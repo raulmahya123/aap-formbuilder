@@ -38,58 +38,67 @@
   @endif
 
   @php
-    use Illuminate\Support\Facades\Storage;
-
-    // ==== TIPE & PDF ====
+    // ============== TIPE & PDF ==============
     $isPdf = ($form->type ?? '') === 'pdf';
     $pdfExists = false;
     $pdfUrl = null;
+
     if ($isPdf && $form->pdf_path) {
       $pdfExists = Storage::disk('public')->exists($form->pdf_path);
       if ($pdfExists) {
-        // pakai asset() biar ikut host:port yang sedang dipakai
+        // pastikan sudah: php artisan storage:link
         $pdfUrl = asset('storage/'.$form->pdf_path);
       }
     }
 
-    // ==== NORMALISASI SCHEMA ====
+    // ============== NORMALISASI SCHEMA ==============
     $raw = $form->schema ?? [];
     if (is_string($raw)) {
       $decoded = json_decode($raw, true);
       if (json_last_error() === JSON_ERROR_NONE) $raw = $decoded;
     }
+
     $fields = [];
     if (is_array($raw)) {
       if (isset($raw['fields']) && is_array($raw['fields'])) {
-        $fields = $raw['fields'];
+        $fields = $raw['fields'];     // bentuk { "fields": [...] }
       } elseif (array_keys($raw) === range(0, max(count($raw)-1, 0))) {
-        $fields = $raw;
+        $fields = $raw;               // bentuk [...]
       }
     }
     $hasFields = !empty($fields);
 
-    // ==== Helper OLD aman ====
-    function fraw($name) { return old("data.$name"); }                          // boleh array
-    function fval($name) { $v = old("data.$name"); return is_array($v)?'':$v; } // string buat value=""
-
-    // ==== Helper opsi ====
-    function opt_tuple($optKey, $opt) {
-      if (is_array($opt)) {
-        if (array_key_exists('value', $opt)) {
-          $val = (string)$opt['value'];
-          $lab = (string)($opt['label'] ?? $opt['value']);
-          return [$val, $lab];
-        }
-        if (array_key_exists(0, $opt)) {
-          $val = (string)$opt[0];
-          $lab = (string)($opt[1] ?? $opt[0]);
-          return [$val, $lab];
-        }
-        return [(string)$optKey, json_encode($opt, JSON_UNESCAPED_UNICODE)];
+    // ============== Helper OLD aman ==============
+    if (!function_exists('fraw')) {
+      function fraw($name) { return old("data.$name"); } // boleh array
+    }
+    if (!function_exists('fval')) {
+      function fval($name) {
+        $v = old("data.$name");
+        return is_array($v) ? '' : $v; // string-only untuk value=""
       }
-      $val = is_int($optKey) ? (string)$opt : (string)$optKey;
-      $lab = (string)$opt;
-      return [$val, $lab];
+    }
+
+    // ============== Helper opsi (value,label) ==============
+    if (!function_exists('opt_tuple')) {
+      function opt_tuple($optKey, $opt) {
+        if (is_array($opt)) {
+          if (array_key_exists('value', $opt)) {
+            $val = (string)$opt['value'];
+            $lab = (string)($opt['label'] ?? $opt['value']);
+            return [$val, $lab];
+          }
+          if (array_key_exists(0, $opt)) {
+            $val = (string)$opt[0];
+            $lab = (string)($opt[1] ?? $opt[0]);
+            return [$val, $lab];
+          }
+          return [(string)$optKey, json_encode($opt, JSON_UNESCAPED_UNICODE)];
+        }
+        $val = is_int($optKey) ? (string)$opt : (string)$optKey;
+        $lab = (string)$opt;
+        return [$val, $lab];
+      }
     }
   @endphp
 
@@ -265,9 +274,9 @@
     </div>
 
     @php
-      // Tombol Kirim hanya muncul jika:
+      // Tampilkan tombol submit hanya jika:
       // - BUKAN PDF, atau
-      // - PDF, file-nya ADA, dan ADA field tambahan
+      // - PDF & file-nya ada & ADA field tambahan
       $showSubmit = (!$isPdf) || ($isPdf && $pdfExists && $hasFields);
     @endphp
 
@@ -280,7 +289,7 @@
         <a href="{{ url()->previous() }}" class="px-4 py-2 rounded-xl border hover:bg-slate-50">Batal</a>
       </div>
     @else
-      {{-- Untuk PDF tanpa field: hanya tombol kembali --}}
+      {{-- PDF tanpa field: hanya tombol kembali --}}
       <div class="mt-6">
         <a href="{{ url()->previous() }}" class="px-4 py-2 rounded-xl border hover:bg-slate-50">Kembali</a>
       </div>

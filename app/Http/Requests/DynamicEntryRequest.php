@@ -3,74 +3,144 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Models\Form;
 
 class DynamicEntryRequest extends FormRequest
 {
-    public Form $form;
+    public \App\Models\Form $form;
 
     public function authorize(): bool
     {
-        $slug = $this->route('form')->slug ?? $this->route('form'); // resource binding
-        $this->form = $this->route('form'); // sudah di-inject dari route model binding
+        $this->form = $this->route('form'); // route model binding {form:slug}
         return $this->user()?->can('submit', $this->form) ?? false;
     }
 
     public function rules(): array
     {
-        $rules = [];
-        $schema = $this->form->schema ?? [];
+        $rules = [
+            'data' => ['array'], // supaya data selalu array jika ada isian
+        ];
 
-        foreach (($schema['fields'] ?? []) as $f) {
+        $schema = $this->form->schema ?? [];
+        $fields = $schema['fields'] ?? [];
+
+        foreach ($fields as $f) {
             $name = $f['name'] ?? null;
             if (!$name) continue;
 
-            $base = [];
-            $type = $f['type'] ?? 'text';
             $required = !empty($f['required']) ? 'required' : 'nullable';
+            $type     = $f['type'] ?? 'text';
+            $multiple = (bool)($f['multiple'] ?? false);
 
-            // tipe → aturan dasar
-            switch ($type) {
-                case 'email':   $base[] = 'string'; $base[] = 'email'; break;
-                case 'date':    $base[] = 'date'; break;
-                case 'number':  $base[] = 'numeric'; break;
-                case 'textarea':
-                case 'text':    $base[] = 'string'; break;
-                case 'select':  $base[] = 'string'; break;
-                case 'radio':   $base[] = 'string'; break;
-                case 'checkbox':$base[] = 'array';  break;
-                case 'file':
-                    $base[] = 'file';
-                    // opsi mimes & max (KB)
-                    if (!empty($f['mimes'])) $base[] = 'mimes:'.$f['mimes'];
-                    if (!empty($f['max']))   $base[] = 'max:'.$f['max'];
-                    break;
-                default: $base[] = 'string';
-            }
-
-            // aturan tambahan custom di schema (mis. min:3|max:80|regex:...)
-            if (!empty($f['rules'])) {
-                foreach (explode('|', $f['rules']) as $r) {
-                    $r = trim($r);
-                    if ($r !== '') $base[] = $r;
+            // util untuk ambil daftar opsi (value)
+            $getAllowed = function(array $options): array {
+                $out = [];
+                foreach ($options as $k => $o) {
+                    if (is_array($o)) {
+                        if (array_key_exists('value', $o)) {
+                            $out[] = (string)$o['value'];
+                        } elseif (array_key_exists(0, $o)) {
+                            $out[] = (string)$o[0];
+                        }
+                    } else {
+                        $out[] = is_int($k) ? (string)$o : (string)$k;
+                    }
                 }
+                return $out;
+            };
+
+            switch ($type) {
+                case 'email':
+                    $base = [$required, 'string', 'email'];
+                    $rules["data.$name"] = $base;
+                    break;
+
+                case 'date':
+                    $base = [$required, 'date'];
+                    $rules["data.$name"] = $base;
+                    break;
+
+                case 'number':
+                    $base = [$required, 'numeric'];
+                    $rules["data.$name"] = $base;
+                    break;
+
+                case 'textarea':
+                case 'text':
+                    $base = [$required, 'string'];
+                    $rules["data.$name"] = $base;
+                    break;
+
+                case 'select':
+                case 'radio':
+                    $base = [$required, 'string'];
+                    if (!empty($f['options'])) {
+                        $allowed = $getAllowed($f['options']);
+                        $base[]  = 'in:'.implode(',', $allowed);
+                    }
+                    $rules["data.$name"] = $base;
+                    break;
+
+                case 'checkbox':
+{
+    $hasOptions = !empty($f['options']);
+    $isMultiple = $multiple && $hasOptions;
+
+    if ($isMultiple) {
+        // checkbox dengan banyak opsi
+        $rules["data.$name"] = [$required, 'array'];
+        // batasi setiap item ke daftar opsi yang valid
+        $allowed = [];
+        foreach ($f['options'] as $k => $o) {
+            if (is_array($o)) {
+                if (array_key_exists('value', $o))      $allowed[] = (string)$o['value'];
+                elseif (array_key_exists(0, $o))         $allowed[] = (string)$o[0];
+            } else {
+                $allowed[] = is_int($k) ? (string)$o : (string)$k;
+            }
+        }
+        $rules["data.$name.*"] = ['in:' . implode(',', $allowed)];
+    } else {
+        // checkbox single (boolean like)
+        if ($required === 'required') {
+            // wajib dicentang
+            $rules["data.$name"] = ['accepted'];
+        } else {
+            // opsional: hanya kirim "1" jika dicentang
+            $rules["data.$name"] = ['nullable', 'in:1'];
+        }
+    }
+    break;
+}
+
+
+                case 'file':
+                    if ($multiple) {
+                        $rules["data.$name"] = [$required, 'array'];
+                        $fileRules = ['file'];
+                        if (!empty($f['mimes'])) $fileRules[] = 'mimes:'.$f['mimes'];
+                        if (!empty($f['max']))   $fileRules[] = 'max:'.$f['max'];
+                        $rules["data.$name.*"] = $fileRules;
+                    } else {
+                        $base = [$required, 'file'];
+                        if (!empty($f['mimes'])) $base[] = 'mimes:'.$f['mimes'];
+                        if (!empty($f['max']))   $base[] = 'max:'.$f['max'];
+                        $rules["data.$name"] = $base;
+                    }
+                    break;
+
+                default:
+                    $rules["data.$name"] = [$required, 'string'];
             }
 
-            // prepend required/nullable
-            array_unshift($base, $required);
-
-            $rules[$name] = $base;
-
-            // untuk checkbox dengan opsi → pastikan setiap item adalah salah satu dari options
-            if ($type === 'checkbox' && !empty($f['options'])) {
-                $allowed = array_map(fn($o) => is_array($o) ? $o[0] : $o, $f['options']);
-                $rules[$name.'.*'] = ['in:'.implode(',', $allowed)];
-            }
-
-            // untuk select/radio → in:options
-            if (in_array($type, ['select','radio']) && !empty($f['options'])) {
-                $allowed = array_map(fn($o) => is_array($o) ? $o[0] : $o, $f['options']);
-                $rules[$name][] = 'in:'.implode(',', $allowed);
+            // rules tambahan custom dari schema (mis. min:3|max:80)
+            if (!empty($f['rules'])) {
+                foreach (explode('|', $f['rules']) as $extra) {
+                    $extra = trim($extra);
+                    if ($extra !== '') {
+                        // tambahkan ke aturan utama (bukan ke *. untuk array)
+                        $rules["data.$name"][] = $extra;
+                    }
+                }
             }
         }
 

@@ -16,6 +16,8 @@
   {{-- Topbar --}}
   <nav class="bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 backdrop-blur">
     <div class="max-w-6xl mx-auto px-4 py-3 flex gap-4 items-center">
+
+      {{-- Brand --}}
       @if(Route::has('admin.dashboard'))
         <a href="{{ route('admin.dashboard') }}" class="font-semibold">AAP</a>
       @else
@@ -23,25 +25,33 @@
       @endif
 
       @auth
+        {{-- Menu kiri --}}
         @if(Route::has('admin.departments.index'))
           <a href="{{ route('admin.departments.index') }}" class="text-sm hover:underline">Departments</a>
-        @endif
+        @endif>
+
         @if(Route::has('admin.forms.index'))
           <a href="{{ route('admin.forms.index') }}" class="text-sm hover:underline">Forms</a>
         @endif
 
-        {{-- Slot nav tambahan dari halaman --}}
+        {{-- Entries: tampil untuk SEMUA user login (Super Admin, Admin, maupun user biasa) --}}
+        @if(Route::has('admin.entries.index'))
+          <a href="{{ route('admin.entries.index') }}" class="text-sm hover:underline">Entries</a>
+        @endif
+
+        {{-- Slot nav tambahan --}}
         @hasSection('topnav')
           <div class="ml-2">@yield('topnav')</div>
         @endif
 
+        {{-- Kanan --}}
         <div class="ml-auto flex items-center gap-3">
-          {{-- Toggle Dark Mode (opsional) --}}
           <button type="button" class="text-xs px-2 py-1 rounded border"
                   @click="dark = !dark"
                   x-text="dark ? 'Light' : 'Dark'"></button>
 
           <span class="text-sm text-slate-600 dark:text-slate-300">{{ auth()->user()->name }}</span>
+
           @if(Route::has('logout'))
             <form method="post" action="{{ route('logout') }}">
               @csrf
@@ -61,7 +71,7 @@
     </div>
   </nav>
 
-  {{-- Flash message sukses --}}
+  {{-- Flash sukses --}}
   @if(session('ok') || session('success'))
     <div class="max-w-3xl mx-auto mt-4 px-4">
       <div class="p-3 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-200 dark:border-emerald-900">
@@ -70,7 +80,7 @@
     </div>
   @endif
 
-  {{-- Flash message error global --}}
+  {{-- Flash error --}}
   @if(session('error'))
     <div class="max-w-3xl mx-auto mt-4 px-4">
       <div class="p-3 rounded bg-rose-50 text-rose-800 border border-rose-200 dark:bg-rose-900/20 dark:text-rose-200 dark:border-rose-900">
@@ -79,7 +89,7 @@
     </div>
   @endif
 
-  {{-- Breadcrumbs + Actions (opsional, dari halaman) --}}
+  {{-- Breadcrumbs + Actions --}}
   <div class="max-w-6xl mx-auto px-4 pt-6">
     <div class="flex items-center justify-between gap-4">
       <div>
@@ -99,7 +109,6 @@
     @yield('content')
   </main>
 
-  {{-- Modal stack & script tambahan --}}
   @stack('modals')
   @stack('scripts')
 

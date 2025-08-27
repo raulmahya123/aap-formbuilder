@@ -7,77 +7,88 @@ use App\Http\Requests\DynamicEntryRequest;
 use App\Models\Form;
 use App\Models\FormEntry;
 use App\Models\FormEntryFile;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Spatie\LaravelPdf\Facades\Pdf;
 
 class FormEntryController extends Controller
 {
     /**
-     * Simpan isian form (builder/pdf), upload lampiran, dan render bukti PDF.
+     * Simpan isian form (builder/pdf) + upload lampiran.
+     * TIDAK ada proses render PDF bukti.
      */
     public function store(DynamicEntryRequest $r, Form $form)
     {
-        // Data tervalidasi sesuai schema (DynamicEntryRequest)
+        $this->authorize('submit', $form);
+
+        // Data tervalidasi dari FormRequest (prefix "data.")
         $validated = $r->validated();
+        $data      = $validated['data'] ?? [];
 
-        // Pisahkan field file vs non-file
-        $filesData = [];
-        $payload   = [];
+        // Ambil fields dari schema (untuk tahu mana yang file)
+        $schema = $form->schema;
+        if (is_string($schema)) {
+            $decoded = json_decode($schema, true);
+            $schema  = json_last_error() === JSON_ERROR_NONE ? $decoded : [];
+        }
+        $fields = is_array($schema)
+            ? ($schema['fields'] ?? (array_is_list($schema) ? $schema : []))
+            : [];
+        $byName = collect($fields)->keyBy('name');
 
-        $schemaFields = collect($form->schema['fields'] ?? [])->keyBy('name');
+        // Pisahkan payload vs files
+        $payload  = [];
+        $filesBag = []; // [fieldName => UploadedFile[]]
 
-        foreach ($validated as $name => $val) {
-            $type = $schemaFields[$name]['type'] ?? null;
+        foreach ($data as $name => $val) {
+            $type = $byName[$name]['type'] ?? null;
 
-            if ($type === 'file' && $r->hasFile($name)) {
-                $filesData[$name] = $r->file($name);
-            } else {
-                $payload[$name] = $val;
+            if ($type === 'file') {
+                $uploaded = $r->file("data.$name");
+                if (is_array($uploaded)) {
+                    foreach ($uploaded as $u) {
+                        if ($u) $filesBag[$name][] = $u;
+                    }
+                } elseif ($uploaded) {
+                    $filesBag[$name] = [$uploaded];
+                }
+                continue; // file tidak disimpan ke kolom data JSON
             }
+
+            $payload[$name] = $val;
         }
 
         // Buat entry
         $entry = FormEntry::create([
             'form_id' => $form->id,
-            'user_id' => $r->user()->id,
+            'user_id' => optional($r->user())->id,
             'data'    => $payload,
+            // 'pdf_output_path' tetap NULL karena kita tidak buat PDF
         ]);
 
-        // Simpan file ke storage/public/form_entries/{entry_id}/
-        foreach ($filesData as $fieldName => $uploaded) {
-            $dir  = "form_entries/{$entry->id}";
-            $path = $uploaded->store($dir, 'public');
+        // Simpan lampiran
+        foreach ($filesBag as $fieldName => $list) {
+            foreach ($list as $uploaded) {
+                $dir  = "form_entries/{$entry->id}";
+                $path = $uploaded->store($dir, 'public');
 
-            FormEntryFile::create([
-                'form_entry_id' => $entry->id,
-                'field_name'    => $fieldName,
-                'original_name' => $uploaded->getClientOriginalName(),
-                'mime'          => $uploaded->getClientMimeType(),
-                'size'          => $uploaded->getSize(),
-                'path'          => $path,
-            ]);
+                FormEntryFile::create([
+                    'form_entry_id' => $entry->id,
+                    'field_name'    => $fieldName,
+                    'original_name' => $uploaded->getClientOriginalName(),
+                    'mime'          => $uploaded->getClientMimeType(),
+                    'size'          => $uploaded->getSize(),
+                    'path'          => $path,
+                ]);
+            }
         }
-
-        // Render bukti ke PDF (opsional)
-        $filename = "entries/entry-{$entry->id}.pdf";
-        Pdf::view('pdf.entry', [
-                'form'  => $form,
-                'entry' => $entry,
-                'data'  => $payload,
-            ])
-            ->format('a4')
-            ->save(storage_path('app/public/' . $filename));
-
-        $entry->update(['pdf_output_path' => $filename]);
 
         return redirect()
             ->route('front.forms.thanks', $form)
-            ->with('ok', 'Jawaban tersimpan');
+            ->with('success', 'Jawaban tersimpan.');
     }
 
     /**
-     * Unduh PDF hasil render jawaban.
+     * (Opsional) Unduh PDF hasil render jawaban — kalau tidak dipakai, hapus method & routenya.
+     * Dibiarkan di sini hanya untuk kompatibilitas; akan 404 jika tidak ada file.
      */
     public function downloadPdf(FormEntry $entry)
     {
