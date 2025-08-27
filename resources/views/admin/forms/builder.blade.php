@@ -5,6 +5,8 @@
 <div class="max-w-6xl mx-auto p-6"
      x-data="formBuilder({
         initial: @js($schema['fields'] ?? []),
+        saveUrl: @js(route('admin.forms.builder.save', $form)),
+        csrf: @js(csrf_token()),
      })">
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-xl font-semibold">Builder — {{ $form->title }}</h1>
@@ -17,7 +19,7 @@
       <h2 class="font-medium mb-3">Palette</h2>
       <div class="grid grid-cols-2 gap-2 text-sm">
         <template x-for="t in palette" :key="t.type">
-          <button type="button" @click="addField(t.type)"
+          <button type="button" @click.prevent="addField(t.type)"
                   class="px-3 py-2 rounded border hover:bg-slate-50 text-left">
             <div class="font-semibold" x-text="t.label"></div>
             <div class="text-xs text-slate-500" x-text="t.desc"></div>
@@ -50,8 +52,8 @@
                 </template>
               </div>
               <div class="flex items-center gap-2">
-                <button class="text-xs underline" @click="editIndex=idx">Edit</button>
-                <button class="text-xs text-red-600 underline" @click="removeField(idx)">Hapus</button>
+                <button type="button" class="text-xs underline" @click.prevent="editIndex=idx">Edit</button>
+                <button type="button" class="text-xs text-red-600 underline" @click.prevent="removeField(idx)">Hapus</button>
               </div>
             </div>
             {{-- ringkasan properti --}}
@@ -67,7 +69,7 @@
     <div class="bg-white rounded-xl border p-4">
       <div class="flex items-center justify-between mb-3">
         <h2 class="font-medium">Properties</h2>
-        <button class="text-xs underline" @click="editIndex=null" x-show="editIndex!==null">Selesai</button>
+        <button type="button" class="text-xs underline" @click.prevent="editIndex=null" x-show="editIndex!==null">Selesai</button>
       </div>
 
       <template x-if="editIndex===null">
@@ -78,23 +80,23 @@
         <div class="space-y-3" x-init="$nextTick(() => focusNameInput())">
           <div>
             <label class="text-sm block">Label</label>
-            <input x-model="fields[editIndex].label" id="prop-label" class="border rounded w-full px-2 py-1">
+            <input x-model="fields[editIndex].label" @input="queueSave()" id="prop-label" class="border rounded w-full px-2 py-1">
           </div>
           <div>
             <label class="text-sm block">Name (snake_case, unik)</label>
-            <input x-model="fields[editIndex].name" id="prop-name" class="border rounded w-full px-2 py-1">
+            <input x-model="fields[editIndex].name" @input="queueSave()" id="prop-name" class="border rounded w-full px-2 py-1">
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="text-sm block">Type</label>
-              <select x-model="fields[editIndex].type" class="border rounded w-full px-2 py-1">
+              <select x-model="fields[editIndex].type" @change="saveNow()" class="border rounded w-full px-2 py-1">
                 <template x-for="t in palette" :key="t.type">
                   <option :value="t.type" x-text="t.type"></option>
                 </template>
               </select>
             </div>
             <div class="flex items-center gap-2 mt-6">
-              <input type="checkbox" x-model="fields[editIndex].required">
+              <input type="checkbox" x-model="fields[editIndex].required" @change="saveNow()">
               <span class="text-sm">Required</span>
             </div>
           </div>
@@ -102,7 +104,7 @@
           {{-- RULES --}}
           <div>
             <label class="text-sm block">Rules (opsional, format Laravel: min:3|max:80|regex:...)</label>
-            <input x-model="fields[editIndex].rules" placeholder="mis. string|min:3|max:80"
+            <input x-model="fields[editIndex].rules" @input="queueSave()" placeholder="mis. string|min:3|max:80"
                    class="border rounded w-full px-2 py-1">
           </div>
 
@@ -111,11 +113,11 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="text-sm block">Mimes</label>
-                <input x-model="fields[editIndex].mimes" placeholder="pdf,jpg,png" class="border rounded w-full px-2 py-1">
+                <input x-model="fields[editIndex].mimes" @input="queueSave()" placeholder="pdf,jpg,png" class="border rounded w-full px-2 py-1">
               </div>
               <div>
                 <label class="text-sm block">Max (KB)</label>
-                <input type="number" x-model.number="fields[editIndex].max" placeholder="2048" class="border rounded w-full px-2 py-1">
+                <input type="number" x-model.number="fields[editIndex].max" @input="queueSave()" placeholder="2048" class="border rounded w-full px-2 py-1">
               </div>
             </div>
           </template>
@@ -125,14 +127,14 @@
             <div>
               <div class="flex items-center justify-between">
                 <label class="text-sm">Options</label>
-                <button class="text-xs underline" @click="addOption()">Tambah Opsi</button>
+                <button type="button" class="text-xs underline" @click.prevent="addOption()">Tambah Opsi</button>
               </div>
               <div class="mt-2 space-y-2">
                 <template x-for="(opt,i) in (fields[editIndex].options ??= [])" :key="i">
                   <div class="flex items-center gap-2">
-                    <input class="border rounded px-2 py-1 w-28" x-model="fields[editIndex].options[i][0]" placeholder="value">
-                    <input class="border rounded px-2 py-1 flex-1" x-model="fields[editIndex].options[i][1]" placeholder="label">
-                    <button class="text-xs text-red-600 underline" @click="fields[editIndex].options.splice(i,1)">hapus</button>
+                    <input class="border rounded px-2 py-1 w-28" x-model="fields[editIndex].options[i][0]" @input="queueSave()" placeholder="value">
+                    <input class="border rounded px-2 py-1 flex-1" x-model="fields[editIndex].options[i][1]" @input="queueSave()" placeholder="label">
+                    <button type="button" class="text-xs text-red-600 underline" @click.prevent="fields[editIndex].options.splice(i,1); saveNow()">hapus</button>
                   </div>
                 </template>
               </div>
@@ -140,7 +142,7 @@
           </template>
 
           <div class="pt-2">
-            <button class="px-3 py-2 bg-slate-800 text-white rounded" @click="editIndex=null">Simpan Properti</button>
+            <button type="button" class="px-3 py-2 bg-slate-800 text-white rounded" @click.prevent="editIndex=null">Selesai</button>
           </div>
         </div>
       </template>
@@ -152,21 +154,23 @@
     <div class="flex items-center justify-between mb-3">
       <h2 class="font-medium">Schema JSON</h2>
       <div class="flex items-center gap-2">
-        <button class="px-3 py-2 rounded border" @click="pretty()">Format JSON</button>
-        <button class="px-3 py-2 bg-emerald-600 text-white rounded" @click="$refs.form.submit()">Save Schema</button>
+        <button type="button" class="px-3 py-2 rounded border" @click.prevent="pretty()">Format JSON</button>
+        <button type="button" class="px-3 py-2 bg-emerald-600 text-white rounded" @click.prevent="saveNow()">Save Schema</button>
       </div>
     </div>
     <form method="post" action="{{ route('admin.forms.builder.save', $form) }}" x-ref="form">
       @csrf @method('PUT')
       <textarea name="schema" x-model="json" rows="10" class="w-full font-mono text-sm border rounded p-2"></textarea>
     </form>
+
+    <div class="text-xs mt-2" x-show="savedFlash" x-transition>✓ Tersimpan</div>
   </div>
 </div>
 
-{{-- SortableJS CDN untuk drag & drop --}}
+{{-- SortableJS --}}
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script>
-function formBuilder({ initial }) {
+function formBuilder({ initial, saveUrl, csrf }) {
   return {
     palette: [
       { type:'text',     label:'Text',     desc:'Input teks 1 baris' },
@@ -180,8 +184,10 @@ function formBuilder({ initial }) {
       { type:'file',     label:'File',     desc:'Upload berkas' },
     ],
 
-    fields: (initial || []).map((f, i) => ({ _key: cryptoRandom(), required:false, ...f })),
+    fields: (initial || []).map((f) => ({ _key: cryptoRandom(), required:false, ...f })),
     editIndex: null,
+    savedFlash: false,
+    saveTimer: null,
 
     get json() { return JSON.stringify({ fields: this.fields.map(stripRuntime) }, null, 2); },
     set json(v) {
@@ -189,6 +195,7 @@ function formBuilder({ initial }) {
         const obj = JSON.parse(v);
         const arr = (obj?.fields ?? []).map((f) => ({ _key: cryptoRandom(), required:false, ...f }));
         this.fields = arr;
+        this.queueSave();
       } catch(e) { /* ignore */ }
     },
 
@@ -199,23 +206,57 @@ function formBuilder({ initial }) {
       this.fields.push({ _key: cryptoRandom(), ...base });
       this.editIndex = this.fields.length - 1;
       queueMicrotask(() => focusNameInput());
+      this.saveNow(); // real-time
     },
-    removeField(i){ if (this.editIndex===i) this.editIndex=null; this.fields.splice(i,1); },
+
+    async removeField(i){
+      this.fields.splice(i,1);
+      if (this.editIndex === i) this.editIndex = null;
+      else if (this.editIndex !== null && this.editIndex > i) this.editIndex--;
+      await this.saveNow(); // real-time
+    },
 
     addOption(){
       if (this.editIndex===null) return;
       const f = this.fields[this.editIndex];
       if (!Array.isArray(f.options)) f.options = [];
       f.options.push(['value','Label']);
+      this.saveNow(); // real-time
     },
+
     pretty(){ this.json = this.json; },
 
+    queueSave(){
+      clearTimeout(this.saveTimer);
+      this.saveTimer = setTimeout(() => this.saveNow(), 600); // debounce utk ketikan biasa
+    },
+
+    async saveNow(){
+      try {
+        const res = await fetch(saveUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrf,
+            'X-HTTP-Method-Override': 'PUT',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({ schema: this.json })
+        });
+        // 200/302 dianggap sukses
+        this.savedFlash = true;
+        setTimeout(()=> this.savedFlash = false, 1200);
+      } catch (e) {
+        console.error('Save failed', e);
+      }
+    },
+
     init(){
-      // active drag
       new Sortable(document.getElementById('canvas'), {
         handle: '.cursor-move',
         animation: 150,
         draggable: '.p-3.border.rounded-lg',
+        filter: 'button,a,input,[data-nodrag]',
         onEnd: (evt) => {
           const oldI = evt.oldIndex, newI = evt.newIndex;
           if (oldI === newI) return;
@@ -223,20 +264,17 @@ function formBuilder({ initial }) {
           this.fields.splice(newI,0,moved);
           if (this.editIndex === oldI) this.editIndex = newI;
           else if (this.editIndex !== null) {
-            // adjust edit index if necessary
             if (oldI < this.editIndex && newI >= this.editIndex) this.editIndex--;
             if (oldI > this.editIndex && newI <= this.editIndex) this.editIndex++;
           }
+          this.saveNow(); // real-time
         }
       });
     }
   }
 }
 
-function stripRuntime(f){
-  const { _key, ...rest } = f;
-  return rest;
-}
+function stripRuntime(f){ const { _key, ...rest } = f; return rest; }
 function cryptoRandom(){
   if (window.crypto?.getRandomValues) {
     const arr = new Uint32Array(2); crypto.getRandomValues(arr);
@@ -251,9 +289,6 @@ function uniqueName(fields, type){
   while (names.has(candidate)) { i++; candidate = base+'_'+i; }
   return candidate;
 }
-function focusNameInput(){
-  const el = document.getElementById('prop-name');
-  el && el.focus();
-}
+function focusNameInput(){ const el = document.getElementById('prop-name'); el && el.focus(); }
 </script>
 @endsection
