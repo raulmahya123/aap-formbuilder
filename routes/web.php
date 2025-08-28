@@ -92,5 +92,8 @@ Route::middleware('auth')->group(function () {
         Route::post('entries/{entry}/approval', [EntryApprovalController::class, 'act'])
             ->name('entries.approval')
             ->whereNumber('entry');
+
+         Route::get('/entries/{entry}/download-all', [AdminEntryController::class, 'downloadAll'])
+        ->name('entries.download_all');
     });
 });

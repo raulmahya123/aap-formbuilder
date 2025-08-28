@@ -7,7 +7,9 @@ use App\Models\FormEntry;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Storage;
-
+use Carbon\Carbon;      // <- tambah ini
+use ZipArchive;         // <- dan ini
+use Illuminate\Support\Str; 
 class FormEntryController extends Controller
 {
     /**
@@ -31,7 +33,7 @@ class FormEntryController extends Controller
             $u = trim($r->input('user'));
             $q->whereHas('user', function ($qq) use ($u) {
                 $qq->where('name', 'like', "%{$u}%")
-                   ->orWhere('email', 'like', "%{$u}%");
+                    ->orWhere('email', 'like', "%{$u}%");
             });
         }
 
@@ -43,8 +45,8 @@ class FormEntryController extends Controller
             // Jika tidak cocok di DB Anda, aktifkan alternatif LIKE di bawah.
             $q->where(function ($qq) use ($val) {
                 $qq->whereJsonContains('data->nama', $val)
-                   // Alternatif LIKE (uncomment jika needed):
-                   // ->orWhereRaw("JSON_EXTRACT(data, '$.nama') LIKE ?", ["%{$val}%"])
+                    // Alternatif LIKE (uncomment jika needed):
+                    // ->orWhereRaw("JSON_EXTRACT(data, '$.nama') LIKE ?", ["%{$val}%"])
                 ;
             });
         }
@@ -146,5 +148,102 @@ class FormEntryController extends Controller
         abort_unless($path && Storage::disk('public')->exists($path), 404);
 
         return response()->download(storage_path('app/public/' . $path));
+    }
+
+
+    public function downloadAll(\App\Models\FormEntry $entry)
+    {
+        // hak akses: sama seperti yang kamu pakai untuk lihat entry
+        $this->authorize('view', $entry->form);
+
+        // siapkan folder tmp
+        $tmpDir = storage_path('app/tmp');
+        if (! is_dir($tmpDir)) {
+            @mkdir($tmpDir, 0775, true);
+        }
+
+        $stamp  = Carbon::now()->format('Ymd-His');
+        $fname  = "entry-{$entry->id}-{$stamp}.zip";
+        $zipPath = $tmpDir . DIRECTORY_SEPARATOR . $fname;
+
+        // buat ZIP
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            abort(500, 'Gagal membuat arsip ZIP.');
+        }
+
+        // 2.a. entry.json (meta + data)
+        $entryJson = [
+            'id'         => $entry->id,
+            'form'       => [
+                'id'    => $entry->form->id,
+                'title' => $entry->form->title,
+            ],
+            'user'       => $entry->user ? [
+                'id'    => $entry->user->id,
+                'name'  => $entry->user->name,
+                'email' => $entry->user->email,
+            ] : null,
+            'status'     => $entry->status,
+            'created_at' => $entry->created_at?->toIso8601String(),
+            'updated_at' => $entry->updated_at?->toIso8601String(),
+            'data'       => $entry->data, // key => value
+        ];
+        $zip->addFromString('entry/entry.json', json_encode($entryJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        // 2.b. Optional: entry.csv (key,value) — biar gampang dibuka di Excel
+        $csv = fopen('php://temp', 'r+');
+        fputcsv($csv, ['field', 'value']);
+        foreach ((array)$entry->data as $k => $v) {
+            $val = is_array($v) ? implode(', ', $v) : $v;
+            fputcsv($csv, [$k, $val]);
+        }
+        rewind($csv);
+        $csvContent = stream_get_contents($csv);
+        fclose($csv);
+        $zip->addFromString('entry/entry.csv', $csvContent);
+
+        // 2.c. Riwayat approval (jika ada)
+        $approvals = $entry->approvals()->with('actor')->orderByDesc('id')->get()->map(function ($h) {
+            return [
+                'action'     => $h->action,
+                'actor'      => $h->actor ? ['id' => $h->actor->id, 'name' => $h->actor->name, 'email' => $h->actor->email] : null,
+                'notes'      => $h->notes,
+                'created_at' => $h->created_at?->toIso8601String(),
+            ];
+        })->all();
+
+        $zip->addFromString('history/approvals.json', json_encode($approvals, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        // 2.d. PDF (jika ada)
+        if ($entry->pdf_output_path && Storage::disk('public')->exists($entry->pdf_output_path)) {
+            $zip->addFile(
+                storage_path('app/public/' . $entry->pdf_output_path),
+                'pdf/' . basename($entry->pdf_output_path)
+            );
+        }
+
+        // 2.e. Semua lampiran
+        // Struktur: attachments/{field_name}/{original_name}
+        foreach ($entry->files as $f) {
+            if (!$f->path) continue;
+            if (!Storage::disk('public')->exists($f->path)) continue;
+
+            $fieldDir = $f->field_name ?: 'unknown';
+            // fallback nama file
+            $niceName = $f->original_name ?: basename($f->path);
+
+            // hindari karakter aneh di nama
+            $safeName = Str::of($niceName)->replace(['\\', '/', ':', '*', '?', '"', '<', '>', '|'], '-');
+            $zip->addFile(
+                storage_path('app/public/' . $f->path),
+                "attachments/{$fieldDir}/{$safeName}"
+            );
+        }
+
+        $zip->close();
+
+        // kirim dan hapus setelah dikirim
+        return response()->download($zipPath)->deleteFileAfterSend(true);
     }
 }

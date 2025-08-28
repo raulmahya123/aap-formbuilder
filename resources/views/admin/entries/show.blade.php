@@ -11,12 +11,22 @@
     <!-- HEADER -->
     <div class="flex items-center justify-between mb-4 sm:mb-6">
       <h1 class="text-2xl font-serif tracking-tight">Entry #{{ $entry->id }}</h1>
-      @if($entry->pdf_output_path)
-        <a href="{{ route('admin.entries.download_pdf', $entry) }}"
-           class="px-3 py-1.5 rounded-lg bg-maroon-700 text-ivory-50 hover:bg-maroon-600 transition text-sm">
-          ⬇️ Unduh PDF
+
+      <div class="flex items-center gap-2">
+        @if($entry->pdf_output_path)
+          <a href="{{ route('admin.entries.download_pdf', $entry) }}"
+             class="px-3 py-1.5 rounded-lg bg-maroon-700 text-ivory-50 hover:bg-maroon-600 transition text-sm">
+            ⬇️ Unduh PDF
+          </a>
+        @endif
+
+        {{-- Tombol unduh semua (ZIP) --}}
+        <a href="{{ route('admin.entries.download_all', $entry) }}"
+           class="px-3 py-1.5 rounded-lg border border-maroon-700 text-maroon-700 hover:bg-maroon-50/60
+                  dark:text-maroon-300 dark:border-maroon-400 dark:hover:bg-maroon-900/20 transition text-sm">
+          📦 Unduh Semua (ZIP)
         </a>
-      @endif
+      </div>
     </div>
 
     <!-- INFO & AKSI -->
@@ -42,7 +52,7 @@
 
       <div class="rounded-xl border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 shadow-soft p-4 sm:p-5">
         <h2 class="font-medium mb-3">Aksi</h2>
-        <div class="text-sm">
+        <div class="text-sm flex flex-wrap gap-2">
           @if($entry->pdf_output_path)
             <a href="{{ route('admin.entries.download_pdf', $entry) }}"
                class="inline-flex items-center px-3 py-1.5 rounded-lg border border-maroon-600 text-maroon-700 hover:bg-maroon-50/60
@@ -52,6 +62,13 @@
           @else
             <div class="text-coal-500 dark:text-coal-400">Belum ada PDF.</div>
           @endif
+
+          {{-- Unduh semua (ZIP) --}}
+          <a href="{{ route('admin.entries.download_all', $entry) }}"
+             class="inline-flex items-center px-3 py-1.5 rounded-lg border border-maroon-600 text-maroon-700 hover:bg-maroon-50/60
+                    dark:text-maroon-300 dark:hover:bg-maroon-900/20 transition">
+            📦 Unduh Semua (ZIP)
+          </a>
         </div>
       </div>
     </div>
