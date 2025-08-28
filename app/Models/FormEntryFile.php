@@ -6,12 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class FormEntryFile extends Model
 {
+    protected $table = 'form_entry_files';
+
     protected $fillable = [
         'form_entry_id',
-        'path',      // path di storage (public)
-        'name',      // nama file asli
-        'size',      // ukuran (byte) - opsional
-        'mime',      // mime type - opsional
+        'field_name',     // <- WAJIB: dipakai di controller & kolom DB
+        'original_name',  // <- WAJIB: dipakai di controller
+        'mime',
+        'size',
+        'path',
     ];
 
     public function entry()
