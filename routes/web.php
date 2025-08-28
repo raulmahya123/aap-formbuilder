@@ -97,5 +97,7 @@ Route::middleware('auth')->group(function () {
             ->name('entries.download_all');
         Route::get('/entries/{entry}/data.pdf', [AdminEntryController::class, 'downloadDataPdf'])
             ->name('entries.data_pdf');
+            Route::get('/entries/export-zip', [AdminEntryController::class, 'exportZip'])
+        ->name('entries.export_zip');
     });
 });
