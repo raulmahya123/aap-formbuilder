@@ -15,7 +15,7 @@ use App\Http\Controllers\Front\FormBrowseController;
 use App\Http\Controllers\Front\FormEntryController as FrontEntryController; // ← alias agar jelas
 
 // Model untuk route model binding pada download lampiran
-use App\Models\FormEntryFile;
+use App\Http\Controllers\Admin\UserActiveController;
 
 Route::get('/', fn () => redirect()->route('admin.dashboard'));
 Route::get('/dashboard', fn () => redirect()->route('admin.dashboard'))
@@ -58,7 +58,10 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard/data/top-forms', [DashboardController::class, 'topForms'])->name('dashboard.data.top_forms');
         Route::get('dashboard/data/by-department', [DashboardController::class, 'byDepartment'])->name('dashboard.data.by_department');
         // ==== END DASHBOARD ====
-
+        
+         Route::get('/users/active', [UserActiveController::class, 'index'])->name('users.active.index');
+    Route::patch('/users/{user}/toggle', [UserActiveController::class, 'toggle'])->name('users.active.toggle');
+    Route::patch('/users/{user}/update', [UserActiveController::class, 'update'])->name('users.active.update');
         // Departments CRUD
         Route::resource('departments', DepartmentController::class);
 

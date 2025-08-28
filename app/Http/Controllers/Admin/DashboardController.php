@@ -34,17 +34,24 @@ class DashboardController extends Controller
 
         $cacheKey = 'dash_summary:'.md5(json_encode([$from,$to,$deptId,$formId]));
         $data = Cache::remember($cacheKey, 60, function() use ($from,$to,$deptId,$formId){
-            $formQuery = Form::query();
+            $formQuery  = Form::query();
             $entryQuery = FormEntry::query();
-            if ($deptId) { $formQuery->where('department_id', $deptId); $entryQuery->whereHas('form', fn($q)=>$q->where('department_id',$deptId)); }
-            if ($formId) { $formQuery->where('id',$formId); $entryQuery->where('form_id',$formId); }
-            if ($from)   { $entryQuery->where('created_at','>=',$from->startOfDay()); }
-            if ($to)     { $entryQuery->where('created_at','<=',$to->endOfDay()); }
 
-            $totalForms    = (clone $formQuery)->count();
-            $activeForms   = (clone $formQuery)->where('is_active', true)->count();
-            $totalEntries  = (clone $entryQuery)->count();
-            $uniqueUsers   = (clone $entryQuery)->distinct('user_id')->count('user_id');
+            if ($deptId) {
+                $formQuery->where('department_id', $deptId);
+                $entryQuery->whereHas('form', fn($q) => $q->where('department_id', $deptId));
+            }
+            if ($formId) {
+                $formQuery->where('id', $formId);
+                $entryQuery->where('form_id', $formId);
+            }
+            if ($from) { $entryQuery->where('created_at', '>=', (clone $from)->startOfDay()); }
+            if ($to)   { $entryQuery->where('created_at', '<=', (clone $to)->endOfDay());   }
+
+            $totalForms   = (clone $formQuery)->count();
+            $activeForms  = (clone $formQuery)->where('is_active', true)->count();
+            $totalEntries = (clone $entryQuery)->count();
+            $uniqueUsers  = (clone $entryQuery)->distinct('user_id')->count('user_id');
 
             return compact('totalForms','activeForms','totalEntries','uniqueUsers');
         });
@@ -57,30 +64,37 @@ class DashboardController extends Controller
     {
         [$from, $to, $deptId, $formId] = $this->extractFilters($r);
         if (!$from && !$to) {
-            $to = now();
+            $to   = now();
             $from = now()->copy()->subDays(29);
         }
 
         $cacheKey = 'dash_entries_by_day:'.md5(json_encode([$from,$to,$deptId,$formId]));
         $data = Cache::remember($cacheKey, 60, function() use ($from,$to,$deptId,$formId){
-            $q = FormEntry::selectRaw('DATE(created_at) d, COUNT(*) c')
-                ->when($deptId, fn($qq)=>$qq->whereHas('form', fn($f)=>$f->where('department_id',$deptId)))
-                ->when($formId, fn($qq)=>$qq->where('form_id',$formId))
-                ->when($from, fn($qq)=>$qq->where('created_at','>=',$from->startOfDay()))
-                ->when($to,   fn($qq)=>$qq->where('created_at','<=',$to->endOfDay()))
+            $q = FormEntry::selectRaw('DATE(created_at) as d, COUNT(*) as c')
+                ->when($deptId, fn($qq) => $qq->whereHas('form', fn($f) => $f->where('department_id', $deptId)))
+                ->when($formId, fn($qq) => $qq->where('form_id', $formId))
+                ->when($from,   fn($qq) => $qq->where('created_at', '>=', (clone $from)->startOfDay()))
+                ->when($to,     fn($qq) => $qq->where('created_at', '<=', (clone $to)->endOfDay()))
                 ->groupBy('d')
                 ->orderBy('d')
                 ->get();
 
-            // lengkapi tanggal kosong supaya chart mulus
-            $map = $q->keyBy('d');
+            // Lengkapi tanggal kosong supaya chart mulus (hindari null property access)
+            $map    = $q->keyBy('d');
             $labels = [];
             $series = [];
-            for ($d = $from->copy(); $d->lte($to); $d->addDay()) {
-                $key = $d->toDateString();
+
+            $start = (clone $from)->startOfDay();
+            $end   = (clone $to)->endOfDay();
+
+            for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
+                $key   = $d->toDateString();
+                $row   = $map->get($key);              // bisa null
+                $count = $row ? (int) $row->c : 0;     // aman
                 $labels[] = $key;
-                $series[] = (int)($map[$key]->c ?? 0);
+                $series[] = $count;
             }
+
             return compact('labels','series');
         });
 
@@ -95,19 +109,21 @@ class DashboardController extends Controller
 
         $data = Cache::remember($cacheKey, 60, function() use ($from,$to,$deptId,$formId){
             $rows = FormEntry::select('form_id', DB::raw('COUNT(*) as c'))
-                ->when($deptId, fn($qq)=>$qq->whereHas('form', fn($f)=>$f->where('department_id',$deptId)))
-                ->when($formId, fn($qq)=>$qq->where('form_id',$formId))
-                ->when($from, fn($qq)=>$qq->where('created_at','>=',$from->startOfDay()))
-                ->when($to,   fn($qq)=>$qq->where('created_at','<=',$to->endOfDay()))
+                ->when($deptId, fn($qq) => $qq->whereHas('form', fn($f) => $f->where('department_id', $deptId)))
+                ->when($formId, fn($qq) => $qq->where('form_id', $formId))
+                ->when($from,   fn($qq) => $qq->where('created_at', '>=', (clone $from)->startOfDay()))
+                ->when($to,     fn($qq) => $qq->where('created_at', '<=', (clone $to)->endOfDay()))
                 ->groupBy('form_id')
                 ->orderByDesc('c')
                 ->limit(10)
                 ->get();
 
             $formTitles = Form::whereIn('id', $rows->pluck('form_id'))->pluck('title','id');
-            $labels = $rows->map(fn($r)=>$formTitles[$r->form_id] ?? ('Form #'.$r->form_id));
-            $series = $rows->pluck('c')->map(fn($v)=>(int)$v);
-            return ['labels'=>$labels->values(), 'series'=>$series->values()];
+
+            $labels = $rows->map(fn($r) => $formTitles->get($r->form_id, 'Form #'.$r->form_id));
+            $series = $rows->pluck('c')->map(fn($v) => (int) $v);
+
+            return ['labels' => $labels->values(), 'series' => $series->values()];
         });
 
         return response()->json($data);
@@ -120,35 +136,46 @@ class DashboardController extends Controller
         $cacheKey = 'dash_by_dept:'.md5(json_encode([$from,$to,$deptId,$formId]));
 
         $data = Cache::remember($cacheKey, 60, function() use ($from,$to,$deptId,$formId){
-            // forms aktif per dept
-            $forms = Form::select('department_id', DB::raw('COUNT(*) as total_forms'), DB::raw('SUM(is_active=1) as active_forms'))
-                ->when($deptId, fn($q)=>$q->where('department_id',$deptId))
-                ->when($formId, fn($q)=>$q->where('id',$formId))
-                ->groupBy('department_id')->get()->keyBy('department_id');
+            // forms per dept (aktif & total)
+            $forms = Form::select(
+                    'department_id',
+                    DB::raw('COUNT(*) as total_forms'),
+                    DB::raw('SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_forms')
+                )
+                ->when($deptId, fn($q) => $q->where('department_id', $deptId))
+                ->when($formId, fn($q) => $q->where('id', $formId))
+                ->groupBy('department_id')
+                ->get()
+                ->keyBy('department_id');
 
-            // entries per dept (dari join)
+            // entries per dept
             $entries = FormEntry::select('forms.department_id', DB::raw('COUNT(form_entries.id) as total_entries'))
                 ->join('forms','forms.id','=','form_entries.form_id')
-                ->when($deptId, fn($q)=>$q->where('forms.department_id',$deptId))
-                ->when($formId, fn($q)=>$q->where('forms.id',$formId))
-                ->when($from, fn($q)=>$q->where('form_entries.created_at','>=',$from->startOfDay()))
-                ->when($to,   fn($q)=>$q->where('form_entries.created_at','<=',$to->endOfDay()))
+                ->when($deptId, fn($q) => $q->where('forms.department_id', $deptId))
+                ->when($formId, fn($q) => $q->where('forms.id', $formId))
+                ->when($from,   fn($q) => $q->where('form_entries.created_at', '>=', (clone $from)->startOfDay()))
+                ->when($to,     fn($q) => $q->where('form_entries.created_at', '<=', (clone $to)->endOfDay()))
                 ->groupBy('forms.department_id')
-                ->get()->keyBy('department_id');
+                ->get()
+                ->keyBy('department_id');
 
             $departments = Department::orderBy('name')->get(['id','name']);
-            $result = $departments->map(function($d) use ($forms,$entries){
-                $f = $forms[$d->id] ?? null;
-                $e = $entries[$d->id] ?? null;
+
+            $rows = $departments->map(function($d) use ($forms,$entries){
+                $f = $forms->get($d->id);
+                $e = $entries->get($d->id);
+
                 return [
                     'department'    => $d->name,
-                    'total_forms'   => (int)($f->total_forms ?? 0),
-                    'active_forms'  => (int)($f->active_forms ?? 0),
-                    'total_entries' => (int)($e->total_entries ?? 0),
+                    'total_forms'   => (int) ($f->total_forms  ?? 0),
+                    'active_forms'  => (int) ($f->active_forms ?? 0),
+                    'total_entries' => (int) ($e->total_entries ?? 0),
                 ];
-            })->filter(fn($x)=>$x['total_forms']>0 || $x['total_entries']>0)->values();
+            })
+            ->filter(fn($x) => $x['total_forms'] > 0 || $x['total_entries'] > 0)
+            ->values();
 
-            return ['rows'=>$result];
+            return ['rows' => $rows];
         });
 
         return response()->json($data);
