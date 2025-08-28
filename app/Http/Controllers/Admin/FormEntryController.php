@@ -9,7 +9,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;      // <- tambah ini
 use ZipArchive;         // <- dan ini
-use Illuminate\Support\Str; 
+use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 class FormEntryController extends Controller
 {
     /**
@@ -245,5 +247,18 @@ class FormEntryController extends Controller
 
         // kirim dan hapus setelah dikirim
         return response()->download($zipPath)->deleteFileAfterSend(true);
+    }
+    public function downloadDataPdf(FormEntry $entry)
+    {
+        // Otorisasi — sesuaikan dengan kebijakanmu (boleh pakai Gate/Policy lain jika ada)
+        // Contoh paling aman: hanya yang bisa melihat entry
+        $this->authorize('view', $entry->form);
+
+        // Render view PDF khusus data
+        $pdf = Pdf::loadView('admin.entries.pdf_data', [
+            'entry' => $entry,
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->download("entry-{$entry->id}-data.pdf");
     }
 }

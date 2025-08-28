@@ -63,36 +63,41 @@
             <div class="text-coal-500 dark:text-coal-400">Belum ada PDF.</div>
           @endif
 
-          {{-- Unduh semua (ZIP) --}}
-          <a href="{{ route('admin.entries.download_all', $entry) }}"
-             class="inline-flex items-center px-3 py-1.5 rounded-lg border border-maroon-600 text-maroon-700 hover:bg-maroon-50/60
-                    dark:text-maroon-300 dark:hover:bg-maroon-900/20 transition">
-            📦 Unduh Semua (ZIP)
-          </a>
         </div>
       </div>
     </div>
 
     <!-- DATA -->
-    <div class="mt-6 rounded-xl border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 shadow-soft overflow-x-auto">
-      <h2 class="font-medium p-4 sm:p-5 pb-0">Data</h2>
-      <div class="p-4 sm:p-5 pt-3">
-        <table class="w-full text-sm min-w-[640px]">
-          <tbody>
-          @foreach($entry->data as $k => $v)
-            <tr class="border-t first:border-t-0 dark:border-coal-800/70 hover:bg-ivory-100/60 dark:hover:bg-coal-800/40">
-              <th class="text-left p-3 align-top w-56 text-coal-700 dark:text-coal-300">
-                {{ ucfirst(str_replace('_',' ',$k)) }}
-              </th>
-              <td class="p-3">
-                {{ is_array($v) ? implode(', ', $v) : $v }}
-              </td>
-            </tr>
-          @endforeach
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <!-- DATA -->
+<div class="mt-6 rounded-xl border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 shadow-soft overflow-x-auto">
+  <div class="flex items-center justify-between p-4 sm:p-5 pb-0">
+    <h2 class="font-medium">Data</h2>
+
+    {{-- Tombol Download Data (PDF) --}}
+    <a href="{{ route('admin.entries.data_pdf', $entry) }}"
+       class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-maroon-700 text-ivory-50 hover:bg-maroon-600 transition text-sm">
+      ⬇️ Download Data (PDF)
+    </a>
+  </div>
+
+  <div class="p-4 sm:p-5 pt-3">
+    <table class="w-full text-sm min-w-[640px]">
+      <tbody>
+      @foreach($entry->data as $k => $v)
+        <tr class="border-t first:border-t-0 dark:border-coal-800/70 hover:bg-ivory-100/60 dark:hover:bg-coal-800/40">
+          <th class="text-left p-3 align-top w-56 text-coal-700 dark:text-coal-300">
+            {{ ucfirst(str_replace('_',' ',$k)) }}
+          </th>
+          <td class="p-3">
+            {{ is_array($v) ? implode(', ', $v) : $v }}
+          </td>
+        </tr>
+      @endforeach
+      </tbody>
+    </table>
+  </div>
+</div>
+
 
     <!-- LAMPIRAN -->
     <div class="mt-6 rounded-xl border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 shadow-soft p-4 sm:p-5">

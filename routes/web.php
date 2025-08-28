@@ -17,8 +17,8 @@ use App\Http\Controllers\Front\FormEntryController as FrontEntryController; // â
 // Model untuk route model binding pada download lampiran
 use App\Http\Controllers\Admin\UserActiveController;
 
-Route::get('/', fn () => redirect()->route('admin.dashboard'));
-Route::get('/dashboard', fn () => redirect()->route('admin.dashboard'))
+Route::get('/', fn() => redirect()->route('admin.dashboard'));
+Route::get('/dashboard', fn() => redirect()->route('admin.dashboard'))
     ->middleware('auth')
     ->name('dashboard');
 
@@ -33,7 +33,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [FormBrowseController::class, 'index'])->name('index');
         Route::get('/{form:slug}', [FormBrowseController::class, 'show'])->name('show');
         Route::post('/{form:slug}', [FrontEntryController::class, 'store'])->name('store');
-        Route::get('/{form:slug}/thanks', fn () => view('front.forms.thanks'))->name('thanks');
+        Route::get('/{form:slug}/thanks', fn() => view('front.forms.thanks'))->name('thanks');
     });
 
     // Download lampiran entry (front)
@@ -58,10 +58,10 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard/data/top-forms', [DashboardController::class, 'topForms'])->name('dashboard.data.top_forms');
         Route::get('dashboard/data/by-department', [DashboardController::class, 'byDepartment'])->name('dashboard.data.by_department');
         // ==== END DASHBOARD ====
-        
-         Route::get('/users/active', [UserActiveController::class, 'index'])->name('users.active.index');
-    Route::patch('/users/{user}/toggle', [UserActiveController::class, 'toggle'])->name('users.active.toggle');
-    Route::patch('/users/{user}/update', [UserActiveController::class, 'update'])->name('users.active.update');
+
+        Route::get('/users/active', [UserActiveController::class, 'index'])->name('users.active.index');
+        Route::patch('/users/{user}/toggle', [UserActiveController::class, 'toggle'])->name('users.active.toggle');
+        Route::patch('/users/{user}/update', [UserActiveController::class, 'update'])->name('users.active.update');
         // Departments CRUD
         Route::resource('departments', DepartmentController::class);
 
@@ -93,7 +93,9 @@ Route::middleware('auth')->group(function () {
             ->name('entries.approval')
             ->whereNumber('entry');
 
-         Route::get('/entries/{entry}/download-all', [AdminEntryController::class, 'downloadAll'])
-        ->name('entries.download_all');
+        Route::get('/entries/{entry}/download-all', [AdminEntryController::class, 'downloadAll'])
+            ->name('entries.download_all');
+        Route::get('/entries/{entry}/data.pdf', [AdminEntryController::class, 'downloadDataPdf'])
+            ->name('entries.data_pdf');
     });
 });
