@@ -10,8 +10,9 @@
   <div class="max-w-6xl mx-auto p-4 sm:p-6">
     <!-- HEADER -->
     <div class="flex items-center justify-between mb-4 sm:mb-6">
-      <h1 class="text-2xl font-serif tracking-tight">Entry #{{ $entry->id }}</h1>
-
+      <h1 class="text-2xl font-serif tracking-tight">
+  {{ $entry->form->title }} <span class="text-coal-500 dark:text-coal-400 text-sm">#{{ $entry->id }}</span>
+</h1>
       <div class="flex items-center gap-2">
         @if($entry->pdf_output_path)
           <a href="{{ route('admin.entries.download_pdf', $entry) }}"

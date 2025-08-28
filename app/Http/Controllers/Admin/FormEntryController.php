@@ -249,16 +249,22 @@ class FormEntryController extends Controller
         return response()->download($zipPath)->deleteFileAfterSend(true);
     }
     public function downloadDataPdf(FormEntry $entry)
-    {
-        // Otorisasi — sesuaikan dengan kebijakanmu (boleh pakai Gate/Policy lain jika ada)
-        // Contoh paling aman: hanya yang bisa melihat entry
-        $this->authorize('view', $entry->form);
+{
+    // Otorisasi — sesuaikan dengan kebijakanmu
+    $this->authorize('view', $entry->form);
 
-        // Render view PDF khusus data
-        $pdf = Pdf::loadView('admin.entries.pdf_data', [
-            'entry' => $entry,
-        ])->setPaper('a4', 'portrait');
+    // Buat nama file yang lebih deskriptif
+    $formTitle = Str::slug($entry->form->title, '-'); // rapihin jadi slug (tanpa spasi/simbol aneh)
+    $userName  = Str::slug($entry->user->name, '-');
 
-        return $pdf->download("entry-{$entry->id}-data.pdf");
-    }
+    $fileName = "{$formTitle}-{$userName}-#{$entry->id}.pdf";
+
+    // Render view PDF
+    $pdf = Pdf::loadView('admin.entries.pdf_data', [
+        'entry' => $entry,
+    ])->setPaper('a4', 'portrait');
+
+    return $pdf->download($fileName);
+}
+
 }
