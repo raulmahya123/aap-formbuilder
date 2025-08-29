@@ -8,28 +8,63 @@ use Illuminate\Http\Request;
 
 class DocumentTemplateController extends Controller
 {
-    public function index() {
+    public function index()
+    {
         $templates = DocumentTemplate::latest()->paginate(20);
         return view('admin.document_templates.index', compact('templates'));
     }
 
-    public function create() {
+    public function create()
+    {
         return view('admin.document_templates.create');
     }
 
-    public function store(Request $r) {
+    public function store(Request $r)
+    {
         $data = $r->validate([
-            'name' => ['required','max:120'],
+            'name' => ['required', 'max:120'],
             // optional: terima json string
             'header_config'    => ['nullable'],
             'footer_config'    => ['nullable'],
             'signature_config' => ['nullable'],
             'layout_config'    => ['nullable'],
         ]);
-        foreach (['header_config','footer_config','signature_config','layout_config'] as $k) {
+        foreach (['header_config', 'footer_config', 'signature_config', 'layout_config'] as $k) {
             if (is_string($data[$k] ?? null)) $data[$k] = json_decode($data[$k], true) ?: null;
         }
         DocumentTemplate::create($data);
-        return redirect()->route('admin.document_templates.index')->with('success','Template dibuat');
+        return redirect()->route('admin.document_templates.index')->with('success', 'Template dibuat');
+    }
+    // app/Http/Controllers/Admin/DocumentTemplateController.php
+
+    public function edit(\App\Models\DocumentTemplate $template)
+    {
+        return view('admin.document_templates.edit', compact('template'));
+    }
+
+    public function update(Request $r, \App\Models\DocumentTemplate $template)
+    {
+        $data = $r->validate([
+            'name'           => ['required', 'max:150'],
+            'header_config'  => ['nullable'],
+            'footer_config'  => ['nullable'],
+        ]);
+
+        // terima JSON string atau array
+        foreach (['header_config', 'footer_config'] as $k) {
+            if (is_string($data[$k] ?? null)) {
+                $data[$k] = json_decode($data[$k], true) ?: null;
+            }
+        }
+
+        $template->update($data);
+
+        return redirect()->route('admin.document_templates.index')->with('success', 'Template diperbarui');
+    }
+
+    public function destroy(\App\Models\DocumentTemplate $template)
+    {
+        $template->delete();
+        return redirect()->route('admin.document_templates.index')->with('success', 'Template dihapus');
     }
 }

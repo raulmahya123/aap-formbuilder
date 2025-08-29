@@ -44,8 +44,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/entry-file/{file}', [FrontEntryController::class, 'downloadAttachment'])
         ->name('front.entry.download.attachment')
         ->whereNumber('file'); // pastikan {file} numerik (ID FormEntryFile)
-    
-      
+
+
 
     // (Opsional) Jika user front boleh unduh PDF isian sendiri:
     // Route::get('/entry/{entry}/download-pdf', [FrontEntryController::class, 'downloadPdf'])
@@ -83,30 +83,54 @@ Route::middleware('auth')->group(function () {
 
         // ==== DOCUMENTS ====
         Route::prefix('documents')->name('documents.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\DocumentController::class, 'index'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\DocumentController::class, 'create'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\DocumentController::class, 'store'])->name('store');
+            Route::get('/', [\App\Http\Controllers\Admin\DocumentController::class, 'index'])
+                ->name('index');
+
+            Route::get('/create', [\App\Http\Controllers\Admin\DocumentController::class, 'create'])
+                ->name('create')
+                ->middleware('can:create,App\Models\Document');
+
+            Route::post('/', [\App\Http\Controllers\Admin\DocumentController::class, 'store'])
+                ->name('store')
+                ->middleware('can:create,App\Models\Document');
 
             Route::get('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'show'])
                 ->name('show')->middleware('can:view,document');
+
             Route::get('/{document}/edit', [\App\Http\Controllers\Admin\DocumentController::class, 'edit'])
                 ->name('edit')->middleware('can:update,document');
+
             Route::put('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'update'])
                 ->name('update')->middleware('can:update,document');
+
             Route::delete('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'destroy'])
                 ->name('destroy')->middleware('can:delete,document');
+
+            // Export dokumen (PDF/HTML fallback)
+            Route::get('/{document}/export', [\App\Http\Controllers\Admin\DocumentController::class, 'export'])
+                ->name('export')->middleware('can:export,document');
 
             // Bagikan akses
             Route::post('/{document}/share', [\App\Http\Controllers\Admin\DocumentController::class, 'share'])
                 ->name('share')->middleware('can:share,document');
-        });
 
+            // Cabut akses (revoke ACL)
+            Route::delete('/{document}/acl/{acl}', [\App\Http\Controllers\Admin\DocumentController::class, 'revoke'])
+                ->name('acl.revoke')->middleware('can:share,document')
+                ->whereNumber('acl');
+        })->whereNumber('document');
         // ==== DOCUMENT TEMPLATES ====
         Route::prefix('document-templates')->name('document_templates.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'index'])->name('index');
             Route::get('/create', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'create'])->name('create');
             Route::post('/', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'store'])->name('store');
-        });
+   Route::get('/{template}/edit', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'edit'])
+        ->name('edit');
+    Route::put('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'update'])
+        ->name('update');
+    Route::delete('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'destroy'])
+        ->name('destroy');
+})->whereNumber('template');
 
 
         // Entries (admin): list/detail/hapus
@@ -131,16 +155,16 @@ Route::middleware('auth')->group(function () {
             ->name('entries.download_all');
         Route::get('/entries/{entry}/data.pdf', [AdminEntryController::class, 'downloadDataPdf'])
             ->name('entries.data_pdf');
-            Route::get('/entries/export-zip', [AdminEntryController::class, 'exportZip'])
-        ->name('entries.export_zip');
+        Route::get('/entries/export-zip', [AdminEntryController::class, 'exportZip'])
+            ->name('entries.export_zip');
         Route::prefix('qa')->name('qa.')->group(function () {
-        Route::get('/', [QaThreadController::class,'index'])->name('index');
-        Route::get('/public', [QaThreadController::class,'public'])->name('public');
-        Route::get('/create', [QaThreadController::class,'create'])->name('create');
-        Route::post('/', [QaThreadController::class,'store'])->name('store');
-        Route::get('/{thread}', [QaThreadController::class,'show'])->name('show');
-        Route::post('/{thread}/messages', [QaMessageController::class,'store'])->name('messages.store');
-        Route::post('/{thread}/resolve', [QaThreadController::class,'resolve'])->name('resolve');
-    });
+            Route::get('/', [QaThreadController::class, 'index'])->name('index');
+            Route::get('/public', [QaThreadController::class, 'public'])->name('public');
+            Route::get('/create', [QaThreadController::class, 'create'])->name('create');
+            Route::post('/', [QaThreadController::class, 'store'])->name('store');
+            Route::get('/{thread}', [QaThreadController::class, 'show'])->name('show');
+            Route::post('/{thread}/messages', [QaMessageController::class, 'store'])->name('messages.store');
+            Route::post('/{thread}/resolve', [QaThreadController::class, 'resolve'])->name('resolve');
+        });
     });
 });
