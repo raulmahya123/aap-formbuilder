@@ -9,13 +9,17 @@ use Illuminate\Support\Facades\Gate;
 use App\Models\Form;
 use App\Models\Department;
 use App\Models\FormEntry;
-use App\Models\QaThread;            // ← tambahkan
+use App\Models\QaThread;
+use App\Models\Document;              // ← tambahkan
+use App\Models\DocumentTemplate;      // opsional kalau mau buat policy juga
 
 // POLICIES
 use App\Policies\FormPolicy;
 use App\Policies\DepartmentPolicy;
 use App\Policies\FormEntryPolicy;
-use App\Policies\QaThreadPolicy;    // ← tambahkan
+use App\Policies\QaThreadPolicy;
+use App\Policies\DocumentPolicy;      // ← tambahkan
+// use App\Policies\DocumentTemplatePolicy; // opsional
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -26,7 +30,9 @@ class AuthServiceProvider extends ServiceProvider
         Form::class       => FormPolicy::class,
         Department::class => DepartmentPolicy::class,
         FormEntry::class  => FormEntryPolicy::class,
-        QaThread::class   => QaThreadPolicy::class,   // ← daftarkan di sini
+        QaThread::class   => QaThreadPolicy::class,
+        Document::class   => DocumentPolicy::class,    // ← daftarkan di sini
+        // DocumentTemplate::class => DocumentTemplatePolicy::class,
     ];
 
     /**

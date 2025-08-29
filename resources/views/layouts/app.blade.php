@@ -172,6 +172,22 @@
             </a>
             @endif
 
+            {{-- DOCUMENTS --}}
+            @if(Route::has('admin.documents.index'))
+            <a href="{{ route('admin.documents.index') }}"
+              class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}">
+              <span class="inline-block w-5 text-center">📄</span><span>Documents</span>
+            </a>
+            @endif
+
+            @if(Route::has('admin.document_templates.index'))
+            <a href="{{ route('admin.document_templates.index') }}"
+              class="{{ $navItemClass(request()->routeIs('admin.document_templates.*')) }}">
+              <span class="inline-block w-5 text-center">🧩</span><span>Doc Templates</span>
+            </a>
+            @endif
+
+
             @if(Route::has('admin.entries.index'))
             <a href="{{ route('admin.entries.index') }}"
               class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">
@@ -180,12 +196,12 @@
             @endif
 
             @if (Route::has('admin.qa.index'))
-  <a href="{{ route('admin.qa.index') }}"
-     class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">
-    <span class="inline-block w-5 text-center">💬</span>
-    <span>Tanya Jawab</span>
-  </a>
-@endif
+            <a href="{{ route('admin.qa.index') }}"
+              class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">
+              <span class="inline-block w-5 text-center">💬</span>
+              <span>Tanya Jawab</span>
+            </a>
+            @endif
 
 
             @php($user = auth()->user())
@@ -263,14 +279,14 @@
                 class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">📥 Entries</a>
               @endif
 
-{{-- Q&A --}}
-@if (Route::has('admin.qa.index'))
-  <a href="{{ route('admin.qa.index') }}"
-     class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">
-    <span class="inline-block w-5 text-center">💬</span>
-    <span>Tanya Jawab</span>
-  </a>
-@endif
+              {{-- Q&A --}}
+              @if (Route::has('admin.qa.index'))
+              <a href="{{ route('admin.qa.index') }}"
+                class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">
+                <span class="inline-block w-5 text-center">💬</span>
+                <span>Tanya Jawab</span>
+              </a>
+              @endif
 
               @php($user = auth()->user())
               @if($user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin())

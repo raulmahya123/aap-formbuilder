@@ -81,6 +81,34 @@ Route::middleware('auth')->group(function () {
         Route::post('departments/{department}/members', [DepartmentMemberController::class, 'store'])->name('departments.members.store');
         Route::delete('departments/{department}/members/{user}', [DepartmentMemberController::class, 'destroy'])->name('departments.members.destroy');
 
+        // ==== DOCUMENTS ====
+        Route::prefix('documents')->name('documents.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\DocumentController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\DocumentController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\DocumentController::class, 'store'])->name('store');
+
+            Route::get('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'show'])
+                ->name('show')->middleware('can:view,document');
+            Route::get('/{document}/edit', [\App\Http\Controllers\Admin\DocumentController::class, 'edit'])
+                ->name('edit')->middleware('can:update,document');
+            Route::put('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'update'])
+                ->name('update')->middleware('can:update,document');
+            Route::delete('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'destroy'])
+                ->name('destroy')->middleware('can:delete,document');
+
+            // Bagikan akses
+            Route::post('/{document}/share', [\App\Http\Controllers\Admin\DocumentController::class, 'share'])
+                ->name('share')->middleware('can:share,document');
+        });
+
+        // ==== DOCUMENT TEMPLATES ====
+        Route::prefix('document-templates')->name('document_templates.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'store'])->name('store');
+        });
+
+
         // Entries (admin): list/detail/hapus
         Route::resource('entries', AdminEntryController::class)
             ->only(['index', 'show', 'destroy'])
