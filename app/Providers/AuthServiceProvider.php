@@ -4,8 +4,18 @@ namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
-use App\Models\{Form, Department, FormEntry};
-use App\Policies\{FormPolicy, DepartmentPolicy, FormEntryPolicy};
+
+// MODELS
+use App\Models\Form;
+use App\Models\Department;
+use App\Models\FormEntry;
+use App\Models\QaThread;            // ← tambahkan
+
+// POLICIES
+use App\Policies\FormPolicy;
+use App\Policies\DepartmentPolicy;
+use App\Policies\FormEntryPolicy;
+use App\Policies\QaThreadPolicy;    // ← tambahkan
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -15,7 +25,8 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Form::class       => FormPolicy::class,
         Department::class => DepartmentPolicy::class,
-        FormEntry::class  => FormEntryPolicy::class, // ← daftar policy entries
+        FormEntry::class  => FormEntryPolicy::class,
+        QaThread::class   => QaThreadPolicy::class,   // ← daftarkan di sini
     ];
 
     /**

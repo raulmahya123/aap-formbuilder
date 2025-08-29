@@ -9,40 +9,20 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * Kolom yang boleh di-mass assign.
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'is_active', // ← tambahkan ini
-    ];
+    protected $fillable = ['name','email','password','is_active'];
 
-    /**
-     * Kolom yang disembunyikan saat serialisasi.
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password','remember_token'];
 
-    /**
-     * Casts atribut.
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
-            'is_active'         => 'boolean', // ← tambahkan ini
+            'is_active'         => 'boolean',
         ];
     }
-
-    // ================== RELASI & HELPER ==================
 
     public function departments()
     {
@@ -55,6 +35,12 @@ class User extends Authenticatable
         return $this->role === 'super_admin';
     }
 
+    public function isAdmin(): bool
+    {
+        return $this->isSuperAdmin()
+            || $this->departments()->wherePivot('dept_role', 'dept_admin')->exists();
+    }
+
     public function isDeptAdminOf(int $departmentId): bool
     {
         return $this->departments()
@@ -63,12 +49,9 @@ class User extends Authenticatable
             ->exists();
     }
 
-    /**
-     * Scope bantu: hanya user aktif.
-     * Contoh: User::active()->get();
-     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 }
+

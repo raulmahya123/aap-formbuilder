@@ -17,6 +17,10 @@ use App\Http\Controllers\Front\FormEntryController as FrontEntryController; // â
 // Model untuk route model binding pada download lampiran
 use App\Http\Controllers\Admin\UserActiveController;
 
+// QA Controllers
+use App\Http\Controllers\QA\QaThreadController;
+use App\Http\Controllers\QA\QaMessageController;
+
 Route::get('/', fn() => redirect()->route('admin.dashboard'));
 Route::get('/dashboard', fn() => redirect()->route('admin.dashboard'))
     ->middleware('auth')
@@ -40,6 +44,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/entry-file/{file}', [FrontEntryController::class, 'downloadAttachment'])
         ->name('front.entry.download.attachment')
         ->whereNumber('file'); // pastikan {file} numerik (ID FormEntryFile)
+    
+      
 
     // (Opsional) Jika user front boleh unduh PDF isian sendiri:
     // Route::get('/entry/{entry}/download-pdf', [FrontEntryController::class, 'downloadPdf'])
@@ -99,5 +105,14 @@ Route::middleware('auth')->group(function () {
             ->name('entries.data_pdf');
             Route::get('/entries/export-zip', [AdminEntryController::class, 'exportZip'])
         ->name('entries.export_zip');
+        Route::prefix('qa')->name('qa.')->group(function () {
+        Route::get('/', [QaThreadController::class,'index'])->name('index');
+        Route::get('/public', [QaThreadController::class,'public'])->name('public');
+        Route::get('/create', [QaThreadController::class,'create'])->name('create');
+        Route::post('/', [QaThreadController::class,'store'])->name('store');
+        Route::get('/{thread}', [QaThreadController::class,'show'])->name('show');
+        Route::post('/{thread}/messages', [QaMessageController::class,'store'])->name('messages.store');
+        Route::post('/{thread}/resolve', [QaThreadController::class,'resolve'])->name('resolve');
+    });
     });
 });
