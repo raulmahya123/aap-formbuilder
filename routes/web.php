@@ -124,13 +124,15 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'index'])->name('index');
             Route::get('/create', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'create'])->name('create');
             Route::post('/', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'store'])->name('store');
-   Route::get('/{template}/edit', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'edit'])
-        ->name('edit');
-    Route::put('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'update'])
-        ->name('update');
-    Route::delete('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'destroy'])
-        ->name('destroy');
-})->whereNumber('template');
+            Route::get('/{template}/edit', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'edit'])
+                ->name('edit');
+            Route::put('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'update'])
+                ->name('update');
+            Route::delete('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'destroy'])
+                ->name('destroy');
+            Route::get('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'show'])
+                ->name('show');
+        })->whereNumber('template');
 
 
         // Entries (admin): list/detail/hapus
