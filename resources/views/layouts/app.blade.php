@@ -149,80 +149,68 @@
       };
       @endphp
 
+      {{-- NAV MENU --}}
+      @php
+      $navItemClass = function(bool $active = false){
+      $base = 'flex items-center gap-3 px-3 py-2 rounded-xl transition outline-none';
+      $inactive = 'text-coal-800 dark:text-ivory-100 border border-transparent hover:bg-ivory-100 dark:hover:bg-coal-900 focus-visible:ring-2 focus-visible:ring-maroon-700';
+      $activeCls = 'is-active border';
+      return $active ? "$base $activeCls" : "$base $inactive";
+      };
+
+      $user = auth()->user();
+      @endphp
+
       <nav class="p-4 space-y-6 flex-1">
         <div>
           <div class="px-3 text-xs uppercase tracking-wider text-coal-500 dark:text-coal-300">Menu</div>
           <div class="mt-2 grid gap-1">
-            <a href="{{ route('admin.dashboard') }}"
-              class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">
-              <span class="inline-block w-5 text-center">🏛️</span><span>Dashboard</span>
-            </a>
+            <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
 
             @if(Route::has('admin.departments.index'))
-            <a href="{{ route('admin.departments.index') }}"
-              class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}">
-              <span class="inline-block w-5 text-center">🏷️</span><span>Departments</span>
-            </a>
+            <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}">🏷️ Departments</a>
             @endif
 
             @if(Route::has('admin.forms.index'))
-            <a href="{{ route('admin.forms.index') }}"
-              class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}">
-              <span class="inline-block w-5 text-center">🧾</span><span>Forms</span>
-            </a>
+            <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}">🧾 Forms</a>
             @endif
 
-            {{-- DOCUMENTS --}}
             @if(Route::has('admin.documents.index'))
-            <a href="{{ route('admin.documents.index') }}"
-              class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}">
-              <span class="inline-block w-5 text-center">📄</span><span>Documents</span>
-            </a>
+            <a href="{{ route('admin.documents.index') }}" class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}">📄 Documents</a>
             @endif
 
+            {{-- Doc Templates: hanya super admin atau user dengan department --}}
+            @if(($user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin()) || ($user && $user->department_id))
             @if(Route::has('admin.document_templates.index'))
-            <a href="{{ route('admin.document_templates.index') }}"
-              class="{{ $navItemClass(request()->routeIs('admin.document_templates.*')) }}">
-              <span class="inline-block w-5 text-center">🧩</span><span>Doc Templates</span>
-            </a>
+            <a href="{{ route('admin.document_templates.index') }}" class="{{ $navItemClass(request()->routeIs('admin.document_templates.*')) }}">🧩 Doc Templates</a>
             @endif
-
+            @endif
 
             @if(Route::has('admin.entries.index'))
-            <a href="{{ route('admin.entries.index') }}"
-              class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">
-              <span class="inline-block w-5 text-center">📥</span><span>Entries</span>
-            </a>
+            <a href="{{ route('admin.entries.index') }}" class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">📥 Entries</a>
             @endif
 
-            @if (Route::has('admin.qa.index'))
-            <a href="{{ route('admin.qa.index') }}"
-              class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">
-              <span class="inline-block w-5 text-center">💬</span>
-              <span>Tanya Jawab</span>
-            </a>
+            @if(Route::has('admin.qa.index'))
+            <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
             @endif
 
-
-            @php($user = auth()->user())
+            {{-- ACL: hanya super admin --}}
             @if($user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin())
-            @if(Route::has('admin.users.active.index'))
-            <a href="{{ route('admin.users.active.index') }}"
-              class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">
-              <span class="inline-block w-5 text-center">👥</span><span>Manage Users</span>
+            @if(Route::has('admin.documents.acl.index'))
+            <a href="{{ route('admin.documents.acl.index', 1) }}" {{-- default ID dokumen, bisa dynamic --}}
+              class="{{ $navItemClass(request()->routeIs('admin.documents.acl.*')) }}">
+              🔐 Akses Dokumen
             </a>
+            @endif
+
+            @if(Route::has('admin.users.active.index'))
+            <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
             @endif
             @endif
           </div>
         </div>
-
-        @hasSection('sidenav')
-        <div>
-          <div class="px-3 text-xs uppercase tracking-wider text-coal-500 dark:text-coal-300">Lainnya</div>
-          <div class="mt-2">@yield('sidenav')</div>
-        </div>
-        @endif
       </nav>
+
 
       {{-- LOGOUT (BAWAH) --}}
       @auth

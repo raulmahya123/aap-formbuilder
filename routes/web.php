@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\FormController as AdminFormController;
 use App\Http\Controllers\Admin\FormEntryController as AdminEntryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EntryApprovalController;
+use App\Http\Controllers\Admin\DocumentAclController; // <-- PENTING: import ACL controller
 
 // FRONT Controllers
 use App\Http\Controllers\Front\FormBrowseController;
@@ -45,8 +46,6 @@ Route::middleware('auth')->group(function () {
         ->name('front.entry.download.attachment')
         ->whereNumber('file'); // pastikan {file} numerik (ID FormEntryFile)
 
-
-
     // (Opsional) Jika user front boleh unduh PDF isian sendiri:
     // Route::get('/entry/{entry}/download-pdf', [FrontEntryController::class, 'downloadPdf'])
     //     ->name('front.entry.download_pdf')
@@ -68,6 +67,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/users/active', [UserActiveController::class, 'index'])->name('users.active.index');
         Route::patch('/users/{user}/toggle', [UserActiveController::class, 'toggle'])->name('users.active.toggle');
         Route::patch('/users/{user}/update', [UserActiveController::class, 'update'])->name('users.active.update');
+
         // Departments CRUD
         Route::resource('departments', DepartmentController::class);
 
@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
 
         // ==== DOCUMENTS ====
         Route::prefix('documents')->name('documents.')->group(function () {
+
             Route::get('/', [\App\Http\Controllers\Admin\DocumentController::class, 'index'])
                 ->name('index');
 
@@ -110,30 +111,42 @@ Route::middleware('auth')->group(function () {
             Route::get('/{document}/export', [\App\Http\Controllers\Admin\DocumentController::class, 'export'])
                 ->name('export')->middleware('can:export,document');
 
-            // Bagikan akses
-            Route::post('/{document}/share', [\App\Http\Controllers\Admin\DocumentController::class, 'share'])
-                ->name('share')->middleware('can:share,document');
+            /**
+             * === ACL (Kelola akses dokumen) ===
+             * NOTE: Ditaruh DI DALAM grup 'documents' supaya name() -> 'admin.documents.acl.*'
+             * dan path-nya /admin/documents/{document}/acl[/{acl}]
+             */
+            Route::get('/{document}/acl', [DocumentAclController::class, 'index'])
+                ->name('acl.index')
+                ->middleware('can:share,document');
 
-            // Cabut akses (revoke ACL)
-            Route::delete('/{document}/acl/{acl}', [\App\Http\Controllers\Admin\DocumentController::class, 'revoke'])
-                ->name('acl.revoke')->middleware('can:share,document')
+            Route::post('/{document}/acl', [DocumentAclController::class, 'store'])
+                ->name('acl.store')
+                ->middleware('can:share,document');
+
+            Route::delete('/{document}/acl/{acl}', [DocumentAclController::class, 'destroy'])
+                ->name('acl.destroy')
+                ->middleware('can:share,document')
                 ->whereNumber('acl');
-        })->whereNumber('document');
+
+            /**
+             * OPSIONAL: Kalau sebelumnya kamu punya:
+             *   POST /{document}/share   -> DocumentController@share
+             *   DELETE /{document}/acl/{acl} -> DocumentController@revoke
+             * HAPUS keduanya agar tidak bentrok path & name.
+             */
+        })->whereNumber('document'); // pastikan {document} numerik (kalau ID)
+
         // ==== DOCUMENT TEMPLATES ====
         Route::prefix('document-templates')->name('document_templates.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'index'])->name('index');
             Route::get('/create', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'create'])->name('create');
             Route::post('/', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'store'])->name('store');
-            Route::get('/{template}/edit', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'edit'])
-                ->name('edit');
-            Route::put('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'update'])
-                ->name('update');
-            Route::delete('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'destroy'])
-                ->name('destroy');
-            Route::get('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'show'])
-                ->name('show');
+            Route::get('/{template}/edit', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'edit'])->name('edit');
+            Route::put('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'update'])->name('update');
+            Route::delete('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'destroy'])->name('destroy');
+            Route::get('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'show'])->name('show');
         })->whereNumber('template');
-
 
         // Entries (admin): list/detail/hapus
         Route::resource('entries', AdminEntryController::class)
@@ -148,7 +161,7 @@ Route::middleware('auth')->group(function () {
             ->name('entries.download_pdf')
             ->whereNumber('entry');
 
-        // Approval (admin) — PERBAIKAN: jangan double "admin." di name()
+        // Approval (admin)
         Route::post('entries/{entry}/approval', [EntryApprovalController::class, 'act'])
             ->name('entries.approval')
             ->whereNumber('entry');
@@ -159,6 +172,8 @@ Route::middleware('auth')->group(function () {
             ->name('entries.data_pdf');
         Route::get('/entries/export-zip', [AdminEntryController::class, 'exportZip'])
             ->name('entries.export_zip');
+
+        // QA
         Route::prefix('qa')->name('qa.')->group(function () {
             Route::get('/', [QaThreadController::class, 'index'])->name('index');
             Route::get('/public', [QaThreadController::class, 'public'])->name('public');
