@@ -82,61 +82,43 @@ Route::middleware('auth')->group(function () {
         Route::delete('departments/{department}/members/{user}', [DepartmentMemberController::class, 'destroy'])->name('departments.members.destroy');
 
         // ==== DOCUMENTS ====
-        Route::prefix('documents')->name('documents.')->group(function () {
+        // ==== DOCUMENTS ====
+Route::prefix('documents')->name('documents.')->group(function () {
+    // CRUD & export
+    Route::get('/', [\App\Http\Controllers\Admin\DocumentController::class, 'index'])->name('index');
+    Route::get('/create', [\App\Http\Controllers\Admin\DocumentController::class, 'create'])
+        ->name('create')->middleware('can:create,App\Models\Document');
+    Route::post('/', [\App\Http\Controllers\Admin\DocumentController::class, 'store'])
+        ->name('store')->middleware('can:create,App\Models\Document');
+    Route::get('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'show'])
+        ->name('show')->middleware('can:view,document');
+    Route::get('/{document}/edit', [\App\Http\Controllers\Admin\DocumentController::class, 'edit'])
+        ->name('edit')->middleware('can:update,document');
+    Route::put('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'update'])
+        ->name('update')->middleware('can:update,document');
+    Route::delete('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'destroy'])
+        ->name('destroy')->middleware('can:delete,document');
+    Route::get('/{document}/export', [\App\Http\Controllers\Admin\DocumentController::class, 'export'])
+        ->name('export')->middleware('can:export,document');
 
-            Route::get('/', [\App\Http\Controllers\Admin\DocumentController::class, 'index'])
-                ->name('index');
+    /**
+     * === ACL (Kelola akses dokumen) ===
+     * - GET index: per dokumen (lihat & kelola daftar ACL dokumen tsb)
+     * - DELETE: per dokumen (hapus entri ACL tertentu)
+     * - POST (BULK): tanpa {document} → untuk tambah ACL ke banyak dokumen sekaligus
+     */
 
-            Route::get('/create', [\App\Http\Controllers\Admin\DocumentController::class, 'create'])
-                ->name('create')
-                ->middleware('can:create,App\Models\Document');
+    // PER-DOKUMEN: halaman kelola ACL & hapus
+    Route::get('/{document}/acl', [DocumentAclController::class, 'index'])
+        ->name('acl.index')->middleware('can:share,document');
+    Route::delete('/{document}/acl/{acl}', [DocumentAclController::class, 'destroy'])
+        ->name('acl.destroy')->middleware('can:share,document')->whereNumber('acl');
 
-            Route::post('/', [\App\Http\Controllers\Admin\DocumentController::class, 'store'])
-                ->name('store')
-                ->middleware('can:create,App\Models\Document');
-
-            Route::get('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'show'])
-                ->name('show')->middleware('can:view,document');
-
-            Route::get('/{document}/edit', [\App\Http\Controllers\Admin\DocumentController::class, 'edit'])
-                ->name('edit')->middleware('can:update,document');
-
-            Route::put('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'update'])
-                ->name('update')->middleware('can:update,document');
-
-            Route::delete('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'destroy'])
-                ->name('destroy')->middleware('can:delete,document');
-
-            // Export dokumen (PDF/HTML fallback)
-            Route::get('/{document}/export', [\App\Http\Controllers\Admin\DocumentController::class, 'export'])
-                ->name('export')->middleware('can:export,document');
-
-            /**
-             * === ACL (Kelola akses dokumen) ===
-             * NOTE: Ditaruh DI DALAM grup 'documents' supaya name() -> 'admin.documents.acl.*'
-             * dan path-nya /admin/documents/{document}/acl[/{acl}]
-             */
-            Route::get('/{document}/acl', [DocumentAclController::class, 'index'])
-                ->name('acl.index')
-                ->middleware('can:share,document');
-
-            Route::post('/{document}/acl', [DocumentAclController::class, 'store'])
-                ->name('acl.store')
-                ->middleware('can:share,document');
-
-            Route::delete('/{document}/acl/{acl}', [DocumentAclController::class, 'destroy'])
-                ->name('acl.destroy')
-                ->middleware('can:share,document')
-                ->whereNumber('acl');
-
-            /**
-             * OPSIONAL: Kalau sebelumnya kamu punya:
-             *   POST /{document}/share   -> DocumentController@share
-             *   DELETE /{document}/acl/{acl} -> DocumentController@revoke
-             * HAPUS keduanya agar tidak bentrok path & name.
-             */
-        })->whereNumber('document'); // pastikan {document} numerik (kalau ID)
-
+    // BULK STORE (NO {document}): dipakai oleh form multi-select dokumen
+    // Blade: action="{{ route('admin.documents.acl.store') }}"
+    Route::post('/acl', [DocumentAclController::class, 'storeBulk'])
+        ->name('acl.store'); // <- TANPA parameter {document}
+})->whereNumber('document');
         // ==== DOCUMENT TEMPLATES ====
         Route::prefix('document-templates')->name('document_templates.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'index'])->name('index');
