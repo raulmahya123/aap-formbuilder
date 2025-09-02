@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Form, FormEntry, Department};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\{Form, FormEntry, Department, Document, DocumentTemplate, DocumentAcl};
 
 class DashboardController extends Controller
 {
@@ -28,36 +28,89 @@ class DashboardController extends Controller
     }
 
     /** Kartu ringkas: total form, total entries, aktif form, pengguna unik */
-    public function summary(Request $r)
-    {
-        [$from, $to, $deptId, $formId] = $this->extractFilters($r);
+    /** Kartu ringkas: total form, total entries, aktif form, pengguna unik
+ *  + totalDocuments, totalTemplates
+ *  + recentDocuments, recentTemplates, recentAclChanges (default 30 hari)
+ */
+public function summary(Request $r)
+{
+    [$from, $to, $deptId, $formId] = $this->extractFilters($r);
 
-        $cacheKey = 'dash_summary:'.md5(json_encode([$from,$to,$deptId,$formId]));
-        $data = Cache::remember($cacheKey, 60, function() use ($from,$to,$deptId,$formId){
-            $formQuery  = Form::query();
-            $entryQuery = FormEntry::query();
+    // window untuk "recent" (bisa override pakai ?recent_days=14)
+    $recentDays = (int)($r->recent_days ?? 30);
+    if ($recentDays < 1) $recentDays = 30;
 
-            if ($deptId) {
-                $formQuery->where('department_id', $deptId);
-                $entryQuery->whereHas('form', fn($q) => $q->where('department_id', $deptId));
-            }
-            if ($formId) {
-                $formQuery->where('id', $formId);
-                $entryQuery->where('form_id', $formId);
-            }
-            if ($from) { $entryQuery->where('created_at', '>=', (clone $from)->startOfDay()); }
-            if ($to)   { $entryQuery->where('created_at', '<=', (clone $to)->endOfDay());   }
+    // Kalau user kasih date_from/date_to → recent pakai window itu.
+    // Kalau tidak → recent pakai now()-recentDays..now()
+    $recentFrom = $from ? (clone $from)->startOfDay() : now()->subDays($recentDays-1)->startOfDay();
+    $recentTo   = $to   ? (clone $to)->endOfDay()     : now()->endOfDay();
 
-            $totalForms   = (clone $formQuery)->count();
-            $activeForms  = (clone $formQuery)->where('is_active', true)->count();
-            $totalEntries = (clone $entryQuery)->count();
-            $uniqueUsers  = (clone $entryQuery)->distinct('user_id')->count('user_id');
+    $cacheKey = 'dash_summary:'.md5(json_encode([
+        $from?->toDateString(), $to?->toDateString(), $deptId, $formId,
+        'recentDays'=>$recentDays, 'recentFrom'=>$recentFrom->toDateTimeString(), 'recentTo'=>$recentTo->toDateTimeString(),
+    ]));
 
-            return compact('totalForms','activeForms','totalEntries','uniqueUsers');
-        });
+    $data = Cache::remember($cacheKey, 60, function() use ($from,$to,$deptId,$formId,$recentFrom,$recentTo){
+        // Base queries
+        $formQuery  = Form::query();
+        $entryQuery = FormEntry::query();
 
-        return response()->json($data);
-    }
+        if ($deptId) {
+            $formQuery->where('department_id', $deptId);
+            $entryQuery->whereHas('form', fn($q) => $q->where('department_id', $deptId));
+        }
+        if ($formId) {
+            $formQuery->where('id', $formId);
+            $entryQuery->where('form_id', $formId);
+        }
+        if ($from) { $entryQuery->where('created_at', '>=', (clone $from)->startOfDay()); }
+        if ($to)   { $entryQuery->where('created_at', '<=', (clone $to)->endOfDay());   }
+
+        // KPI existing
+        $totalForms   = (clone $formQuery)->count();
+        $activeForms  = (clone $formQuery)->where('is_active', true)->count();
+        $totalEntries = (clone $entryQuery)->count();
+        $uniqueUsers  = (clone $entryQuery)->distinct('user_id')->count('user_id');
+
+        // KPI Documents / Templates (total)
+        $docsTotalQ = Document::query();
+        if ($deptId) $docsTotalQ->where('department_id', $deptId);
+        $totalDocuments = (clone $docsTotalQ)->count();
+
+        $tmplTotalQ = DocumentTemplate::query();
+        $totalTemplates = (clone $tmplTotalQ)->count();
+
+        // KPI Recent (menghormati filter department & date range jika ada)
+        $recentDocsQ = Document::query()
+            ->when($deptId, fn($q) => $q->where('department_id', $deptId))
+            ->whereBetween('created_at', [$recentFrom, $recentTo]);
+
+        $recentTmplQ = DocumentTemplate::query()
+            ->whereBetween('updated_at', [$recentFrom, $recentTo]);
+
+        $recentAclQ = DocumentAcl::query()
+            ->when($deptId, function($q) use ($deptId) {
+                $q->where(function($qq) use ($deptId) {
+                    $qq->where('department_id', $deptId)
+                       ->orWhereIn('document_id', Document::where('department_id', $deptId)->pluck('id'));
+                });
+            })
+            ->whereBetween('created_at', [$recentFrom, $recentTo]);
+
+        $recentDocuments  = (clone $recentDocsQ)->count();
+        $recentTemplates  = (clone $recentTmplQ)->count();
+        $recentAclChanges = (clone $recentAclQ)->count();
+
+        return compact(
+            'totalForms','activeForms','totalEntries','uniqueUsers',
+            'totalDocuments','totalTemplates',
+            'recentDocuments','recentTemplates','recentAclChanges'
+        );
+    });
+
+    return response()->json($data);
+}
+
 
     /** Tren entries per hari (default 30 hari terakhir) */
     public function entriesByDay(Request $r)

@@ -16,7 +16,7 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4 sm:mb-6">
       <div>
         <h1 class="text-2xl md:text-3xl font-serif tracking-tight">Dashboard</h1>
-        <p class="text-coal-500 text-sm">Ringkasan aktivitas formulir & entri.</p>
+        <p class="text-coal-500 text-sm">Ringkasan aktivitas formulir &amp; entri.</p>
       </div>
       <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
         <a class="px-3 py-2 rounded-lg border border-maroon-600 text-maroon-700 hover:bg-maroon-50/60 transition text-center"
@@ -76,7 +76,7 @@
     </form>
 
     <!-- KPI CARDS -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 mb-4 sm:mb-6">
       <template x-for="card in kpiCards" :key="card.key">
         <div class="p-4 bg-ivory-50 border rounded-2xl shadow-soft">
           <div class="flex items-start justify-between">
@@ -97,7 +97,7 @@
 
     <!-- CHARTS -->
     <div class="grid lg:grid-cols-3 gap-4 sm:gap-6">
-      <!-- Line chart card -->
+      <!-- Line -->
       <div class="bg-ivory-50 border rounded-2xl p-4 lg:col-span-2 shadow-soft min-w-0">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-semibold">Entries — 30 Hari</h2>
@@ -111,7 +111,7 @@
         </div>
       </div>
 
-      <!-- Bar chart card -->
+      <!-- Bar -->
       <div class="bg-ivory-50 border rounded-2xl p-4 shadow-soft min-w-0">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-semibold">Top Forms</h2>
@@ -173,7 +173,7 @@
 @endsection
 
 @push('styles')
-  <!-- Tailwind (CDN) + Old Money Palette -->
+  <!-- Tailwind (CDN) - ganti ke Vite saat production -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -198,212 +198,238 @@
     .nice-scroll::-webkit-scrollbar{height:8px;width:8px}
     .nice-scroll::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
     .nice-scroll::-webkit-scrollbar-track{background:transparent}
-
-    /* --- Penting untuk chart responsif --- */
-    #dash canvas {
-      width: 100% !important;
-      height: 100% !important;
-      display: block;
-    }
+    #dash canvas { width:100% !important; height:100% !important; display:block; }
   </style>
 @endpush
 
 @push('scripts')
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script>
-  function dash(){
-    return {
-      // state (hapus dark mode)
-      loading: true,
-      lastUpdated: '',
-      filters: { department_id:'', form_id:'', date_from:'', date_to:'' },
-      summary: {},
-      entriesByDay: { labels:[], series:[] },
-      top: { labels:[], series:[] },
-      byDept: { rows:[] },
-      chartLine: null,
-      chartBar: null,
-      _ro: null,
-      _onWinResize: null,
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+function dash(){
+  // throttle util
+  const throttle = (fn, ms) => {
+    let t = 0, id;
+    return (...args) => {
+      const now = Date.now();
+      if (now - t >= ms) { t = now; fn(...args); }
+      else { clearTimeout(id); id = setTimeout(() => { t = Date.now(); fn(...args); }, ms - (now - t)); }
+    };
+  };
 
-      kpiCards: [
-        { key:'totalForms',  label:'Total Forms',  icon:'📄' },
-        { key:'activeForms', label:'Active Forms', icon:'✅' },
-        { key:'totalEntries',label:'Total Entries',icon:'🧾' },
-        { key:'uniqueUsers', label:'Unique Users', icon:'👤' },
-      ].map(c => ({...c, icon:`<span class='text-lg'>${c.icon}</span>`})),
+  // HAPUS semua reactivity/proxy Alpine dari nilai yang dikirim ke Chart.js
+  const pure = (v) => {
+    if (Array.isArray(v)) return v.slice();            // shallow copy array
+    if (v && typeof v === 'object') return JSON.parse(JSON.stringify(v)); // deep clone object
+    return v ?? null;
+  };
 
-      exportHref(){
-        const p = new URLSearchParams(this.filters);
-        return `{{ route('admin.entries.export') }}?${p.toString()}`;
-      },
+  return {
+    // state
+    loading: true,
+    lastUpdated: '',
+    filters: { department_id:'', form_id:'', date_from:'', date_to:'' },
 
-      formatNumber(n){
-        if(n===null || n===undefined) return '0';
-        return new Intl.NumberFormat('id-ID').format(n);
-      },
+    summary: {},
+    entriesByDay: { labels:[], series:[] },
+    top: { labels:[], series:[] },
+    byDept: { rows:[] },
 
-      // Palet chart tetap (tanpa adaptasi dark)
-      chartPalette(){
-        const line   = 'rgba(153,26,37,0.95)';  // maroon gelap
-        const fill   = 'rgba(186,32,46,0.10)';  // maroon transparan
-        const bar    = 'rgba(123,30,43,0.85)';  // maroon untuk bar
-        const grid   = 'rgba(58,58,64,0.15)';
-        const ticks  = '#3a3a40';
-        return { line, fill, bar, grid, ticks };
-      },
+    // instance Chart — disimpan sebagai RAW agar tidak di-proxy Alpine
+    chartLine: null,
+    chartBar: null,
 
-      async init(){
-        await this.reloadAll();
-        this.initCharts();
-        this.observeResize();
+    _onWinResize: null,
+    _destroyed: false,
+
+    kpiCards: [
+      { key:'totalForms', label:'Total Forms', icon:'📄' },
+      { key:'activeForms', label:'Active Forms', icon:'✅' },
+      { key:'totalEntries', label:'Total Entries', icon:'🧾' },
+      { key:'uniqueUsers', label:'Unique Users', icon:'👤' },
+      { key:'totalDocuments', label:'Total Documents', icon:'📚' },
+      { key:'totalTemplates', label:'Total Templates', icon:'📑' },
+    ].map(c => ({...c, icon:`<span class='text-lg'>${c.icon}</span>`})),
+
+    exportHref(){
+      const p = new URLSearchParams(this.filters);
+      return `{{ route('admin.entries.export') }}?${p.toString()}`;
+    },
+
+    formatNumber(n){
+      if(n===null || n===undefined) return '0';
+      return new Intl.NumberFormat('id-ID').format(n);
+    },
+
+    chartPalette(){
+      const line = 'rgba(153,26,37,0.95)';
+      const fill = 'rgba(186,32,46,0.10)';
+      const bar  = 'rgba(123,30,43,0.85)';
+      const grid = 'rgba(58,58,64,0.15)';
+      const ticks= '#3a3a40';
+      return { line, fill, bar, grid, ticks };
+    },
+
+    async init(){
+      await this.reloadAll();
+      this.initCharts();
+      this.bindWindowResize();
+      requestAnimationFrame(() => {
+        this.chartLine?.resize();
+        this.chartBar?.resize();
+      });
+      window.addEventListener('beforeunload', () => this.destroy());
+    },
+
+    async reloadAll(){
+      this.loading = true;
+      const p  = new URLSearchParams(this.filters);
+      const el = document.getElementById('dash');
+
+      try{
+        const [sum, ent, top, dept] = await Promise.all([
+          fetch(el.dataset.urlSummary + '?' + p.toString()).then(r=>r.json()),
+          fetch(el.dataset.urlEntries + '?' + p.toString()).then(r=>r.json()),
+          fetch(el.dataset.urlTop     + '?' + p.toString()).then(r=>r.json()),
+          fetch(el.dataset.urlDept    + '?' + p.toString()).then(r=>r.json()),
+        ]);
+
+        // normalisasi: pastikan array selalu ada
+        this.summary      = sum ?? {};
+        this.entriesByDay = { labels: Array.isArray(ent?.labels) ? ent.labels : [], series: Array.isArray(ent?.series) ? ent.series : [] };
+        this.top          = { labels: Array.isArray(top?.labels) ? top.labels : [], series: Array.isArray(top?.series) ? top.series : [] };
+        this.byDept       = { rows: Array.isArray(dept?.rows) ? dept.rows : [] };
+
+        this.lastUpdated = new Date().toLocaleString('id-ID', {hour12:false});
+        this.updateCharts(); // update data chart saja
+
         requestAnimationFrame(() => {
-          this.chartLine && this.chartLine.resize();
-          this.chartBar && this.chartBar.resize();
+          this.chartLine?.resize();
+          this.chartBar?.resize();
         });
-      },
-
-      async reloadAll(){
-        this.loading = true;
-        const p  = new URLSearchParams(this.filters);
-        const el = document.getElementById('dash');
-
-        try{
-          const [sum, ent, top, dept] = await Promise.all([
-            fetch(el.dataset.urlSummary + '?' + p.toString()).then(r=>r.json()),
-            fetch(el.dataset.urlEntries + '?' + p.toString()).then(r=>r.json()),
-            fetch(el.dataset.urlTop     + '?' + p.toString()).then(r=>r.json()),
-            fetch(el.dataset.urlDept    + '?' + p.toString()).then(r=>r.json()),
-          ]);
-
-          this.summary      = sum ?? {};
-          this.entriesByDay = ent ?? {labels:[],series:[]};
-          this.top          = top ?? {labels:[],series:[]};
-          this.byDept       = dept ?? {rows:[]};
-
-          this.lastUpdated = new Date().toLocaleString('id-ID', {hour12:false});
-          this.updateCharts();
-
-          requestAnimationFrame(() => {
-            this.chartLine && this.chartLine.resize();
-            this.chartBar && this.chartBar.resize();
-          });
-        }catch(e){
-          console.error(e);
-        }finally{
-          this.loading = false;
-        }
-      },
-
-      resetFilters(){
-        this.filters = { department_id:'', form_id:'', date_from:'', date_to:'' };
-        this.reloadAll();
-      },
-
-      initCharts(){
-        const pal = this.chartPalette();
-        // Line
-        const ctxL = document.getElementById('chartLine').getContext('2d');
-        this.chartLine = new Chart(ctxL, {
-          type: 'line',
-          data: {
-            labels: this.entriesByDay.labels,
-            datasets: [{
-              label: 'Entries',
-              data: this.entriesByDay.series,
-              fill: true,
-              borderWidth: 2,
-              borderColor: pal.line,
-              backgroundColor: pal.fill,
-              tension: 0.35,
-              pointRadius: 2,
-              pointHoverRadius: 4
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
-            scales: {
-              x: { grid: { color: pal.grid }, ticks:{ color: pal.ticks } },
-              y: { grid: { color: pal.grid }, ticks:{ color: pal.ticks } }
-            }
-          }
-        });
-        // Bar
-        const ctxB = document.getElementById('chartBar').getContext('2d');
-        this.chartBar = new Chart(ctxB, {
-          type: 'bar',
-          data: {
-            labels: this.top.labels,
-            datasets: [{
-              label: 'Entries',
-              data: this.top.series,
-              borderWidth: 0,
-              borderRadius: 8,
-              backgroundColor: pal.bar
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
-            scales: {
-              x: { grid: { display:false }, ticks:{ color: pal.ticks } },
-              y: { grid: { color: pal.grid }, ticks:{ color: pal.ticks } }
-            }
-          }
-        });
-      },
-
-      updateCharts(){
-        if(this.chartLine){
-          const pal = this.chartPalette();
-          this.chartLine.data.labels = this.entriesByDay.labels;
-          this.chartLine.data.datasets[0].data = this.entriesByDay.series;
-          this.chartLine.data.datasets[0].borderColor = pal.line;
-          this.chartLine.data.datasets[0].backgroundColor = pal.fill;
-          this.chartLine.update();
-        }
-        if(this.chartBar){
-          const pal = this.chartPalette();
-          this.chartBar.data.labels = this.top.labels;
-          this.chartBar.data.datasets[0].data = this.top.series;
-          this.chartBar.data.datasets[0].backgroundColor = pal.bar;
-          this.chartBar.update();
-        }
-      },
-
-      observeResize(){
-        const elLineWrap = document.getElementById('chartLine')?.parentElement;
-        const elBarWrap  = document.getElementById('chartBar')?.parentElement;
-        const ro = new ResizeObserver(() => {
-          this.chartLine && this.chartLine.resize();
-          this.chartBar && this.chartBar.resize();
-        });
-        elLineWrap && ro.observe(elLineWrap);
-        elBarWrap  && ro.observe(elBarWrap);
-
-        const onWinResize = () => {
-          requestAnimationFrame(() => {
-            this.chartLine && this.chartLine.resize();
-            this.chartBar && this.chartBar.resize();
-          });
-        };
-        window.addEventListener('resize', onWinResize);
-
-        document.addEventListener('visibilitychange', () => {
-          if (!document.hidden) {
-            this.chartLine && this.chartLine.resize();
-            this.chartBar && this.chartBar.resize();
-          }
-        });
-
-        this._ro = ro;
-        this._onWinResize = onWinResize;
+      }catch(e){
+        console.error(e);
+      }finally{
+        this.loading = false;
       }
-    }
+    },
+
+    resetFilters(){
+      this.filters = { department_id:'', form_id:'', date_from:'', date_to:'' };
+      this.reloadAll();
+    },
+
+    initCharts(){
+      const pal = this.chartPalette();
+
+      const cvLine = document.getElementById('chartLine');
+      const cvBar  = document.getElementById('chartBar');
+
+      // Pastikan tidak ada instance lama
+      Chart.getChart(cvLine)?.destroy();
+      Chart.getChart(cvBar)?.destroy();
+
+      // ===== LINE =====
+      const ctxL = cvLine.getContext('2d');
+      const lineChart = new Chart(ctxL, {
+        type: 'line',
+        data: {
+          labels: pure(this.entriesByDay.labels),      // <-- pakai data murni
+          datasets: [{
+            label: 'Entries',
+            data: pure(this.entriesByDay.series),      // <-- pakai data murni
+            fill: true,
+            borderWidth: 2,
+            borderColor: pal.line,
+            backgroundColor: pal.fill,
+            tension: 0.35,
+            pointRadius: 2,
+            pointHoverRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+          scales: {
+            x: { grid: { color: pal.grid }, ticks:{ color: pal.ticks } },
+            y: { grid: { color: pal.grid }, ticks:{ color: pal.ticks } }
+          }
+        }
+      });
+      this.chartLine = Alpine.raw(lineChart); // jangan diproxy
+
+      // ===== BAR =====
+      const ctxB = cvBar.getContext('2d');
+      const barChart = new Chart(ctxB, {
+        type: 'bar',
+        data: {
+          labels: pure(this.top.labels),               // <-- pakai data murni
+          datasets: [{
+            label: 'Entries',
+            data: pure(this.top.series),               // <-- pakai data murni
+            borderWidth: 0,
+            borderRadius: 8,
+            backgroundColor: pal.bar
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+          scales: {
+            x: { grid: { display:false }, ticks:{ color: pal.ticks } },
+            y: { grid: { color: pal.grid }, ticks:{ color: pal.ticks } }
+          }
+        }
+      });
+      this.chartBar = Alpine.raw(barChart); // jangan diproxy
+    },
+
+    updateCharts(){
+      // Update data — dengan array plain (non-proxy)
+      if (this.chartLine && this.chartLine.data) {
+        const pal = this.chartPalette();
+        this.chartLine.data.labels = pure(this.entriesByDay.labels);
+        this.chartLine.data.datasets[0].data = pure(this.entriesByDay.series);
+        this.chartLine.data.datasets[0].borderColor = pal.line;
+        this.chartLine.data.datasets[0].backgroundColor = pal.fill;
+        this.chartLine.update();
+      }
+      if (this.chartBar && this.chartBar.data) {
+        const pal = this.chartPalette();
+        this.chartBar.data.labels = pure(this.top.labels);
+        this.chartBar.data.datasets[0].data = pure(this.top.series);
+        this.chartBar.data.datasets[0].backgroundColor = pal.bar;
+        this.chartBar.update();
+      }
+    },
+
+    bindWindowResize(){
+      const onWinResize = throttle(() => {
+        this.chartLine?.resize();
+        this.chartBar?.resize();
+      }, 150);
+      window.addEventListener('resize', onWinResize);
+      this._onWinResize = onWinResize;
+
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          this.chartLine?.resize();
+          this.chartBar?.resize();
+        }
+      });
+    },
+
+    destroy(){
+      if (this._destroyed) return;
+      this._destroyed = true;
+      try { this._onWinResize && window.removeEventListener('resize', this._onWinResize); } catch(e){}
+      try { this.chartLine?.destroy(); } catch(e){}
+      try { this.chartBar?.destroy(); } catch(e){}
+    },
   }
-  </script>
+}
+</script>
 @endpush
+

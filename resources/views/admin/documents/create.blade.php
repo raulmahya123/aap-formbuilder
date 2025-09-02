@@ -39,10 +39,12 @@
         <div class="mt-4 rounded-xl border bg-gray-50 p-6 overflow-auto max-h-[75vh] select-none">
           <template x-for="p in preview.pagesCount" :key="'p'+p">
             <div class="mx-auto mb-8 shadow-sm bg-white relative" :style="pageStyle()">
+              {{-- Area margin box --}}
               <div class="absolute inset-0 pointer-events-none">
                 <div class="absolute" :style="marginBoxStyle()"></div>
               </div>
 
+              {{-- Render semua block di page p --}}
               <template x-for="blk in preview.blocks.filter(b => (b.page||1)===p)" :key="blk.id">
                 <div class="absolute ring-1 ring-gray-200 group"
                      :style="blockStyle(blk)"
@@ -54,7 +56,10 @@
                          :style="{ fontSize: (blk.fontSize??12)+'px', textAlign: blk.align||'left' }">
                       <div class="flex items-center gap-2 overflow-hidden">
                         <template x-if="header?.logo?.url">
-                          <img :src="header.logo.url" alt="Logo" class="h-6 w-auto object-contain">
+                          <img :src="resolveSrc(header.logo.url)"
+                               alt="Logo"
+                               class="h-10 w-auto object-contain"
+                               @error="$event.target.src = placeholderImg">
                         </template>
                         <div class="truncate font-medium" x-text="header?.title?.text || blk.text || 'Judul Dokumen'"></div>
                       </div>
@@ -77,8 +82,13 @@
                   <!-- IMAGE -->
                   <template x-if="blk.type==='image'">
                     <div class="w-full h-full flex items-center justify-center bg-white">
-                      <template x-if="blk.src"><img :src="blk.src" class="max-w-full max-h-full object-contain"></template>
-                      <template x-if="!blk.src"><span class="text-xs text-gray-400">[Gambar]</span></template>
+                      <template x-if="blk.src">
+                        <img :src="resolveSrc(blk.src)" class="max-w-full max-h-full object-contain"
+                             @error="$event.target.src = placeholderImg">
+                      </template>
+                      <template x-if="!blk.src">
+                        <span class="text-xs text-gray-400">[Gambar]</span>
+                      </template>
                     </div>
                   </template>
 
@@ -105,7 +115,10 @@
                     <div class="w-full h-full p-2 bg-white/90 rounded">
                       <div class="text-[11px] text-gray-600" x-text="blk.role||'Role'"></div>
                       <div class="mt-1 w-full flex-1 border border-dashed rounded flex items-center justify-center" style="height:38px;">
-                        <template x-if="blk.src"><img :src="blk.src" class="max-h-full object-contain"></template>
+                        <template x-if="blk.src">
+                          <img :src="resolveSrc(blk.src)" class="max-h-full object-contain"
+                               @error="$event.target.src = placeholderImg">
+                        </template>
                         <template x-if="!blk.src && blk.signatureText"><span class="italic" x-text="blk.signatureText"></span></template>
                         <template x-if="!blk.src && !blk.signatureText"><span class="text-[10px] text-gray-400">TTD</span></template>
                       </div>
@@ -116,7 +129,7 @@
                     </div>
                   </template>
 
-                  <!-- HANDLES -->
+                  <!-- HANDLES (drag/resize) -->
                   <template x-if="blk.origin==='section'">
                     <div class="absolute -bottom-1 -right-1 w-3 h-3 border border-gray-400 bg-white rounded-sm cursor-se-resize opacity-90"
                          @mousedown.stop="onResizeMouseDown($event, blk, 'br')"></div>
@@ -153,7 +166,15 @@
             <input name="title" class="mt-1 w-full border rounded-lg px-3 py-2" required>
           </div>
 
-          {{-- >>> DIBUAT 3 KOLOM: Dept, Doc Type, Project Code --}}
+          {{-- Info kecil untuk uji logo (opsional) --}}
+          <div>
+            <label class="text-sm font-medium">Logo URL (opsional)</label>
+            <input x-model="header.logo.url" class="mt-1 w-full border rounded-lg px-3 py-2"
+                   placeholder="/storage/logos/foo.png atau https://...">
+            <p class="text-xs text-gray-500 mt-1">Pastikan file bisa diakses publik. Jalankan <code>php artisan storage:link</code> jika perlu.</p>
+          </div>
+
+          {{-- 3 kolom --}}
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <label class="text-sm font-medium">Dept Code</label>
@@ -281,6 +302,7 @@
 <script>
 function docBuilder(){
   return {
+    // --- Konfigurasi utama ---
     header:     { logo:{url:'',position:'left'}, title:{align:'center', text:''} },
     footer:     { text:'', show_page_number:true },
     signatures: { rows:[], columns:4, mode:'grid' },
@@ -298,6 +320,21 @@ function docBuilder(){
 
     drag: { active:false, mode:null, handle:null, blk:null, startX:0, startY:0, startTop:0, startLeft:0, startWidth:0, startHeight:0 },
 
+    // --- Asset base URL & placeholder ---
+    baseUrl: @json(asset('')), // contoh "http://localhost:8000/"
+    placeholderImg: @json(asset('assets/images/placeholder-logo.png')),
+
+    resolveSrc(path){
+      if (!path) return '';
+      if (/^(https?:)?\/\//i.test(path) || path.startsWith('data:')) return path; // absolute / data
+      // jika path sudah mulai dengan /, gabungkan dengan origin
+      if (path.startsWith('/')) return this.baseUrl.replace(/\/+$/,'') + path;
+      // jika tidak mengandung storage/, default prepend /storage/
+      const p = path.includes('storage/') ? path : ('/storage/' + path.replace(/^\/+/, ''));
+      return this.baseUrl.replace(/\/+$/,'') + p;
+    },
+
+    // --- Lifecycle ---
     init(){
       try {
         const el = document.querySelector('#doc-templates-json');
@@ -305,7 +342,10 @@ function docBuilder(){
       } catch(e){ console.error('Invalid templates JSON', e); }
 
       if (!this.preview.blocks.length) {
-        this.preview.blocks = [{ id:'dummy', type:'text', text:'Preview Dokumen', top:120, left:120, width:420, height:42, fontSize:16, bold:true, z:10, page:1, origin:'template', repeatEachPage:false }];
+        this.preview.blocks = [{
+          id:'dummy', type:'text', text:'Preview Dokumen', top:120, left:120,
+          width:420, height:42, fontSize:16, bold:true, z:10, page:1, origin:'template', repeatEachPage:false
+        }];
       }
 
       this.$watch('selectedTemplateId', (val) => {
@@ -319,6 +359,7 @@ function docBuilder(){
       this.refreshBlocks();
     },
 
+    // --- Zoom & Style ---
     zoomIn(){ this.preview.zoom = Math.min(2, this.preview.zoom + 0.1); },
     zoomOut(){ this.preview.zoom = Math.max(0.6, this.preview.zoom - 0.1); },
 
@@ -350,10 +391,14 @@ function docBuilder(){
       };
     },
 
+    // --- Template controls ---
     resetPreview(){
       this.preview.layout = { page:{width:794, height:1123}, margins:{top:40,right:35,bottom:40,left:35}, font:{size:12} };
       this.preview.zoom = 1.1;
-      this.preview.blocks = [{ id:'dummy', type:'text', text:'Preview Dokumen', top:120, left:120, width:420, height:42, fontSize:16, bold:true, z:10, page:1, origin:'template', repeatEachPage:false }];
+      this.preview.blocks = [{
+        id:'dummy', type:'text', text:'Preview Dokumen', top:120, left:120,
+        width:420, height:42, fontSize:16, bold:true, z:10, page:1, origin:'template', repeatEachPage:false
+      }];
       this.header = { logo:{url:'',position:'left'}, title:{align:'center', text:''} };
       this.footer = { text:'', show_page_number:true };
       this.signatures = { rows:[], columns:4, mode:'grid' };
@@ -386,6 +431,7 @@ function docBuilder(){
         return out;
       });
 
+      // Inject header/footer default jika template tidak menyediakannya
       const hasHeader = this.preview.blocks.some(b => b.type==='header' && b.page===1);
       if (!hasHeader) {
         const L = this.preview.layout;
@@ -428,6 +474,7 @@ function docBuilder(){
       this.rebuildRepeatingBlocksAcrossPages();
     },
 
+    // --- Blocks rebuild ---
     refreshBlocks(){
       const L = this.preview.layout;
       const contentTop = L.margins.top, contentLeft = L.margins.left;
@@ -487,6 +534,7 @@ function docBuilder(){
       this.preview.pagesCount = Math.max(maxPage, 1);
     },
 
+    // --- Sections ops ---
     addSection(){
       this.sections.push({
         key: 'sec_'+Date.now(),
@@ -508,6 +556,7 @@ function docBuilder(){
       this.refreshBlocks();
     },
 
+    // --- Drag/Resize handlers ---
     onBlockMouseDown(e, blk){
       this.drag.active = true; this.drag.mode = 'move'; this.drag.handle = null; this.drag.blk = blk;
       this.drag.startX = e.clientX; this.drag.startY = e.clientY;
@@ -576,7 +625,7 @@ function docBuilder(){
       if (!opts.silent) this.refreshBlocks();
     },
 
-    // Repeating template helpers
+    // --- Repeating template helpers ---
     repeatable(b){
       const t = (b.type||'').toLowerCase();
       const isHFS = (t==='header'||t==='footer'||t==='signature');

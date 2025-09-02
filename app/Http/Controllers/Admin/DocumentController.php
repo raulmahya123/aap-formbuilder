@@ -12,6 +12,7 @@ use App\Models\{
 };
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage; // <-- TAMBAH
 use Illuminate\Support\Str;
 
 class DocumentController extends Controller
@@ -83,7 +84,7 @@ class DocumentController extends Controller
             ['key' => 'ruang_lingkup',        'label' => 'Ruang Lingkup',         'html' => ''],
             ['key' => 'referensi',            'label' => 'Referensi',             'html' => ''],
             ['key' => 'definisi',             'label' => 'Definisi',              'html' => ''],
-            ['key' => 'tugas_tanggungjawab',  'label' => 'Tugas & Tanggung Jawab', 'html' => ''],
+            ['key' => 'tugas_tanggungjawab',  'label' => 'Tugas & Tanggung Jawab','html' => ''],
             ['key' => 'rincian_prosedur',     'label' => 'Rincian Prosedur',      'html' => ''],
             ['key' => 'alur_prosedur',        'label' => 'Alur Prosedur',         'html' => ''],
             ['key' => 'sanksi',               'label' => 'Sanksi',                'html' => ''],
@@ -120,6 +121,10 @@ class DocumentController extends Controller
             'footer_config'     => ['nullable'],
             'signature_config'  => ['nullable'],
             'sections'          => ['nullable'],
+
+            // opsional create QR/Barcode text
+            'qr_text'           => ['nullable','string','max:500'],
+            'barcode_text'      => ['nullable','string','max:500'],
         ]);
 
         // Decode JSON string → array
@@ -136,6 +141,9 @@ class DocumentController extends Controller
             // Tetapkan default layout walau tanpa template
             $data['layout_config'] = $data['layout_config'] ?? self::DEFAULT_LAYOUT;
         }
+
+        // >>> Normalisasi path gambar ke URL storage (logo/signature/section images)
+        $this->normalizeConfigsForStorage($data);
 
         // Auto nomor
         $dept = strtoupper($data['dept_code'] ?? 'GEN');
@@ -158,9 +166,11 @@ class DocumentController extends Controller
             ]);
         }
 
+        // >>> Simpan snapshot ke storage (public/documents/{id}/meta.json)
+        $this->writeSnapshotToStorage($doc);
+
         return redirect()->route('admin.documents.edit', $doc)->with('success', 'Dokumen dibuat');
     }
-
 
     public function show(Document $document)
     {
@@ -195,14 +205,12 @@ class DocumentController extends Controller
         ]);
 
         return view('admin.documents.edit', [
-            'document'        => $document,
-            'templates'       => $templates,
+            'document'         => $document,
+            'templates'        => $templates,
             'templatesPayload' => $templatesPayload,
-            'departments'     => $departments,
+            'departments'      => $departments,
         ]);
     }
-
-    // app/Http/Controllers/Admin/DocumentController.php
 
     public function update(Request $r, Document $document)
     {
@@ -231,8 +239,6 @@ class DocumentController extends Controller
             // opsional
             'qr_text'           => ['nullable', 'string', 'max:500'],
             'barcode_text'      => ['nullable', 'string', 'max:500'],
-
-            // NOTE: abaikan revision_no dari form (jika ada), kita yang atur sendiri.
         ]);
 
         $decode = function ($v) {
@@ -267,28 +273,18 @@ class DocumentController extends Controller
             'barcode_text'      => $data['barcode_text']      ?? null,
         ];
 
+        // >>> Normalisasi path gambar ke URL storage
+        $this->normalizeConfigsForStorage($updates);
+
         // Isi model dengan perubahan
         $document->fill($updates);
 
         // Cek apakah ada field "konten" yang berubah
         $fieldsYangDicek = [
-            'template_id',
-            'title',
-            'dept_code',
-            'doc_type',
-            'project_code',
-            'effective_date',
-            'class',
-            'controlled_status',
-            'department_id',
-            'doc_no',
-            'layout_config',
-            'header_config',
-            'footer_config',
-            'signature_config',
-            'sections',
-            'qr_text',
-            'barcode_text',
+            'template_id','title','dept_code','doc_type','project_code','effective_date','class',
+            'controlled_status','department_id','doc_no',
+            'layout_config','header_config','footer_config','signature_config','sections',
+            'qr_text','barcode_text',
         ];
         $adaPerubahan = $document->isDirty($fieldsYangDicek);
 
@@ -299,13 +295,14 @@ class DocumentController extends Controller
 
         $document->save();
 
+        // >>> Perbarui snapshot storage
+        $this->writeSnapshotToStorage($document);
+
         // Setelah update → balik ke index + flash message
         return redirect()
             ->route('admin.documents.index')
             ->with('ok', 'Dokumen berhasil diperbarui (Rev ' . $document->revision_no . ').');
     }
-
-
 
     public function destroy(Document $document)
     {
@@ -399,13 +396,13 @@ class DocumentController extends Controller
         $layout = array_replace_recursive(self::DEFAULT_LAYOUT, $layout ?? []);
 
         return [
-            'id'        => $t->id,
-            'name'      => $t->name,
-            'layout'    => $layout,
-            'blocks'    => $blocks,
-            'header'    => $header,
-            'footer'    => $footer,
-            'signature' => $signature,
+            'id'         => $t->id,
+            'name'       => $t->name,
+            'layout'     => $layout,
+            'blocks'     => $blocks,
+            'header'     => $header,
+            'footer'     => $footer,
+            'signature'  => $signature,
             'updated_at' => optional($t->updated_at)->toIso8601String(),
         ];
     }
@@ -421,6 +418,7 @@ class DocumentController extends Controller
         }
         return [];
     }
+
     /** Tarik default dari template untuk field yang kosong / tidak dikirim */
     private function hydrateFromTemplate(?DocumentTemplate $t, array $data): array
     {
@@ -439,13 +437,113 @@ class DocumentController extends Controller
         $data['footer_config']    = $data['footer_config']    ?? $footer;
         $data['signature_config'] = $data['signature_config'] ?? $signature;
 
-        // Normalisasi sections: jika kosong, bisa pakai blok/konvensi default
+        // Normalisasi sections
         if (!isset($data['sections']) || empty($data['sections'])) {
-            // Jika template punya blocks dengan default sections, boleh mapping di sini.
-            // Untuk sekarang biarkan null → editor isi sendiri.
             $data['sections'] = null;
         }
 
         return $data;
+    }
+
+    /** =========================
+     * Tambahan helper “masuk ke storage”
+     * ========================= */
+
+    /**
+     * Normalisasi semua path gambar ke URL storage publik:
+     * - header.logo.url
+     * - signature_config.rows[*].image_path
+     * - sections[*] jika ada type image (opsional)
+     *
+     * Juga handle path relatif: "logos/foo.png" → "/storage/logos/foo.png"
+     * Catatan: diasumsikan file sudah ada di disk "public".
+     */
+    private function normalizeConfigsForStorage(array &$data): void
+    {
+        // Header logo
+        if (!empty($data['header_config']['logo']['url'])) {
+            $data['header_config']['logo']['url'] = $this->normalizePathToUrl($data['header_config']['logo']['url']);
+        }
+
+        // Signatures
+        if (!empty($data['signature_config']['rows']) && is_array($data['signature_config']['rows'])) {
+            foreach ($data['signature_config']['rows'] as $i => $row) {
+                if (!empty($row['image_path'])) {
+                    $data['signature_config']['rows'][$i]['image_path'] = $this->normalizePathToUrl($row['image_path']);
+                }
+            }
+        }
+
+        // Sections: kalau ada blok image di HTML/konfig khusus, bisa kamu extend di sini
+        if (!empty($data['sections']) && is_array($data['sections'])) {
+            foreach ($data['sections'] as $idx => $s) {
+                // contoh jika kamu menambah type 'image' di sections (opsional)
+                if (($s['type'] ?? '') === 'image' && !empty($s['src'])) {
+                    $data['sections'][$idx]['src'] = $this->normalizePathToUrl($s['src']);
+                }
+                // kalau HTML berisi <img src="..."> kamu bisa parse & rewrite, tapi itu advanced (abaikan dulu).
+            }
+        }
+    }
+
+    /** Ubah relatif path → URL publik berbasis disk 'public' (via Storage::url) */
+    private function normalizePathToUrl(string $path): string
+    {
+        $path = trim($path);
+
+        // Sudah URL absolut atau data URI
+        if (preg_match('~^(https?:)?//~i', $path) || str_starts_with($path, 'data:')) {
+            return $path;
+        }
+
+        // Sudah /storage/... -> biarkan
+        if (str_starts_with($path, '/storage/')) {
+            return $path;
+        }
+
+        // Jika user kirim "storage/foo.png" tanpa leading slash
+        if (str_starts_with($path, 'storage/')) {
+            return '/'.$path;
+        }
+
+        // Anggap relatif ke root folder publik disk: public/<path>
+        // -> simpan sebagai URL /storage/<path>
+        return Storage::url(ltrim($path, '/')); // contoh: "logos/foo.png" => "/storage/logos/foo.png"
+    }
+
+    /**
+     * Tulis snapshot meta dokumen ke storage:
+     *  - public/documents/{id}/meta.json
+     */
+    private function writeSnapshotToStorage(Document $doc): void
+    {
+        $payload = [
+            'id'               => $doc->id,
+            'doc_no'           => $doc->doc_no,
+            'title'            => $doc->title,
+            'dept_code'        => $doc->dept_code,
+            'doc_type'         => $doc->doc_type,
+            'project_code'     => $doc->project_code,
+            'revision_no'      => $doc->revision_no,
+            'effective_date'   => optional($doc->effective_date)->toDateString(),
+            'controlled_status'=> $doc->controlled_status,
+            'class'            => $doc->class,
+            'department_id'    => $doc->department_id,
+            'owner_id'         => $doc->owner_id,
+            'layout_config'    => $doc->layout_config,
+            'header_config'    => $doc->header_config,
+            'footer_config'    => $doc->footer_config,
+            'signature_config' => $doc->signature_config,
+            'sections'         => $doc->sections,
+            'qr_text'          => $doc->qr_text,
+            'barcode_text'     => $doc->barcode_text,
+            'updated_at'       => $doc->updated_at?->toIso8601String(),
+            'created_at'       => $doc->created_at?->toIso8601String(),
+        ];
+
+        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        $path = "documents/{$doc->id}/meta.json";
+        Storage::disk('public')->put($path, $json);
+        // hasil URL bisa diakses di: Storage::url($path) => "/storage/documents/{id}/meta.json"
     }
 }

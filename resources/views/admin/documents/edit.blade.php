@@ -73,7 +73,10 @@
                          :style="{ fontSize: (blk.fontSize??12)+'px', textAlign: blk.align||'left' }">
                       <div class="flex items-center gap-2 overflow-hidden">
                         <template x-if="header?.logo?.url">
-                          <img :src="header.logo.url" alt="Logo" class="h-6 w-auto object-contain">
+                          <img :src="resolveSrc(header.logo.url)"
+                               alt="Logo"
+                               class="h-10 w-auto object-contain"
+                               @error="$event.target.src = placeholderImg">
                         </template>
                         <div class="truncate font-medium" x-text="header?.title?.text || blk.text || 'Judul Dokumen'"></div>
                       </div>
@@ -99,7 +102,11 @@
                   {{-- IMAGE --}}
                   <template x-if="blk.type==='image'">
                     <div class="w-full h-full flex items-center justify-center bg-white">
-                      <template x-if="blk.src"><img :src="blk.src" class="max-w-full max-h-full object-contain"></template>
+                      <template x-if="blk.src">
+                        <img :src="resolveSrc(blk.src)"
+                             class="max-w-full max-h-full object-contain"
+                             @error="$event.target.src = placeholderImg">
+                      </template>
                       <template x-if="!blk.src"><span class="text-xs text-gray-400">[Gambar]</span></template>
                     </div>
                   </template>
@@ -127,7 +134,10 @@
                     <div class="w-full h-full p-2 bg-white/90 rounded">
                       <div class="text-[11px] text-gray-600" x-text="blk.role||'Role'"></div>
                       <div class="mt-1 w-full flex-1 border border-dashed rounded flex items-center justify-center" style="height:38px;">
-                        <template x-if="blk.src"><img :src="blk.src" class="max-h-full object-contain"></template>
+                        <template x-if="blk.src">
+                          <img :src="resolveSrc(blk.src)" class="max-h-full object-contain"
+                               @error="$event.target.src = placeholderImg">
+                        </template>
                         <template x-if="!blk.src && blk.signatureText"><span class="italic" x-text="blk.signatureText"></span></template>
                         <template x-if="!blk.src && !blk.signatureText"><span class="text-[10px] text-gray-400">TTD</span></template>
                       </div>
@@ -175,6 +185,13 @@
           <div>
             <label class="text-sm font-medium">Judul</label>
             <input name="title" value="{{ old('title',$document->title) }}" class="mt-1 w-full border rounded-lg px-3 py-2" required>
+          </div>
+
+          {{-- (Opsional) Input cepat Logo URL untuk uji tampil --}}
+          <div>
+            <label class="text-sm font-medium">Logo URL (opsional)</label>
+            <input x-model="header.logo.url" class="mt-1 w-full border rounded-lg px-3 py-2"
+                   placeholder="/storage/logos/foo.png atau https://...">
           </div>
 
           {{-- Dept / Type / Project --}}
@@ -334,10 +351,10 @@
           @if($document->qr_image_path || $document->barcode_image_path)
           <div class="flex gap-6 mt-3">
             @if($document->qr_image_path)
-              <div><img src="{{ $document->qr_image_path }}" class="h-28"><div class="text-xs mt-1">QR Sekarang</div></div>
+              <div><img src="{{ $document->qr_image_path }}" class="h-28" alt="QR Saat Ini"><div class="text-xs mt-1">QR Sekarang</div></div>
             @endif
             @if($document->barcode_image_path)
-              <div><img src="{{ $document->barcode_image_path }}" class="h-20"><div class="text-xs mt-1">Barcode Sekarang</div></div>
+              <div><img src="{{ $document->barcode_image_path }}" class="h-20" alt="Barcode Saat Ini"><div class="text-xs mt-1">Barcode Sekarang</div></div>
             @endif
           </div>
           @endif
@@ -403,6 +420,18 @@ function docBuilder(){
     // Drag/resize
     drag: { active:false, mode:null, handle:null, blk:null, startX:0, startY:0, startTop:0, startLeft:0, startWidth:0, startHeight:0 },
 
+    // BASE URL & PLACEHOLDER untuk normalisasi gambar
+    baseUrl: @json(asset('')),
+    placeholderImg: @json(asset('assets/images/placeholder-logo.png')),
+    resolveSrc(path){
+      if (!path) return '';
+      if (/^(https?:)?\/\//i.test(path) || path.startsWith('data:')) return path; // absolute / data URI
+      if (path.startsWith('/')) return this.baseUrl.replace(/\/+$/,'') + path;
+      // default prepend ke /storage/ kalau bukan absolut dan tidak ada 'storage/'
+      const p = path.includes('storage/') ? path : ('/storage/' + path.replace(/^\/+/, ''));
+      return this.baseUrl.replace(/\/+$/,'') + p;
+    },
+
     init(){
       // Read JSON
       try { this.templates = JSON.parse(document.querySelector('#doc-templates-json')?.textContent || '[]'); } catch(e){}
@@ -419,7 +448,10 @@ function docBuilder(){
 
       // Seed blocks (dummy)
       if (!this.preview.blocks.length) {
-        this.preview.blocks = [{ id:'dummy', type:'text', text:'Preview Dokumen', top:120, left:120, width:420, height:42, fontSize:16, bold:true, z:10, page:1, origin:'template', repeatEachPage:false }];
+        this.preview.blocks = [{
+          id:'dummy', type:'text', text:'Preview Dokumen', top:120, left:120,
+          width:420, height:42, fontSize:16, bold:true, z:10, page:1, origin:'template', repeatEachPage:false
+        }];
       }
 
       // Template watcher
@@ -476,7 +508,10 @@ function docBuilder(){
     resetPreview(){
       this.preview.layout = { page:{width:794, height:1123}, margins:{top:40,right:35,bottom:40,left:35}, font:{size:12} };
       this.preview.zoom = 1.1;
-      this.preview.blocks = [{ id:'dummy', type:'text', text:'Preview Dokumen', top:120, left:120, width:420, height:42, fontSize:16, bold:true, z:10, page:1, origin:'template', repeatEachPage:false }];
+      this.preview.blocks = [{
+        id:'dummy', type:'text', text:'Preview Dokumen', top:120, left:120,
+        width:420, height:42, fontSize:16, bold:true, z:10, page:1, origin:'template', repeatEachPage:false
+      }];
       this.preview.pagesCount = 1;
       this.refreshBlocks();
     },
