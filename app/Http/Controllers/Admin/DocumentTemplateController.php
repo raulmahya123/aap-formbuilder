@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DocumentTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentTemplateController extends Controller
 {
@@ -30,6 +31,7 @@ class DocumentTemplateController extends Controller
     {
         $data = $r->validate([
             'name'              => ['required', 'string', 'max:150'],
+            'photo_path'        => ['nullable', 'image', 'max:2048'], // ← foto template
             'blocks_config'     => ['nullable'],
             'layout_config'     => ['nullable'],
             'header_config'     => ['nullable'],
@@ -37,8 +39,15 @@ class DocumentTemplateController extends Controller
             'signature_config'  => ['nullable'],
         ]);
 
+        // Upload foto jika ada
+        if ($r->hasFile('photo_path')) {
+            $path = $r->file('photo_path')->store('templates/photos', 'public');
+            $data['photo_path'] = $path; // simpan PATH (bukan URL)
+        }
+
         $payload = [
             'name'              => $data['name'],
+            'photo_path'        => $data['photo_path'] ?? null,
             'blocks_config'     => $this->normalizeJson($data['blocks_config']  ?? null, []),
             // Pakai DEFAULT_LAYOUT sebagai default
             'layout_config'     => $this->normalizeJson($data['layout_config']  ?? null, self::DEFAULT_LAYOUT),
@@ -61,6 +70,7 @@ class DocumentTemplateController extends Controller
     {
         $data = $r->validate([
             'name'              => ['required', 'string', 'max:150'],
+            'photo_path'        => ['nullable', 'image', 'max:2048'], // ← foto template
             'blocks_config'     => ['nullable'],
             'layout_config'     => ['nullable'],
             'header_config'     => ['nullable'],
@@ -70,6 +80,16 @@ class DocumentTemplateController extends Controller
 
         $payload = ['name' => $data['name']];
 
+        // Replace foto jika upload baru
+        if ($r->hasFile('photo_path')) {
+            if ($template->photo_path) {
+                Storage::disk('public')->delete($template->photo_path);
+            }
+            $path = $r->file('photo_path')->store('templates/photos', 'public');
+            $payload['photo_path'] = $path; // simpan PATH (bukan URL)
+        }
+
+        // Update konfigurasi (opsional jika dikirim)
         foreach (['blocks_config', 'layout_config', 'header_config', 'footer_config', 'signature_config'] as $k) {
             if ($r->has($k)) {
                 $default = $k === 'layout_config' ? self::DEFAULT_LAYOUT : [];
@@ -84,6 +104,11 @@ class DocumentTemplateController extends Controller
 
     public function destroy(DocumentTemplate $template)
     {
+        // Hapus file foto jika ada
+        if ($template->photo_path) {
+            Storage::disk('public')->delete($template->photo_path);
+        }
+
         $template->delete();
         return redirect()->route('admin.document_templates.index')->with('success', 'Template dihapus');
     }

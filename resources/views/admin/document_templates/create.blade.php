@@ -33,6 +33,36 @@
       @error('name') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
     </div>
 
+    {{-- INPUT: Foto Template (photo_path) --}}
+    <div class="px-4 pt-3">
+      <label class="block text-sm font-medium text-[#1D1C1A]">Foto Template (opsional)</label>
+      <div class="mt-2 flex items-center gap-3">
+        <input type="file"
+               name="photo_path"
+               x-ref="photoInput"
+               accept="image/*"
+               @change="onPhotoChange($event)"
+               class="block text-sm">
+        <template x-if="photo.url">
+          <img :src="photo.url" alt="Preview" class="h-16 w-auto rounded border">
+        </template>
+        <button type="button"
+                class="px-3 py-1.5 rounded border text-sm"
+                @click="clearPhoto()"
+                x-show="photo.url"
+                x-cloak>Hapus</button>
+        <button type="button"
+                class="px-3 py-1.5 rounded border text-sm"
+                @click="addPhotoToCanvas()"
+                x-show="photo.url"
+                x-cloak>Tampilkan di Kanvas</button>
+      </div>
+      <p class="text-xs text-gray-500 mt-1">
+        Gambar ini disimpan ke field <code>photo_path</code> pada template dan bisa dipakai sebagai logo default saat membuat dokumen dari template ini.
+      </p>
+      @error('photo_path') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
+    </div>
+
     {{-- HIDDEN JSONS (diset via x-ref sebelum submit) --}}
     <input type="hidden" name="blocks_config"     x-ref="blocksInput">
     <input type="hidden" name="layout_config"     x-ref="layoutInput">
@@ -345,6 +375,9 @@ function docDesigner(){
     resizing: { active:false, id:null, startW:0, startH:0, startX:0, startY:0 },
     snap: { enabled:true, grid:8 },
 
+    // preview foto template (photo_path)
+    photo: { url: '' },
+
     // legacy payload (string JSON)
     legacy: { header:'{}', footer:'{}', signature:'{}' },
 
@@ -389,6 +422,15 @@ function docDesigner(){
         this.layout.page.width - this.layout.margins.left - this.layout.margins.right,
         36, true, 'left', 11)); },
     addSignature(){ this.blocks.push(this.mkSignature('Signer','', '', this.layout.page.height - 260, this.layout.margins.left + 60, 160, 70)); },
+
+    // foto template (preview + ke kanvas)
+    onPhotoChange(e){ const f=e.target.files?.[0]; if(!f){ this.photo.url=''; return; } this.photo.url=URL.createObjectURL(f); },
+    clearPhoto(){ this.photo.url=''; if(this.$refs.photoInput) this.$refs.photoInput.value=null; },
+    addPhotoToCanvas(){
+      if(!this.photo.url) return;
+      // Tambahkan blok image di dekat margin kiri-atas
+      this.blocks.push(this.mkImage(this.photo.url, this.layout.margins.top + 4, this.layout.margins.left, 120, 48));
+    },
 
     // select
     get selected(){ return this.blocks.find(b=>b.id===this.selectedId) || null; },

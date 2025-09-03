@@ -11,21 +11,15 @@ return new class extends Migration {
             $t->id();
             $t->string('name'); // SOP, IK, ST, dll
 
-            // Pilih SALAH SATU: JSON (jika MariaDB/MySQL mendukung) ATAU longText
+            // Tambahan untuk foto/logo template
+            $t->string('photo_path')->nullable(); // simpan path file (storage/app/public/...)
 
-            // --- Opsi A: JSON (MySQL 5.7+/MariaDB 10.2+ biasanya ok)
+            // Konfigurasi JSON
             $t->json('blocks_config')->nullable();
             $t->json('layout_config')->nullable();
             $t->json('header_config')->nullable();
             $t->json('footer_config')->nullable();
             $t->json('signature_config')->nullable();
-
-            // --- Opsi B: Kalau JSON bermasalah, comment Opsi A lalu pakai ini:
-            // $t->longText('blocks_config')->nullable();
-            // $t->longText('layout_config')->nullable();
-            // $t->longText('header_config')->nullable();
-            // $t->longText('footer_config')->nullable();
-            // $t->longText('signature_config')->nullable();
 
             $t->timestamps();
         });

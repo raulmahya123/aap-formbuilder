@@ -15,14 +15,20 @@
   $footer     = is_array($template->footer_config)    ? $template->footer_config    : (json_decode($template->footer_config   ?? '[]', true) ?: []);
   $signature  = is_array($template->signature_config) ? $template->signature_config : (json_decode($template->signature_config?? '[]', true) ?: []);
 
-  // Siapkan payload ops untuk Alpine (AMAN karena @js)
+  // URL foto saat ini (butuh accessor photo_url di model; fallback asset())
+  $photoUrl = method_exists($template, 'getPhotoUrlAttribute')
+    ? ($template->photo_url ?? null)
+    : ($template->photo_path ? asset('storage/'.$template->photo_path) : null);
+
+  // Payload ops untuk Alpine
   $opts = [
-    'initialName'      => old('name', $template->name),
-    'initialBlocks'    => $blocks,
-    'initialLayout'    => $layout,
-    'initialHeader'    => $header,
-    'initialFooter'    => $footer,
-    'initialSignature' => $signature,
+    'initialName'       => old('name', $template->name),
+    'initialBlocks'     => $blocks,
+    'initialLayout'     => $layout,
+    'initialHeader'     => $header,
+    'initialFooter'     => $footer,
+    'initialSignature'  => $signature,
+    'initialPhotoUrl'   => $photoUrl, // ← tambahkan untuk preview foto
   ];
 @endphp
 
@@ -54,6 +60,36 @@
              placeholder="Nama Template"
              x-model="name">
       @error('name')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
+    </div>
+
+    {{-- INPUT: Foto Template (photo_path) --}}
+    <div class="px-4 pt-3">
+      <label class="block text-sm font-medium text-[#1D1C1A]">Foto Template (opsional)</label>
+      <div class="mt-2 flex items-center gap-3">
+        <input type="file"
+               name="photo_path"
+               accept="image/*"
+               x-ref="photoInput"
+               @change="onPhotoChange($event)"
+               class="block text-sm">
+        <template x-if="photo.url">
+          <img :src="photo.url" alt="Preview" class="h-16 w-auto rounded border">
+        </template>
+        <button type="button"
+                class="px-3 py-1.5 rounded border text-sm"
+                @click="clearPhoto()"
+                x-show="photo.url"
+                x-cloak>Hapus</button>
+        <button type="button"
+                class="px-3 py-1.5 rounded border text-sm"
+                @click="addPhotoToCanvas()"
+                x-show="photo.url"
+                x-cloak>Tampilkan di Kanvas</button>
+      </div>
+      <p class="text-xs text-gray-500 mt-1">
+        Jika memilih file baru, foto lama akan diganti saat simpan. Tombol “Hapus” di atas hanya membersihkan preview lokal (tidak menghapus di server).
+      </p>
+      @error('photo_path')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
     </div>
 
     {{-- HIDDEN JSONS --}}
@@ -387,13 +423,25 @@ function docDesigner(opts = {}){
     resizing:{active:false,id:null,startW:0,startH:0,startX:0,startY:0},
     snap:{enabled:true,grid:8},
     pad:{open:false,id:null,ctx:null,drawing:false,stroke:3,last:{x:0,y:0}},
-    _initial:{ name: opts.initialName || '', layout: deepMerge(DEFAULT_LAYOUT, initialLayout), blocks: initialBlocks.slice(), header: initialHeader, footer: initialFooter, signature: initialSignature },
+
+    // preview foto template
+    photo: { url: opts.initialPhotoUrl || '' },
+
+    _initial:{
+      name: opts.initialName || '',
+      layout: deepMerge(DEFAULT_LAYOUT, initialLayout),
+      blocks: initialBlocks.slice(),
+      header: initialHeader,
+      footer: initialFooter,
+      signature: initialSignature,
+      photoUrl: opts.initialPhotoUrl || '',
+    },
 
     // INIT
     init(){
-      // Jika tidak ada blocks tapi ada legacy, impor
+      // Import dari legacy bila tidak ada blocks
       if (!this.blocks.length) this.importFromLegacy({header:initialHeader, footer:initialFooter, signature:initialSignature});
-      // Kalau tetap kosong, seed default
+      // Seed default jika tetap kosong
       if (!this.blocks.length){
         this.blocks = [
           this.mkText('Judul Dokumen',  this.layout.margins.top + 8,  this.layout.margins.left + 160, 400, 40, 'center', true, 18),
@@ -448,6 +496,11 @@ function docDesigner(opts = {}){
     addFooter(){ this.blocks.push(this.mkFooter('© Perusahaan 2025', this.layout.page.height-this.layout.margins.bottom-36, this.layout.margins.left, this.layout.page.width-this.layout.margins.left-this.layout.margins.right, 36, true, 'left', 11)); },
     addSignature(){ this.blocks.push(this.mkSignature('Signer','', '', this.layout.page.height-260, this.layout.margins.left+60, 160, 70)); },
 
+    // Foto template (preview + ke kanvas)
+    onPhotoChange(e){ const f=e.target.files?.[0]; if(!f){ this.photo.url=this._initial.photoUrl || ''; return; } this.photo.url=URL.createObjectURL(f); },
+    clearPhoto(){ this.photo.url=this._initial.photoUrl || ''; if(this.$refs.photoInput) this.$refs.photoInput.value=null; },
+    addPhotoToCanvas(){ if(!this.photo.url) return; this.blocks.push(this.mkImage(this.photo.url, this.layout.margins.top + 4, this.layout.margins.left, 120, 48)); },
+
     // Select / Drag / Resize
     get selected(){ return this.blocks.find(b=>b.id===this.selectedId)||null; },
     select(id){ this.selectedId=id; },
@@ -475,33 +528,12 @@ function docDesigner(opts = {}){
     pointerUp(){ this.moving.active=false; this.moving.id=null; this.resizing.active=false; this.resizing.id=null; },
     startResize(blk,evt){ this.select(blk.id); this.resizing.active=true; this.resizing.id=blk.id; this.resizing.startW=blk.width; this.resizing.startH=blk.height; this.resizing.startX=evt.clientX; this.resizing.startY=evt.clientY; },
 
-    // PAD
-    openPad(id){
-      this.pad.open=true; this.pad.id=id;
-      if(this.$refs.sigCanvas){
-        this.$refs.sigCanvas.onmousedown=this.$refs.sigCanvas.onmousemove=this.$refs.sigCanvas.onmouseup=this.$refs.sigCanvas.onmouseleave=null;
-        this.$refs.sigCanvas.ontouchstart=this.$refs.sigCanvas.ontouchmove=this.$refs.sigCanvas.ontouchend=null;
-      }
-      this.$nextTick(()=>{
-        const c=this.$refs.sigCanvas, ctx=c.getContext('2d');
-        ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#111'; ctx.lineWidth=this.pad.stroke; this.pad.ctx=ctx;
-        ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height);
-        const getPos=(e)=>{ const r=c.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return {x:t.clientX-r.left, y:t.clientY-r.top}; };
-        const down=(e)=>{ e.preventDefault(); this.pad.drawing=true; this.pad.last=getPos(e); };
-        const mv  =(e)=>{ if(!this.pad.drawing) return; e.preventDefault(); const p=getPos(e); ctx.lineWidth=this.pad.stroke; ctx.beginPath(); ctx.moveTo(this.pad.last.x,this.pad.last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); this.pad.last=p; };
-        const up  =()=>{ this.pad.drawing=false; };
-        c.onmousedown=down; c.onmousemove=mv; c.onmouseup=up; c.onmouseleave=up; c.ontouchstart=down; c.ontouchmove=mv; c.ontouchend=up;
-      });
-    },
-    closePad(){ this.pad.open=false; },
-    padClear(){ const c=this.$refs.sigCanvas, ctx=this.pad.ctx; ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height); },
-    padSave(){ const dataURL=this.$refs.sigCanvas.toDataURL('image/jpeg',0.7); const blk=this.blocks.find(b=>b.id===this.pad.id); if(blk&&blk.type==='signature'){ blk.src=dataURL; } this.closePad(); },
-
     // RESET
     resetToInitial(){
       this.name = this._initial.name;
       this.layout = deepMerge(DEFAULT_LAYOUT, this._initial.layout||{});
       this.blocks = (this._initial.blocks && this._initial.blocks.length) ? this._initial.blocks.slice() : [];
+      this.photo.url = this._initial.photoUrl || '';
       this.selectedId=null;
     },
 

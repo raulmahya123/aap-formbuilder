@@ -8,16 +8,35 @@
 @endpush
 
 @section('content')
+@php
+  use Illuminate\Support\Str;
+  use Illuminate\Support\Facades\Storage;
+
+  // Normalisasi URL foto dari kolom photo_path:
+  // - Jika sudah http(s) atau /storage/... → pakai apa adanya
+  // - Jika relatif (mis. "templates/foo.jpg") → jadikan URL publik via Storage::url()
+  $raw = $template->photo_path ?? null;
+  $photoUrl = null;
+  if ($raw) {
+      if (Str::startsWith($raw, ['http://','https://','/storage/'])) {
+          $photoUrl = $raw;
+      } else {
+          $photoUrl = Storage::url(ltrim($raw, '/')); // -> "/storage/xxx"
+      }
+  }
+@endphp
+
 {{-- Inject data sebagai JSON murni --}}
 <script type="application/json" id="doc-template-json">
 {!! json_encode([
-    'name'   => $name ?? ($template->name ?? ''),
-    'layout' => $layout ?? [
+    'name'     => $name ?? ($template->name ?? ''),
+    'layout'   => $layout ?? [
         'page'    => ['width'=>794,'height'=>1123],
         'margins' => ['top'=>30,'right'=>25,'bottom'=>25,'left'=>25],
         'font'    => ['size'=>11],
     ],
-    'blocks' => $blocks ?? [],
+    'blocks'   => $blocks ?? [],
+    'photoUrl' => $photoUrl, // ← kirim URL foto ke Alpine
 ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}
 </script>
 
@@ -37,6 +56,15 @@
     </div>
     <a href="{{ route('admin.document_templates.index') }}" class="px-4 py-2 rounded-xl border">← Kembali</a>
   </div>
+
+  {{-- Foto Template (jika ada) --}}
+  <template x-if="photoUrl">
+    <div class="bg-white border rounded-xl p-3 flex items-center gap-3">
+      <div class="text-sm font-medium">Foto Template:</div>
+      <img :src="photoUrl" alt="Foto Template" class="h-20 w-auto rounded border bg-white">
+      <div class="text-xs text-gray-500">Disimpan pada kolom <code>photo_path</code>.</div>
+    </div>
+  </template>
 
   {{-- Canvas --}}
   <div>
@@ -147,7 +175,7 @@
 <script>
   function loadDocTemplate(selector) {
     const rawEl = document.querySelector(selector);
-    let payload = { name: '', layout: {}, blocks: [] };
+    let payload = { name: '', layout: {}, blocks: [], photoUrl: '' };
     try {
       payload = JSON.parse(rawEl?.textContent || '{}');
     } catch (e) {
@@ -172,8 +200,8 @@
       if (type === 'signature') out.type = 'signature';
       if (type === 'text')      out.type = 'text';
 
-      if (b.hasOwnProperty('fontsize')) out.fontSize = b.fontsize;
-      if (b.hasOwnProperty('showpage')) out.showPage = !!b.showpage;
+      if (Object.prototype.hasOwnProperty.call(b, 'fontsize')) out.fontSize = b.fontsize;
+      if (Object.prototype.hasOwnProperty.call(b, 'showpage')) out.showPage = !!b.showpage;
 
       return out;
     }) : [];
@@ -182,6 +210,7 @@
       name: payload.name ?? '',
       layout,
       blocks: normBlocks,
+      photoUrl: payload.photoUrl || '',
       init(){ /* no-op */ }
     };
   }
