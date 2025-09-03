@@ -28,21 +28,42 @@
 </head>
 <body class="min-h-screen grid md:grid-cols-12 text-ivory-100 bg-maroon-900">
 
-  <!-- LEFT: IMAGE + FULL MAROON OVERLAY -->
+  <!-- LEFT: IMAGE + OVERLAY -->
   <div class="hidden md:block md:col-span-7 relative">
-    <!-- Gambar latar -->
-    <div class="absolute inset-0 bg-cover bg-center bg-[url('{{ asset('assets/images/kegiatan.jpg') }}')]"></div>
-    <!-- Overlay gradasi maroon penuh (tidak transparan) -->
+    <!-- Background -->
+    <div class="absolute inset-0 bg-cover bg-center bg-[url('{{ asset('assets/images/foto-tambang.jpg') }}')]"></div>
     <div class="absolute inset-0 bg-gradient-to-tr from-maroon-900/95 via-maroon-800/85 to-maroon-900/90"></div>
 
-    <!-- Konten branding -->
+    <!-- Branding + Visi Misi -->
     <div class="relative h-full flex items-end">
-      <div class="p-10 lg:p-14">
+      <div class="p-10 lg:p-14 space-y-6">
         <h1 class="font-serif text-4xl lg:text-5xl leading-tight">Bergabung dengan<br>Generasi Baru</h1>
-        <p class="mt-4 max-w-xl text-ivory-100/80">
+        <p class="mt-2 max-w-xl text-ivory-100/80">
           Daftarkan akun Anda untuk akses aplikasi internal PT Andalan Artha Primanusa.
         </p>
-        <div class="mt-8 h-[2px] w-40 bg-gradient-to-r from-gold to-transparent"></div>
+        <div class="mt-6 h-[2px] w-40 bg-gradient-to-r from-gold to-transparent"></div>
+
+        <!-- Visi -->
+        <div>
+          <h3 class="font-semibold text-lg text-gold mb-2">Visi</h3>
+          <p class="text-sm leading-relaxed">
+            Menjadi kontraktor pertambangan terkemuka dan terpercaya di Indonesia
+            dengan kredibilitas dan komitmen dalam memberikan hasil, didukung oleh
+            fondasi operasi pertambangan yang solid, sistem yang terintegrasi,
+            dan kerja tim yang luar biasa.
+          </p>
+        </div>
+
+        <!-- Misi -->
+        <div>
+          <h3 class="font-semibold text-lg text-gold mb-2">Misi</h3>
+          <ul class="list-disc list-inside space-y-1 text-sm leading-relaxed">
+            <li>Memaksimalkan produktivitas operasional dengan sistem pemantauan yang sangat baik.</li>
+            <li>Melakukan identifikasi yang tepat dengan pemeriksaan data yang teliti sebagai peningkatan dan perkembangan berkelanjutan.</li>
+            <li>Memiliki pola pikir yang kuat dan tangguh untuk memiliki ketahanan mental dan emosional untuk bangkit kembali dari kesulitan, mengatasi tantangan, dan beradaptasi dengan situasi sulit.</li>
+            <li>Memberikan solusi yang saling menguntungkan bagi para pemangku kepentingan.</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -50,9 +71,8 @@
   <!-- RIGHT: REGISTER CARD -->
   <div class="md:col-span-5 min-h-screen flex items-center">
     <div class="w-full max-w-md mx-auto p-6 sm:p-8">
-
       <!-- Logo center -->
-     <div class="flex justify-center mb-6">
+      <div class="flex justify-center mb-6">
         <img src="{{ asset('assets/images/foto.png') }}" 
              class="h-28 drop-shadow-lg" 
              alt="Logo AAP">

@@ -19,6 +19,9 @@
           fontFamily: {
             serif: ['"Playfair Display"', 'serif'],
             sans: ['Poppins','sans-serif']
+          },
+          dropShadow: {
+            gold: '0 0 12px rgba(212,175,55,.35)'
           }
         }
       }
@@ -26,24 +29,132 @@
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
-<body class="min-h-screen grid md:grid-cols-12 bg-maroon-900 text-ivory-100">
+<body class="min-h-screen grid md:grid-cols-12 bg-maroon-900 text-ivory-100 font-sans">
 
-  <!-- LEFT BACKGROUND -->
-  <div class="hidden md:block md:col-span-7 relative">
+  <!-- LEFT BRANDING + EFFORT -->
+  <div class="hidden md:block md:col-span-7 relative overflow-hidden">
     <!-- Foto tambang -->
-    <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('/images/mining-bg.jpg')"></div>
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('assets/images/foto-tambang.jpg')"></div>
     <!-- Overlay gradasi maroon -->
-    <div class="absolute inset-0 bg-gradient-to-tr from-maroon-900/95 via-maroon-800/70 to-transparent"></div>
+    <div class="absolute inset-0 bg-gradient-to-tr from-maroon-900/95 via-maroon-800/75 to-maroon-900/10"></div>
 
     <!-- Content branding -->
-    <div class="relative h-full flex items-end">
+    <div class="relative h-full flex flex-col justify-between">
+
+      <!-- Headline & sub -->
+     <div class="p-10 lg:p-14 text-center">
+  <h1 class="font-serif text-5xl sm:text-6xl lg:text-7xl leading-tight drop-shadow">
+    Kontraktor Tambang<br>Generasi Baru
+  </h1>
+  <p class="mt-6 max-w-2xl mx-auto text-lg text-ivory-100/85">
+    Spesialis nikel, overburden, hauling, mine plan, compliance & ESG.<br>
+    Kami menambang dengan presisi & integritas.
+  </p>
+  <div class="mt-8 mx-auto h-[3px] w-52 bg-gradient-to-r from-gold to-transparent drop-shadow-gold"></div>
+</div>
+
+      <!-- CORE VALUE: EFFORT (unik & keren) -->
       <div class="p-10 lg:p-14">
-        <h1 class="font-serif text-4xl lg:text-5xl leading-tight">Kontraktor Tambang<br>Generasi Baru</h1>
-        <p class="mt-4 max-w-xl text-ivory-100/80">
-          Spesialis nikel, overburden, hauling, mine plan, compliance & ESG.<br>
-          Kami menambang dengan presisi & integritas.
-        </p>
-        <div class="mt-8 h-[2px] w-40 bg-gradient-to-r from-gold to-transparent"></div>
+        <div class="mb-6">
+          <p class="text-xs uppercase tracking-[0.25em] text-ivory-100/60">Core Value</p>
+          <h3 class="text-2xl font-semibold text-gold drop-shadow-gold">
+            EFFORT
+          </h3>
+        </div>
+
+        <!-- Dekor garis emas tipis -->
+        <div class="relative">
+          <div class="pointer-events-none absolute -top-3 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-gold/60 to-transparent"></div>
+
+          <!-- Grid lingkaran E F F O R T -->
+          <div class="grid grid-cols-3 gap-6 sm:grid-cols-6">
+
+            <!-- Item template:
+              - Lingkaran huruf (huruf besar)
+              - Judul & deskripsi singkat
+            -->
+            <!-- E -->
+            <div class="group text-center">
+              <div class="mx-auto w-16 h-16 rounded-full border-2 border-gold bg-maroon-800/70
+                          flex items-center justify-center transition
+                          group-hover:scale-110 group-hover:drop-shadow-gold">
+                <span class="text-gold font-bold text-xl">E</span>
+              </div>
+              <h4 class="mt-3 text-sm font-semibold text-gold">Excellence</h4>
+              <p class="mt-1 text-[11px] leading-snug text-ivory-100/75">
+                Standar kualitas tinggi & keselamatan kerja.
+              </p>
+            </div>
+
+            <!-- F -->
+            <div class="group text-center">
+              <div class="mx-auto w-16 h-16 rounded-full border-2 border-gold bg-maroon-800/70
+                          flex items-center justify-center transition
+                          group-hover:scale-110 group-hover:drop-shadow-gold">
+                <span class="text-gold font-bold text-xl">F</span>
+              </div>
+              <h4 class="mt-3 text-sm font-semibold text-gold">Focus</h4>
+              <p class="mt-1 text-[11px] leading-snug text-ivory-100/75">
+                Proyek sesuai target waktu, biaya, & keberlanjutan.
+              </p>
+            </div>
+
+            <!-- F (Fortitude) -->
+            <div class="group text-center">
+              <div class="mx-auto w-16 h-16 rounded-full border-2 border-gold bg-maroon-800/70
+                          flex items-center justify-center transition
+                          group-hover:scale-110 group-hover:drop-shadow-gold">
+                <span class="text-gold font-bold text-xl">F</span>
+              </div>
+              <h4 class="mt-3 text-sm font-semibold text-gold">Fortitude</h4>
+              <p class="mt-1 text-[11px] leading-snug text-ivory-100/75">
+                Berani & tangguh menghadapi tantangan.
+              </p>
+            </div>
+
+            <!-- O -->
+            <div class="group text-center">
+              <div class="mx-auto w-16 h-16 rounded-full border-2 border-gold bg-maroon-800/70
+                          flex items-center justify-center transition
+                          group-hover:scale-110 group-hover:drop-shadow-gold">
+                <span class="text-gold font-bold text-xl">O</span>
+              </div>
+              <h4 class="mt-3 text-sm font-semibold text-gold">Optimism</h4>
+              <p class="mt-1 text-[11px] leading-snug text-ivory-100/75">
+                Semangat positif, solusi inovatif, adaptif.
+              </p>
+            </div>
+
+            <!-- R -->
+            <div class="group text-center">
+              <div class="mx-auto w-16 h-16 rounded-full border-2 border-gold bg-maroon-800/70
+                          flex items-center justify-center transition
+                          group-hover:scale-110 group-hover:drop-shadow-gold">
+                <span class="text-gold font-bold text-xl">R</span>
+              </div>
+              <h4 class="mt-3 text-sm font-semibold text-gold">Responsive</h4>
+              <p class="mt-1 text-[11px] leading-snug text-ivory-100/75">
+                Tanggap risiko & kebutuhan klien.
+              </p>
+            </div>
+
+            <!-- T -->
+            <div class="group text-center">
+              <div class="mx-auto w-16 h-16 rounded-full border-2 border-gold bg-maroon-800/70
+                          flex items-center justify-center transition
+                          group-hover:scale-110 group-hover:drop-shadow-gold">
+                <span class="text-gold font-bold text-xl">T</span>
+              </div>
+              <h4 class="mt-3 text-sm font-semibold text-gold">Tenacity</h4>
+              <p class="mt-1 text-[11px] leading-snug text-ivory-100/75">
+                Gigih capai target & keberlanjutan.
+              </p>
+            </div>
+          </div>
+
+          <!-- Garis dekor bawah -->
+          <div class="pointer-events-none mt-8 h-[1px] bg-gradient-to-r from-transparent via-gold/60 to-transparent"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -100,7 +211,7 @@
               Masuk
             </button>
 
-            <!-- Register link (pengganti lupa password) -->
+            <!-- Register link -->
             <div class="text-center mt-3">
               <a href="{{ route('register') }}" class="text-xs underline hover:text-gold">Belum punya akun? Daftar</a>
             </div>

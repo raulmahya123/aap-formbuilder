@@ -129,7 +129,8 @@ Route::prefix('documents')->name('documents.')->group(function () {
             Route::delete('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'destroy'])->name('destroy');
             Route::get('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'show'])->name('show');
         })->whereNumber('template');
-
+ Route::post('/upload-temp', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'uploadTemp'])
+      ->name('upload_temp');
         // Entries (admin): list/detail/hapus
         Route::resource('entries', AdminEntryController::class)
             ->only(['index', 'show', 'destroy'])
