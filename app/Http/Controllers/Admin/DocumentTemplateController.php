@@ -6,14 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\DocumentTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str; // ★ dipakai untuk nama file random
 
 class DocumentTemplateController extends Controller
 {
-    // Layout standar A4 (px) + margin & font
+    // ★ Tambah font.family default
     private const DEFAULT_LAYOUT = [
         'page'    => ['width' => 794, 'height' => 1123],
         'margins' => ['top' => 30, 'right' => 25, 'bottom' => 25, 'left' => 25],
-        'font'    => ['size' => 11],
+        'font'    => ['size' => 11, 'family' => 'Poppins, sans-serif'],
     ];
 
     public function index()
@@ -27,11 +28,27 @@ class DocumentTemplateController extends Controller
         return view('admin.document_templates.create');
     }
 
+    public function storeImage(Request $request)
+    {
+        $request->validate([
+            'file' => ['required','image','max:4096'],
+        ]);
+
+        $path = $request->file('file')->store('templates/photos', 'public');
+        $url  = Storage::disk('public')->url($path);
+
+        return response()->json([
+            'ok'   => true,
+            'path' => $path,
+            'url'  => $url,
+        ]);
+    }
+
     public function store(Request $r)
     {
         $data = $r->validate([
             'name'              => ['required', 'string', 'max:150'],
-            'photo_path'        => ['nullable', 'image', 'max:2048'], // ← foto template
+            'photo_path'        => ['nullable', 'image', 'max:2048'],
             'blocks_config'     => ['nullable'],
             'layout_config'     => ['nullable'],
             'header_config'     => ['nullable'],
@@ -39,21 +56,32 @@ class DocumentTemplateController extends Controller
             'signature_config'  => ['nullable'],
         ]);
 
-        // Upload foto jika ada
+        // Upload foto template (opsional)
+        $photoPath = null;
         if ($r->hasFile('photo_path')) {
-            $path = $r->file('photo_path')->store('templates/photos', 'public');
-            $data['photo_path'] = $path; // simpan PATH (bukan URL)
+            $photoPath = $r->file('photo_path')->store('templates/photos', 'public');
         }
+
+        // Ambil & normalisasi JSON dari request
+        $blocks    = $this->normalizeJson($data['blocks_config']    ?? null, []);
+        $layout    = $this->normalizeJson($data['layout_config']    ?? null, self::DEFAULT_LAYOUT);
+        $header    = $this->normalizeJson($data['header_config']    ?? null, []);
+        $footer    = $this->normalizeJson($data['footer_config']    ?? null, []);
+        $signature = $this->normalizeJson($data['signature_config'] ?? null, []);
+
+        // ★ Persist semua dataURL gambar ke storage publik
+        $blocks    = $this->replaceDataUrlsInBlocks($blocks);
+        $header    = $this->replaceDataUrlsInHeader($header);
+        $signature = $this->replaceDataUrlsInSignature($signature);
 
         $payload = [
             'name'              => $data['name'],
-            'photo_path'        => $data['photo_path'] ?? null,
-            'blocks_config'     => $this->normalizeJson($data['blocks_config']  ?? null, []),
-            // Pakai DEFAULT_LAYOUT sebagai default
-            'layout_config'     => $this->normalizeJson($data['layout_config']  ?? null, self::DEFAULT_LAYOUT),
-            'header_config'     => $this->normalizeJson($data['header_config']  ?? null, []),
-            'footer_config'     => $this->normalizeJson($data['footer_config']  ?? null, []),
-            'signature_config'  => $this->normalizeJson($data['signature_config'] ?? null, []),
+            'photo_path'        => $photoPath,
+            'blocks_config'     => $blocks,
+            'layout_config'     => $layout,
+            'header_config'     => $header,
+            'footer_config'     => $footer,
+            'signature_config'  => $signature,
         ];
 
         DocumentTemplate::create($payload);
@@ -70,31 +98,53 @@ class DocumentTemplateController extends Controller
     {
         $data = $r->validate([
             'name'              => ['required', 'string', 'max:150'],
-            'photo_path'        => ['nullable', 'image', 'max:2048'], // ← foto template
+            'photo_path'        => ['nullable', 'image', 'max:2048'],
             'blocks_config'     => ['nullable'],
             'layout_config'     => ['nullable'],
             'header_config'     => ['nullable'],
             'footer_config'     => ['nullable'],
             'signature_config'  => ['nullable'],
+            'remove_photo'      => ['nullable', 'in:1'], // ★ dukung hapus foto
         ]);
 
         $payload = ['name' => $data['name']];
 
-        // Replace foto jika upload baru
+        // ★ Hapus foto existing jika diminta
+        if ($r->boolean('remove_photo') && $template->photo_path) {
+            Storage::disk('public')->delete($template->photo_path);
+            $payload['photo_path'] = null;
+        }
+
+        // Ganti foto jika upload baru
         if ($r->hasFile('photo_path')) {
             if ($template->photo_path) {
                 Storage::disk('public')->delete($template->photo_path);
             }
-            $path = $r->file('photo_path')->store('templates/photos', 'public');
-            $payload['photo_path'] = $path; // simpan PATH (bukan URL)
+            $payload['photo_path'] = $r->file('photo_path')->store('templates/photos', 'public');
         }
 
         // Update konfigurasi (opsional jika dikirim)
-        foreach (['blocks_config', 'layout_config', 'header_config', 'footer_config', 'signature_config'] as $k) {
-            if ($r->has($k)) {
-                $default = $k === 'layout_config' ? self::DEFAULT_LAYOUT : [];
-                $payload[$k] = $this->normalizeJson($data[$k] ?? null, $default);
-            }
+        if ($r->has('blocks_config')) {
+            $blocks = $this->normalizeJson($data['blocks_config'] ?? null, []);
+            $payload['blocks_config'] = $this->replaceDataUrlsInBlocks($blocks); // ★
+        }
+        if ($r->has('layout_config')) {
+            $layout = $this->normalizeJson($data['layout_config'] ?? null, self::DEFAULT_LAYOUT);
+            // ★ pastikan field wajib ada (merge ringan)
+            $layout = array_replace_recursive(self::DEFAULT_LAYOUT, $layout);
+            $payload['layout_config'] = $layout;
+        }
+        if ($r->has('header_config')) {
+            $header = $this->normalizeJson($data['header_config'] ?? null, []);
+            $payload['header_config'] = $this->replaceDataUrlsInHeader($header); // ★
+        }
+        if ($r->has('footer_config')) {
+            $footer = $this->normalizeJson($data['footer_config'] ?? null, []);
+            $payload['footer_config'] = $footer;
+        }
+        if ($r->has('signature_config')) {
+            $signature = $this->normalizeJson($data['signature_config'] ?? null, []);
+            $payload['signature_config'] = $this->replaceDataUrlsInSignature($signature); // ★
         }
 
         $template->update($payload);
@@ -104,19 +154,13 @@ class DocumentTemplateController extends Controller
 
     public function destroy(DocumentTemplate $template)
     {
-        // Hapus file foto jika ada
         if ($template->photo_path) {
             Storage::disk('public')->delete($template->photo_path);
         }
-
         $template->delete();
         return redirect()->route('admin.document_templates.index')->with('success', 'Template dihapus');
     }
 
-    /**
-     * Tampilkan preview template.
-     * Controller merakit layout & blocks agar Blade tinggal render.
-     */
     public function show(DocumentTemplate $template)
     {
         [$layout, $blocks] = $this->buildPreviewData($template);
@@ -145,12 +189,99 @@ class DocumentTemplateController extends Controller
         return $default;
     }
 
-    /**
-     * Rakitan data untuk preview:
-     * - Normalisasi layout (merge DEFAULT_LAYOUT)
-     * - Build $blocks dari header/footer/signature jika blocks kosong
-     * - Fallback dummy block bila tetap kosong
-     */
+    // ★ Simpan dataURL ke storage & return URL publik; null jika bukan dataURL image
+    private function persistDataUrlImage(string $dataUrl, string $dir = 'templates/blocks'): ?string
+    {
+        if (!preg_match('#^data:image/([a-zA-Z0-9\+\-\.]+);base64,#', $dataUrl, $m)) {
+            return null;
+        }
+        $ext = strtolower($m[1]);
+
+        // Normalize beberapa ekstensi umum
+        $ext = str_replace('jpeg', 'jpg', $ext);
+        $ext = str_replace('svg+xml', 'svg', $ext);
+
+        $base64 = preg_replace('#^data:image/[a-zA-Z0-9\+\-\.]+;base64,#', '', $dataUrl);
+        $bytes  = base64_decode($base64, true);
+        if ($bytes === false) return null;
+
+        $filename = Str::random(40) . '.' . $ext;
+        $path = $dir . '/' . $filename;
+
+        Storage::disk('public')->put($path, $bytes);
+
+        return Storage::url($path); // "/storage/dir/file.ext"
+    }
+
+    // ★ Bersihkan & persist gambar di blocks (type=image & signature image)
+    private function replaceDataUrlsInBlocks(array $blocks): array
+    {
+        foreach ($blocks as &$b) {
+            if (($b['type'] ?? null) === 'image' && !empty($b['src']) && is_string($b['src'])) {
+                if (str_starts_with($b['src'], 'data:image/')) {
+                    if ($url = $this->persistDataUrlImage($b['src'], 'templates/blocks')) {
+                        $b['src'] = $url;
+                    }
+                } elseif (str_starts_with($b['src'], 'blob:')) {
+                    // blob tidak valid untuk server; kosongkan
+                    $b['src'] = '';
+                }
+            }
+            // signature block mungkin simpan di "src" juga
+            if (($b['type'] ?? null) === 'signature' && !empty($b['src']) && is_string($b['src'])) {
+                if (str_starts_with($b['src'], 'data:image/')) {
+                    if ($url = $this->persistDataUrlImage($b['src'], 'templates/signatures')) {
+                        $b['src'] = $url;
+                    }
+                } elseif (str_starts_with($b['src'], 'blob:')) {
+                    $b['src'] = '';
+                }
+            }
+        }
+        unset($b);
+        return $blocks;
+    }
+
+    // ★ Bersihkan & persist gambar di header.items (type=image → src)
+    private function replaceDataUrlsInHeader(array $header): array
+    {
+        if (!empty($header['items']) && is_array($header['items'])) {
+            foreach ($header['items'] as &$it) {
+                if (($it['type'] ?? null) === 'image' && !empty($it['src']) && is_string($it['src'])) {
+                    if (str_starts_with($it['src'], 'data:image/')) {
+                        if ($url = $this->persistDataUrlImage($it['src'], 'templates/blocks')) {
+                            $it['src'] = $url;
+                        }
+                    } elseif (str_starts_with($it['src'], 'blob:')) {
+                        $it['src'] = '';
+                    }
+                }
+            }
+            unset($it);
+        }
+        return $header;
+    }
+
+    // ★ Bersihkan & persist gambar pada signature.rows (image_path)
+    private function replaceDataUrlsInSignature(array $signature): array
+    {
+        if (!empty($signature['rows']) && is_array($signature['rows'])) {
+            foreach ($signature['rows'] as &$row) {
+                if (!empty($row['image_path']) && is_string($row['image_path'])) {
+                    if (str_starts_with($row['image_path'], 'data:image/')) {
+                        if ($url = $this->persistDataUrlImage($row['image_path'], 'templates/signatures')) {
+                            $row['image_path'] = $url;
+                        }
+                    } elseif (str_starts_with($row['image_path'], 'blob:')) {
+                        $row['image_path'] = '';
+                    }
+                }
+            }
+            unset($row);
+        }
+        return $signature;
+    }
+
     private function buildPreviewData(DocumentTemplate $template): array
     {
         $layout    = $this->toArray($template->layout_config);
@@ -159,15 +290,12 @@ class DocumentTemplateController extends Controller
         $footer    = $this->toArray($template->footer_config);
         $signature = $this->toArray($template->signature_config);
 
-        // Merge layout dengan default
         $layout = array_replace_recursive(self::DEFAULT_LAYOUT, $layout ?? []);
 
-        // Build blocks dari config jika kosong
         if (empty($blocks)) {
             $blocks = $this->buildBlocksFromConfigs($layout, $header, $footer, $signature);
         }
 
-        // Fallback: tetap kosong → suntik 1 block dummy
         if (empty($blocks)) {
             $blocks = [[
                 'id'       => uniqid('blk_'),
@@ -187,7 +315,6 @@ class DocumentTemplateController extends Controller
         return [$layout, $blocks];
     }
 
-    /** Ubah value jadi array (terima array atau JSON string). */
     private function toArray($value): array
     {
         if (is_array($value)) return $value;
@@ -200,15 +327,11 @@ class DocumentTemplateController extends Controller
         return [];
     }
 
-    /**
-     * Builder blocks dari header/footer/signature (skema baru & legacy).
-     */
     private function buildBlocksFromConfigs(array $layout, array $header, array $footer, array $signature): array
     {
         $blocks = [];
         $makeId = static fn() => substr(str_shuffle('abcdefghijklmnopqrstuvwxyz0123456789'), 0, 8);
 
-        /* ===== HEADER ===== */
         $hItems = data_get($header, 'items', []);
         if (is_array($hItems) && $hItems) {
             foreach ($hItems as $it) {
@@ -225,7 +348,6 @@ class DocumentTemplateController extends Controller
                 ];
             }
         } else {
-            // Legacy: logo + title
             if ($logo = data_get($header, 'logo.url')) {
                 $blocks[] = ['id'=>$makeId(),'type'=>'image','src'=>$logo,'top'=>20,'left'=>20,'width'=>120,'height'=>48,'z'=>10];
             }
@@ -241,7 +363,6 @@ class DocumentTemplateController extends Controller
             }
         }
 
-        /* ===== FOOTER ===== */
         $fItems = data_get($footer, 'items', []);
         if (is_array($fItems) && $fItems) {
             foreach ($fItems as $f) {
@@ -258,7 +379,7 @@ class DocumentTemplateController extends Controller
                     'z'=>5,
                 ];
             }
-        } elseif (!empty($footer['text'])) { // Legacy single item
+        } elseif (!empty($footer['text'])) {
             $blocks[] = [
                 'id'=>$makeId(),'type'=>'footer',
                 'text'=> $footer['text'] ?? '',
@@ -271,7 +392,6 @@ class DocumentTemplateController extends Controller
             ];
         }
 
-        /* ===== SIGNATURE ===== */
         $sRows = data_get($signature, 'rows', []);
         if (is_array($sRows) && $sRows) {
             foreach ($sRows as $row) {

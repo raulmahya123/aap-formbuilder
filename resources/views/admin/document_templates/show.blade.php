@@ -68,7 +68,7 @@
 
   {{-- Canvas --}}
   <div>
-    <div class="bg-[#1D1C1A] text-white px-3 py-2 text-sm rounded-t-xl">
+    <div class="bg-[#1D1C1A] text-white px-2 py-2 text-sm rounded-t-xl">
       Preview — <span x-text="layout.page.width"></span>×<span x-text="layout.page.height"></span> px
     </div>
 

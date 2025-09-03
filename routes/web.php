@@ -133,6 +133,8 @@ Route::prefix('documents')->name('documents.')->group(function () {
         })->whereNumber('template');
  Route::post('/upload-temp', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'uploadTemp'])
       ->name('upload_temp');
+      Route::post('/uploads/image', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'storeImage'])
+    ->name('uploads.image');
         // Entries (admin): list/detail/hapus
         Route::resource('entries', AdminEntryController::class)
             ->only(['index', 'show', 'destroy'])
