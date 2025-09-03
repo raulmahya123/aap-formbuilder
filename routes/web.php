@@ -62,6 +62,8 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard/data/entries-by-day', [DashboardController::class, 'entriesByDay'])->name('dashboard.data.entries_by_day');
         Route::get('dashboard/data/top-forms', [DashboardController::class, 'topForms'])->name('dashboard.data.top_forms');
         Route::get('dashboard/data/by-department', [DashboardController::class, 'byDepartment'])->name('dashboard.data.by_department');
+        Route::get('dashboard/data/by-aggregate', [DashboardController::class, 'byAggregate'])->name('dashboard.data.by_aggregate');
+
         // ==== END DASHBOARD ====
 
         Route::get('/users/active', [UserActiveController::class, 'index'])->name('users.active.index');

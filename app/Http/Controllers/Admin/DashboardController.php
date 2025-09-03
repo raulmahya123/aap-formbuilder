@@ -245,4 +245,140 @@ public function summary(Request $r)
 
         return [$from, $to, $deptId, $formId];
     }
+
+    public function byAggregate(Request $r)
+{
+    [$from, $to, $deptId, $formId] = $this->extractFilters($r);
+    $group = $r->string('group', 'department');
+    $cacheKey = 'dash_by_agg:'.md5(json_encode([$group, $from?->toDateString(), $to?->toDateString(), $deptId, $formId]));
+
+    $payload = Cache::remember($cacheKey, 60, function() use ($group, $from, $to, $deptId, $formId) {
+
+        if ($group === 'form') {
+            // Rows per Form dengan total entries pada rentang & status aktif
+            $rows = DB::table('forms')
+                ->leftJoin('form_entries', function($j){
+                    $j->on('form_entries.form_id','=','forms.id');
+                })
+                ->when($deptId, fn($q) => $q->where('forms.department_id', $deptId))
+                ->when($formId, fn($q) => $q->where('forms.id', $formId))
+                ->when($from,   fn($q) => $q->where('form_entries.created_at', '>=', (clone $from)->startOfDay()))
+                ->when($to,     fn($q) => $q->where('form_entries.created_at', '<=', (clone $to)->endOfDay()))
+                ->groupBy('forms.id','forms.title','forms.is_active','forms.department_id')
+                ->select([
+                    'forms.id',
+                    'forms.title',
+                    'forms.is_active',
+                    'forms.department_id',
+                    DB::raw('COUNT(form_entries.id) as total_entries'),
+                ])
+                ->orderByDesc(DB::raw('COUNT(form_entries.id)'))
+                ->get();
+
+            $deptNames = \App\Models\Department::pluck('name','id');
+
+            $columns = [
+                ['key'=>'name',          'label'=>'Form',       'align'=>'left'],
+                ['key'=>'department',    'label'=>'Department', 'align'=>'left'],
+                ['key'=>'is_active',     'label'=>'Active',     'align'=>'left'],
+                ['key'=>'total_entries', 'label'=>'Total Entries','align'=>'right','format'=>'number'],
+            ];
+
+            $rowsOut = $rows->map(function($r) use ($deptNames){
+                return [
+                    '__key'        => 'form_'.$r->id,
+                    'name'         => $r->title,
+                    'department'   => $deptNames[$r->department_id] ?? '-',
+                    'is_active'    => $r->is_active ? 'Ya' : 'Tidak',
+                    'total_entries'=> (int)$r->total_entries,
+                ];
+            })->values();
+
+            return ['columns'=>$columns, 'rows'=>$rowsOut];
+        }
+
+        if ($group === 'document') {
+            // Rows per Document Template: total dokumen dibuat pada rentang
+            $rows = DB::table('documents')
+                ->when($deptId, fn($q) => $q->where('documents.department_id', $deptId))
+                ->when($from,   fn($q) => $q->where('documents.created_at', '>=', (clone $from)->startOfDay()))
+                ->when($to,     fn($q) => $q->where('documents.created_at', '<=', (clone $to)->endOfDay()))
+                ->groupBy('documents.document_template_id')
+                ->select([
+                    'documents.document_template_id as template_id',
+                    DB::raw('COUNT(*) as total_documents'),
+                ])
+                ->orderByDesc(DB::raw('COUNT(*)'))
+                ->get();
+
+            $tmplNames = \App\Models\DocumentTemplate::whereIn('id', $rows->pluck('template_id')->filter())
+                ->pluck('name','id');
+
+            $columns = [
+                ['key'=>'template',       'label'=>'Template',        'align'=>'left'],
+                ['key'=>'total_documents','label'=>'Total Documents', 'align'=>'right','format'=>'number'],
+            ];
+
+            $rowsOut = $rows->map(function($r) use ($tmplNames){
+                return [
+                    '__key'          => 'tmpl_'.$r->template_id,
+                    'template'       => $tmplNames[$r->template_id] ?? '—',
+                    'total_documents'=> (int)$r->total_documents,
+                ];
+            })->values();
+
+            return ['columns'=>$columns, 'rows'=>$rowsOut];
+        }
+
+        // default: group by department (lama)
+        $forms = DB::table('forms')
+            ->when($deptId, fn($q) => $q->where('department_id', $deptId))
+            ->when($formId, fn($q) => $q->where('id', $formId))
+            ->groupBy('department_id')
+            ->select([
+                'department_id',
+                DB::raw('COUNT(*) as total_forms'),
+                DB::raw('SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_forms')
+            ])->get()->keyBy('department_id');
+
+        $entries = DB::table('form_entries')
+            ->join('forms','forms.id','=','form_entries.form_id')
+            ->when($deptId, fn($q) => $q->where('forms.department_id', $deptId))
+            ->when($formId, fn($q) => $q->where('forms.id', $formId))
+            ->when($from,   fn($q) => $q->where('form_entries.created_at', '>=', (clone $from)->startOfDay()))
+            ->when($to,     fn($q) => $q->where('form_entries.created_at', '<=', (clone $to)->endOfDay()))
+            ->groupBy('forms.department_id')
+            ->select(['forms.department_id', DB::raw('COUNT(form_entries.id) as total_entries')])
+            ->get()->keyBy('department_id');
+
+        $depts = \App\Models\Department::orderBy('name')->get(['id','name']);
+
+        $columns = [
+            ['key'=>'name',          'label'=>'Department',   'align'=>'left'],
+            ['key'=>'total_forms',   'label'=>'Total Forms',  'align'=>'right','format'=>'number'],
+            ['key'=>'active_forms',  'label'=>'Active Forms', 'align'=>'right','format'=>'number'],
+            ['key'=>'total_entries', 'label'=>'Total Entries','align'=>'right','format'=>'number'],
+        ];
+
+        $rowsOut = $depts->map(function($d) use ($forms,$entries){
+            $f = $forms->get($d->id);
+            $e = $entries->get($d->id);
+            $row = [
+                '__key'        => 'dept_'.$d->id,
+                'name'         => $d->name,
+                'total_forms'  => (int)($f->total_forms  ?? 0),
+                'active_forms' => (int)($f->active_forms ?? 0),
+                'total_entries'=> (int)($e->total_entries ?? 0),
+            ];
+            return ($row['total_forms']>0 || $row['total_entries']>0) ? $row : null;
+        })->filter()->values();
+
+        return ['columns'=>$columns, 'rows'=>$rowsOut];
+    });
+
+    // inject formatter hint untuk angka (opsional)
+    // front-end sudah handle via col.format === 'number'
+    return response()->json($payload);
+}
+
 }
