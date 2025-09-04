@@ -9,19 +9,21 @@
 
   {{-- Inject daftar templates sebagai JSON murni untuk Alpine --}}
   <script type="application/json" id="doc-templates-json">
-    {!! json_encode($templatesPayload, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}
+    {
+      !!json_encode($templatesPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!
+    }
   </script>
 
   <form id="docForm" method="POST" action="{{ route('admin.documents.store') }}">
     @csrf
 
     {{-- HIDDEN: JSON yang disimpan ke documents --}}
-    <input type="hidden" name="template_id"      :value="selectedTemplateId">
-    <input type="hidden" name="layout_config"    :value="JSON.stringify(preview.layout)">
-    <input type="hidden" name="header_config"    :value="JSON.stringify(header)">
-    <input type="hidden" name="footer_config"    :value="JSON.stringify(footer)">
+    <input type="hidden" name="template_id" :value="selectedTemplateId">
+    <input type="hidden" name="layout_config" :value="JSON.stringify(preview.layout)">
+    <input type="hidden" name="header_config" :value="JSON.stringify(header)">
+    <input type="hidden" name="footer_config" :value="JSON.stringify(footer)">
     <input type="hidden" name="signature_config" :value="JSON.stringify(signatures)">
-    <input type="hidden" name="sections"         :value="JSON.stringify(sections)">
+    <input type="hidden" name="sections" :value="JSON.stringify(sections)">
 
     <div class="grid lg:grid-cols-[2fr_1fr] gap-6">
       {{-- KIRI: PREVIEW --}}
@@ -45,13 +47,13 @@
 
               <template x-for="blk in preview.blocks.filter(b => (b.page||1)===p)" :key="blk.id">
                 <div class="absolute ring-1 ring-gray-200 group"
-                     :style="blockStyle(blk)"
-                     @mousedown="blk.origin==='section' && onBlockMouseDown($event, blk)">
+                  :style="blockStyle(blk)"
+                  @mousedown="blk.origin==='section' && onBlockMouseDown($event, blk)">
 
                   <!-- HEADER -->
                   <template x-if="blk.type==='header'">
                     <div class="w-full h-full px-3 py-2 flex items-center justify-between bg-white/95"
-                         :style="{ fontSize: (blk.fontSize??12)+'px', textAlign: blk.align||'left' }">
+                      :style="{ fontSize: (blk.fontSize??12)+'px', textAlign: blk.align||'left' }">
                       <div class="flex items-center gap-2 overflow-hidden">
                         <template x-if="header?.logo?.url">
                           <img :src="header.logo.url" alt="Logo" class="h-6 w-auto object-contain">
@@ -64,8 +66,8 @@
                   <!-- TEXT -->
                   <template x-if="blk.type==='text'">
                     <div class="w-full h-full p-2 overflow-hidden"
-                         :style="{ textAlign: blk.align||'left', fontWeight: blk.bold?'700':'400', fontSize: (blk.fontSize??preview.layout.font.size)+'pt' }"
-                         x-text="blk.text||''"></div>
+                      :style="{ textAlign: blk.align||'left', fontWeight: blk.bold?'700':'400', fontSize: (blk.fontSize??preview.layout.font.size)+'pt' }"
+                      x-text="blk.text||''"></div>
                   </template>
 
                   <!-- HTML -->
@@ -84,14 +86,14 @@
                   <!-- TABLE CELL -->
                   <template x-if="blk.type==='tableCell'">
                     <div class="w-full h-full px-2 py-1 border border-gray-300 overflow-hidden flex items-center"
-                         :style="{ fontWeight: blk.bold?'700':'400', fontSize: (blk.fontSize??12)+'px' }"
-                         x-text="blk.text || ' '"></div>
+                      :style="{ fontWeight: blk.bold?'700':'400', fontSize: (blk.fontSize??12)+'px' }"
+                      x-text="blk.text || ' '"></div>
                   </template>
 
                   <!-- FOOTER -->
                   <template x-if="blk.type==='footer'">
                     <div class="w-full h-full px-2 py-1 flex items-center justify-between bg-white/95"
-                         :style="{ fontSize: (blk.fontSize??11)+'px', textAlign: blk.align||'left' }">
+                      :style="{ fontSize: (blk.fontSize??11)+'px', textAlign: blk.align||'left' }">
                       <div class="truncate" x-text="blk.text || footer.text || '© Perusahaan'"></div>
                       <div class="text-xs text-gray-600" x-show="blk.showPage || footer.show_page_number">
                         Halaman <span x-text="p"></span> / <span x-text="preview.pagesCount"></span>
@@ -100,8 +102,10 @@
                   </template>
 
                   <!-- SIGNATURE -->
+                  <!-- SIGNATURE -->
                   <template x-if="blk.type==='signature'">
-                    <div class="w-full h-full p-2 bg-white/90 rounded">
+                    <div class="w-full h-full p-2 bg-white/90 rounded"
+                      :style="{ textAlign: blk.align || 'center' }">
                       <div class="text-[11px] text-gray-600" x-text="blk.role||'Role'"></div>
                       <div class="mt-1 w-full flex-1 border border-dashed rounded flex items-center justify-center" style="height:38px;">
                         <template x-if="blk.src"><img :src="blk.src" class="max-h-full object-contain"></template>
@@ -115,14 +119,15 @@
                     </div>
                   </template>
 
+
                   <!-- HANDLES -->
                   <template x-if="blk.origin==='section'">
                     <div class="absolute -bottom-1 -right-1 w-3 h-3 border border-gray-400 bg-white rounded-sm cursor-se-resize opacity-90"
-                         @mousedown.stop="onResizeMouseDown($event, blk, 'br')"></div>
+                      @mousedown.stop="onResizeMouseDown($event, blk, 'br')"></div>
                   </template>
                   <template x-if="blk.origin==='section'">
                     <div class="absolute -top-1 -left-1 w-3 h-3 border border-gray-400 bg-white rounded-sm cursor-nw-resize opacity-90"
-                         @mousedown.stop="onResizeMouseDown($event, blk, 'tl')"></div>
+                      @mousedown.stop="onResizeMouseDown($event, blk, 'tl')"></div>
                   </template>
                 </div>
               </template>
@@ -139,7 +144,7 @@
             <select x-model.number="selectedTemplateId" class="mt-1 w-full border rounded-lg px-3 py-2">
               <option value="">— Tanpa Template —</option>
               @foreach($templates as $t)
-                <option value="{{ $t->id }}">#{{ $t->id }} — {{ $t->name }}</option>
+              <option value="{{ $t->id }}">#{{ $t->id }} — {{ $t->name }}</option>
               @endforeach
             </select>
             <p class="mt-1 text-xs text-gray-600" x-show="selectedTemplateId">
@@ -152,7 +157,7 @@
             <input name="title" class="mt-1 w-full border rounded-lg px-3 py-2" required>
           </div>
 
-          {{-- >>> DIBUAT 3 KOLOM: Dept, Doc Type, Project Code --}}
+          {{-- 3 kolom: Dept, Doc Type, Project Code --}}
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <label class="text-sm font-medium">Dept Code</label>
@@ -176,7 +181,11 @@
             <div>
               <label class="text-sm font-medium">Class</label>
               <select name="class" class="mt-1 w-full border rounded-lg px-3 py-2">
-                <option value="">-</option><option>I</option><option>II</option><option>III</option><option>IV</option>
+                <option value="">-</option>
+                <option>I</option>
+                <option>II</option>
+                <option>III</option>
+                <option>IV</option>
               </select>
             </div>
           </div>
@@ -195,7 +204,7 @@
               <select name="department_id" class="mt-1 w-full border rounded-lg px-3 py-2">
                 <option value="">-</option>
                 @foreach($departments as $dp)
-                  <option value="{{ $dp->id }}">{{ $dp->name }}</option>
+                <option value="{{ $dp->id }}">{{ $dp->name }}</option>
                 @endforeach
               </select>
             </div>
@@ -212,17 +221,20 @@
           <template x-for="(s,i) in sections" :key="s.key">
             <div class="mt-3 p-3 border rounded-lg space-y-2">
               <div class="flex flex-wrap gap-2 items-center">
-                <input x-model="s.label" class="border rounded px-2 py-1 w-56" placeholder="Nama Section">
+                <input x-model="s.label" class="border rounded px-2 py-1 w-56" placeholder="Nama Section (key)">
+                <input x-model="s.title" class="border rounded px-2 py-1 w-56" placeholder="Judul Section">
+                <input x-model="s.subtitle" class="border rounded px-2 py-1 w-56" placeholder="Subjudul (opsional)">
+
                 <select x-model="s.type" class="border rounded px-2 py-1">
                   <option value="text">Teks/HTML</option>
                   <option value="table">Tabel</option>
                 </select>
 
                 <!-- Posisi & ukuran -->
-                <input x-model.number="s.top"    type="number" class="border rounded px-2 py-1 w-24"  placeholder="top">
-                <input x-model.number="s.left"   type="number" class="border rounded px-2 py-1 w-24"  placeholder="left">
-                <input x-model.number="s.width"  type="number" class="border rounded px-2 py-1 w-24"  placeholder="width">
-                <input x-model.number="s.height" type="number" class="border rounded px-2 py-1 w-24"  placeholder="height">
+                <input x-model.number="s.top" type="number" class="border rounded px-2 py-1 w-24" placeholder="top">
+                <input x-model.number="s.left" type="number" class="border rounded px-2 py-1 w-24" placeholder="left">
+                <input x-model.number="s.width" type="number" class="border rounded px-2 py-1 w-24" placeholder="width">
+                <input x-model.number="s.height" type="number" class="border rounded px-2 py-1 w-24" placeholder="height">
 
                 <!-- Halaman & Auto flow -->
                 <input x-model.number="s.page" type="number" min="1" class="border rounded px-2 py-1 w-20" title="Halaman" placeholder="Pg">
@@ -278,335 +290,650 @@
 
 @push('scripts')
 <script>
-function docBuilder(){
-  return {
-    header:     { logo:{url:'',position:'left'}, title:{align:'center', text:''} },
-    footer:     { text:'', show_page_number:true },
-    signatures: { rows:[], columns:4, mode:'grid' },
+  function docBuilder() {
+    return {
+      header: {
+        logo: {
+          url: '',
+          position: 'left'
+        },
+        title: {
+          align: 'center',
+          text: ''
+        }
+      },
+      footer: {
+        text: '',
+        show_page_number: true
+      },
+      signatures: {
+        rows: [],
+        columns: 4,
+        mode: 'grid'
+      },
 
-    sections:   @json($defaultSections ?? []),
+      sections: @json($defaultSections ?? []),
 
-    templates: [], templateName: '', selectedTemplateId: '',
+      templates: [],
+      templateName: '',
+      selectedTemplateId: '',
 
-    preview: {
-      layout: { page:{width:794, height:1123}, margins:{top:40,right:35,bottom:40,left:35}, font:{size:12} },
-      zoom: 1.1,
-      pagesCount: 1,
-      blocks: []
-    },
-
-    drag: { active:false, mode:null, handle:null, blk:null, startX:0, startY:0, startTop:0, startLeft:0, startWidth:0, startHeight:0 },
-
-    init(){
-      try {
-        const el = document.querySelector('#doc-templates-json');
-        this.templates = JSON.parse(el?.textContent || '[]');
-      } catch(e){ console.error('Invalid templates JSON', e); }
-
-      if (!this.preview.blocks.length) {
-        this.preview.blocks = [{ id:'dummy', type:'text', text:'Preview Dokumen', top:120, left:120, width:420, height:42, fontSize:16, bold:true, z:10, page:1, origin:'template', repeatEachPage:false }];
-      }
-
-      this.$watch('selectedTemplateId', (val) => {
-        const t = this.templates.find(x => String(x.id) === String(val));
-        this.templateName = t ? t.name : '';
-        t ? this.applyTemplate(t) : this.resetPreview();
-      });
-
-      this.$watch('sections', () => this.refreshBlocks(), { deep:true });
-
-      this.refreshBlocks();
-    },
-
-    zoomIn(){ this.preview.zoom = Math.min(2, this.preview.zoom + 0.1); },
-    zoomOut(){ this.preview.zoom = Math.max(0.6, this.preview.zoom - 0.1); },
-
-    pageStyle(){
-      const w = this.preview.layout.page.width * this.preview.zoom;
-      const h = this.preview.layout.page.height * this.preview.zoom;
-      return { width: w+'px', height: h+'px', transformOrigin: 'top left' };
-    },
-    marginBoxStyle(){
-      const z = this.preview.zoom, L=this.preview.layout;
-      return {
-        top: (L.margins.top*z)+'px',
-        left: (L.margins.left*z)+'px',
-        width: ((L.page.width-L.margins.left-L.margins.right)*z)+'px',
-        height: ((L.page.height-L.margins.top-L.margins.bottom)*z)+'px',
-        outline: '1px dashed rgba(0,0,0,.08)'
-      }
-    },
-    blockStyle(blk){
-      const z = this.preview.zoom;
-      return {
-        top: ((blk.top??0)*z)+'px',
-        left: ((blk.left??0)*z)+'px',
-        width: ((blk.width??100)*z)+'px',
-        height: ((blk.height??32)*z)+'px',
-        zIndex: blk.z ?? 1,
-        background: blk.type==='tableCell' ? 'rgba(249,250,251,.9)' : 'transparent',
-        cursor: blk.origin==='section' ? (this.drag.mode ? 'grabbing' : 'grab') : 'default'
-      };
-    },
-
-    resetPreview(){
-      this.preview.layout = { page:{width:794, height:1123}, margins:{top:40,right:35,bottom:40,left:35}, font:{size:12} };
-      this.preview.zoom = 1.1;
-      this.preview.blocks = [{ id:'dummy', type:'text', text:'Preview Dokumen', top:120, left:120, width:420, height:42, fontSize:16, bold:true, z:10, page:1, origin:'template', repeatEachPage:false }];
-      this.header = { logo:{url:'',position:'left'}, title:{align:'center', text:''} };
-      this.footer = { text:'', show_page_number:true };
-      this.signatures = { rows:[], columns:4, mode:'grid' };
-      this.preview.pagesCount = 1;
-      this.refreshBlocks();
-    },
-
-    applyTemplate(tpl){
-      this.preview.layout = Object.assign(
-        { page:{width:794,height:1123}, margins:{top:40,right:35,bottom:40,left:35}, font:{size:12} },
-        tpl.layout || {}
-      );
-      this.header     = Object.assign({ logo:{url:'',position:'left'}, title:{align:'center', text:''} }, tpl.header || {});
-      this.footer     = Object.assign({ text:'', show_page_number:true }, tpl.footer || {});
-      this.signatures = Object.assign({ rows:[], columns:4, mode:'grid' }, tpl.signature ? { rows:(tpl.signature.rows||[]) } : {});
-
-      let blocks = Array.isArray(tpl.blocks) ? tpl.blocks.slice() : [];
-      this.preview.blocks = blocks.map((b) => {
-        const t = (b.type||'').toLowerCase();
-        const out = Object.assign({}, b, {
-          type: t==='tablecell' ? 'tableCell' : (t||'text'),
-          page: b.page || 1,
-          origin: 'template',
-          repeatEachPage: (typeof b.repeat!=='undefined') ? !!b.repeat
-                         : (typeof b.repeatEachPage!=='undefined') ? !!b.repeatEachPage
-                         : (t==='footer' || t==='header' || t==='signature')
-        });
-        if (b.hasOwnProperty('fontsize') && !b.hasOwnProperty('fontSize')) out.fontSize = b.fontsize;
-        if (b.hasOwnProperty('showpage')  && !b.hasOwnProperty('showPage')) out.showPage = !!b.showpage;
-        return out;
-      });
-
-      const hasHeader = this.preview.blocks.some(b => b.type==='header' && b.page===1);
-      if (!hasHeader) {
-        const L = this.preview.layout;
-        this.preview.blocks.push({
-          id: Math.random().toString(36).slice(2,10), type: 'header',
-          text: this.header?.title?.text || 'Judul Dokumen', align: this.header?.title?.align || 'left',
-          showMeta: false, metaRight: '', top: Math.max(8, (L.margins.top - 28)),
-          left: L.margins.left, width: L.page.width - (L.margins.left + L.margins.right),
-          height: 36, z: 50, page: 1, origin: 'template', repeatEachPage: true
-        });
-      }
-
-      const hasFooter = this.preview.blocks.some(b => b.type==='footer' && b.page===1);
-      if (!hasFooter) {
-        const L = this.preview.layout;
-        this.preview.blocks.push({
-          id: Math.random().toString(36).slice(2,10), type: 'footer',
-          text: this.footer?.text || '', showPage: this.footer?.show_page_number ?? true,
-          align: 'left',
-          top: L.page.height - (L.margins.bottom + 28),
-          left: L.margins.left,
-          width: L.page.width - (L.margins.left + L.margins.right),
-          height: 28, z: 50, page: 1, origin: 'template', repeatEachPage: true
-        });
-      }
-
-      const hasSig = this.preview.blocks.some(b => b.type==='signature' && b.page===1);
-      if (!hasSig && Array.isArray(this.signatures?.rows) && this.signatures.rows.length) {
-        const L = this.preview.layout;
-        const h = 90, y = Math.max(L.margins.top + 140, (L.page.height - L.margins.bottom - 28 - h - 8));
-        this.preview.blocks.push({
-          id: Math.random().toString(36).slice(2,10), type: 'signature',
-          role: 'Disetujui oleh', name: this.signatures.rows?.[0]?.name || '', position: this.signatures.rows?.[0]?.position_title || '',
-          top: y, left: L.margins.left, width: L.page.width - (L.margins.left + L.margins.right), height: h,
-          z: 40, page: 1, origin: 'template', repeatEachPage: true
-        });
-      }
-
-      this.refreshBlocks();
-      this.rebuildRepeatingBlocksAcrossPages();
-    },
-
-    refreshBlocks(){
-      const L = this.preview.layout;
-      const contentTop = L.margins.top, contentLeft = L.margins.left;
-      const contentWidth = L.page.width - L.margins.left - L.margins.right;
-      const contentBottom = L.page.height - L.margins.bottom;
-
-      const staticBlocks = (this.preview.blocks||[]).filter(b => b.origin!=='section');
-
-      const sectionBlocks = [];
-      const makeId = () => Math.random().toString(36).slice(2,10);
-      const pagesNow = Math.max(1, this.preview.pagesCount|0);
-      let maxPage = pagesNow;
-
-      this.sections.forEach((s, idx) => {
-        const basePage = Math.max(1, Number(s.page||1));
-        const pagesToPaint = s.repeatEachPage ? Array.from({length: pagesNow}, (_,i)=>i+1) : [basePage];
-
-        pagesToPaint.forEach((pg) => {
-          const base = {
-            id: makeId(),
-            top:    Number.isFinite(+s.top)    ? +s.top    : (contentTop + 60 + idx*120),
-            left:   Number.isFinite(+s.left)   ? +s.left   : contentLeft,
-            width:  Number.isFinite(+s.width)  ? +s.width  : contentWidth,
-            height: Number.isFinite(+s.height) ? +s.height : 120,
-            z: 20, origin: 'section', label: s.label || '', page: pg,
-            refKey: s.key || s.label, repeatEachPage: !!s.repeatEachPage,
-          };
-
-          let rect = {...base};
-          if (!s.repeatEachPage && s.autoFlow && (rect.top + rect.height) > (contentBottom)) {
-            rect.page += 1; rect.top = contentTop;
+      preview: {
+        layout: {
+          page: {
+            width: 794,
+            height: 1123
+          },
+          margins: {
+            top: 40,
+            right: 35,
+            bottom: 40,
+            left: 35
+          },
+          font: {
+            size: 12
           }
-          maxPage = Math.max(maxPage, rect.page);
+        },
+        zoom: 1.1,
+        pagesCount: 1,
+        blocks: []
+      },
 
-          if ((s.type || 'text') === 'text') {
-            sectionBlocks.push({ ...rect, type:'html', html: s.html || `<p style="color:#666">(${s.label||'Section'})</p>` });
-          } else if (s.type === 'table') {
-            const rows = Math.max(1, s.rows|0), cols = Math.max(1, s.cols|0);
-            const cellW = Math.max(20, Math.floor((rect.width-2) / cols));
-            const cellH = Math.max(20, Math.floor((rect.height-2) / rows));
-            for (let r=0; r<rows; r++){
-              for (let c=0; c<cols; c++){
-                const idxCell = r*cols + c;
-                sectionBlocks.push({
-                  id: makeId(), type: 'tableCell', text: (s.cells?.[idxCell] ?? ''),
-                  top: rect.top + r*cellH, left: rect.left + c*cellW,
-                  width: cellW, height: cellH, z: 20, origin: 'section',
-                  page: rect.page, refKey: rect.refKey, repeatEachPage: !!s.repeatEachPage,
-                });
+      drag: {
+        active: false,
+        mode: null,
+        handle: null,
+        blk: null,
+        startX: 0,
+        startY: 0,
+        startTop: 0,
+        startLeft: 0,
+        startWidth: 0,
+        startHeight: 0
+      },
+
+      init() {
+        try {
+          const el = document.querySelector('#doc-templates-json');
+          this.templates = JSON.parse(el?.textContent || '[]');
+        } catch (e) {
+          console.error('Invalid templates JSON', e);
+        }
+
+        if (!this.preview.blocks.length) {
+          this.preview.blocks = [{
+            id: 'dummy',
+            type: 'text',
+            text: 'Preview Dokumen',
+            top: 120,
+            left: 120,
+            width: 420,
+            height: 42,
+            fontSize: 16,
+            bold: true,
+            z: 10,
+            page: 1,
+            origin: 'template',
+            repeatEachPage: false
+          }];
+        }
+
+        this.$watch('selectedTemplateId', (val) => {
+          const t = this.templates.find(x => String(x.id) === String(val));
+          this.templateName = t ? t.name : '';
+          t ? this.applyTemplate(t) : this.resetPreview();
+        });
+
+        this.$watch('sections', () => this.refreshBlocks(), {
+          deep: true
+        });
+
+        this.refreshBlocks();
+      },
+
+      // ==== helper: translate items (header/footer) → blocks ====
+      itemsToBlocks(items, extra = {}) {
+        if (!Array.isArray(items)) return [];
+        const mk = () => Math.random().toString(36).slice(2, 10);
+        return items.map(it => {
+          const t = (it.type || 'text').toLowerCase();
+          return {
+            id: mk(),
+            type: t === 'tablecell' ? 'tableCell' : t,
+            text: it.text || '',
+            html: it.html || '',
+            src: it.src || '',
+            top: Number(it.top ?? 0),
+            left: Number(it.left ?? 0),
+            width: Number(it.width ?? 160),
+            height: Number(it.height ?? 32),
+            bold: !!it.bold,
+            align: it.align || 'left',
+            fontSize: Number(it.font_size ?? it.fontSize ?? (this.preview?.layout?.font?.size ?? 12)),
+            color: it.color || '#111',
+            z: 50,
+            origin: 'template',
+            repeatEachPage: true,
+            ...extra,
+          };
+        });
+      },
+
+      zoomIn() {
+        this.preview.zoom = Math.min(2, this.preview.zoom + 0.1);
+      },
+      zoomOut() {
+        this.preview.zoom = Math.max(0.6, this.preview.zoom - 0.1);
+      },
+
+      pageStyle() {
+        const w = this.preview.layout.page.width * this.preview.zoom;
+        const h = this.preview.layout.page.height * this.preview.zoom;
+        return {
+          width: w + 'px',
+          height: h + 'px',
+          transformOrigin: 'top left'
+        };
+      },
+      marginBoxStyle() {
+        const z = this.preview.zoom,
+          L = this.preview.layout;
+        return {
+          top: (L.margins.top * z) + 'px',
+          left: (L.margins.left * z) + 'px',
+          width: ((L.page.width - L.margins.left - L.margins.right) * z) + 'px',
+          height: ((L.page.height - L.margins.top - L.margins.bottom) * z) + 'px',
+          outline: '1px dashed rgba(0,0,0,.08)'
+        }
+      },
+      blockStyle(blk) {
+        const z = this.preview.zoom;
+        return {
+          top: ((blk.top ?? 0) * z) + 'px',
+          left: ((blk.left ?? 0) * z) + 'px',
+          width: ((blk.width ?? 100) * z) + 'px',
+          height: ((blk.height ?? 32) * z) + 'px',
+          zIndex: blk.z ?? 1,
+          background: blk.type === 'tableCell' ? 'rgba(249,250,251,.9)' : 'transparent',
+          cursor: blk.origin === 'section' ? (this.drag.mode ? 'grabbing' : 'grab') : 'default'
+        };
+      },
+
+      resetPreview() {
+        this.preview.layout = {
+          page: {
+            width: 794,
+            height: 1123
+          },
+          margins: {
+            top: 40,
+            right: 35,
+            bottom: 40,
+            left: 35
+          },
+          font: {
+            size: 12
+          }
+        };
+        this.preview.zoom = 1.1;
+        this.preview.blocks = [{
+          id: 'dummy',
+          type: 'text',
+          text: 'Preview Dokumen',
+          top: 120,
+          left: 120,
+          width: 420,
+          height: 42,
+          fontSize: 16,
+          bold: true,
+          z: 10,
+          page: 1,
+          origin: 'template',
+          repeatEachPage: false
+        }];
+        this.header = {
+          logo: {
+            url: '',
+            position: 'left'
+          },
+          title: {
+            align: 'center',
+            text: ''
+          }
+        };
+        this.footer = {
+          text: '',
+          show_page_number: true
+        };
+        this.signatures = {
+          rows: [],
+          columns: 4,
+          mode: 'grid'
+        };
+        this.preview.pagesCount = 1;
+        this.refreshBlocks();
+      },
+
+      applyTemplate(tpl) {
+        this.preview.layout = Object.assign({
+            page: {
+              width: 794,
+              height: 1123
+            },
+            margins: {
+              top: 40,
+              right: 35,
+              bottom: 40,
+              left: 35
+            },
+            font: {
+              size: 12
+            }
+          },
+          tpl.layout || {}
+        );
+        this.header = Object.assign({
+          logo: {
+            url: '',
+            position: 'left'
+          },
+          title: {
+            align: 'center',
+            text: ''
+          }
+        }, tpl.header || {});
+        this.footer = Object.assign({
+          text: '',
+          show_page_number: true
+        }, tpl.footer || {});
+        this.signatures = Object.assign({
+          rows: [],
+          columns: 4,
+          mode: 'grid'
+        }, tpl.signature ? {
+          rows: (tpl.signature.rows || [])
+        } : {});
+
+        // Blocks dari template
+        let blocks = Array.isArray(tpl.blocks) ? tpl.blocks.slice() : [];
+        this.preview.blocks = blocks.map((b) => {
+          const t = (b.type || '').toLowerCase();
+          const out = Object.assign({}, b, {
+            type: t === 'tablecell' ? 'tableCell' : (t || 'text'),
+            page: b.page || 1,
+            origin: 'template',
+            repeatEachPage: (typeof b.repeat !== 'undefined') ? !!b.repeat :
+              (typeof b.repeatEachPage !== 'undefined') ? !!b.repeatEachPage :
+              (t === 'footer' || t === 'header' || t === 'signature')
+          });
+          if (b.hasOwnProperty('fontsize') && !b.hasOwnProperty('fontSize')) out.fontSize = b.fontsize;
+          if (b.hasOwnProperty('showpage') && !b.hasOwnProperty('showPage')) out.showPage = !!b.showpage;
+          return out;
+        });
+
+        // Inject header.items → blocks
+        if (Array.isArray(tpl.header?.items) && tpl.header.items.length) {
+          this.preview.blocks.push(...this.itemsToBlocks(tpl.header.items));
+        }
+
+        // Inject footer.items → blocks
+        if (Array.isArray(tpl.footer?.items) && tpl.footer.items.length) {
+          this.preview.blocks.push(...this.itemsToBlocks(tpl.footer.items));
+        }
+
+        // Fallback header/footer block default kalau tidak ada sama sekali
+        const hasHeader = this.preview.blocks.some(b => b.type === 'header' && b.page === 1);
+        if (!hasHeader) {
+          const L = this.preview.layout;
+          this.preview.blocks.push({
+            id: Math.random().toString(36).slice(2, 10),
+            type: 'header',
+            text: this.header?.title?.text || 'Judul Dokumen',
+            align: this.header?.title?.align || 'left',
+            showMeta: false,
+            metaRight: '',
+            top: Math.max(8, (L.margins.top - 28)),
+            left: L.margins.left,
+            width: L.page.width - (L.margins.left + L.margins.right),
+            height: 36,
+            z: 50,
+            page: 1,
+            origin: 'template',
+            repeatEachPage: true
+          });
+        }
+
+        const hasFooter = this.preview.blocks.some(b => b.type === 'footer' && b.page === 1);
+        if (!hasFooter) {
+          const L = this.preview.layout;
+          this.preview.blocks.push({
+            id: Math.random().toString(36).slice(2, 10),
+            type: 'footer',
+            text: this.footer?.text || '',
+            showPage: this.footer?.show_page_number ?? true,
+            align: 'left',
+            top: L.page.height - (L.margins.bottom + 28),
+            left: L.margins.left,
+            width: L.page.width - (L.margins.left + L.margins.right),
+            height: 28,
+            z: 50,
+            page: 1,
+            origin: 'template',
+            repeatEachPage: true
+          });
+        }
+
+        // Signature default bila ada rows
+        const hasSig = this.preview.blocks.some(b => b.type === 'signature' && b.page === 1);
+        if (!hasSig && Array.isArray(this.signatures?.rows) && this.signatures.rows.length) {
+          const L = this.preview.layout;
+          const h = 90,
+            y = Math.max(L.margins.top + 140, (L.page.height - L.margins.bottom - 28 - h - 8));
+          this.preview.blocks.push({
+            id: Math.random().toString(36).slice(2, 10),
+            type: 'signature',
+            role: 'Disetujui oleh',
+            name: this.signatures.rows?.[0]?.name || '',
+            position: this.signatures.rows?.[0]?.position_title || '',
+            top: y,
+            left: L.margins.left,
+            width: L.page.width - (L.margins.left + L.margins.right),
+            height: h,
+            z: 40,
+            page: 1,
+            origin: 'template',
+            repeatEachPage: true
+          });
+        }
+
+        this.refreshBlocks();
+        this.rebuildRepeatingBlocksAcrossPages();
+      },
+
+      refreshBlocks() {
+        const L = this.preview.layout;
+        const contentTop = L.margins.top,
+          contentLeft = L.margins.left;
+        const contentWidth = L.page.width - L.margins.left - L.margins.right;
+        const contentBottom = L.page.height - L.margins.bottom;
+
+        const staticBlocks = (this.preview.blocks || []).filter(b => b.origin !== 'section');
+
+        const sectionBlocks = [];
+        const makeId = () => Math.random().toString(36).slice(2, 10);
+        const pagesNow = Math.max(1, this.preview.pagesCount | 0);
+        let maxPage = pagesNow;
+
+        this.sections.forEach((s, idx) => {
+          const basePage = Math.max(1, Number(s.page || 1));
+          const pagesToPaint = s.repeatEachPage ? Array.from({
+            length: pagesNow
+          }, (_, i) => i + 1) : [basePage];
+
+          pagesToPaint.forEach((pg) => {
+            const base = {
+              id: makeId(),
+              top: Number.isFinite(+s.top) ? +s.top : (contentTop + 60 + idx * 120),
+              left: Number.isFinite(+s.left) ? +s.left : contentLeft,
+              width: Number.isFinite(+s.width) ? +s.width : contentWidth,
+              height: Number.isFinite(+s.height) ? +s.height : 120,
+              z: 20,
+              origin: 'section',
+              label: s.label || '',
+              page: pg,
+              refKey: s.key || s.label,
+              repeatEachPage: !!s.repeatEachPage,
+            };
+
+            let rect = {
+              ...base
+            };
+            if (!s.repeatEachPage && s.autoFlow && (rect.top + rect.height) > (contentBottom)) {
+              rect.page += 1;
+              rect.top = contentTop;
+            }
+            maxPage = Math.max(maxPage, rect.page);
+
+            if ((s.type || 'text') === 'text') {
+              const title = (s.title || s.label || '').trim();
+              const subtitle = (s.subtitle || '').trim();
+              const body = (s.html || '').trim();
+
+              const html = `
+              ${title ? `<div style="font-weight:600;color:#1D1C1A;margin-bottom:2px;">${title}</div>` : ''}
+              ${subtitle ? `<div style="font-size:11px;color:#6b7280;margin-bottom:6px;">${subtitle}</div>` : ''}
+              ${body || `<p style="color:#666">(${s.label||'Section'})</p>`}
+            `;
+
+              sectionBlocks.push({
+                ...rect,
+                type: 'html',
+                html
+              });
+            } else if (s.type === 'table') {
+              const rows = Math.max(1, s.rows | 0),
+                cols = Math.max(1, s.cols | 0);
+              const cellW = Math.max(20, Math.floor((rect.width - 2) / cols));
+              const cellH = Math.max(20, Math.floor((rect.height - 2) / rows));
+              for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                  const idxCell = r * cols + c;
+                  sectionBlocks.push({
+                    id: makeId(),
+                    type: 'tableCell',
+                    text: (s.cells?.[idxCell] ?? ''),
+                    top: rect.top + r * cellH,
+                    left: rect.left + c * cellW,
+                    width: cellW,
+                    height: cellH,
+                    z: 20,
+                    origin: 'section',
+                    page: rect.page,
+                    refKey: rect.refKey,
+                    repeatEachPage: !!s.repeatEachPage,
+                  });
+                }
               }
             }
-          }
+          });
         });
-      });
 
-      this.preview.blocks = [...staticBlocks, ...sectionBlocks];
-      this.preview.pagesCount = Math.max(maxPage, 1);
-    },
+        this.preview.blocks = [...staticBlocks, ...sectionBlocks];
+        this.preview.pagesCount = Math.max(maxPage, 1);
+      },
 
-    addSection(){
-      this.sections.push({
-        key: 'sec_'+Date.now(),
-        label: 'Section Baru',
-        type: 'text',
-        html: '',
-        rows: 2, cols: 2, cells: [],
-        top: null, left: null, width: null, height: null,
-        page: 1, autoFlow: true, repeatEachPage: false
-      });
-    },
+      addSection() {
+        this.sections.push({
+          key: 'sec_' + Date.now(),
+          label: 'section_' + (this.sections.length + 1),
+          title: 'Section Baru',
+          subtitle: '',
+          type: 'text',
+          html: '',
+          rows: 2,
+          cols: 2,
+          cells: [],
+          top: null,
+          left: null,
+          width: null,
+          height: null,
+          page: 1,
+          autoFlow: true,
+          repeatEachPage: false
+        });
+      },
 
-    initTable(i){
-      const s = this.sections[i];
-      const total = Math.max(1,(s.rows|0)) * Math.max(1,(s.cols|0));
-      s.cells = Array.from({length: total}, (_,k) => s.cells?.[k] ?? '');
-      if (!Number.isFinite(+s.width))  s.width  = 520;
-      if (!Number.isFinite(+s.height)) s.height = 140;
-      this.refreshBlocks();
-    },
+      initTable(i) {
+        const s = this.sections[i];
+        const total = Math.max(1, (s.rows | 0)) * Math.max(1, (s.cols | 0));
+        s.cells = Array.from({
+          length: total
+        }, (_, k) => s.cells?.[k] ?? '');
+        if (!Number.isFinite(+s.width)) s.width = 520;
+        if (!Number.isFinite(+s.height)) s.height = 140;
+        this.refreshBlocks();
+      },
 
-    onBlockMouseDown(e, blk){
-      this.drag.active = true; this.drag.mode = 'move'; this.drag.handle = null; this.drag.blk = blk;
-      this.drag.startX = e.clientX; this.drag.startY = e.clientY;
-      this.drag.startTop = blk.top ?? 0; this.drag.startLeft = blk.left ?? 0;
+      onBlockMouseDown(e, blk) {
+        this.drag.active = true;
+        this.drag.mode = 'move';
+        this.drag.handle = null;
+        this.drag.blk = blk;
+        this.drag.startX = e.clientX;
+        this.drag.startY = e.clientY;
+        this.drag.startTop = blk.top ?? 0;
+        this.drag.startLeft = blk.left ?? 0;
 
-      const onMove = (ev) => {
-        if (!this.drag.active || this.drag.mode!=='move') return;
-        const scale = this.preview.zoom || 1;
-        const dx = (ev.clientX - this.drag.startX) / scale;
-        const dy = (ev.clientY - this.drag.startY) / scale;
-        blk.top  = Math.max(0, Math.round(this.drag.startTop  + dy));
-        blk.left = Math.max(0, Math.round(this.drag.startLeft + dx));
-        this.updateSectionRectFromBlock(blk, { top: blk.top, left: blk.left }, { silent:true });
-      };
-      const onUp = () => {
-        this.endDrag(); window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp);
-        this.updateSectionRectFromBlock(blk, { top: blk.top, left: blk.left });
-      };
-      window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
-    },
+        const onMove = (ev) => {
+          if (!this.drag.active || this.drag.mode !== 'move') return;
+          const scale = this.preview.zoom || 1;
+          const dx = (ev.clientX - this.drag.startX) / scale;
+          const dy = (ev.clientY - this.drag.startY) / scale;
+          blk.top = Math.max(0, Math.round(this.drag.startTop + dy));
+          blk.left = Math.max(0, Math.round(this.drag.startLeft + dx));
+          this.updateSectionRectFromBlock(blk, {
+            top: blk.top,
+            left: blk.left
+          }, {
+            silent: true
+          });
+        };
+        const onUp = () => {
+          this.endDrag();
+          window.removeEventListener('mousemove', onMove);
+          window.removeEventListener('mouseup', onUp);
+          this.updateSectionRectFromBlock(blk, {
+            top: blk.top,
+            left: blk.left
+          });
+        };
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+      },
 
-    onResizeMouseDown(e, blk, handle){
-      this.drag.active = true; this.drag.mode = 'resize'; this.drag.handle = handle; this.drag.blk = blk;
-      this.drag.startX = e.clientX; this.drag.startY = e.clientY;
-      this.drag.startWidth  = blk.width  ?? 100; this.drag.startHeight = blk.height ?? 32;
-      this.drag.startTop    = blk.top    ?? 0;   this.drag.startLeft   = blk.left   ?? 0;
+      onResizeMouseDown(e, blk, handle) {
+        this.drag.active = true;
+        this.drag.mode = 'resize';
+        this.drag.handle = handle;
+        this.drag.blk = blk;
+        this.drag.startX = e.clientX;
+        this.drag.startY = e.clientY;
+        this.drag.startWidth = blk.width ?? 100;
+        this.drag.startHeight = blk.height ?? 32;
+        this.drag.startTop = blk.top ?? 0;
+        this.drag.startLeft = blk.left ?? 0;
 
-      const onMove = (ev) => {
-        if (!this.drag.active || this.drag.mode!=='resize') return;
-        const scale = this.preview.zoom || 1;
-        const dx = (ev.clientX - this.drag.startX) / scale;
-        const dy = (ev.clientY - this.drag.startY) / scale;
+        const onMove = (ev) => {
+          if (!this.drag.active || this.drag.mode !== 'resize') return;
+          const scale = this.preview.zoom || 1;
+          const dx = (ev.clientX - this.drag.startX) / scale;
+          const dy = (ev.clientY - this.drag.startY) / scale;
 
-        if (this.drag.handle === 'br') {
-          blk.width  = Math.max(20, Math.round(this.drag.startWidth  + dx));
-          blk.height = Math.max(20, Math.round(this.drag.startHeight + dy));
-          this.updateSectionRectFromBlock(blk, { width: blk.width, height: blk.height }, { silent:true });
-        } else if (this.drag.handle === 'tl') {
-          const newLeft = Math.max(0, Math.round(this.drag.startLeft + dx));
-          const newTop  = Math.max(0, Math.round(this.drag.startTop  + dy));
-          const newW = Math.max(20, Math.round(this.drag.startWidth  - dx));
-          const newH = Math.max(20, Math.round(this.drag.startHeight - dy));
-          blk.left = newLeft; blk.top = newTop; blk.width = newW; blk.height = newH;
-          this.updateSectionRectFromBlock(blk, { left:newLeft, top:newTop, width:newW, height:newH }, { silent:true });
+          if (this.drag.handle === 'br') {
+            blk.width = Math.max(20, Math.round(this.drag.startWidth + dx));
+            blk.height = Math.max(20, Math.round(this.drag.startHeight + dy));
+            this.updateSectionRectFromBlock(blk, {
+              width: blk.width,
+              height: blk.height
+            }, {
+              silent: true
+            });
+          } else if (this.drag.handle === 'tl') {
+            const newLeft = Math.max(0, Math.round(this.drag.startLeft + dx));
+            const newTop = Math.max(0, Math.round(this.drag.startTop + dy));
+            const newW = Math.max(20, Math.round(this.drag.startWidth - dx));
+            const newH = Math.max(20, Math.round(this.drag.startHeight - dy));
+            blk.left = newLeft;
+            blk.top = newTop;
+            blk.width = newW;
+            blk.height = newH;
+            this.updateSectionRectFromBlock(blk, {
+              left: newLeft,
+              top: newTop,
+              width: newW,
+              height: newH
+            }, {
+              silent: true
+            });
+          }
+        };
+        const onUp = () => {
+          this.endDrag();
+          window.removeEventListener('mousemove', onMove);
+          window.removeEventListener('mouseup', onUp);
+          this.updateSectionRectFromBlock(blk, {
+            top: blk.top,
+            left: blk.left,
+            width: blk.width,
+            height: blk.height
+          });
+        };
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+      },
+
+      endDrag() {
+        this.drag.active = false;
+        this.drag.mode = null;
+        this.drag.handle = null;
+        this.drag.blk = null;
+      },
+
+      updateSectionRectFromBlock(blk, part, opts = {}) {
+        if (!blk || blk.origin !== 'section') return;
+        const key = blk.refKey || blk.label;
+        const i = this.sections.findIndex(s => (s.key === key) || (s.label === key));
+        if (i === -1) return;
+        const s = this.sections[i];
+        if (part.top !== undefined) s.top = Math.round(part.top);
+        if (part.left !== undefined) s.left = Math.round(part.left);
+        if (part.width !== undefined) s.width = Math.round(part.width);
+        if (part.height !== undefined) s.height = Math.round(part.height);
+        if (!opts.silent) this.refreshBlocks();
+      },
+
+      // Repeating template helpers
+      repeatable(b) {
+        const t = (b.type || '').toLowerCase();
+        const isHFS = (t === 'header' || t === 'footer' || t === 'signature');
+        return !!(b.repeatEachPage || b.repeat || isHFS);
+      },
+      getRepeatingTemplateBlocks() {
+        return (this.preview.blocks || []).filter(b => b.origin === 'template' && this.repeatable(b) && ((b.page || 1) === 1));
+      },
+      rebuildRepeatingBlocksAcrossPages() {
+        const pages = this.preview.pagesCount | 0;
+        if (pages <= 1) return;
+        const base = this.getRepeatingTemplateBlocks();
+        this.preview.blocks = (this.preview.blocks || []).filter(b => !(b.origin === 'template' && (b.page || 1) > 1));
+        for (let pg = 2; pg <= pages; pg++) {
+          const clones = base.map(b => {
+            const nb = JSON.parse(JSON.stringify(b));
+            nb.id = Math.random().toString(36).slice(2, 10);
+            nb.page = pg;
+            return nb;
+          });
+          this.preview.blocks.push(...clones);
         }
-      };
-      const onUp = () => {
-        this.endDrag(); window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp);
-        this.updateSectionRectFromBlock(blk, { top: blk.top, left: blk.left, width: blk.width, height: blk.height });
-      };
-      window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
-    },
+      },
 
-    endDrag(){ this.drag.active = false; this.drag.mode = null; this.drag.handle = null; this.drag.blk = null; },
-
-    updateSectionRectFromBlock(blk, part, opts = {}){
-      if (!blk || blk.origin!=='section') return;
-      const key = blk.refKey || blk.label;
-      const i = this.sections.findIndex(s => (s.key === key) || (s.label===key));
-      if (i === -1) return;
-      const s = this.sections[i];
-      if (part.top    !== undefined) s.top    = Math.round(part.top);
-      if (part.left   !== undefined) s.left   = Math.round(part.left);
-      if (part.width  !== undefined) s.width  = Math.round(part.width);
-      if (part.height !== undefined) s.height = Math.round(part.height);
-      if (!opts.silent) this.refreshBlocks();
-    },
-
-    // Repeating template helpers
-    repeatable(b){
-      const t = (b.type||'').toLowerCase();
-      const isHFS = (t==='header'||t==='footer'||t==='signature');
-      return !!(b.repeatEachPage || b.repeat || isHFS);
-    },
-    getRepeatingTemplateBlocks(){
-      return (this.preview.blocks||[]).filter(b => b.origin==='template' && this.repeatable(b) && ((b.page||1)===1));
-    },
-    rebuildRepeatingBlocksAcrossPages(){
-      const pages = this.preview.pagesCount|0;
-      if (pages <= 1) return;
-      const base = this.getRepeatingTemplateBlocks();
-      this.preview.blocks = (this.preview.blocks||[]).filter(b => !(b.origin==='template' && (b.page||1)>1));
-      for (let pg = 2; pg <= pages; pg++){
-        const clones = base.map(b => { const nb = JSON.parse(JSON.stringify(b)); nb.id = Math.random().toString(36).slice(2,10); nb.page = pg; return nb; });
-        this.preview.blocks.push(...clones);
-      }
-    },
-
-    addPage(){
-      this.preview.pagesCount = (this.preview.pagesCount|0) + 1;
-      const newPage = this.preview.pagesCount;
-      const base = this.getRepeatingTemplateBlocks();
-      const clones = base.map(b => { const nb = JSON.parse(JSON.stringify(b)); nb.id = Math.random().toString(36).slice(2,10); nb.page = newPage; return nb; });
-      const sectionBlocks = (this.preview.blocks||[]).filter(b => b.origin==='section');
-      const staticBlocks  = (this.preview.blocks||[]).filter(b => b.origin!=='section');
-      this.preview.blocks = [...staticBlocks, ...clones, ...sectionBlocks];
-      this.refreshBlocks();
-    },
+      addPage() {
+        this.preview.pagesCount = (this.preview.pagesCount | 0) + 1;
+        const newPage = this.preview.pagesCount;
+        const base = this.getRepeatingTemplateBlocks();
+        const clones = base.map(b => {
+          const nb = JSON.parse(JSON.stringify(b));
+          nb.id = Math.random().toString(36).slice(2, 10);
+          nb.page = newPage;
+          return nb;
+        });
+        const sectionBlocks = (this.preview.blocks || []).filter(b => b.origin === 'section');
+        const staticBlocks = (this.preview.blocks || []).filter(b => b.origin !== 'section');
+        this.preview.blocks = [...staticBlocks, ...clones, ...sectionBlocks];
+        this.refreshBlocks();
+      },
+    }
   }
-}
 </script>
 @endpush
 @endsection

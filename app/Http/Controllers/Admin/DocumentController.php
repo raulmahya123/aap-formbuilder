@@ -84,7 +84,7 @@ class DocumentController extends Controller
             ['key' => 'ruang_lingkup',        'label' => 'Ruang Lingkup',         'html' => ''],
             ['key' => 'referensi',            'label' => 'Referensi',             'html' => ''],
             ['key' => 'definisi',             'label' => 'Definisi',              'html' => ''],
-            ['key' => 'tugas_tanggungjawab',  'label' => 'Tugas & Tanggung Jawab','html' => ''],
+            ['key' => 'tugas_tanggungjawab',  'label' => 'Tugas & Tanggung Jawab', 'html' => ''],
             ['key' => 'rincian_prosedur',     'label' => 'Rincian Prosedur',      'html' => ''],
             ['key' => 'alur_prosedur',        'label' => 'Alur Prosedur',         'html' => ''],
             ['key' => 'sanksi',               'label' => 'Sanksi',                'html' => ''],
@@ -123,8 +123,8 @@ class DocumentController extends Controller
             'sections'          => ['nullable'],
 
             // opsional create QR/Barcode text
-            'qr_text'           => ['nullable','string','max:500'],
-            'barcode_text'      => ['nullable','string','max:500'],
+            'qr_text'           => ['nullable', 'string', 'max:500'],
+            'barcode_text'      => ['nullable', 'string', 'max:500'],
         ]);
 
         // Decode JSON string → array
@@ -184,7 +184,18 @@ class DocumentController extends Controller
             'acls.department:id,name'
         ]);
 
-        return view('admin.documents.show', compact('document'));
+        // Tambahkan ini
+        $templates   = DocumentTemplate::orderBy('name')->get();
+        $templatesPayload = $templates->map(fn($t) => $this->mapTemplateForClient($t))->values();
+
+        // (opsional) kirim default layout biar konsisten dengan poin #1
+        $defaultLayout = self::DEFAULT_LAYOUT;
+
+        return view('admin.documents.show', [
+            'document'         => $document,
+            'templatesPayload' => $templatesPayload,
+            'defaultLayout'    => $defaultLayout,
+        ]);
     }
 
     public function edit(Document $document)
@@ -281,10 +292,23 @@ class DocumentController extends Controller
 
         // Cek apakah ada field "konten" yang berubah
         $fieldsYangDicek = [
-            'template_id','title','dept_code','doc_type','project_code','effective_date','class',
-            'controlled_status','department_id','doc_no',
-            'layout_config','header_config','footer_config','signature_config','sections',
-            'qr_text','barcode_text',
+            'template_id',
+            'title',
+            'dept_code',
+            'doc_type',
+            'project_code',
+            'effective_date',
+            'class',
+            'controlled_status',
+            'department_id',
+            'doc_no',
+            'layout_config',
+            'header_config',
+            'footer_config',
+            'signature_config',
+            'sections',
+            'qr_text',
+            'barcode_text',
         ];
         $adaPerubahan = $document->isDirty($fieldsYangDicek);
 
@@ -503,7 +527,7 @@ class DocumentController extends Controller
 
         // Jika user kirim "storage/foo.png" tanpa leading slash
         if (str_starts_with($path, 'storage/')) {
-            return '/'.$path;
+            return '/' . $path;
         }
 
         // Anggap relatif ke root folder publik disk: public/<path>
@@ -526,7 +550,7 @@ class DocumentController extends Controller
             'project_code'     => $doc->project_code,
             'revision_no'      => $doc->revision_no,
             'effective_date'   => optional($doc->effective_date)->toDateString(),
-            'controlled_status'=> $doc->controlled_status,
+            'controlled_status' => $doc->controlled_status,
             'class'            => $doc->class,
             'department_id'    => $doc->department_id,
             'owner_id'         => $doc->owner_id,

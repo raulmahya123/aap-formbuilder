@@ -122,9 +122,10 @@
                     </div>
                   </template>
 
-                  {{-- SIGNATURE --}}
+                  {{-- SIGNATURE (center-aware) --}}
                   <template x-if="blk.type==='signature'">
-                    <div class="w-full h-full p-2 bg-white/90 rounded">
+                    <div class="w-full h-full p-2 bg-white/90 rounded"
+                         :style="{ textAlign: (blk.align || 'center') }">
                       <div class="text-[11px] text-gray-600" x-text="blk.role||'Role'"></div>
                       <div class="mt-1 w-full flex-1 border border-dashed rounded flex items-center justify-center" style="height:38px;">
                         <template x-if="blk.src"><img :src="blk.src" class="max-h-full object-contain"></template>
@@ -242,7 +243,6 @@
             </div>
             <div>
               <label class="text-sm font-medium">Revision</label>
-              {{-- tampilkan readonly; backend yang auto-increment --}}
               <input value="{{ $document->revision_no }}" class="mt-1 w-full border rounded-lg px-3 py-2 bg-gray-50" readonly>
               <p class="text-xs text-gray-500 mt-1">Naik otomatis saat disimpan.</p>
             </div>
@@ -260,6 +260,7 @@
             <div class="mt-3 p-3 border rounded-lg space-y-2">
               <div class="flex flex-wrap gap-2 items-center">
                 <input x-model="s.label" class="border rounded px-2 py-1 w-56" placeholder="Nama Section">
+                <input x-model="s.subtitle" class="border rounded px-2 py-1 w-56" placeholder="Subjudul (opsional)">
                 <select x-model="s.type" class="border rounded px-2 py-1">
                   <option value="text">Teks/HTML</option>
                   <option value="table">Tabel</option>
@@ -343,7 +344,7 @@
           @endif
         </div>
 
-        {{-- Signatures (opsional, kalau mau edit di sini juga) --}}
+        {{-- Signatures list (opsional) --}}
         @if(is_array($document->signatures))
           <div class="border rounded-xl p-4 space-y-4">
             <h2 class="font-semibold text-[#1D1C1A]">Pengesahan (TTD)</h2>
@@ -481,6 +482,21 @@ function docBuilder(){
       this.refreshBlocks();
     },
 
+    // Hitung left berdasarkan align (left|center|right)
+    computeLeftByAlign(blk) {
+      const L = this.preview.layout;
+      const contentW = L.page.width - L.margins.left - L.margins.right;
+      const w = blk.width ?? 100;
+      const a = (blk.align || '').toLowerCase();
+      if (a === 'center') {
+        return Math.round(L.margins.left + (contentW - w) / 2);
+      }
+      if (a === 'right') {
+        return Math.max(L.margins.left, Math.round(L.page.width - L.margins.right - w));
+      }
+      return blk.left ?? L.margins.left;
+    },
+
     applyTemplate(tpl){
       // Layout + config
       this.preview.layout = Object.assign(
@@ -508,11 +524,19 @@ function docBuilder(){
         return out;
       });
 
+      // Sesuaikan left berdasarkan align
+      this.preview.blocks = this.preview.blocks.map(b => {
+        if (['header','footer','signature','text','image','html'].includes(b.type) && b.align) {
+          b.left = this.computeLeftByAlign(b);
+        }
+        return b;
+      });
+
       // HEADER default (page 1)
       const hasHeader = this.preview.blocks.some(b => b.type==='header' && b.page===1);
       if (!hasHeader) {
         const L = this.preview.layout;
-        this.preview.blocks.push({
+        const hdr = {
           id: Math.random().toString(36).slice(2,10),
           type: 'header',
           text: this.header?.title?.text || 'Judul Dokumen',
@@ -524,14 +548,16 @@ function docBuilder(){
           width: L.page.width - (L.margins.left + L.margins.right),
           height: 36,
           z: 50, page: 1, origin: 'template', repeatEachPage: true
-        });
+        };
+        hdr.left = this.computeLeftByAlign(hdr);
+        this.preview.blocks.push(hdr);
       }
 
       // FOOTER default (page 1)
       const hasFooter = this.preview.blocks.some(b => b.type==='footer' && b.page===1);
       if (!hasFooter) {
         const L = this.preview.layout;
-        this.preview.blocks.push({
+        const ftr = {
           id: Math.random().toString(36).slice(2,10),
           type: 'footer',
           text: this.footer?.text || '',
@@ -542,7 +568,9 @@ function docBuilder(){
           width: L.page.width - (L.margins.left + L.margins.right),
           height: 28,
           z: 50, page: 1, origin: 'template', repeatEachPage: true
-        });
+        };
+        ftr.left = this.computeLeftByAlign(ftr);
+        this.preview.blocks.push(ftr);
       }
 
       // SIGNATURE default (page 1) bila ada rows
@@ -551,18 +579,21 @@ function docBuilder(){
         const L = this.preview.layout;
         const h = 90;
         const y = Math.max(L.margins.top + 140, (L.page.height - L.margins.bottom - 28 - h - 8));
-        this.preview.blocks.push({
+        const sig = {
           id: Math.random().toString(36).slice(2,10),
           type: 'signature',
           role: 'Disetujui oleh',
           name: this.signatures.rows?.[0]?.name || '',
           position: this.signatures.rows?.[0]?.position_title || '',
+          align: 'center',
           top: y,
           left: L.margins.left,
           width: L.page.width - (L.margins.left + L.margins.right),
           height: h,
           z: 40, page: 1, origin: 'template', repeatEachPage: true
-        });
+        };
+        sig.left = this.computeLeftByAlign(sig);
+        this.preview.blocks.push(sig);
       }
 
       this.refreshBlocks();
@@ -613,7 +644,10 @@ function docBuilder(){
           maxPage = Math.max(maxPage, rect.page);
 
           if ((s.type || 'text') === 'text') {
-            sectionBlocks.push({ ...rect, type:'html', html: s.html || `<p style="color:#666">(${s.label||'Section'})</p>` });
+            const title    = s.label ? `<div style="font-weight:600;margin-bottom:2px">${s.label}</div>` : '';
+            const subtitle = s.subtitle ? `<div style="color:#6b7280;font-size:12px;margin-bottom:6px">${s.subtitle}</div>` : '';
+            const body     = s.html ? s.html : `<p style="color:#6b7280">(${s.label||'Section'})</p>`;
+            sectionBlocks.push({ ...rect, type:'html', html: `${title}${subtitle}${body}` });
           } else if (s.type === 'table') {
             const rows = Math.max(1, s.rows|0), cols = Math.max(1, s.cols|0);
             const cellW = Math.max(20, Math.floor((rect.width-2) / cols));
@@ -647,6 +681,7 @@ function docBuilder(){
       this.sections.push({
         key: 'sec_'+Date.now(),
         label: 'Section Baru',
+        subtitle: '',
         type: 'text',
         html: '',
         rows: 2, cols: 2, cells: [],
