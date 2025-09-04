@@ -17,55 +17,41 @@
   .focus\:ring-0:focus { box-shadow: none !important; }
 
   /* ===== Panel lebih besar ===== */
-  .panel-lg { font-size: 0.95rem; } /* ~15.2px */
+  .panel-lg { font-size: 0.95rem; }
   .panel-lg .panel-title { font-size: 1rem; font-weight: 600; }
-  .panel-lg .field-grid { gap: .625rem; } /* 10px */
+  .panel-lg .field-grid { gap: .625rem; }
   .panel-lg label { font-size: 0.95rem; }
   .panel-lg input,
   .panel-lg select,
   .panel-lg textarea {
     padding: .6rem .7rem;
     font-size: 0.95rem;
-    border-radius: .75rem; /* rounded-xl */
+    border-radius: .75rem;
     border-width: 1px;
   }
-  .panel-lg .hint { font-size: .8rem; color: #6b7280; } /* gray-500 */
+  .panel-lg .hint { font-size: .8rem; color: #6b7280; }
 
   /* Garis panduan & label jarak */
-  .guide-line {
-    position: absolute;
-    pointer-events: none;
-  }
+  .guide-line { position: absolute; pointer-events: none; }
   .guide-badge {
-    position: absolute;
-    font-size: 10px;
-    line-height: 1;
-    padding: 2px 4px;
-    border-radius: 4px;
-    background: rgba(17,17,17,.85);
-    color: #fff;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    white-space: nowrap;
+    position: absolute; font-size: 10px; line-height: 1; padding: 2px 4px;
+    border-radius: 4px; background: rgba(17,17,17,.85); color: #fff;
+    pointer-events: none; transform: translate(-50%, -50%); white-space: nowrap;
   }
 </style>
 @endpush
 
 @section('content')
 @php
-  // Siapkan URL foto existing (akses via accessor photo_url bila ada)
   $photoUrl = method_exists($template, 'getPhotoUrlAttribute')
     ? ($template->photo_url ?? null)
     : ($template->photo_path ? asset('storage/'.$template->photo_path) : null);
 @endphp
 
-{{-- Inject payload template sebagai JSON agar Alpine bisa inisialisasi state --}}
 <script type="application/json" id="doc-template-json">
 {!! json_encode([
   'id'        => $template->id,
   'name'      => old('name', $template->name),
-  // layout_config, blocks_config, header_config, footer_config, signature_config
-  // diasumsikan disimpan sebagai JSON di DB.
   'layout'    => old('layout_config')     ? json_decode(old('layout_config'), true)     : ($template->layout_config     ?: ['page'=>['width'=>794,'height'=>1123],'margins'=>['top'=>30,'right'=>25,'bottom'=>25,'left'=>25],'font'=>['size'=>11,'family'=>'Poppins, sans-serif']]),
   'blocks'    => old('blocks_config')     ? json_decode(old('blocks_config'), true)     : ($template->blocks_config     ?: []),
   'header'    => old('header_config')     ? json_decode(old('header_config'), true)     : ($template->header_config     ?: ['mode'=>'absolute','items'=>[]]),
@@ -102,7 +88,7 @@
       @error('name') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
     </div>
 
-    {{-- INPUT: Ganti Foto Template (photo_path) + tampilkan existing --}}
+    {{-- INPUT: Foto Template --}}
     <div class="px-4 pt-3 space-y-2">
       <label class="block text-sm font-medium text-[#1D1C1A]">Foto Template (opsional)</label>
       <div class="mt-2 flex items-center gap-3">
@@ -115,16 +101,8 @@
         <template x-if="photo.url">
           <img :src="photo.url" alt="Preview" class="h-16 w-auto rounded border">
         </template>
-        <button type="button"
-                class="px-3 py-1.5 rounded border text-sm"
-                @click="clearPhoto()"
-                x-show="photo.url"
-                x-cloak>Hapus Preview</button>
-        <button type="button"
-                class="px-3 py-1.5 rounded border text-sm"
-                @click="addPhotoToCanvas()"
-                x-show="photo.url"
-                x-cloak>Tampilkan di Kanvas</button>
+        <button type="button" class="px-3 py-1.5 rounded border text-sm" @click="clearPhoto()" x-show="photo.url" x-cloak>Hapus Preview</button>
+        <button type="button" class="px-3 py-1.5 rounded border text-sm" @click="addPhotoToCanvas()" x-show="photo.url" x-cloak>Tampilkan di Kanvas</button>
       </div>
 
       @if($photoUrl)
@@ -137,9 +115,7 @@
         </label>
       @endif
 
-      <p class="text-xs text-gray-500">
-        Jika tidak memilih file baru, foto lama akan tetap digunakan (kecuali centang “Hapus foto”).
-      </p>
+      <p class="text-xs text-gray-500">Jika tidak memilih file baru, foto lama akan tetap digunakan (kecuali centang “Hapus foto”).</p>
       @error('photo_path') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
     </div>
 
@@ -176,7 +152,6 @@
           <input type="checkbox" x-model="guides"> Show guides
         </label>
 
-        {{-- Colors --}}
         <div class="flex items-center gap-2 text-sm">
           <span>Guide Color</span>
           <input type="color" x-model="colors.guide" class="w-8 h-6 p-0 border rounded">
@@ -194,7 +169,6 @@
         <button type="button" @click="bringToFront()" :disabled="selectedId===null" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Bring Front</button>
         <button type="button" @click="sendToBack()" :disabled="selectedId===null" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Send Back</button>
 
-        {{-- Duplicate, Copy, Paste --}}
         <button type="button" @click="duplicateSelected()" :disabled="selectedId===null" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Duplicate</button>
         <button type="button" @click="copySelected()" :disabled="selectedId===null" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Copy</button>
         <button type="button" @click="pasteClipboard()" :disabled="!clipboard" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Paste</button>
@@ -228,7 +202,6 @@
             <input type="number" class="mt-1 w-full border rounded px-2 py-1" x-model.number="layout.margins.bottom">
           </label>
 
-          {{-- Default font family halaman --}}
           <label class="col-span-2">Font family default
             <select class="mt-1 w-full border rounded px-2 py-1" x-model="layout.font.family">
               <option value="Poppins, sans-serif">Poppins (sans)</option>
@@ -283,20 +256,15 @@
                 <div class="grid grid-cols-2 field-grid">
                   <label>Align
                     <select class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.align">
-                      <option>left</option>
-                      <option>center</option>
-                      <option>right</option>
+                      <option>left</option><option>center</option><option>right</option>
                     </select>
                   </label>
 
                   <label>Ukuran (pt)
-                    <input type="number" min="8"
-                           class="mt-1 w-full border rounded-xl px-3 py-2"
-                           x-model.number="selected.fontSize">
+                    <input type="number" min="8" class="mt-1 w-full border rounded-xl px-3 py-2" x-model.number="selected.fontSize">
                   </label>
                 </div>
 
-                {{-- Font family per-blok teks --}}
                 <div class="grid grid-cols-2 field-grid">
                   <label>Font family
                     <select class="mt-1 w-full border rounded-xl px-3 py-2"
@@ -315,14 +283,12 @@
                   </label>
                   <label x-show="selected.__fontSelect==='__custom__'">
                     Custom CSS font-family
-                    <input class="mt-1 w-full border rounded-xl px-3 py-2"
-                           placeholder="e.g. 'Playfair Display', serif"
+                    <input class="mt-1 w-full border rounded-xl px-3 py-2" placeholder="e.g. 'Playfair Display', serif"
                            x-model="selected.__fontCustom"
                            @input="selected.fontFamily = selected.__fontCustom || layout.font.family">
                   </label>
                 </div>
 
-                {{-- Warna teks & border --}}
                 <div class="grid grid-cols-2 field-grid">
                   <label>Warna Teks
                     <input type="color" class="mt-1 w-full border rounded-xl px-2 py-1" x-model="selected.color">
@@ -332,9 +298,7 @@
                   </label>
                 </div>
 
-                <label>Bold
-                  <input type="checkbox" class="ml-2" x-model="selected.bold">
-                </label>
+                <label>Bold <input type="checkbox" class="ml-2" x-model="selected.bold"></label>
               </div>
             </template>
 
@@ -353,6 +317,13 @@
                   </label>
                   <label>Tanda Tangan (Teks, opsional)
                     <input class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.signatureText" placeholder="tulis tanda tangan">
+                  </label>
+
+                  {{-- NEW: Align TTD --}}
+                  <label>Align
+                    <select class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.align">
+                      <option>left</option><option>center</option><option>right</option>
+                    </select>
                   </label>
                 </div>
 
@@ -443,9 +414,7 @@
                 <div class="grid grid-cols-2 field-grid">
                   <label>Align
                     <select class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.align">
-                      <option>left</option>
-                      <option>center</option>
-                      <option>right</option>
+                      <option>left</option><option>center</option><option>right</option>
                     </select>
                   </label>
                   <label>Ukuran font (px)
@@ -472,7 +441,6 @@
           Kanvas (Custom) — <span x-text="layout.page.width"></span>×<span x-text="layout.page.height"></span> px
         </div>
 
-        {{-- Wrapper kanvas --}}
         <div class="relative bg-white rounded-b-xl shadow"
              :style="{ width: layout.page.width+'px', height: layout.page.height+'px', outline: pageBorder ? ('1px solid '+colors.pageBorder) : 'none' }"
              x-ref="page"
@@ -495,7 +463,7 @@
                  }"></div>
           </div>
 
-          {{-- SMART GUIDES OVERLAY --}}
+          {{-- SMART GUIDES --}}
           <template x-if="guides">
             <div class="absolute inset-0 pointer-events-none" x-ref="guidesOverlay">
               <div class="guide-line" x-show="gl.v.show"
@@ -576,14 +544,27 @@
               <template x-if="blk.type==='signature'">
                 <div class="w-full h-full p-2 bg-white/90 backdrop-blur rounded"
                      :class="blk.border ? 'border' : ''"
-                     :style="{ borderColor: (blk.borderColor || '#e5e7eb'), fontFamily: (blk.fontFamily ?? layout.font.family) }">
-                  <div class="text-[11px] text-gray-600" :style="{fontSize: (blk.infoFontSize)+'px'}" x-text="blk.role || 'Role'"></div>
-                  <div class="mt-1 w-full flex-1 border border-dashed rounded flex items-center justify-center"
-                       :style="{borderColor: (blk.borderColor || '#e5e7eb'), height:'38px', fontSize: (blk.signatureFontSize)+'px'}">
+                     :style="{
+                        borderColor: (blk.borderColor || '#e5e7eb'),
+                        fontFamily: (blk.fontFamily ?? layout.font.family),
+                        textAlign: (blk.align || 'center')
+                      }">
+                  <div class="text-[11px] text-gray-600"
+                       :style="{fontSize: (blk.infoFontSize)+'px'}"
+                       x-text="blk.role || 'Role'"></div>
+
+                  <div class="mt-1 w-full flex-1 border border-dashed rounded flex items-center"
+                       :style="{
+                         borderColor: (blk.borderColor || '#e5e7eb'),
+                         justifyContent: (blk.align==='right' ? 'flex-end' : (blk.align==='left' ? 'flex-start' : 'center'))
+                       }">
                     <template x-if="blk.src"><img :src="blk.src" class="max-h-full object-contain"></template>
-                    <template x-if="!blk.src && blk.signatureText"><span class="italic" x-text="blk.signatureText"></span></template>
+                    <template x-if="!blk.src && blk.signatureText">
+                      <span class="italic" :style="{fontSize: (blk.signatureFontSize)+'px'}" x-text="blk.signatureText"></span>
+                    </template>
                     <template x-if="!blk.src && !blk.signatureText"><span class="text-[10px] text-gray-400">TTD</span></template>
                   </div>
+
                   <div class="mt-1" :style="{fontSize: (blk.infoFontSize)+'px'}">
                     <div class="text-xs font-medium truncate" x-text="blk.name || 'Nama'"></div>
                     <div class="text-[11px] text-gray-600 truncate" x-text="blk.position || 'Jabatan'"></div>
@@ -591,7 +572,6 @@
                 </div>
               </template>
 
-              {{-- Resize handle --}}
               <div class="absolute right-0 bottom-0 translate-x-1/2 translate-y-1/2 w-3 h-3 bg-sky-500 rounded-sm cursor-se-resize opacity-0 group-hover:opacity-100"
                    @mousedown.stop="startResize(blk, $event)"></div>
             </div>
@@ -679,27 +659,21 @@ function docDesignerEdit() {
       const raw = document.getElementById('doc-template-json')?.textContent || '{}';
       const payload = JSON.parse(raw);
 
-      // meta
       this.meta.id = payload.id ?? null;
       this.meta.name = payload.name ?? '';
 
-      // layout
       if (payload.layout) {
-        // fallback default
         this.layout = Object.assign({
           page: { width: 794, height: 1123 },
           margins: { top: 30, right: 25, bottom: 25, left: 25 },
           font: { size: 11, family: 'Poppins, sans-serif' }
         }, payload.layout);
-        // pastikan key wajib ada
-        this.layout.page      = Object.assign({ width: 794, height: 1123 }, this.layout.page || {});
-        this.layout.margins   = Object.assign({ top: 30, right: 25, bottom: 25, left: 25 }, this.layout.margins || {});
-        this.layout.font      = Object.assign({ size: 11, family: 'Poppins, sans-serif' }, this.layout.font || {});
+        this.layout.page    = Object.assign({ width: 794, height: 1123 }, this.layout.page || {});
+        this.layout.margins = Object.assign({ top: 30, right: 25, bottom: 25, left: 25 }, this.layout.margins || {});
+        this.layout.font    = Object.assign({ size: 11, family: 'Poppins, sans-serif' }, this.layout.font || {});
       }
 
-      // blocks
       this.blocks = Array.isArray(payload.blocks) ? payload.blocks : [];
-      // set helper font dropdown supaya UI konsisten
       this.blocks.forEach(b => {
         b.z = b.z ?? 10;
         b.borderColor = b.borderColor || '#e5e7eb';
@@ -715,6 +689,7 @@ function docDesignerEdit() {
           b.__sigFontCustom = '';
           b.infoFontSize = (typeof b.infoFontSize === 'number' ? b.infoFontSize : 11);
           b.signatureFontSize = (typeof b.signatureFontSize === 'number' ? b.signatureFontSize : 16);
+          b.align = b.align || 'center'; // NEW default align
         }
         if (b.type === 'tableCell') {
           b.fontSize = (typeof b.fontSize === 'number' ? b.fontSize : 12);
@@ -726,11 +701,10 @@ function docDesignerEdit() {
         }
       });
 
-      // photo existing
       if (payload.photo_url) this.photo.url = payload.photo_url;
     },
 
-    // ====== BUILDERS (sama seperti form "create") ======
+    // ====== BUILDERS ======
     uid() { return Math.random().toString(36).slice(2, 10); },
     mkText(text, top, left, w, h, align='left', bold=false, fontSize=11, fontFamily=null, border=false) {
       return {
@@ -750,7 +724,8 @@ function docDesignerEdit() {
     mkFooter(text, top, left, w, h, border=true, align='left', fontSize=11, showPage=false) {
       return { id: this.uid(), type:'footer', text, top, left, width:w, height:h, border, align, fontSize, showPage, z:10, color:'#111', borderColor:'#e5e7eb' };
     },
-    mkSignature(role, name, position, top, left, w, h, border=false, fontFamily=null, infoFontSize=11, signatureFontSize=16) {
+    // NEW: align param default 'center'
+    mkSignature(role, name, position, top, left, w, h, border=false, fontFamily=null, infoFontSize=11, signatureFontSize=16, align='center') {
       return {
         id: this.uid(), type: 'signature',
         role, name, position,
@@ -759,13 +734,14 @@ function docDesignerEdit() {
         fontFamily,
         infoFontSize,
         signatureFontSize,
+        align, // left/center/right
         borderColor:'#e5e7eb',
         __sigFontSelect: fontFamily ?? this.layout?.font?.family ?? 'Poppins, sans-serif',
         __sigFontCustom: ''
       };
     },
 
-    // ====== ACTIONS (sama seperti form "create") ======
+    // ====== ACTIONS ======
     addText(t='Teks') {
       const b = this.mkText(t, 120, 60, 240, 40, 'left', false, this.layout.font.size, this.layout.font.family);
       b.__fontSelect = this.layout.font.family;
@@ -805,11 +781,11 @@ function docDesignerEdit() {
         36, true, 'left', 11));
     },
     addSignature() {
-      const b = this.mkSignature('Signer', '', '', this.layout.page.height - 260, this.layout.margins.left + 60, 160, 70, false, this.layout.font.family, 11, 16);
+      const b = this.mkSignature('Signer', '', '', this.layout.page.height - 260, this.layout.margins.left + 60, 160, 70, false, this.layout.font.family, 11, 16, 'center');
       this.blocks.push(b);
     },
 
-    // foto template (preview + ke kanvas)
+    // foto template
     onPhotoChange(e) {
       const f = e.target.files?.[0];
       if (!f) { this.photo.url = ''; return; }
@@ -971,30 +947,22 @@ function docDesignerEdit() {
         if (overlap(curr.left, curr.left+curr.width, o.left, o.left+o.width)) {
           if (o.top + o.height <= curr.top) {
             const gap = curr.top - (o.top + o.height);
-            if (gap < vGap.dist) {
-              vGap = {dist: gap, midX: centerX, midY: (curr.top + (o.top+o.height))/2, text: gap + ' px', show:true};
-            }
+            if (gap < vGap.dist) vGap = {dist: gap, midX: centerX, midY: (curr.top + (o.top+o.height))/2, text: gap + ' px', show:true};
           }
           if (curr.top + curr.height <= o.top) {
             const gap = o.top - (curr.top + curr.height);
-            if (gap < vGap.dist) {
-              vGap = {dist: gap, midX: centerX, midY: (o.top + (curr.top+curr.height))/2, text: gap + ' px', show:true};
-            }
+            if (gap < vGap.dist) vGap = {dist: gap, midX: centerX, midY: (o.top + (curr.top+curr.height))/2, text: gap + ' px', show:true};
           }
         }
 
         if (overlap(curr.top, curr.top+curr.height, o.top, o.top+o.height)) {
           if (o.left + o.width <= curr.left) {
             const gap = curr.left - (o.left + o.width);
-            if (gap < hGap.dist) {
-              hGap = {dist: gap, midY: centerY, midX: (curr.left + (o.left+o.width))/2, text: gap + ' px', show:true};
-            }
+            if (gap < hGap.dist) hGap = {dist: gap, midY: centerY, midX: (curr.left + (o.left+o.width))/2, text: gap + ' px', show:true};
           }
           if (curr.left + curr.width <= o.left) {
             const gap = o.left - (curr.left + curr.width);
-            if (gap < hGap.dist) {
-              hGap = {dist: gap, midY: centerY, midX: (o.left + (curr.left+curr.width))/2, text: gap + ' px', show:true};
-            }
+            if (gap < hGap.dist) hGap = {dist: gap, midY: centerY, midX: (o.left + (curr.left+curr.width))/2, text: gap + ' px', show:true};
           }
         }
       });
@@ -1003,23 +971,11 @@ function docDesignerEdit() {
       this.gl.v.show = vMatch.dist <= th; if (this.gl.v.show) this.gl.v.x = Math.round(vMatch.x);
       this.gl.h.show = hMatch.dist <= th; if (this.gl.h.show) this.gl.h.y = Math.round(hMatch.y);
 
-      if (vGap.show) {
-        this.gl.badgeV.show = true;
-        this.gl.badgeV.x = Math.round(vGap.midX);
-        this.gl.badgeV.y = Math.round(vGap.midY);
-        this.gl.badgeV.text = vGap.text;
-      } else {
-        this.gl.badgeV.show = false;
-      }
+      if (vGap.show) { this.gl.badgeV.show = true; this.gl.badgeV.x = Math.round(vGap.midX); this.gl.badgeV.y = Math.round(vGap.midY); this.gl.badgeV.text = vGap.text; }
+      else { this.gl.badgeV.show = false; }
 
-      if (hGap.show) {
-        this.gl.badgeH.show = true;
-        this.gl.badgeH.x = Math.round(hGap.midX);
-        this.gl.badgeH.y = Math.round(hGap.midY);
-        this.gl.badgeH.text = hGap.text;
-      } else {
-        this.gl.badgeH.show = false;
-      }
+      if (hGap.show) { this.gl.badgeH.show = true; this.gl.badgeH.x = Math.round(hGap.midX); this.gl.badgeH.y = Math.round(hGap.midY); this.gl.badgeH.text = hGap.text; }
+      else { this.gl.badgeH.show = false; }
     },
 
     // PAD
@@ -1098,7 +1054,7 @@ function docDesignerEdit() {
       const signature = {
         mode: 'absolute',
         rows: this.blocks.filter(b => b.type === 'signature')
-          .map(({ role, name, position, signatureText, src, top, left, width, height, border, fontFamily, infoFontSize, signatureFontSize, borderColor }) => ({
+          .map(({ role, name, position, signatureText, src, top, left, width, height, border, fontFamily, infoFontSize, signatureFontSize, borderColor, align }) => ({
             role: role || '',
             name: name || '',
             position_title: position || '',
@@ -1110,17 +1066,16 @@ function docDesignerEdit() {
             info_font_size: infoFontSize,
             signature_font_size: signatureFontSize,
             border_color: borderColor || '#e5e7eb',
+            align: align || 'center', // NEW: ikut dikirim
           }))
       };
 
-      // isikan ke hidden inputs
       this.$refs.blocksInput.value   = JSON.stringify(this.blocks);
       this.$refs.layoutInput.value   = JSON.stringify(this.layout);
       this.$refs.headerInput.value   = JSON.stringify(header);
       this.$refs.footerInput.value   = JSON.stringify(footer);
       this.$refs.signatureInput.value= JSON.stringify(signature);
 
-      // set nama ke input "name" (pakai x-model sudah cukup, tapi untuk safety)
       const nameInput = this.$refs.form.querySelector('input[name="name"]');
       if (nameInput) nameInput.value = this.meta.name || '';
 

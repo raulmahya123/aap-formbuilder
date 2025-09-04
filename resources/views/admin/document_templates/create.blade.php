@@ -318,6 +318,15 @@
                   <label>Tanda Tangan (Teks, opsional)
                     <input class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.signatureText" placeholder="tulis tanda tangan">
                   </label>
+
+                  {{-- NEW: Align TTD --}}
+                  <label>Align
+                    <select class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.align">
+                      <option>left</option>
+                      <option>center</option>
+                      <option>right</option>
+                    </select>
+                  </label>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -544,14 +553,27 @@
               <template x-if="blk.type==='signature'">
                 <div class="w-full h-full p-2 bg-white/90 backdrop-blur rounded"
                      :class="blk.border ? 'border' : ''"
-                     :style="{ borderColor: (blk.borderColor || '#e5e7eb'), fontFamily: (blk.fontFamily ?? layout.font.family) }">
-                  <div class="text-[11px] text-gray-600" :style="{fontSize: (blk.infoFontSize)+'px'}" x-text="blk.role || 'Role'"></div>
-                  <div class="mt-1 w-full flex-1 border border-dashed rounded flex items-center justify-center"
-                       :style="{borderColor: (blk.borderColor || '#e5e7eb'), height:'38px', fontSize: (blk.signatureFontSize)+'px'}">
+                     :style="{
+                        borderColor: (blk.borderColor || '#e5e7eb'),
+                        fontFamily: (blk.fontFamily ?? layout.font.family),
+                        textAlign: (blk.align || 'center')
+                      }">
+                  <div class="text-[11px] text-gray-600"
+                       :style="{fontSize: (blk.infoFontSize)+'px'}"
+                       x-text="blk.role || 'Role'"></div>
+
+                  <div class="mt-1 w-full flex-1 border border-dashed rounded flex items-center"
+                       :style="{
+                         borderColor: (blk.borderColor || '#e5e7eb'),
+                         justifyContent: (blk.align==='right' ? 'flex-end' : (blk.align==='left' ? 'flex-start' : 'center'))
+                       }">
                     <template x-if="blk.src"><img :src="blk.src" class="max-h-full object-contain"></template>
-                    <template x-if="!blk.src && blk.signatureText"><span class="italic" x-text="blk.signatureText"></span></template>
-                    <template x-if="!blk.src && !blk.signatureText"><span class="text-[10px] text-gray-400">TTD</span></template>
+                    <template x-if="!blk.src && blk.signatureText">
+                      <span class="italic" :style="{fontSize: (blk.signatureFontSize)+'px'}" x-text="blk.signatureText"></span>
+                    </template>
+                    <template x-if="!blk.src && !blk.signatureText"><span class="text-[10px] text-gray-400"></span></template>
                   </div>
+
                   <div class="mt-1" :style="{fontSize: (blk.infoFontSize)+'px'}">
                     <div class="text-xs font-medium truncate" x-text="blk.name || 'Nama'"></div>
                     <div class="text-[11px] text-gray-600 truncate" x-text="blk.position || 'Jabatan'"></div>
@@ -659,9 +681,9 @@ function docDesigner() {
           this.layout.margins.left,
           this.layout.page.width - this.layout.margins.left - this.layout.margins.right,
           36, true, 'left', 11, false),
-        // Signature awal: pakai default family, ukuran info 11px, signature 16px
-        this.mkSignature('Disiapkan', '', '', this.layout.page.height - 300, this.layout.margins.left + 0,   160, 70, false, null, 11, 16),
-        this.mkSignature('Diperiksa', '', '', this.layout.page.height - 300, this.layout.margins.left + 180, 160, 70, false, null, 11, 16),
+        // Signature awal: align default center
+        this.mkSignature('Disiapkan', '', '', this.layout.page.height - 300, this.layout.margins.left + 0,   160, 70, false, null, 11, 16, 'center'),
+        this.mkSignature('Diperiksa', '', '', this.layout.page.height - 300, this.layout.margins.left + 180, 160, 70, false, null, 11, 16, 'center'),
       ];
       // Init helper untuk dropdown font
       this.blocks.forEach(b => {
@@ -697,7 +719,8 @@ function docDesigner() {
     mkFooter(text, top, left, w, h, border=true, align='left', fontSize=11, showPage=false) {
       return { id: this.uid(), type:'footer', text, top, left, width:w, height:h, border, align, fontSize, showPage, z:10, color:'#111', borderColor:'#e5e7eb' };
     },
-    mkSignature(role, name, position, top, left, w, h, border=false, fontFamily=null, infoFontSize=11, signatureFontSize=16) {
+    // NEW: tambah param align (default 'center')
+    mkSignature(role, name, position, top, left, w, h, border=false, fontFamily=null, infoFontSize=11, signatureFontSize=16, align='center') {
       return {
         id: this.uid(), type: 'signature',
         role, name, position,
@@ -706,6 +729,7 @@ function docDesigner() {
         fontFamily,       // font untuk seluruh teks di blok TTD
         infoFontSize,     // px untuk Role/Nama/Jabatan
         signatureFontSize,// px untuk teks tanda tangan
+        align,            // left / center / right
         borderColor:'#e5e7eb',
         __sigFontSelect: fontFamily ?? this.layout?.font?.family ?? 'Poppins, sans-serif',
         __sigFontCustom: ''
@@ -752,7 +776,7 @@ function docDesigner() {
         36, true, 'left', 11));
     },
     addSignature() {
-      const b = this.mkSignature('Signer', '', '', this.layout.page.height - 260, this.layout.margins.left + 60, 160, 70, false, this.layout.font.family, 11, 16);
+      const b = this.mkSignature('Signer', '', '', this.layout.page.height - 260, this.layout.margins.left + 60, 160, 70, false, this.layout.font.family, 11, 16, 'center');
       this.blocks.push(b);
     },
 
@@ -831,7 +855,6 @@ function docDesigner() {
       if (meta && e.key.toLowerCase()==='c') { e.preventDefault(); this.copySelected(); }
       if (meta && e.key.toLowerCase()==='v') { e.preventDefault(); this.pasteClipboard(); }
       if (meta && e.key.toLowerCase()==='d') { e.preventDefault(); this.duplicateSelected(); }
-      if ((e.key==='Delete' || e.key==='Backspace') && this.selectedId) { e.preventDefault(); this.deleteSelected(); }
     },
 
     // drag & resize
@@ -1078,7 +1101,7 @@ function docDesigner() {
       const signature = {
         mode: 'absolute',
         rows: this.blocks.filter(b => b.type === 'signature')
-          .map(({ role, name, position, signatureText, src, top, left, width, height, border, fontFamily, infoFontSize, signatureFontSize, borderColor }) => ({
+          .map(({ role, name, position, signatureText, src, top, left, width, height, border, fontFamily, infoFontSize, signatureFontSize, borderColor, align }) => ({
             role: role || '',
             name: name || '',
             position_title: position || '',
@@ -1090,6 +1113,7 @@ function docDesigner() {
             info_font_size: infoFontSize,
             signature_font_size: signatureFontSize,
             border_color: borderColor || '#e5e7eb',
+            align: align || 'center', // NEW: kirim align ke backend
           }))
       };
 
