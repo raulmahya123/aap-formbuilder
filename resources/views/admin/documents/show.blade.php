@@ -113,20 +113,36 @@
 
               {{-- SIGNATURE (honor align center/left/right) --}}
               <template x-if="blk.type==='signature'">
-                <div class="w-full h-full p-2 bg-white/90 rounded"
-                     :style="{ textAlign: (blk.align || 'center') }">
-                  <div class="text-[11px] text-gray-600" x-text="blk.role||'Role'"></div>
-                  <div class="mt-1 w-full flex-1 border border-dashed rounded flex items-center justify-center" style="height:38px;">
-                    <template x-if="blk.src"><img :src="blk.src" class="max-h-full object-contain"></template>
-                    <template x-if="!blk.src && blk.signatureText"><span class="italic" x-text="blk.signatureText"></span></template>
-                    <template x-if="!blk.src && !blk.signatureText"><span class="text-[10px] text-gray-400">TTD</span></template>
-                  </div>
-                  <div class="mt-1">
-                    <div class="text-xs font-medium truncate" x-text="blk.name||'Nama'"></div>
-                    <div class="text-[11px] text-gray-600 truncate" x-text="blk.position||'Jabatan'"></div>
-                  </div>
-                </div>
-              </template>
+                    <div class="w-full h-full p-2 bg-white/90 rounded" :style="{ textAlign: blk.align || 'center', color:'#000' }">
+                      <div class="text-[11px]" x-text="blk.role||'Role'"></div>
+
+                      <!-- FRAME TTD -->
+                      <div class="mt-1 w-full flex-1 rounded flex items-center justify-center p-1"
+                           :style="{
+                             height: (blk.boxHeight ?? 96) + 'px',
+                             borderStyle: (blk.borderStyle ?? 'solid'),
+                             borderWidth: ((blk.borderWidth ?? 2)) + 'px',
+                             borderColor: (blk.borderColor ?? '#9CA3AF'),
+                             boxSizing: 'border-box',
+                             backgroundColor: '#fff'
+                           }">
+                        <template x-if="blk.src">
+                          <img :src="blk.src" class="max-h-full max-w-full object-contain">
+                        </template>
+                        <template x-if="!blk.src && blk.signatureText">
+                          <span class="italic" x-text="blk.signatureText"></span>
+                        </template>
+                        <template x-if="!blk.src && !blk.signatureText">
+                          <span class="text-[11px]">Tanda Tangan</span>
+                        </template>
+                      </div>
+
+                      <div class="mt-1">
+                        <div class="text-xs font-medium truncate" x-text="blk.name||'Nama'"></div>
+                        <div class="text-[11px] truncate" x-text="blk.position||'Jabatan'"></div>
+                      </div>
+                    </div>
+                  </template>
 
             </div>
           </template>

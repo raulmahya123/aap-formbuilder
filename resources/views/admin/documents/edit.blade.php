@@ -1,3 +1,4 @@
+{{-- resources/views/admin/documents/edit.blade.php --}}
 @extends('layouts.app')
 
 @section('title','Edit Document')
@@ -70,14 +71,14 @@
                   {{-- HEADER --}}
                   <template x-if="blk.type==='header'">
                     <div class="w-full h-full px-3 py-2 flex items-center justify-between bg-white/95"
-                         :style="{ fontSize: (blk.fontSize??12)+'px', textAlign: blk.align||'left' }">
+                         :style="{ fontSize: (blk.fontSize??12)+'px', textAlign: blk.align||'left', color:'#000' }">
                       <div class="flex items-center gap-2 overflow-hidden">
                         <template x-if="header?.logo?.url">
                           <img :src="header.logo.url" alt="Logo" class="h-6 w-auto object-contain">
                         </template>
                         <div class="truncate font-medium" x-text="header?.title?.text || blk.text || 'Judul Dokumen'"></div>
                       </div>
-                      <div class="text-xs text-gray-600" x-show="blk.showMeta">
+                      <div class="text-xs" x-show="blk.showMeta">
                         <span x-text="blk.metaRight || ''"></span>
                       </div>
                     </div>
@@ -86,55 +87,62 @@
                   {{-- TEXT --}}
                   <template x-if="blk.type==='text'">
                     <div class="w-full h-full p-2 overflow-hidden"
-                         :style="{ textAlign: blk.align||'left', fontWeight: blk.bold?'700':'400', fontSize: (blk.fontSize??preview.layout.font.size)+'pt' }"
+                         :style="{ textAlign: blk.align||'left', fontWeight: blk.bold?'700':'400', fontSize: (blk.fontSize??preview.layout.font.size)+'pt', color:'#000' }"
                          x-text="blk.text||''"></div>
                   </template>
 
                   {{-- HTML --}}
                   <template x-if="blk.type==='html'">
-                    <div class="w-full h-full p-3 overflow-auto text-[13px] leading-relaxed prose prose-sm max-w-none"
-                         x-html="blk.html"></div>
+                    <div class="w-full h-full p-3 overflow-auto text-[13px] leading-relaxed"
+                         style="color:#000" x-html="blk.html"></div>
                   </template>
 
                   {{-- IMAGE --}}
                   <template x-if="blk.type==='image'">
                     <div class="w-full h-full flex items-center justify-center bg-white">
                       <template x-if="blk.src"><img :src="blk.src" class="max-w-full max-h-full object-contain"></template>
-                      <template x-if="!blk.src"><span class="text-xs text-gray-400">[Gambar]</span></template>
+                      <template x-if="!blk.src"><span class="text-xs">[Gambar]</span></template>
                     </div>
                   </template>
 
                   {{-- TABLE CELL --}}
                   <template x-if="blk.type==='tableCell'">
                     <div class="w-full h-full px-2 py-1 border border-gray-300 overflow-hidden flex items-center"
-                         :style="{ fontWeight: blk.bold?'700':'400', fontSize: (blk.fontSize??12)+'px' }"
+                         :style="{ fontWeight: blk.bold?'700':'400', fontSize: (blk.fontSize??12)+'px', color:'#000' }"
                          x-text="blk.text || ' '"></div>
                   </template>
 
                   {{-- FOOTER --}}
                   <template x-if="blk.type==='footer'">
                     <div class="w-full h-full px-2 py-1 flex items-center justify-between bg-white/95"
-                         :style="{ fontSize: (blk.fontSize??11)+'px', textAlign: blk.align||'left' }">
+                         :style="{ fontSize: (blk.fontSize??11)+'px', textAlign: blk.align||'left', color:'#000' }">
                       <div class="truncate" x-text="blk.text || footer.text || '© Perusahaan'"></div>
-                      <div class="text-xs text-gray-600" x-show="blk.showPage || footer.show_page_number">
+                      <div class="text-xs" x-show="blk.showPage || footer.show_page_number">
                         Halaman <span x-text="p"></span> / <span x-text="preview.pagesCount"></span>
                       </div>
                     </div>
                   </template>
 
-                  {{-- SIGNATURE (center-aware) --}}
+                  {{-- SIGNATURE (grid, border tegas) --}}
                   <template x-if="blk.type==='signature'">
-                    <div class="w-full h-full p-2 bg-white/90 rounded"
-                         :style="{ textAlign: (blk.align || 'center') }">
-                      <div class="text-[11px] text-gray-600" x-text="blk.role||'Role'"></div>
-                      <div class="mt-1 w-full flex-1 border border-dashed rounded flex items-center justify-center" style="height:38px;">
-                        <template x-if="blk.src"><img :src="blk.src" class="max-h-full object-contain"></template>
+                    <div class="w-full h-full p-2 bg-white/90 rounded" :style="{ textAlign: (blk.align || 'center'), color:'#000' }">
+                      <div class="text-[11px]" x-text="blk.role||'Role'"></div>
+                      <div class="mt-1 w-full flex-1 rounded flex items-center justify-center p-1"
+                           :style="{
+                             height: (blk.boxHeight ?? 96) + 'px',
+                             borderStyle: (blk.borderStyle ?? 'solid'),
+                             borderWidth: ((blk.borderWidth ?? 2)) + 'px',
+                             borderColor: (blk.borderColor ?? '#9CA3AF'),
+                             boxSizing: 'border-box',
+                             backgroundColor: '#fff'
+                           }">
+                        <template x-if="blk.src"><img :src="blk.src" class="max-h-full max-w-full object-contain"></template>
                         <template x-if="!blk.src && blk.signatureText"><span class="italic" x-text="blk.signatureText"></span></template>
-                        <template x-if="!blk.src && !blk.signatureText"><span class="text-[10px] text-gray-400">TTD</span></template>
+                        <template x-if="!blk.src && !blk.signatureText"><span class="text-[11px]">Tanda Tangan</span></template>
                       </div>
                       <div class="mt-1">
                         <div class="text-xs font-medium truncate" x-text="blk.name||'Nama'"></div>
-                        <div class="text-[11px] text-gray-600 truncate" x-text="blk.position||'Jabatan'"></div>
+                        <div class="text-[11px] truncate" x-text="blk.position||'Jabatan'"></div>
                       </div>
                     </div>
                   </template>
@@ -235,7 +243,7 @@
             </div>
           </div>
 
-          {{-- Nomor & Revisi (UI aja) --}}
+          {{-- Nomor & Revisi --}}
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="text-sm font-medium">Doc.No</label>
@@ -344,35 +352,6 @@
           @endif
         </div>
 
-        {{-- Signatures list (opsional) --}}
-        @if(is_array($document->signatures))
-          <div class="border rounded-xl p-4 space-y-4">
-            <h2 class="font-semibold text-[#1D1C1A]">Pengesahan (TTD)</h2>
-            @foreach($document->signatures as $i => $sig)
-              <div class="p-3 border rounded-lg space-y-3">
-                <div class="grid md:grid-cols-3 gap-3">
-                  <div>
-                    <label class="text-sm">Role</label>
-                    <input type="text" name="signatures[{{ $i }}][role]" value="{{ old("signatures.$i.role",$sig['role'] ?? '') }}" class="mt-1 w-full border rounded-lg px-3 py-2">
-                  </div>
-                  <div>
-                    <label class="text-sm">Nama</label>
-                    <input type="text" name="signatures[{{ $i }}][name]" value="{{ old("signatures.$i.name",$sig['name'] ?? '') }}" class="mt-1 w-full border rounded-lg px-3 py-2">
-                  </div>
-                  <div>
-                    <label class="text-sm">Jabatan</label>
-                    <input type="text" name="signatures[{{ $i }}][position_title]" value="{{ old("signatures.$i.position_title",$sig['position_title'] ?? '') }}" class="mt-1 w-full border rounded-lg px-3 py-2">
-                  </div>
-                </div>
-                <div>
-                  <label class="text-sm">TTD (URL)</label>
-                  <input type="text" name="signatures[{{ $i }}][image_path]" value="{{ old("signatures.$i.image_path",$sig['image_path'] ?? '') }}" class="mt-1 w-full border rounded-lg px-3 py-2">
-                </div>
-              </div>
-            @endforeach
-          </div>
-        @endif
-
         <div class="pt-2 flex items-center justify-end gap-3">
           <a href="{{ route('admin.documents.index') }}" class="px-4 py-2 rounded-xl border text-[#1D1C1A]">Batal</a>
           <button class="px-4 py-2 rounded-xl bg-[#7A2C2F] text-white hover:opacity-90">Update</button>
@@ -390,14 +369,15 @@ function docBuilder(){
     // STATE awal
     header:     { logo:{url:'',position:'left'}, title:{align:'center', text:''} },
     footer:     { text:'', show_page_number:true },
-    signatures: { rows:[], columns:4, mode:'grid' },
+    signatures: { rows:[], columns:4, mode:'grid' },   // <— penting
     sections:   [],
     templates: [], templateName: '', selectedTemplateId: '',
 
     preview: {
       layout: { page:{width:794, height:1123}, margins:{top:40,right:35,bottom:40,left:35}, font:{size:12} },
       zoom: 1.1,
-      pagesCount: 1,
+      pagesCount: 2,          // minimal 2 halaman saat edit
+      templatePages: [1],     // halaman yang pakai blok template
       blocks: []
     },
 
@@ -420,7 +400,11 @@ function docBuilder(){
 
       // Seed blocks (dummy)
       if (!this.preview.blocks.length) {
-        this.preview.blocks = [{ id:'dummy', type:'text', text:'Preview Dokumen', top:120, left:120, width:420, height:42, fontSize:16, bold:true, z:10, page:1, origin:'template', repeatEachPage:false }];
+        this.preview.blocks = [{
+          id:'dummy', type:'text', text:'Preview Dokumen',
+          top:120, left:120, width:420, height:42, fontSize:16, bold:true,
+          z:10, page:1, origin:'template', repeatEachPage:false
+        }];
       }
 
       // Template watcher
@@ -438,7 +422,7 @@ function docBuilder(){
         const t = this.templates.find(x => String(x.id) === String(this.selectedTemplateId));
         t ? this.applyTemplate(t) : this.refreshBlocks();
       } else {
-        this.applyTemplate({ layout:this.preview.layout, header:this.header, footer:this.footer, signature:{ rows:this.signatures.rows||[] }, blocks: [] });
+        this.applyTemplate({ layout:this.preview.layout, header:this.header, footer:this.footer, signature:{ rows:this.signatures.rows||[], columns:this.signatures.columns||4, mode:this.signatures.mode||'grid' }, blocks: [] });
       }
     },
 
@@ -477,9 +461,15 @@ function docBuilder(){
     resetPreview(){
       this.preview.layout = { page:{width:794, height:1123}, margins:{top:40,right:35,bottom:40,left:35}, font:{size:12} };
       this.preview.zoom = 1.1;
-      this.preview.blocks = [{ id:'dummy', type:'text', text:'Preview Dokumen', top:120, left:120, width:420, height:42, fontSize:16, bold:true, z:10, page:1, origin:'template', repeatEachPage:false }];
-      this.preview.pagesCount = 1;
+      this.preview.blocks = [{
+        id:'dummy', type:'text', text:'Preview Dokumen',
+        top:120, left:120, width:420, height:42, fontSize:16, bold:true,
+        z:10, page:1, origin:'template', repeatEachPage:false
+      }];
+      this.preview.pagesCount = 2;
+      this.preview.templatePages = [1];
       this.refreshBlocks();
+      this.rebuildRepeatingBlocksAcrossPages();
     },
 
     // Hitung left berdasarkan align (left|center|right)
@@ -488,13 +478,80 @@ function docBuilder(){
       const contentW = L.page.width - L.margins.left - L.margins.right;
       const w = blk.width ?? 100;
       const a = (blk.align || '').toLowerCase();
-      if (a === 'center') {
-        return Math.round(L.margins.left + (contentW - w) / 2);
-      }
-      if (a === 'right') {
-        return Math.max(L.margins.left, Math.round(L.page.width - L.margins.right - w));
-      }
+      if (a === 'center') return Math.round(L.margins.left + (contentW - w) / 2);
+      if (a === 'right')  return Math.max(L.margins.left, Math.round(L.page.width - L.margins.right - w));
       return blk.left ?? L.margins.left;
+    },
+
+    // --- DEDUPE helper: hilangkan header/footer ganda per halaman (keep yang pertama) ---
+    dedupeHeaderFooter(){
+      const seen = new Set();
+      this.preview.blocks = (this.preview.blocks||[]).filter(b => {
+        if (b.type==='header' || b.type==='footer'){
+          const key = `${b.type}@${b.page||1}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+        }
+        return true;
+      });
+    },
+
+    // === SIGNATURE GRID: build dari signatures.rows & columns ===
+    buildSignatureGridBlocks(page = 1) {
+      const rows = Array.isArray(this.signatures?.rows) ? this.signatures.rows : [];
+      if (!rows.length) return [];
+
+      const L = this.preview.layout;
+      const contentLeft   = L.margins.left;
+      const contentRight  = L.page.width - L.margins.right;
+      const contentWidth  = contentRight - contentLeft;
+
+      const cols = Math.max(1, +this.signatures.columns || 1);
+      const gap  = 16;               // jarak antar-kolom
+      const cellW = Math.floor((contentWidth - gap*(cols-1)) / cols);
+      const cellH = 120;             // tinggi tiap kotak signature
+      const boxH  = 96;              // tinggi area coret tangan
+
+      // posisi Y: di atas footer/margin bawah
+      const topStart = Math.max(
+        L.margins.top + 140,
+        L.page.height - L.margins.bottom - 28 - cellH - 8
+      );
+
+      const blocks = [];
+      rows.forEach((person, idx) => {
+        const r = Math.floor(idx / cols);
+        const c = idx % cols;
+
+        const blk = {
+          id: Math.random().toString(36).slice(2,10),
+          type: 'signature',
+          origin: 'template',
+          repeatEachPage: true,     // ikut halaman template lain
+          page,
+          top:  topStart + r*(cellH + 10),
+          left: contentLeft + c*(cellW + gap),
+          width: cellW,
+          height: cellH,
+          z: 40,
+          align: 'center',
+          role: person?.role || person?.role_title || 'Disetujui oleh',
+          name: person?.name || '',
+          position: person?.position || person?.position_title || '',
+          // properti frame:
+          boxHeight: boxH,
+          borderStyle: 'solid',
+          borderWidth: 2,
+          borderColor: '#9CA3AF',
+          signatureText: '',
+          src: person?.signature_url || person?.image_url || ''
+        };
+        blk.color = '#000';
+        blk.left = this.computeLeftByAlign(blk); // kalau nanti pakai align
+        blocks.push(blk);
+      });
+
+      return blocks;
     },
 
     applyTemplate(tpl){
@@ -505,7 +562,12 @@ function docBuilder(){
       );
       this.header     = Object.assign({ logo:{url:'',position:'left'}, title:{align:'center', text:''} }, tpl.header || {});
       this.footer     = Object.assign({ text:'', show_page_number:true }, tpl.footer || {});
-      this.signatures = Object.assign({ rows:[], columns:4, mode:'grid' }, tpl.signature ? { rows:(tpl.signature.rows||[]) } : this.signatures);
+
+      // AMBIL SELURUH konfigurasi signature (rows + columns + mode)
+      this.signatures = Object.assign(
+        { rows:[], columns:4, mode:'grid' },
+        tpl.signature || this.signatures
+      );
 
       // Blocks dari template (opsional)
       let blocks = Array.isArray(tpl.blocks) ? tpl.blocks.slice() : [];
@@ -529,11 +591,12 @@ function docBuilder(){
         if (['header','footer','signature','text','image','html'].includes(b.type) && b.align) {
           b.left = this.computeLeftByAlign(b);
         }
+        if (!b.color) b.color = '#000';
         return b;
       });
 
       // HEADER default (page 1)
-      const hasHeader = this.preview.blocks.some(b => b.type==='header' && b.page===1);
+      const hasHeader = this.preview.blocks.some(b => b.type==='header' && (b.page||1)===1);
       if (!hasHeader) {
         const L = this.preview.layout;
         const hdr = {
@@ -541,20 +604,18 @@ function docBuilder(){
           type: 'header',
           text: this.header?.title?.text || 'Judul Dokumen',
           align: this.header?.title?.align || 'left',
-          showMeta: false,
-          metaRight: '',
+          showMeta: false, metaRight: '',
           top: Math.max(8, (L.margins.top - 28)),
           left: L.margins.left,
           width: L.page.width - (L.margins.left + L.margins.right),
-          height: 36,
-          z: 50, page: 1, origin: 'template', repeatEachPage: true
+          height: 36, z: 50, page: 1, origin: 'template', repeatEachPage: true
         };
         hdr.left = this.computeLeftByAlign(hdr);
         this.preview.blocks.push(hdr);
       }
 
       // FOOTER default (page 1)
-      const hasFooter = this.preview.blocks.some(b => b.type==='footer' && b.page===1);
+      const hasFooter = this.preview.blocks.some(b => b.type==='footer' && (b.page||1)===1);
       if (!hasFooter) {
         const L = this.preview.layout;
         const ftr = {
@@ -566,35 +627,29 @@ function docBuilder(){
           top: L.page.height - (L.margins.bottom + 28),
           left: L.margins.left,
           width: L.page.width - (L.margins.left + L.margins.right),
-          height: 28,
-          z: 50, page: 1, origin: 'template', repeatEachPage: true
+          height: 28, z: 50, page: 1, origin: 'template', repeatEachPage: true
         };
         ftr.left = this.computeLeftByAlign(ftr);
         this.preview.blocks.push(ftr);
       }
 
-      // SIGNATURE default (page 1) bila ada rows
-      const hasSig = this.preview.blocks.some(b => b.type==='signature' && b.page===1);
-      if (!hasSig && Array.isArray(this.signatures?.rows) && this.signatures.rows.length) {
-        const L = this.preview.layout;
-        const h = 90;
-        const y = Math.max(L.margins.top + 140, (L.page.height - L.margins.bottom - 28 - h - 8));
-        const sig = {
-          id: Math.random().toString(36).slice(2,10),
-          type: 'signature',
-          role: 'Disetujui oleh',
-          name: this.signatures.rows?.[0]?.name || '',
-          position: this.signatures.rows?.[0]?.position_title || '',
-          align: 'center',
-          top: y,
-          left: L.margins.left,
-          width: L.page.width - (L.margins.left + L.margins.right),
-          height: h,
-          z: 40, page: 1, origin: 'template', repeatEachPage: true
-        };
-        sig.left = this.computeLeftByAlign(sig);
-        this.preview.blocks.push(sig);
+      // === BANGUN ULANG SIGNATURE DARI GRID ===
+      // Hapus signature template lama
+      this.preview.blocks = (this.preview.blocks || []).filter(
+        b => !(b.origin==='template' && b.type==='signature')
+      );
+      // Tambahkan signature grid dari konfigurasi
+      const sigBlocks = this.buildSignatureGridBlocks(1);
+      if (sigBlocks.length) this.preview.blocks.push(...sigBlocks);
+
+      // Minimal 2 halaman
+      if (!Array.isArray(this.preview.templatePages) || !this.preview.templatePages.length) {
+        this.preview.templatePages = [1];
       }
+      if ((this.preview.pagesCount|0) < 2) this.preview.pagesCount = 2;
+
+      // Hilangkan kemungkinan header/footer ganda di page 1
+      this.dedupeHeaderFooter();
 
       this.refreshBlocks();
       this.rebuildRepeatingBlocksAcrossPages();
@@ -627,26 +682,24 @@ function docBuilder(){
             left:   Number.isFinite(+s.left)   ? +s.left   : contentLeft,
             width:  Number.isFinite(+s.width)  ? +s.width  : contentWidth,
             height: Number.isFinite(+s.height) ? +s.height : 120,
-            z: 20,
-            origin: 'section',
+            z: 20, origin: 'section',
             label: s.label || '',
             page:  pg,
             refKey: s.key || s.label,
             repeatEachPage: !!s.repeatEachPage,
           };
 
-          // AUTO FLOW sederhana (geser ke halaman berikut kalau nabrak margin bawah)
+          // AUTO FLOW
           let rect = {...base};
           if (!s.repeatEachPage && s.autoFlow && (rect.top + rect.height) > (contentBottom)) {
-            rect.page += 1;
-            rect.top = contentTop;
+            rect.page += 1; rect.top = contentTop;
           }
           maxPage = Math.max(maxPage, rect.page);
 
           if ((s.type || 'text') === 'text') {
-            const title    = s.label ? `<div style="font-weight:600;margin-bottom:2px">${s.label}</div>` : '';
-            const subtitle = s.subtitle ? `<div style="color:#6b7280;font-size:12px;margin-bottom:6px">${s.subtitle}</div>` : '';
-            const body     = s.html ? s.html : `<p style="color:#6b7280">(${s.label||'Section'})</p>`;
+            const title    = s.label ? `<div style="font-weight:600;color:#000;margin-bottom:2px">${s.label}</div>` : '';
+            const subtitle = s.subtitle ? `<div style="color:#000;font-size:12px;margin-bottom:6px">${s.subtitle}</div>` : '';
+            const body     = s.html ? s.html : '';
             sectionBlocks.push({ ...rect, type:'html', html: `${title}${subtitle}${body}` });
           } else if (s.type === 'table') {
             const rows = Math.max(1, s.rows|0), cols = Math.max(1, s.cols|0);
@@ -656,16 +709,10 @@ function docBuilder(){
               for (let c=0; c<cols; c++){
                 const idxCell = r*cols + c;
                 sectionBlocks.push({
-                  id: makeId(),
-                  type: 'tableCell',
-                  text: (s.cells?.[idxCell] ?? ''),
-                  top:  rect.top + r*cellH,
-                  left: rect.left + c*cellW,
-                  width: cellW, height: cellH,
-                  z: 20, origin: 'section',
-                  page: rect.page,
-                  refKey: rect.refKey,
-                  repeatEachPage: !!s.repeatEachPage,
+                  id: makeId(), type: 'tableCell', text: (s.cells?.[idxCell] ?? ''),
+                  top: rect.top + r*cellH, left: rect.left + c*cellW,
+                  width: cellW, height: cellH, z: 20, origin: 'section',
+                  page: rect.page, refKey: rect.refKey, repeatEachPage: !!s.repeatEachPage,
                 });
               }
             }
@@ -674,7 +721,62 @@ function docBuilder(){
       });
 
       this.preview.blocks = [...staticBlocks, ...sectionBlocks];
-      this.preview.pagesCount = Math.max(maxPage, 1);
+
+      this.dedupeHeaderFooter();
+
+      this.preview.pagesCount = Math.max(maxPage, 2);
+    },
+
+    // ==== Repeat template helpers ====
+    repeatable(b){
+      const t = (b.type||'').toLowerCase();
+      const isHFS = (t==='header'||t==='footer'||t==='signature');
+      return !!(b.repeatEachPage || b.repeat || isHFS);
+    },
+    getRepeatingTemplateBlocks(){
+      return (this.preview.blocks||[]).filter(b =>
+        b.origin==='template' && this.repeatable(b) && ((b.page||1)===1)
+      );
+    },
+
+    // Clone blok template hanya ke halaman yang ditandai (templatePages)
+    rebuildRepeatingBlocksAcrossPages(){
+      const pages = this.preview.pagesCount|0;
+      if (pages <= 1) return;
+
+      const base = this.getRepeatingTemplateBlocks();
+
+      // buang clone template di page > 1
+      this.preview.blocks = (this.preview.blocks||[]).filter(
+        b => !(b.origin==='template' && (b.page||1)>1)
+      );
+
+      const tplPages = Array.isArray(this.preview.templatePages) ? this.preview.templatePages : [1];
+      for (let pg = 2; pg <= pages; pg++){
+        if (!tplPages.includes(pg)) continue; // skip halaman kosong
+        const clones = base.map(b => {
+          const nb = JSON.parse(JSON.stringify(b));
+          nb.id = Math.random().toString(36).slice(2,10);
+          nb.page = pg;
+          return nb;
+        });
+        this.preview.blocks.push(...clones);
+      }
+      this.dedupeHeaderFooter();
+    },
+
+    // Halaman baru
+    addPage(withTemplate = false){
+      this.preview.pagesCount = (this.preview.pagesCount|0) + 1;
+      const newPage = this.preview.pagesCount;
+
+      if (withTemplate) {
+        if (!Array.isArray(this.preview.templatePages)) this.preview.templatePages = [1];
+        if (!this.preview.templatePages.includes(newPage)) this.preview.templatePages.push(newPage);
+      }
+
+      this.rebuildRepeatingBlocksAcrossPages();
+      this.refreshBlocks();
     },
 
     addSection(){
@@ -779,54 +881,6 @@ function docBuilder(){
       if (part.width  !== undefined) s.width  = Math.round(part.width);
       if (part.height !== undefined) s.height = Math.round(part.height);
       if (!opts.silent) this.refreshBlocks();
-    },
-
-    // Helpers repeat template
-    repeatable(b){
-      const t = (b.type||'').toLowerCase();
-      const isHFS = (t==='header'||t==='footer'||t==='signature');
-      return !!(b.repeatEachPage || b.repeat || isHFS);
-    },
-    getRepeatingTemplateBlocks(){
-      return (this.preview.blocks||[]).filter(b =>
-        b.origin==='template' && this.repeatable(b) && ((b.page||1)===1)
-      );
-    },
-    rebuildRepeatingBlocksAcrossPages(){
-      const pages = this.preview.pagesCount|0;
-      if (pages <= 1) return;
-      const base = this.getRepeatingTemplateBlocks();
-      // buang blok template di halaman >1
-      this.preview.blocks = (this.preview.blocks||[]).filter(b => !(b.origin==='template' && (b.page||1)>1));
-      for (let pg = 2; pg <= pages; pg++){
-        const clones = base.map(b => {
-          const nb = JSON.parse(JSON.stringify(b));
-          nb.id = Math.random().toString(36).slice(2,10);
-          nb.page = pg;
-          return nb;
-        });
-        this.preview.blocks.push(...clones);
-      }
-    },
-
-    // Halaman baru
-    addPage(){
-      this.preview.pagesCount = (this.preview.pagesCount|0) + 1;
-      const newPage = this.preview.pagesCount;
-
-      const base = this.getRepeatingTemplateBlocks();
-      const clones = base.map(b => {
-        const nb = JSON.parse(JSON.stringify(b));
-        nb.id = Math.random().toString(36).slice(2,10);
-        nb.page = newPage;
-        return nb;
-      });
-
-      const sectionBlocks = (this.preview.blocks||[]).filter(b => b.origin==='section'); // diganti oleh refresh
-      const staticBlocks  = (this.preview.blocks||[]).filter(b => b.origin!=='section');
-      this.preview.blocks = [...staticBlocks, ...clones, ...sectionBlocks];
-
-      this.refreshBlocks(); // sections repeatEachPage juga ikut
     },
   }
 }
