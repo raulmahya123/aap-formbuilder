@@ -369,7 +369,7 @@ function docBuilder(){
     // STATE awal
     header:     { logo:{url:'',position:'left'}, title:{align:'center', text:''} },
     footer:     { text:'', show_page_number:true },
-    signatures: { rows:[], columns:4, mode:'grid' },   // <— penting
+    signatures: { rows:[], columns:4, mode:'grid' },
     sections:   [],
     templates: [], templateName: '', selectedTemplateId: '',
 
@@ -422,7 +422,13 @@ function docBuilder(){
         const t = this.templates.find(x => String(x.id) === String(this.selectedTemplateId));
         t ? this.applyTemplate(t) : this.refreshBlocks();
       } else {
-        this.applyTemplate({ layout:this.preview.layout, header:this.header, footer:this.footer, signature:{ rows:this.signatures.rows||[], columns:this.signatures.columns||4, mode:this.signatures.mode||'grid' }, blocks: [] });
+        this.applyTemplate({
+          layout:this.preview.layout,
+          header:this.header,
+          footer:this.footer,
+          signature:{ rows:this.signatures.rows||[], columns:this.signatures.columns||4, mode:this.signatures.mode||'grid' },
+          blocks: []
+        });
       }
     },
 
@@ -496,61 +502,84 @@ function docBuilder(){
       });
     },
 
-    // === SIGNATURE GRID: build dari signatures.rows & columns ===
-    buildSignatureGridBlocks(page = 1) {
+    // ====== SIGNATURE (mengikuti template) ======
+    fillSignatureBlockFromRow(block, row) {
+      const r = row || {};
+      block.role     = r.role || r.role_title || block.role || 'Disetujui oleh';
+      block.name     = r.name || block.name || '';
+      block.position = r.position || r.position_title || block.position || '';
+      block.src      = r.image_path || r.signature_url || r.image_url || block.src || '';
+      return block;
+    },
+
+    buildSignatureFromTemplateBlocks(tplSigBlocks, rows = []) {
+      const clones = tplSigBlocks.map((b, i) => {
+        const nb = JSON.parse(JSON.stringify(b));
+        nb.id = Math.random().toString(36).slice(2,10);
+        nb.origin = 'template';
+        // normalisasi type
+        const t = (nb.type||'').toLowerCase();
+        nb.type = t === 'tablecell' ? 'tableCell' : (t || 'signature');
+        // isi konten dari rows[i]
+        this.fillSignatureBlockFromRow(nb, rows[i]);
+        // default repeat untuk signature
+        nb.repeatEachPage = (typeof nb.repeatEachPage !== 'undefined') ? !!nb.repeatEachPage : true;
+        // pastikan warna default
+        if (!nb.color) nb.color = '#000';
+        return nb;
+      });
+      return clones;
+    },
+
+    buildSignatureFromTemplateGrid(tplSignatureCfg) {
       const rows = Array.isArray(this.signatures?.rows) ? this.signatures.rows : [];
       if (!rows.length) return [];
 
-      const L = this.preview.layout;
-      const contentLeft   = L.margins.left;
-      const contentRight  = L.page.width - L.margins.right;
-      const contentWidth  = contentRight - contentLeft;
+      const L   = this.preview.layout;
+      const cfg = tplSignatureCfg || {};
+      const area = cfg.layout?.area || {}; // {top,left,width,height,page}
+      const page = Number(area.page) || 1;
 
-      const cols = Math.max(1, +this.signatures.columns || 1);
-      const gap  = 16;               // jarak antar-kolom
-      const cellW = Math.floor((contentWidth - gap*(cols-1)) / cols);
-      const cellH = 120;             // tinggi tiap kotak signature
-      const boxH  = 96;              // tinggi area coret tangan
+      const topStart = Number.isFinite(+area.top)    ? +area.top    : (L.page.height - L.margins.bottom - (cfg.layout?.cellHeight ?? 120) - 28 - 8);
+      const leftStart= Number.isFinite(+area.left)   ? +area.left   : L.margins.left;
+      const areaW    = Number.isFinite(+area.width)  ? +area.width  : (L.page.width - L.margins.left - L.margins.right);
+      const cols     = Math.max(1, +(cfg.columns ?? this.signatures.columns ?? 1));
+      const gap      = Number.isFinite(+cfg.layout?.gap)        ? +cfg.layout.gap        : 16;
+      const rowGap   = Number.isFinite(+cfg.layout?.rowGap)     ? +cfg.layout.rowGap     : 10;
+      const cellH    = Number.isFinite(+cfg.layout?.cellHeight) ? +cfg.layout.cellHeight : 120;
+      const boxH     = Number.isFinite(+cfg.layout?.boxHeight)  ? +cfg.layout.boxHeight  : 96;
+      const borderW  = Number.isFinite(+cfg.layout?.borderWidth)? +cfg.layout.borderWidth: 2;
+      const borderSt = cfg.layout?.borderStyle || 'solid';
+      const borderCo = cfg.layout?.borderColor || '#9CA3AF';
+      const align    = cfg.align || 'center';
+      const z        = cfg.z ?? 40;
 
-      // posisi Y: di atas footer/margin bawah
-      const topStart = Math.max(
-        L.margins.top + 140,
-        L.page.height - L.margins.bottom - 28 - cellH - 8
-      );
+      const cellW = Math.floor((areaW - gap*(cols-1)) / cols);
 
       const blocks = [];
       rows.forEach((person, idx) => {
         const r = Math.floor(idx / cols);
         const c = idx % cols;
-
         const blk = {
           id: Math.random().toString(36).slice(2,10),
           type: 'signature',
           origin: 'template',
-          repeatEachPage: true,     // ikut halaman template lain
+          repeatEachPage: cfg.repeatEachPage ?? true,
           page,
-          top:  topStart + r*(cellH + 10),
-          left: contentLeft + c*(cellW + gap),
+          top:  topStart + r*(cellH + rowGap),
+          left: leftStart + c*(cellW + gap),
           width: cellW,
           height: cellH,
-          z: 40,
-          align: 'center',
-          role: person?.role || person?.role_title || 'Disetujui oleh',
-          name: person?.name || '',
-          position: person?.position || person?.position_title || '',
-          // properti frame:
+          z,
+          align,
           boxHeight: boxH,
-          borderStyle: 'solid',
-          borderWidth: 2,
-          borderColor: '#9CA3AF',
-          signatureText: '',
-          src: person?.signature_url || person?.image_url || ''
+          borderStyle: borderSt,
+          borderWidth: borderW,
+          borderColor: borderCo,
+          color:'#000',
         };
-        blk.color = '#000';
-        blk.left = this.computeLeftByAlign(blk); // kalau nanti pakai align
-        blocks.push(blk);
+        blocks.push(this.fillSignatureBlockFromRow(blk, person));
       });
-
       return blocks;
     },
 
@@ -563,11 +592,8 @@ function docBuilder(){
       this.header     = Object.assign({ logo:{url:'',position:'left'}, title:{align:'center', text:''} }, tpl.header || {});
       this.footer     = Object.assign({ text:'', show_page_number:true }, tpl.footer || {});
 
-      // AMBIL SELURUH konfigurasi signature (rows + columns + mode)
-      this.signatures = Object.assign(
-        { rows:[], columns:4, mode:'grid' },
-        tpl.signature || this.signatures
-      );
+      // signature config (rows/columns/mode + optional layout)
+      this.signatures = Object.assign({ rows:[], columns:4, mode:'grid' }, tpl.signature || this.signatures);
 
       // Blocks dari template (opsional)
       let blocks = Array.isArray(tpl.blocks) ? tpl.blocks.slice() : [];
@@ -583,10 +609,11 @@ function docBuilder(){
         });
         if (b.hasOwnProperty('fontsize') && !b.hasOwnProperty('fontSize')) out.fontSize = b.fontsize;
         if (b.hasOwnProperty('showpage')  && !b.hasOwnProperty('showPage')) out.showPage = !!b.showpage;
+        if (!out.color) out.color = '#000';
         return out;
       });
 
-      // Sesuaikan left berdasarkan align
+      // Sesuaikan left berdasarkan align (untuk blok yang memiliki align saja)
       this.preview.blocks = this.preview.blocks.map(b => {
         if (['header','footer','signature','text','image','html'].includes(b.type) && b.align) {
           b.left = this.computeLeftByAlign(b);
@@ -595,7 +622,7 @@ function docBuilder(){
         return b;
       });
 
-      // HEADER default (page 1)
+      // HEADER default (page 1) jika tidak ada
       const hasHeader = this.preview.blocks.some(b => b.type==='header' && (b.page||1)===1);
       if (!hasHeader) {
         const L = this.preview.layout;
@@ -608,13 +635,14 @@ function docBuilder(){
           top: Math.max(8, (L.margins.top - 28)),
           left: L.margins.left,
           width: L.page.width - (L.margins.left + L.margins.right),
-          height: 36, z: 50, page: 1, origin: 'template', repeatEachPage: true
+          height: 36, z: 50, page: 1, origin: 'template', repeatEachPage: true,
+          color:'#000'
         };
         hdr.left = this.computeLeftByAlign(hdr);
         this.preview.blocks.push(hdr);
       }
 
-      // FOOTER default (page 1)
+      // FOOTER default (page 1) jika tidak ada
       const hasFooter = this.preview.blocks.some(b => b.type==='footer' && (b.page||1)===1);
       if (!hasFooter) {
         const L = this.preview.layout;
@@ -627,20 +655,47 @@ function docBuilder(){
           top: L.page.height - (L.margins.bottom + 28),
           left: L.margins.left,
           width: L.page.width - (L.margins.left + L.margins.right),
-          height: 28, z: 50, page: 1, origin: 'template', repeatEachPage: true
+          height: 28, z: 50, page: 1, origin: 'template', repeatEachPage: true,
+          color:'#000'
         };
         ftr.left = this.computeLeftByAlign(ftr);
         this.preview.blocks.push(ftr);
       }
 
-      // === BANGUN ULANG SIGNATURE DARI GRID ===
-      // Hapus signature template lama
-      this.preview.blocks = (this.preview.blocks || []).filter(
-        b => !(b.origin==='template' && b.type==='signature')
-      );
-      // Tambahkan signature grid dari konfigurasi
-      const sigBlocks = this.buildSignatureGridBlocks(1);
-      if (sigBlocks.length) this.preview.blocks.push(...sigBlocks);
+      // === SIGNATURE: IKUTI TEMPLATE ===
+      (() => {
+        // buang signature lama dari template (kita rebuild)
+        this.preview.blocks = (this.preview.blocks || []).filter(
+          b => !(b.origin==='template' && b.type==='signature')
+        );
+
+        const rows = Array.isArray(this.signatures?.rows) ? this.signatures.rows : [];
+        if (!rows.length) return;
+
+        // 1) pakai signature blocks dari tpl.blocks bila ada (posisi/ukuran persis)
+        const tplSigBlocks = (Array.isArray(tpl.blocks) ? tpl.blocks : []).filter(b => (b.type||'').toLowerCase()==='signature');
+        if (tplSigBlocks.length) {
+          const sigBlocks = this.buildSignatureFromTemplateBlocks(tplSigBlocks, rows);
+          this.preview.blocks.push(...sigBlocks);
+          return;
+        }
+
+        // 2) jika tidak ada, gunakan konfigurasi grid dari tpl.signature (layout.area, columns, dll)
+        if (tpl.signature && (tpl.signature.layout || tpl.signature.columns)) {
+          const gridBlocks = this.buildSignatureFromTemplateGrid(tpl.signature);
+          if (gridBlocks.length) {
+            this.preview.blocks.push(...gridBlocks);
+            return;
+          }
+        }
+
+        // 3) fallback: grid sederhana pakai layout aktif (tanpa angka fix template)
+        const fallback = this.buildSignatureFromTemplateGrid({
+          columns: this.signatures.columns ?? 2,
+          layout: {}
+        });
+        if (fallback.length) this.preview.blocks.push(...fallback);
+      })();
 
       // Minimal 2 halaman
       if (!Array.isArray(this.preview.templatePages) || !this.preview.templatePages.length) {
