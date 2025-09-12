@@ -2,26 +2,40 @@
 
 use Illuminate\Support\Facades\Route;
 
-// ADMIN Controllers
-use App\Http\Controllers\Admin\DepartmentController;               // pastikan namespace & huruf besar benar
+// ==============================
+// ADMIN Controllers (existing)
+// ==============================
+use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DepartmentMemberController;
 use App\Http\Controllers\Admin\FormController as AdminFormController;
 use App\Http\Controllers\Admin\FormEntryController as AdminEntryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EntryApprovalController;
-use App\Http\Controllers\Admin\DocumentAclController; // <-- PENTING: import ACL controller
-
-// FRONT Controllers
-use App\Http\Controllers\Front\FormBrowseController;
-use App\Http\Controllers\Front\FormEntryController as FrontEntryController; // ← alias agar jelas
-
-// Model untuk route model binding pada download lampiran
+use App\Http\Controllers\Admin\DocumentAclController;
 use App\Http\Controllers\Admin\UserActiveController;
 
+// ==============================
+// FRONT Controllers
+// ==============================
+use App\Http\Controllers\Front\FormBrowseController;
+use App\Http\Controllers\Front\FormEntryController as FrontEntryController;
+
+// ==============================
 // QA Controllers
+// ==============================
 use App\Http\Controllers\QA\QaThreadController;
 use App\Http\Controllers\QA\QaMessageController;
 
+// ==============================
+// HSE / KPI Controllers (baru)
+// ==============================
+use App\Http\Controllers\Admin\SiteController as AdminSiteController;
+use App\Http\Controllers\Admin\IndicatorGroupController as AdminIndicatorGroupController;
+use App\Http\Controllers\Admin\IndicatorController as AdminIndicatorController;
+use App\Http\Controllers\Admin\DailyInputController as AdminDailyInputController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
+
+// Redirect root ke dashboard
 Route::get('/', fn() => redirect()->route('admin.dashboard'));
 Route::get('/dashboard', fn() => redirect()->route('admin.dashboard'))
     ->middleware('auth')
@@ -44,12 +58,7 @@ Route::middleware('auth')->group(function () {
     // Download lampiran entry (front)
     Route::get('/entry-file/{file}', [FrontEntryController::class, 'downloadAttachment'])
         ->name('front.entry.download.attachment')
-        ->whereNumber('file'); // pastikan {file} numerik (ID FormEntryFile)
-
-    // (Opsional) Jika user front boleh unduh PDF isian sendiri:
-    // Route::get('/entry/{entry}/download-pdf', [FrontEntryController::class, 'downloadPdf'])
-    //     ->name('front.entry.download_pdf')
-    //     ->whereNumber('entry');
+        ->whereNumber('file');
 
     // ==============================
     // ADMIN
@@ -63,9 +72,9 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard/data/top-forms', [DashboardController::class, 'topForms'])->name('dashboard.data.top_forms');
         Route::get('dashboard/data/by-department', [DashboardController::class, 'byDepartment'])->name('dashboard.data.by_department');
         Route::get('dashboard/data/by-aggregate', [DashboardController::class, 'byAggregate'])->name('dashboard.data.by_aggregate');
-
         // ==== END DASHBOARD ====
 
+        // Manage Users (active/toggle)
         Route::get('/users/active', [UserActiveController::class, 'index'])->name('users.active.index');
         Route::patch('/users/{user}/toggle', [UserActiveController::class, 'toggle'])->name('users.active.toggle');
         Route::patch('/users/{user}/update', [UserActiveController::class, 'update'])->name('users.active.update');
@@ -83,45 +92,65 @@ Route::middleware('auth')->group(function () {
         Route::post('departments/{department}/members', [DepartmentMemberController::class, 'store'])->name('departments.members.store');
         Route::delete('departments/{department}/members/{user}', [DepartmentMemberController::class, 'destroy'])->name('departments.members.destroy');
 
-        // ==== DOCUMENTS ====
-        // ==== DOCUMENTS ====
-Route::prefix('documents')->name('documents.')->group(function () {
-    // CRUD & export
-    Route::get('/', [\App\Http\Controllers\Admin\DocumentController::class, 'index'])->name('index');
-    Route::get('/create', [\App\Http\Controllers\Admin\DocumentController::class, 'create'])
-        ->name('create')->middleware('can:create,App\Models\Document');
-    Route::post('/', [\App\Http\Controllers\Admin\DocumentController::class, 'store'])
-        ->name('store')->middleware('can:create,App\Models\Document');
-    Route::get('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'show'])
-        ->name('show')->middleware('can:view,document');
-    Route::get('/{document}/edit', [\App\Http\Controllers\Admin\DocumentController::class, 'edit'])
-        ->name('edit')->middleware('can:update,document');
-    Route::put('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'update'])
-        ->name('update')->middleware('can:update,document');
-    Route::delete('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'destroy'])
-        ->name('destroy')->middleware('can:delete,document');
-    Route::get('/{document}/export', [\App\Http\Controllers\Admin\DocumentController::class, 'export'])
-        ->name('export')->middleware('can:export,document');
+        // ==============================
+        // HSE / KPI (Sites, Indicators, Input, Report)
+        // ==============================
+        Route::middleware('can:is-admin')->group(function () {
+            Route::resource('sites', AdminSiteController::class)->except(['show']);
 
-    /**
-     * === ACL (Kelola akses dokumen) ===
-     * - GET index: per dokumen (lihat & kelola daftar ACL dokumen tsb)
-     * - DELETE: per dokumen (hapus entri ACL tertentu)
-     * - POST (BULK): tanpa {document} → untuk tambah ACL ke banyak dokumen sekaligus
-     */
+            Route::resource('groups', AdminIndicatorGroupController::class)->except(['show']);
+            Route::resource('indicators', AdminIndicatorController::class)->except(['show']);
 
-    // PER-DOKUMEN: halaman kelola ACL & hapus
-    Route::get('/{document}/acl', [DocumentAclController::class, 'index'])
-        ->name('acl.index')->middleware('can:share,document');
-    Route::delete('/{document}/acl/{acl}', [DocumentAclController::class, 'destroy'])
-        ->name('acl.destroy')->middleware('can:share,document')->whereNumber('acl');
+            Route::resource('groups', AdminIndicatorGroupController::class)->except(['show']);
+            Route::resource('indicators', AdminIndicatorController::class)->except(['show']);
+        });
 
-    // BULK STORE (NO {document}): dipakai oleh form multi-select dokumen
-    // Blade: action="{{ route('admin.documents.acl.store') }}"
-    Route::post('/acl', [DocumentAclController::class, 'storeBulk'])
-        ->name('acl.store'); // <- TANPA parameter {document}
-})->whereNumber('document');
-        // ==== DOCUMENT TEMPLATES ====
+        // Operasional
+        Route::get('daily',        [AdminDailyInputController::class, 'index'])->name('daily.index');
+        Route::get('daily/create', [AdminDailyInputController::class, 'create'])->name('daily.create');
+        Route::post('daily',       [AdminDailyInputController::class, 'store'])->name('daily.store');
+
+        // Rekap generik (harian/mingguan/bulanan/tahunan)
+        Route::get('reports', [AdminReportController::class, 'report'])->name('reports.index');
+
+        // Tetap ada: bulanan (backward compatibility)
+        Route::get('reports/monthly', [AdminReportController::class, 'monthly'])->name('reports.monthly');
+
+        // ==============================
+        // DOCUMENTS
+        // ==============================
+        Route::prefix('documents')->name('documents.')->group(function () {
+            // CRUD & export
+            Route::get('/', [\App\Http\Controllers\Admin\DocumentController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\DocumentController::class, 'create'])
+                ->name('create')->middleware('can:create,App\Models\Document');
+            Route::post('/', [\App\Http\Controllers\Admin\DocumentController::class, 'store'])
+                ->name('store')->middleware('can:create,App\Models\Document');
+            Route::get('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'show'])
+                ->name('show')->middleware('can:view,document');
+            Route::get('/{document}/edit', [\App\Http\Controllers\Admin\DocumentController::class, 'edit'])
+                ->name('edit')->middleware('can:update,document');
+            Route::put('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'update'])
+                ->name('update')->middleware('can:update,document');
+            Route::delete('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'destroy'])
+                ->name('destroy')->middleware('can:delete,document');
+            Route::get('/{document}/export', [\App\Http\Controllers\Admin\DocumentController::class, 'export'])
+                ->name('export')->middleware('can:export,document');
+
+            // === ACL (Kelola akses dokumen) ===
+            // Halaman kelola ACL per dokumen & hapus
+            Route::get('/{document}/acl', [DocumentAclController::class, 'index'])
+                ->name('acl.index')->middleware('can:share,document');
+            Route::delete('/{document}/acl/{acl}', [DocumentAclController::class, 'destroy'])
+                ->name('acl.destroy')->middleware('can:share,document')->whereNumber('acl');
+
+            // BULK store ACL (tanpa {document})
+            Route::post('/acl', [DocumentAclController::class, 'storeBulk'])->name('acl.store');
+        })->whereNumber('document');
+
+        // ==============================
+        // DOCUMENT TEMPLATES
+        // ==============================
         Route::prefix('document-templates')->name('document_templates.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'index'])->name('index');
             Route::get('/create', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'create'])->name('create');
@@ -131,14 +160,16 @@ Route::prefix('documents')->name('documents.')->group(function () {
             Route::delete('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'destroy'])->name('destroy');
             Route::get('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'show'])->name('show');
         })->whereNumber('template');
- Route::post('/upload-temp', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'uploadTemp'])
-      ->name('upload_temp');
-      Route::post('/uploads/image', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'storeImage'])
-    ->name('uploads.image');
+
+        Route::post('/upload-temp', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'uploadTemp'])
+            ->name('upload_temp');
+        Route::post('/uploads/image', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'storeImage'])
+            ->name('uploads.image');
+
         // Entries (admin): list/detail/hapus
         Route::resource('entries', AdminEntryController::class)
             ->only(['index', 'show', 'destroy'])
-            ->where(['entry' => '[0-9]+']); // pastikan {entry} numerik
+            ->where(['entry' => '[0-9]+']);
 
         // Export CSV entries
         Route::get('entries/export', [AdminEntryController::class, 'export'])->name('entries.export');
@@ -160,7 +191,9 @@ Route::prefix('documents')->name('documents.')->group(function () {
         Route::get('/entries/export-zip', [AdminEntryController::class, 'exportZip'])
             ->name('entries.export_zip');
 
+        // ==============================
         // QA
+        // ==============================
         Route::prefix('qa')->name('qa.')->group(function () {
             Route::get('/', [QaThreadController::class, 'index'])->name('index');
             Route::get('/public', [QaThreadController::class, 'public'])->name('public');
