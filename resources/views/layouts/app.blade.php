@@ -42,17 +42,17 @@
   <style>
     :root { --font-sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans'; }
     body { font-family: var(--font-sans); }
+
     .nice-scroll::-webkit-scrollbar { width: 8px; height: 8px }
     .nice-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px }
     .nice-scroll::-webkit-scrollbar-track { background: transparent }
 
-    /* Warna AKTIF yang pasti merah (maroon) */
+    /* Warna AKTIF maroon */
     aside nav a.is-active {
-      background-color: #7b1c1c !important; /* maroon utama */
+      background-color: #7b1c1c !important;
       color: #fff !important;
       border-color: #7b1c1c !important;
     }
-    /* Netralisir efek :active/:focus supaya item lain tidak ikut merah */
     aside nav a:is(:active, :focus):not(.is-active) {
       color: inherit !important;
       background-color: inherit !important;
@@ -69,41 +69,169 @@
   <div class="lg:hidden sticky top-0 z-40 bg-ivory-50/90 dark:bg-coal-900/80 backdrop-blur border-b border-coal-200/60 dark:border-coal-800">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
       <button @click="toggleSidebar()" class="p-2 rounded-lg border border-coal-200 dark:border-coal-700">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 6h18M3 12h18M3 18h18" />
+        </svg>
       </button>
 
+      {{-- ===== ROLE HELPERS ===== --}}
       @php
         use App\Models\Site;
 
-        $isAdmin = auth()->check() && \Illuminate\Support\Facades\Gate::allows('is-admin');
+        $user    = auth()->user();
+        $isSuper = $user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin();
+        $isAdmin = $isSuper || ($user && method_exists($user,'isAdmin') && $user->isAdmin());
+        $isBasic = $user && !$isAdmin;
+
+        // home untuk masing2 role
         $homeUrl = $isAdmin
           ? (Route::has('admin.dashboard') ? route('admin.dashboard') : url('/'))
-          : (Route::has('admin.daily.create') ? route('admin.daily.create') : url('/'));
+          : (Route::has('daily.index') ? route('daily.index') : url('/'));
 
-        // Ambil daftar site: admin = semua; non-admin = site yang dia punya.
+        // helper class item nav
+        $navItemClass = function(bool $active = false){
+          $base = 'flex items-center gap-3 px-3 py-2 rounded-xl transition outline-none';
+          $inactive = 'text-coal-800 dark:text-ivory-100 border border-transparent hover:bg-ivory-100 dark:hover:bg-coal-900 focus-visible:ring-2 focus-visible:ring-maroon-700';
+          $activeCls = 'is-active border';
+          return $active ? "$base $activeCls" : "$base $inactive";
+        };
+
+        // daftar site utk badge & switcher
         $sites = collect();
-        if (auth()->check()) {
+        if ($user) {
           if ($isAdmin) {
-            $sites = Site::orderBy('code')->get(['id','code','name']);
-          } elseif (method_exists(auth()->user(), 'sites')) {
-            $sites = auth()->user()->sites()->orderBy('code')->get(['id','code','name']);
+            $sites = Site::select('id','code','name')->orderBy('code')->get();
+          } elseif (method_exists($user, 'sites')) {
+            $sites = $user->sites()->select('sites.id','sites.code','sites.name')->orderBy('sites.code')->get();
           }
         }
         $activeSiteId = session('active_site_id');
         $activeSite   = $activeSiteId ? $sites->firstWhere('id', $activeSiteId) : null;
       @endphp
 
+      <nav class="p-4 space-y-6 flex-1">
+
+        {{-- =========================
+            MENU
+        ========================= --}}
+        <div>
+          <div class="px-3 text-xs uppercase tracking-wider text-coal-500 dark:text-coal-300">Menu</div>
+
+          {{-- ADMIN / SUPER ADMIN: semua menu --}}
+          @if($isAdmin)
+            <div class="mt-2 grid gap-1">
+              <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
+
+              @if(Route::has('admin.departments.index'))
+                <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}">🏷️ Departments</a>
+              @endif
+
+              @if(Route::has('admin.forms.index'))
+                <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}">🧾 Forms</a>
+              @endif
+
+              @if(Route::has('admin.documents.index'))
+                <a href="{{ route('admin.documents.index') }}" class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}">📄 Documents</a>
+              @endif
+
+              @if(($isSuper) || ($user && $user->department_id))
+                @if(Route::has('admin.document_templates.index'))
+                  <a href="{{ route('admin.document_templates.index') }}" class="{{ $navItemClass(request()->routeIs('admin.document_templates.*')) }}">🧩 Doc Templates</a>
+                @endif
+              @endif
+
+              @if(Route::has('admin.entries.index'))
+                <a href="{{ route('admin.entries.index') }}" class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">📥 Entries</a>
+              @endif
+
+              @if(Route::has('admin.qa.index'))
+                <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+              @endif
+
+              @if($isSuper)
+                @if(Route::has('admin.documents.acl.index'))
+                  <a href="{{ route('admin.documents.acl.index', 1) }}" class="{{ $navItemClass(request()->routeIs('admin.documents.acl.*')) }}">🔐 Akses Dokumen</a>
+                @endif
+                @if(Route::has('admin.users.active.index'))
+                  <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
+                @endif
+              @endif
+            </div>
+
+          {{-- USER BIASA: Dashboard, FORM (front), Tanya Jawab --}}
+          @else
+            <div class="mt-2 grid gap-1">
+              {{-- Dashboard user diarahkan ke /daily (index) --}}
+              <a href="{{ Route::has('daily.index') ? route('daily.index') : url('/') }}"
+                 class="{{ $navItemClass(request()->routeIs('daily.*')) }}">🏛️ Dashboard</a>
+
+              {{-- FORM versi front --}}
+              @if(Route::has('front.forms.index'))
+                <a href="{{ route('front.forms.index') }}"
+                   class="{{ $navItemClass(request()->routeIs('front.forms.*')) }}">🧾 FORM</a>
+              @endif
+
+              {{-- Tanya Jawab (route admin.qa.* terbuka untuk auth) --}}
+              @if(Route::has('admin.qa.index'))
+                <a href="{{ route('admin.qa.index') }}"
+                   class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+              @endif
+            </div>
+          @endif
+        </div>
+
+        {{-- =========================
+            HSE / KPI
+        ========================= --}}
+        <div>
+          <div class="px-3 text-xs uppercase tracking-wider text-coal-500 dark:text-coal-300">HSE / KPI</div>
+          <div class="mt-2 grid gap-1">
+
+            {{-- Master Data: ADMIN only --}}
+            @if($isAdmin)
+              @if(Route::has('admin.sites.index'))
+                <a href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}">📍 Sites</a>
+              @endif
+              @if(Route::has('admin.groups.index'))
+                <a href="{{ route('admin.groups.index') }}" class="{{ $navItemClass(request()->routeIs('admin.groups.*')) }}">🗂️ Indicator Groups</a>
+              @endif
+              @if(Route::has('admin.indicators.index'))
+                <a href="{{ route('admin.indicators.index') }}" class="{{ $navItemClass(request()->routeIs('admin.indicators.*')) }}">📊 Indicators</a>
+              @endif
+            @endif
+
+            {{-- Operasional Input Harian --}}
+            @if($isAdmin && Route::has('admin.daily.create'))
+              <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
+            @elseif(Route::has('daily.index'))
+              <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>
+            @endif
+
+            {{-- Rekap Bulanan: boleh untuk semua user --}}
+            @if(Route::has('admin.reports.monthly'))
+              <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+            @endif
+
+            {{-- Khusus Super Admin: Input Access --}}
+            @if($isSuper && Route::has('admin.site_access.index'))
+              <a href="{{ route('admin.site_access.index') }}" class="{{ $navItemClass(request()->routeIs('admin.site_access.*')) }}">🛂 Input Access</a>
+            @endif
+          </div>
+        </div>
+      </nav>
+
       <a href="{{ $homeUrl }}" class="flex items-center gap-2">
-        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor" aria-hidden="true"><path d="M12 3l7 18h-2.6l-1.7-4.5H9.4L7.7 21H5.1L12 3zm2 11L12 7l-2 7h4z" /></svg>
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor" aria-hidden="true">
+          <path d="M12 3l7 18h-2.6l-1.7-4.5H9.4L7.7 21H5.1L12 3zm2 11L12 7l-2 7h4z" />
+        </svg>
         <span class="font-medium tracking-tight">{{ config('app.name','AAP') }}</span>
       </a>
 
       <div class="ml-auto flex items-center gap-2">
-        {{-- Badge Active Site (ringkas) --}}
         @if($sites->count() > 0)
           <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs
-                       border-maroon-700 text-maroon-800 dark:text-maroon-300 dark:border-maroon-600 bg-maroon-50/70
-                       dark:bg-maroon-900/20">
+                         border-maroon-700 text-maroon-800 dark:text-maroon-300 dark:border-maroon-600 bg-maroon-50/70
+                         dark:bg-maroon-900/20">
             📍 {{ $activeSite?->code ?? 'ALL' }}
           </span>
         @endif
@@ -142,7 +270,7 @@
       </div>
       @endauth
 
-      {{-- NAV MENU (helper class + user) --}}
+      {{-- NAV MENU (helper class + role) --}}
       @php
         $navItemClass = function(bool $active = false){
           $base = 'flex items-center gap-3 px-3 py-2 rounded-xl transition outline-none';
@@ -150,64 +278,62 @@
           $activeCls = 'is-active border';
           return $active ? "$base $activeCls" : "$base $inactive";
         };
-        $user = auth()->user();
+        $user    = auth()->user();
+        $isSuper = $user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin();
+        $isAdmin = $isSuper || ($user && method_exists($user,'isAdmin') && $user->isAdmin());
+        $isBasic = $user && !$isAdmin;
       @endphp
 
       <nav class="p-4 space-y-6 flex-1">
-        {{-- Menu utama (ADMIN ONLY) --}}
-        @can('is-admin')
-        <div>
-          <div class="px-3 text-xs uppercase tracking-wider text-coal-500 dark:text-coal-300">Menu</div>
-          <div class="mt-2 grid gap-1">
-            <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
+        {{-- ===== ADMIN FULL MENU ===== --}}
+        @if($isAdmin)
+          <div>
+            <div class="px-3 text-xs uppercase tracking-wider text-coal-500 dark:text-coal-300">Menu</div>
+            <div class="mt-2 grid gap-1">
+              <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
 
-            @if(Route::has('admin.departments.index'))
-              <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}">🏷️ Departments</a>
-            @endif
-
-            @if(Route::has('admin.forms.index'))
-              <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}">🧾 Forms</a>
-            @endif
-
-            @if(Route::has('admin.documents.index'))
-              <a href="{{ route('admin.documents.index') }}" class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}">📄 Documents</a>
-            @endif
-
-            {{-- Doc Templates: hanya super admin atau user dengan department --}}
-            @if(($user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin()) || ($user && $user->department_id))
-              @if(Route::has('admin.document_templates.index'))
-                <a href="{{ route('admin.document_templates.index') }}" class="{{ $navItemClass(request()->routeIs('admin.document_templates.*')) }}">🧩 Doc Templates</a>
+              @if(Route::has('admin.departments.index'))
+                <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}">🏷️ Departments</a>
               @endif
-            @endif
 
-            @if(Route::has('admin.entries.index'))
-              <a href="{{ route('admin.entries.index') }}" class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">📥 Entries</a>
-            @endif
-
-            @if(Route::has('admin.qa.index'))
-              <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
-            @endif
-
-            {{-- ACL & Manage Users: super admin --}}
-            @if($user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin())
-              @if(Route::has('admin.documents.acl.index'))
-                <a href="{{ route('admin.documents.acl.index', 1) }}"
-                   class="{{ $navItemClass(request()->routeIs('admin.documents.acl.*')) }}">🔐 Akses Dokumen</a>
+              @if(Route::has('admin.forms.index'))
+                <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}">🧾 Forms</a>
               @endif
-              @if(Route::has('admin.users.active.index'))
-                <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
+
+              @if(Route::has('admin.documents.index'))
+                <a href="{{ route('admin.documents.index') }}" class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}">📄 Documents</a>
               @endif
-            @endif
+
+              @if(($user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin()) || ($user && $user->department_id))
+                @if(Route::has('admin.document_templates.index'))
+                  <a href="{{ route('admin.document_templates.index') }}" class="{{ $navItemClass(request()->routeIs('admin.document_templates.*')) }}">🧩 Doc Templates</a>
+                @endif
+              @endif
+
+              @if(Route::has('admin.entries.index'))
+                <a href="{{ route('admin.entries.index') }}" class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">📥 Entries</a>
+              @endif
+
+              @if(Route::has('admin.qa.index'))
+                <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+              @endif
+
+              @if($isSuper)
+                @if(Route::has('admin.documents.acl.index'))
+                  <a href="{{ route('admin.documents.acl.index', 1) }}"
+                     class="{{ $navItemClass(request()->routeIs('admin.documents.acl.*')) }}">🔐 Akses Dokumen</a>
+                @endif
+                @if(Route::has('admin.users.active.index'))
+                  <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
+                @endif
+              @endif
+            </div>
           </div>
-        </div>
-        @endcan
 
-        {{-- HSE / KPI Monitoring --}}
-        <div>
-          <div class="px-3 text-xs uppercase tracking-wider text-coal-500 dark:text-coal-300">HSE / KPI</div>
-          <div class="mt-2 grid gap-1">
-            {{-- Master Data (Admin only) --}}
-            @can('is-admin')
+          {{-- HSE / KPI (Admin: full) --}}
+          <div>
+            <div class="px-3 text-xs uppercase tracking-wider text-coal-500 dark:text-coal-300">HSE / KPI</div>
+            <div class="mt-2 grid gap-1">
               @if(Route::has('admin.sites.index'))
                 <a href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}">📍 Sites</a>
               @endif
@@ -217,60 +343,91 @@
               @if(Route::has('admin.indicators.index'))
                 <a href="{{ route('admin.indicators.index') }}" class="{{ $navItemClass(request()->routeIs('admin.indicators.*')) }}">📊 Indicators</a>
               @endif
-            @endcan
 
-            {{-- Operasional: Input Harian (semua user boleh lihat) --}}
-            @if(Route::has('admin.daily.create'))
-              <a href="{{ route('admin.daily.create') }}"
-                 class="{{ $navItemClass(request()->routeIs('admin.daily.create') || request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
-            @endif
-
-            {{-- Rekap Bulanan: hanya admin --}}
-            @can('is-admin')
-              @if(Route::has('admin.reports.monthly'))
-                <a href="{{ route('admin.reports.monthly') }}"
-                   class="{{ $navItemClass(request()->routeIs('admin.reports.*')) }}">📈 Rekap Bulanan</a>
+              @if(Route::has('admin.daily.create'))
+                <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
               @endif
-            @endcan
+              @if(Route::has('admin.reports.monthly'))
+                <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+              @endif
+
+              @if(Route::has('admin.site_access.index'))
+                <a href="{{ route('admin.site_access.index') }}" class="{{ $navItemClass(request()->routeIs('admin.site_access.*')) }}">🛂 Input Access</a>
+              @endif
+            </div>
           </div>
-        </div>
+
+        {{-- ===== NON-ADMIN (USER BIASA) ===== --}}
+        @else
+          {{-- MENU UTAMA --}}
+          <div>
+            <div class="px-3 text-xs uppercase tracking-wider text-coal-500 dark:text-coal-300">Menu</div>
+            <div class="mt-2 grid gap-1">
+              @if(Route::has('daily.index'))
+                <a href="{{ route('daily.index') }}"
+                   class="{{ $navItemClass(request()->routeIs('daily.*')) }}">🏛️ Dashboard</a>
+              @endif
+
+              @if(Route::has('front.forms.index'))
+                <a href="{{ route('front.forms.index') }}"
+                   class="{{ $navItemClass(request()->routeIs('front.forms.*')) }}">🧾 FORM</a>
+              @endif
+
+              @if(Route::has('admin.qa.index'))
+                <a href="{{ route('admin.qa.index') }}"
+                   class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+              @endif
+            </div>
+          </div>
+
+          {{-- HSE / KPI (minimal) --}}
+          <div class="mt-6">
+            <div class="px-3 text-xs uppercase tracking-wider text-coal-500 dark:text-coal-300">HSE / KPI</div>
+            <div class="mt-2 grid gap-1">
+              @if(Route::has('daily.index'))
+                <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>
+              @endif
+              @if(Route::has('admin.reports.monthly'))
+                <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+              @endif
+            </div>
+          </div>
+        @endif
       </nav>
 
       {{-- ACTIVE SITE (desktop) --}}
       @if($sites->count() > 0)
-        <div class="px-4 py-3 border-t border-coal-200 dark:border-coal-800">
-          <div class="text-xs mb-2 text-coal-600 dark:text-coal-300 uppercase tracking-wider">Active Site</div>
+      <div class="px-4 py-3 border-t border-coal-200 dark:border-coal-800">
+        <div class="text-xs mb-2 text-coal-600 dark:text-coal-300 uppercase tracking-wider">Active Site</div>
 
-          {{-- Badge site aktif --}}
-          <div class="mb-2">
-            <span class="inline-flex items-center gap-2 px-2 py-1 rounded-lg border
+        <div class="mb-2">
+          <span class="inline-flex items-center gap-2 px-2 py-1 rounded-lg border
                           border-maroon-700 text-maroon-800 dark:text-maroon-300 dark:border-maroon-600 bg-maroon-50/70
                           dark:bg-maroon-900/20">
-              📍 {{ $activeSite?->code ?? 'ALL' }}
-              @if($activeSite && $activeSite->name)
-                <span class="text-xs text-coal-500 dark:text-coal-400">— {{ $activeSite->name }}</span>
-              @endif
-            </span>
-          </div>
-
-          {{-- Switcher (kondisional pada route) --}}
-          @if(Route::has('admin.sites.switch'))
-            <form method="POST" action="{{ route('admin.sites.switch') }}" class="grid gap-2">
-              @csrf
-              <select name="site_id" class="border rounded-lg px-3 py-2 bg-white dark:bg-coal-900">
-                <option value="">ALL SITES</option>
-                @foreach($sites as $s)
-                  <option value="{{ $s->id }}" @selected($activeSiteId == $s->id)>
-                    {{ $s->code }} — {{ $s->name }}
-                  </option>
-                @endforeach
-              </select>
-              <button class="px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 hover:bg-ivory-100 dark:hover:bg-coal-900">
-                Ganti Site
-              </button>
-            </form>
-          @endif
+            📍 {{ $activeSite?->code ?? 'ALL' }}
+            @if($activeSite && $activeSite->name)
+              <span class="text-xs text-coal-500 dark:text-coal-400">— {{ $activeSite->name }}</span>
+            @endif
+          </span>
         </div>
+
+        @if(Route::has('admin.sites.switch'))
+        <form method="POST" action="{{ route('admin.sites.switch') }}" class="grid gap-2">
+          @csrf
+          <select name="site_id" class="border rounded-lg px-3 py-2 bg-white dark:bg-coal-900">
+            <option value="">ALL SITES</option>
+            @foreach($sites as $s)
+              <option value="{{ $s->id }}" @selected($activeSiteId==$s->id)>
+                {{ $s->code }} — {{ $s->name }}
+              </option>
+            @endforeach
+          </select>
+          <button class="px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 hover:bg-ivory-100 dark:hover:bg-coal-900">
+            Ganti Site
+          </button>
+        </form>
+        @endif
+      </div>
       @endif
 
       {{-- LOGOUT (BAWAH) --}}
@@ -306,41 +463,54 @@
             </div>
             @endauth
 
-            {{-- MENU (ADMIN ONLY) --}}
-            @can('is-admin')
-            <div class="p-4 grid gap-1 flex-1">
-              <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
+            {{-- MENU (ADMIN ONLY / NON-ADMIN) --}}
+            @if($isAdmin)
+              <div class="p-4 grid gap-1 flex-1">
+                <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
 
-              @if(Route::has('admin.departments.index'))
-                <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}">🏷️ Departments</a>
-              @endif
-
-              @if(Route::has('admin.forms.index'))
-                <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}">🧾 Forms</a>
-              @endif
-
-              @if(Route::has('admin.entries.index'))
-                <a href="{{ route('admin.entries.index') }}" class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">📥 Entries</a>
-              @endif
-
-              @if (Route::has('admin.qa.index'))
-                <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
-              @endif
-
-              @php($user = auth()->user())
-              @if($user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin())
-                @if(Route::has('admin.users.active.index'))
-                  <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
+                @if(Route::has('admin.departments.index'))
+                  <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}">🏷️ Departments</a>
                 @endif
-              @endif
-            </div>
-            @endcan
+                @if(Route::has('admin.forms.index'))
+                  <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}">🧾 Forms</a>
+                @endif
+                @if(Route::has('admin.entries.index'))
+                  <a href="{{ route('admin.entries.index') }}" class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">📥 Entries</a>
+                @endif
+                @if (Route::has('admin.qa.index'))
+                  <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+                @endif
 
-            {{-- HSE / KPI Monitoring --}}
+                @if($isSuper)
+                  @if(Route::has('admin.users.active.index'))
+                    <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
+                  @endif
+                @endif
+              </div>
+            @else
+              <div class="p-4 grid gap-1 flex-1">
+                @if(Route::has('daily.index'))
+                  <a href="{{ route('daily.index') }}"
+                     class="{{ $navItemClass(request()->routeIs('daily.*')) }}">🏛️ Dashboard</a>
+                @endif
+
+                @if(Route::has('front.forms.index'))
+                  <a href="{{ route('front.forms.index') }}"
+                     class="{{ $navItemClass(request()->routeIs('front.forms.*')) }}">🧾 FORM</a>
+                @endif
+
+                @if(Route::has('admin.qa.index'))
+                  <a href="{{ route('admin.qa.index') }}"
+                     class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+                @endif
+              </div>
+            @endif
+
+            {{-- HSE / KPI (mobile) --}}
             <div class="p-4 pt-0">
               <div class="px-1 text-xs uppercase tracking-wider text-coal-500 dark:text-coal-300">HSE / KPI</div>
               <div class="mt-2 grid gap-1">
-                @can('is-admin')
+                @if($isAdmin)
                   @if(Route::has('admin.sites.index'))
                     <a href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}">📍 Sites</a>
                   @endif
@@ -350,54 +520,59 @@
                   @if(Route::has('admin.indicators.index'))
                     <a href="{{ route('admin.indicators.index') }}" class="{{ $navItemClass(request()->routeIs('admin.indicators.*')) }}">📊 Indicators</a>
                   @endif
-                @endcan
-
-                @if(Route::has('admin.daily.create'))
-                  <a href="{{ route('admin.daily.create') }}"
-                     class="{{ $navItemClass(request()->routeIs('admin.daily.create') || request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
-                @endif
-
-                @can('is-admin')
-                  @if(Route::has('admin.reports.monthly'))
-                    <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.*')) }}">📈 Rekap Bulanan</a>
+                  @if(Route::has('admin.daily.create'))
+                    <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
                   @endif
-                @endcan
+                  @if(Route::has('admin.reports.monthly'))
+                    <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+                  @endif
+                  @if($isSuper && Route::has('admin.site_access.index'))
+                    <a href="{{ route('admin.site_access.index') }}" class="{{ $navItemClass(request()->routeIs('admin.site_access.*')) }}">🛂 Input Access</a>
+                  @endif
+                @else
+                  @if(Route::has('daily.index'))
+                    <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>
+                  @endif
+                  @if(Route::has('admin.reports.monthly'))
+                    <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+                  @endif
+                @endif
               </div>
             </div>
 
             {{-- ACTIVE SITE (mobile) --}}
             @if($sites->count() > 0)
-              <div class="p-4 border-t border-coal-200 dark:border-coal-800">
-                <div class="text-xs mb-2 text-coal-600 dark:text-coal-300 uppercase tracking-wider">Active Site</div>
+            <div class="p-4 border-t border-coal-200 dark:border-coal-800">
+              <div class="text-xs mb-2 text-coal-600 dark:text-coal-300 uppercase tracking-wider">Active Site</div>
 
-                <div class="mb-2">
-                  <span class="inline-flex items-center gap-2 px-2 py-1 rounded-lg border
+              <div class="mb-2">
+                <span class="inline-flex items-center gap-2 px-2 py-1 rounded-lg border
                                 border-maroon-700 text-maroon-800 dark:text-maroon-300 dark:border-maroon-600 bg-maroon-50/70
                                 dark:bg-maroon-900/20">
-                    📍 {{ $activeSite?->code ?? 'ALL' }}
-                    @if($activeSite && $activeSite->name)
-                      <span class="text-xs text-coal-500 dark:text-coal-400">— {{ $activeSite->name }}</span>
-                    @endif
-                  </span>
-                </div>
-
-                @if(Route::has('admin.sites.switch'))
-                  <form method="POST" action="{{ route('admin.sites.switch') }}" class="grid gap-2">
-                    @csrf
-                    <select name="site_id" class="border rounded-lg px-3 py-2 bg-white dark:bg-coal-900">
-                      <option value="">ALL SITES</option>
-                      @foreach($sites as $s)
-                        <option value="{{ $s->id }}" @selected($activeSiteId == $s->id)>
-                          {{ $s->code }} — {{ $s->name }}
-                        </option>
-                      @endforeach
-                    </select>
-                    <button class="px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 hover:bg-ivory-100 dark:hover:bg-coal-900">
-                      Ganti Site
-                    </button>
-                  </form>
-                @endif
+                  📍 {{ $activeSite?->code ?? 'ALL' }}
+                  @if($activeSite && $activeSite->name)
+                    <span class="text-xs text-coal-500 dark:text-coal-400">— {{ $activeSite->name }}</span>
+                  @endif
+                </span>
               </div>
+
+              @if(Route::has('admin.sites.switch'))
+              <form method="POST" action="{{ route('admin.sites.switch') }}" class="grid gap-2">
+                @csrf
+                <select name="site_id" class="border rounded-lg px-3 py-2 bg-white dark:bg-coal-900">
+                  <option value="">ALL SITES</option>
+                  @foreach($sites as $s)
+                    <option value="{{ $s->id }}" @selected($activeSiteId==$s->id)>
+                      {{ $s->code }} — {{ $s->name }}
+                    </option>
+                  @endforeach
+                </select>
+                <button class="px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 hover:bg-ivory-100 dark:hover:bg-coal-900">
+                  Ganti Site
+                </button>
+              </form>
+              @endif
+            </div>
             @endif
 
             {{-- LOGOUT (BAWAH) --}}
@@ -418,35 +593,41 @@
     <div class="min-h-screen lg:ml-0">
       <div class="px-4 lg:px-8 pt-6">
         <div class="flex items-center justify-between gap-4">
-          <div>@hasSection('breadcrumbs') @yield('breadcrumbs') @endif</div>
+          <div>
+            @hasSection('breadcrumbs')
+              @yield('breadcrumbs')
+            @endif
+          </div>
 
           {{-- Right header actions + compact site switcher --}}
           <div class="flex items-center gap-3">
             @if($sites->count() > 0)
-              <div class="hidden md:flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs
+            <div class="hidden md:flex items-center gap-2">
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs
                              border-maroon-700 text-maroon-800 dark:text-maroon-300 dark:border-maroon-600 bg-maroon-50/70
                              dark:bg-maroon-900/20">
-                  📍 {{ $activeSite?->code ?? 'ALL' }}
-                </span>
-                @if(Route::has('admin.sites.switch'))
-                  <form method="POST" action="{{ route('admin.sites.switch') }}" class="flex items-center gap-2">
-                    @csrf
-                    <select name="site_id" class="border rounded px-2 py-1 bg-white dark:bg-coal-900 text-sm">
-                      <option value="">ALL</option>
-                      @foreach($sites as $s)
-                        <option value="{{ $s->id }}" @selected($activeSiteId == $s->id)>{{ $s->code }}</option>
-                      @endforeach
-                    </select>
-                    <button class="px-2 py-1 rounded border border-coal-300 dark:border-coal-700 text-sm">
-                      Set
-                    </button>
-                  </form>
-                @endif
-              </div>
+                📍 {{ $activeSite?->code ?? 'ALL' }}
+              </span>
+              @if(Route::has('admin.sites.switch'))
+              <form method="POST" action="{{ route('admin.sites.switch') }}" class="flex items-center gap-2">
+                @csrf
+                <select name="site_id" class="border rounded px-2 py-1 bg-white dark:bg-coal-900 text-sm">
+                  <option value="">ALL</option>
+                  @foreach($sites as $s)
+                    <option value="{{ $s->id }}" @selected($activeSiteId==$s->id)>{{ $s->code }}</option>
+                  @endforeach
+                </select>
+                <button class="px-2 py-1 rounded border border-coal-300 dark:border-coal-700 text-sm">
+                  Set
+                </button>
+              </form>
+              @endif
+            </div>
             @endif
 
-            @hasSection('actions') @yield('actions') @endif
+            @hasSection('actions')
+              @yield('actions')
+            @endif
           </div>
         </div>
       </div>
@@ -478,4 +659,5 @@
 
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
+
 </html>

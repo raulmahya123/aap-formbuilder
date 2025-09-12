@@ -11,9 +11,9 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name','email','password','is_active'];
+    protected $fillable = ['name', 'email', 'password', 'is_active'];
 
-    protected $hidden = ['password','remember_token'];
+    protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
@@ -53,5 +53,17 @@ class User extends Authenticatable
     {
         return $query->where('is_active', true);
     }
+
+    // App\Models\User.php
+    public function sites()
+{
+    return $this->belongsToMany(Site::class, 'user_site_access')
+        ->using(UserSiteAccess::class) // kalau mau custom pivot
+        ->withTimestamps();
 }
 
+    public function canAccessSite(int $siteId): bool
+    {
+        return $this->sites()->where('sites.id', $siteId)->exists();
+    }
+}

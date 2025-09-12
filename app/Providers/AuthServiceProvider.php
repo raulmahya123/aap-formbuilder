@@ -34,6 +34,7 @@ use App\Policies\IndicatorGroupPolicy;
 use App\Policies\IndicatorPolicy;
 use App\Policies\IndicatorDailyPolicy;
 use App\Policies\IndicatorValuePolicy;
+use App\Policies\UserSiteAccessPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -55,6 +56,7 @@ class AuthServiceProvider extends ServiceProvider
         Indicator::class        => IndicatorPolicy::class,
         IndicatorDaily::class   => IndicatorDailyPolicy::class,
         IndicatorValue::class   => IndicatorValuePolicy::class,
+        UserSiteAccessPolicy::class => UserSiteAccessPolicy::class,
     ];
 
     /**

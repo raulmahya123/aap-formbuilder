@@ -53,4 +53,26 @@ class SiteController extends Controller
         $site->delete();
         return back()->with('success', "Site {$site->code} dihapus.");
     }
+
+    /**
+     * Switch active site (untuk sidebar switcher).
+     */
+    public function switch(Request $request)
+    {
+        $request->validate([
+            'site_id' => ['nullable','integer','exists:sites,id'],
+        ]);
+
+        // Validasi tambahan: jika bukan admin, cek apakah user punya akses ke site tsb
+        if (!auth()->user()->isSuperAdmin() && !\Gate::allows('is-admin')) {
+            if ($request->filled('site_id') && method_exists(auth()->user(),'hasSite')
+                && !auth()->user()->hasSite((int)$request->site_id)) {
+                return back()->with('error','Kamu tidak punya akses ke site tersebut.');
+            }
+        }
+
+        session(['active_site_id' => $request->site_id ?: null]);
+
+        return back()->with('ok','Active site updated.');
+    }
 }

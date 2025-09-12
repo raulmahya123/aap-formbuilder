@@ -35,9 +35,19 @@ use App\Http\Controllers\Admin\IndicatorController as AdminIndicatorController;
 use App\Http\Controllers\Admin\DailyInputController as AdminDailyInputController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 
+// ==============================
+// USER Controllers (baru HSE)
+// ==============================
+use App\Http\Controllers\User\IndicatorDailyController;
+
+// ==============================
+// Admin kelola akses user↔site (baru)
+// ==============================
+use App\Http\Controllers\Admin\UserSiteAccessController;
+
 // Redirect root ke dashboard
-Route::get('/', fn() => redirect()->route('admin.dashboard'));
-Route::get('/dashboard', fn() => redirect()->route('admin.dashboard'))
+Route::get('/', fn () => redirect()->route('admin.dashboard'));
+Route::get('/dashboard', fn () => redirect()->route('admin.dashboard'))
     ->middleware('auth')
     ->name('dashboard');
 
@@ -49,16 +59,53 @@ Route::middleware('auth')->group(function () {
     // FRONT (user)
     // ==============================
     Route::prefix('forms')->name('front.forms.')->group(function () {
+        // List
         Route::get('/', [FormBrowseController::class, 'index'])->name('index');
+
+        // Riwayat entries user (letakkan SEBELUM catch-all slug)
+        Route::get('/entries', [FrontEntryController::class, 'index'])->name('entries.index');
+        Route::get('/entries/{entry}', [FrontEntryController::class, 'show'])
+            ->name('entries.show')->whereNumber('entry');
+
+        // === Compatibility: akses /forms/{id} → redirect ke slug ===
+        Route::get('/{id}', function ($id) {
+            $form = \App\Models\Form::query()
+                ->select(['id', 'slug'])
+                ->whereKey($id)
+                ->firstOrFail();
+
+            return redirect()->route('front.forms.show', $form->slug);
+        })->whereNumber('id')->name('by_id');
+
+        // Show/Fill (pakai slug)
         Route::get('/{form:slug}', [FormBrowseController::class, 'show'])->name('show');
+
+        // Alias "fill" (opsional)
+        Route::get('/{form:slug}/fill', [FormBrowseController::class, 'show'])->name('fill');
+
+        // Submit (alias "store")
         Route::post('/{form:slug}', [FrontEntryController::class, 'store'])->name('store');
-        Route::get('/{form:slug}/thanks', fn() => view('front.forms.thanks'))->name('thanks');
+        Route::post('/{form:slug}/submit', [FrontEntryController::class, 'store'])->name('submit');
+
+        // Preview (opsional)
+        Route::get('/{form:slug}/preview', [FormBrowseController::class, 'preview'])->name('preview');
+
+        // Thanks page (opsional)
+        Route::get('/{form:slug}/thanks', fn () => view('front.forms.thanks'))->name('thanks');
     });
 
     // Download lampiran entry (front)
     Route::get('/entry-file/{file}', [FrontEntryController::class, 'downloadAttachment'])
         ->name('front.entry.download.attachment')
         ->whereNumber('file');
+
+    // ==============================
+    // USER — Daily HSE (view semua; create/update/delete via Policy per site)
+    // ==============================
+    Route::get('/daily', [IndicatorDailyController::class, 'index'])->name('daily.index');
+    Route::post('/daily', [IndicatorDailyController::class, 'store'])->name('daily.store');
+    Route::put('/daily/{daily}', [IndicatorDailyController::class, 'update'])->name('daily.update')->whereNumber('daily');
+    Route::delete('/daily/{daily}', [IndicatorDailyController::class, 'destroy'])->name('daily.destroy')->whereNumber('daily');
 
     // ==============================
     // ADMIN
@@ -73,6 +120,9 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard/data/by-department', [DashboardController::class, 'byDepartment'])->name('dashboard.data.by_department');
         Route::get('dashboard/data/by-aggregate', [DashboardController::class, 'byAggregate'])->name('dashboard.data.by_aggregate');
         // ==== END DASHBOARD ====
+
+        // ==== ACTIVE SITE SWITCH (accessible for any authenticated user) ====
+        Route::post('sites/switch', [AdminSiteController::class, 'switch'])->name('sites.switch');
 
         // Manage Users (active/toggle)
         Route::get('/users/active', [UserActiveController::class, 'index'])->name('users.active.index');
@@ -97,12 +147,17 @@ Route::middleware('auth')->group(function () {
         // ==============================
         Route::middleware('can:is-admin')->group(function () {
             Route::resource('sites', AdminSiteController::class)->except(['show']);
-
             Route::resource('groups', AdminIndicatorGroupController::class)->except(['show']);
             Route::resource('indicators', AdminIndicatorController::class)->except(['show']);
 
-            Route::resource('groups', AdminIndicatorGroupController::class)->except(['show']);
-            Route::resource('indicators', AdminIndicatorController::class)->except(['show']);
+            // Kelola akses user↔site (admin only)
+            Route::get('site-access', [UserSiteAccessController::class, 'index'])->name('site_access.index');
+            Route::post('site-access', [UserSiteAccessController::class, 'store'])->name('site_access.store');
+            Route::post('site-access/bulk', [UserSiteAccessController::class, 'bulk'])->name('site_access.bulk'); // attach massal
+            Route::post('site-access/bulk-detach', [UserSiteAccessController::class, 'bulkDetachSites'])->name('site_access.bulk_detach'); // detach massal
+            Route::delete('site-access/{userSiteAccess}', [UserSiteAccessController::class, 'destroy'])
+                ->name('site_access.destroy')->whereNumber('userSiteAccess');
+            Route::delete('site-access', [UserSiteAccessController::class, 'destroySelected'])->name('site_access.destroy_selected'); // hapus terpilih
         });
 
         // Operasional
@@ -138,7 +193,6 @@ Route::middleware('auth')->group(function () {
                 ->name('export')->middleware('can:export,document');
 
             // === ACL (Kelola akses dokumen) ===
-            // Halaman kelola ACL per dokumen & hapus
             Route::get('/{document}/acl', [DocumentAclController::class, 'index'])
                 ->name('acl.index')->middleware('can:share,document');
             Route::delete('/{document}/acl/{acl}', [DocumentAclController::class, 'destroy'])

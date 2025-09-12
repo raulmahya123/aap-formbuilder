@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Indicator;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -12,6 +13,7 @@ class DatabaseSeeder extends Seeder
             SuperAdminSeeder::class,
             DemoDepartmentSeeder::class,
             SampleFormSeeder::class,
+            IndicatorSeeder::class,
         ]);
     }
 }

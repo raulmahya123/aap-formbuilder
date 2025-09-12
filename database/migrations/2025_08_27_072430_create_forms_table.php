@@ -10,6 +10,7 @@ return new class extends Migration {
       $t->id();
       $t->foreignId('department_id')->constrained()->cascadeOnDelete();
       $t->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+      $t->foreignId('site_id')->nullable()->constrained('sites')->nullOnDelete();
       $t->string('title');
       $t->string('slug')->unique();
       $t->enum('type', ['builder','pdf']);        // builder = form dinamis; pdf = unggah PDF

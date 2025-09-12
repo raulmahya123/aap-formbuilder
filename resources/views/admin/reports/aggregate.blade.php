@@ -110,35 +110,139 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-(function(){
-  const payload = @json($charts);
+(function () {
+  const payload = @json($charts ?? []);
 
-  // Top chart
-  const allRows = Object.values(payload).flatMap(g => g.labels.map((label,i)=>({label,val:g.values[i]})));
+  // ===== THEME & UTIL =====
+  const isDark   = document.documentElement.classList.contains('dark');
+  const gridCol  = isDark ? 'rgba(255,255,255,.12)' : 'rgba(0,0,0,.08)';
+  const textCol  = isDark ? '#e5e7eb' : '#374151';
+
+  Chart.defaults.color = textCol;
+  Chart.defaults.font.family = "Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial";
+  Chart.defaults.borderColor = gridCol;
+
+  const PALETTE = [
+    '#ef4444','#f97316','#f59e0b','#84cc16','#22c55e',
+    '#14b8a6','#06b6d4','#0ea5e9','#3b82f6','#6366f1',
+    '#8b5cf6','#a78bfa','#e879f9','#f472b6','#fb7185'
+  ];
+  const rgba = (hex, a=1) => {
+    const h = hex.replace('#',''); const n = parseInt(h,16);
+    const r = (n>>16)&255, g=(n>>8)&255, b=n&255;
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  };
+  const colorsFor = n => Array.from({length:n},(_,i)=>PALETTE[i%PALETTE.length]);
+
+  const baseOptions = (o={}) => ({
+    responsive:true, maintainAspectRatio:false,
+    animation:{duration:800,easing:'easeOutQuart'},
+    scales:{
+      x:{ grid:{ color:gridCol } },
+      y:{ grid:{ color:gridCol } },
+    },
+    plugins:{
+      legend:{ display:false },
+      tooltip:{
+        backgroundColor:isDark?'rgba(17,24,39,.95)':'rgba(255,255,255,.95)',
+        titleColor:textCol, bodyColor:textCol, borderColor:gridCol, borderWidth:1
+      }
+    },
+    ...o
+  });
+
+  // Label nilai sederhana (tanpa plugin eksternal)
+  const DataLabelPlugin = {
+    id:'valueLabels',
+    afterDatasetsDraw(chart){
+      const {ctx} = chart;
+      chart.data.datasets.forEach((ds,di)=>{
+        const meta = chart.getDatasetMeta(di); if (!meta || meta.hidden) return;
+        meta.data.forEach((el,i)=>{
+          const v = ds.data[i]; if (v==null) return;
+          ctx.save();
+          ctx.font = '600 11px ' + Chart.defaults.font.family;
+          ctx.fillStyle = textCol;
+          let x=el.x,y=el.y; ctx.textAlign='center'; ctx.textBaseline='bottom';
+          if (chart.config.type==='bar' && chart.config.options.indexAxis==='y'){
+            ctx.textAlign='left'; ctx.textBaseline='middle'; x = el.x + 8; y = el.y;
+          } else { y = el.y - 6; }
+          ctx.fillText(v, x, y);
+          ctx.restore();
+        });
+      });
+    }
+  };
+  Chart.register(DataLabelPlugin);
+
+  // ===== TOP CHART =====
+  const allRows = Object.values(payload).flatMap(g =>
+    (g.labels||[]).map((label,i)=>({label, val:(g.values||[])[i] ?? 0}))
+  );
   const top = [...allRows].sort((a,b)=>b.val-a.val).slice(0,10);
+
   if (document.getElementById('topChart') && top.length){
-    new Chart(document.getElementById('topChart'),{
+    const cols = colorsFor(top.length);
+    new Chart(document.getElementById('topChart'), {
       type:'bar',
-      data:{ labels:top.map(r=>r.label), datasets:[{ data:top.map(r=>r.val), backgroundColor:'rgba(123,28,28,.5)' }]},
-      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}
+      data:{
+        labels: top.map(r=>r.label),
+        datasets:[{
+          data: top.map(r=>r.val),
+          backgroundColor: cols.map(c=>rgba(c,.85)),
+          borderColor: cols, borderWidth:1, borderRadius:10, maxBarThickness:36
+        }]
+      },
+      options: baseOptions({
+        scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true } }
+      })
     });
   }
 
-  // Trend chart (dummy data)
+  // ===== TREND CHART (dummy → tinggal ganti datanya) =====
   if (document.getElementById('trendChart')){
-    new Chart(document.getElementById('trendChart'),{
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    const line = '#3b82f6';
+    const grad = ctx.createLinearGradient(0,0,0,ctx.canvas.height);
+    grad.addColorStop(0, rgba(line,.35)); grad.addColorStop(1, rgba(line,0));
+
+    const labels = Array.from({length:12},(_,i)=>`M${i+1}`);
+    const values = labels.map(()=>Math.round(Math.random()*100));
+
+    new Chart(ctx,{
       type:'line',
-      data:{ labels:Array.from({length:30},(_,i)=>i+1), datasets:[{ data:Array(30).fill(0), borderColor:'rgba(123,28,28,1)', fill:true, tension:.35 }]},
-      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}
+      data:{ labels, datasets:[{
+        data: values, borderColor: line, backgroundColor: grad,
+        fill:true, tension:.35, pointRadius:3, pointHoverRadius:5, borderWidth:2
+      }]},
+      options: baseOptions({
+        scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true } }
+      })
     });
   }
 
-  // Per group
+  // ===== PER GROUP (horizontal colorful) =====
   Object.entries(payload).forEach(([code,cfg])=>{
-    const el=document.getElementById('chart_'+code);
-    if (!el) return;
-    new Chart(el,{type:'bar', data:{labels:cfg.labels,datasets:[{data:cfg.values,backgroundColor:'rgba(31,41,55,.5)'}]}, options:{indexAxis:'y',responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}});
+    const el = document.getElementById('chart_'+code); if (!el) return;
+    const n = (cfg.labels||[]).length; const cols = colorsFor(n);
+    new Chart(el,{
+      type:'bar',
+      data:{
+        labels: cfg.labels||[],
+        datasets:[{
+          data: cfg.values||[],
+          backgroundColor: cols.map(c=>rgba(c,.85)),
+          borderColor: cols, borderWidth:1, borderRadius:10,
+          barPercentage:.8, categoryPercentage:.9
+        }]
+      },
+      options: baseOptions({
+        indexAxis:'y',
+        scales:{ x:{ beginAtZero:true }, y:{ grid:{ display:false } } }
+      })
+    });
   });
 })();
 </script>
 @endpush
+
