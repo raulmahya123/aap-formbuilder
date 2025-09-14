@@ -113,15 +113,8 @@
             <a href="{{ $showUrl }}"
                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-maroon-700 text-maroon-700 hover:bg-maroon-50
                       dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20">
-              ✍️ Isi Form
+              LIHAT
             </a>
-
-            @if(Route::has('front.forms.preview'))
-              <a href="{{ route('front.forms.preview', $form->id) }}"
-                 class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 hover:bg-ivory-100 dark:hover:bg-coal-900">
-                👁️ Preview
-              </a>
-            @endif
           </div>
         </div>
       @endforeach

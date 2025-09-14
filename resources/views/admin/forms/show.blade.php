@@ -4,12 +4,51 @@
 <div class="max-w-3xl mx-auto p-6 bg-white rounded-xl">
   <h1 class="text-xl font-semibold mb-4">{{ $form->title }}</h1>
 
-  {{-- Preview PDF referensi jika tipe = pdf --}}
+  {{-- Preview / Download referensi untuk tipe "file" (value tetap 'pdf') --}}
   @if($form->type === 'pdf' && $form->pdf_path)
-    <iframe
-      class="w-full h-[70vh] border rounded mb-4"
-      src="{{ asset('storage/'.$form->pdf_path) }}#view=FitH">
-    </iframe>
+    @php
+      $url  = Storage::disk('public')->url($form->pdf_path);
+      $ext  = strtolower(pathinfo($form->pdf_path, PATHINFO_EXTENSION));
+      $size = null;
+      try {
+        $bytes = Storage::disk('public')->size($form->pdf_path);
+        $units = ['B','KB','MB','GB'];
+        $pow   = $bytes > 0 ? floor(log($bytes, 1024)) : 0;
+        $pow   = min($pow, count($units)-1);
+        $size  = number_format($bytes / pow(1024, $pow), $pow ? 2 : 0).' '.$units[$pow];
+      } catch (\Throwable $e) {
+        $size = null;
+      }
+    @endphp
+
+    @if($ext === 'pdf')
+      <iframe
+        class="w-full h-[70vh] border rounded mb-4"
+        src="{{ $url }}#view=FitH">
+      </iframe>
+      <div class="text-xs text-slate-500 mb-6">
+        File: <a class="underline" href="{{ $url }}" target="_blank">{{ basename($form->pdf_path) }}</a>
+        @if($size) • {{ $size }} @endif
+      </div>
+    @else
+      {{-- Word/Excel: tampilkan kartu download --}}
+      <div class="mb-6 p-4 rounded-lg border bg-ivory-50">
+        <div class="text-sm text-slate-700 mb-2">
+          File referensi: <span class="font-medium uppercase">{{ $ext }}</span>
+          @if($size) • <span class="text-slate-500">{{ $size }}</span> @endif
+        </div>
+        <a
+          href="{{ $url }}"
+          download
+          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition">
+          {{-- ikon download sederhana --}}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 16l4-5h-3V4h-2v7H8l4 5z"/><path d="M5 18h14v2H5z"/>
+          </svg>
+          Download {{ strtoupper($ext) }}
+        </a>
+      </div>
+    @endif
   @endif
 
   {{-- Error summary --}}
@@ -33,12 +72,23 @@
     @if ($form->type === 'builder')
       @foreach (($form->schema['fields'] ?? []) as $field)
         @php
+          use Illuminate\Support\Str;
           $name     = $field['name'] ?? Str::slug($field['label'] ?? 'field','_');
           $type     = $field['type'] ?? 'text';
           $label    = $field['label'] ?? ucfirst($name);
           $required = !empty($field['required']);
           $options  = $field['options'] ?? [];
-          $help     = $field['help'] ?? null;   // opsional di schema
+          $help     = $field['help'] ?? null;
+
+          // siapkan accept untuk input file dari schema 'mimes'
+          $acceptStr = null;
+          if ($type === 'file' && !empty($field['mimes'])) {
+            $m = array_map('trim', explode(',', $field['mimes']));
+            // ekstensi dengan titik
+            $exts = array_map(fn($x) => '.'.strtolower($x), $m);
+            // gabungan ext dan mime
+            $acceptStr = implode(',', array_merge($exts, $m));
+          }
         @endphp
 
         <div class="mb-4">
@@ -120,6 +170,7 @@
               type="file"
               name="{{ $name }}"
               class="border rounded w-full px-3 py-2"
+              @if($acceptStr) accept="{{ $acceptStr }}" @endif
               @if($required) required @endif>
             @if(!empty($field['mimes']))
               <p class="text-xs text-slate-500 mt-1">Format: {{ $field['mimes'] }}</p>
@@ -128,7 +179,7 @@
               <p class="text-xs text-slate-500">Maks: {{ $field['max'] }} KB</p>
             @endif
 
-          {{-- Default (fallback) --}}
+          {{-- Default --}}
           @else
             <input
               id="{{ $name }}"
@@ -139,7 +190,7 @@
               @if($required) required @endif>
           @endif
 
-          {{-- Help text (opsional) --}}
+          {{-- Help text --}}
           @if ($help)
             <p class="text-xs text-slate-500 mt-1">{{ $help }}</p>
           @endif
@@ -152,7 +203,7 @@
       @endforeach
 
     @else
-      {{-- Untuk tipe PDF, sediakan beberapa meta isian opsional --}}
+      {{-- Untuk tipe file: form meta opsional (tanpa preview Word/Excel) --}}
       <div class="mb-4">
         <label class="block mb-1 font-medium" for="catatan">Catatan</label>
         <textarea id="catatan" name="catatan" class="border rounded w-full px-3 py-2" rows="3">{{ old('catatan') }}</textarea>

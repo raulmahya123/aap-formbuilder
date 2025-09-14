@@ -19,14 +19,14 @@
     </div>
   </div>
 
-  {{-- Flash message --}}
+  {{-- Flash --}}
   @if (session('ok'))
     <div class="mb-4 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 px-4 py-3">
       {{ session('ok') }}
     </div>
   @endif
 
-  {{-- Error message --}}
+  {{-- Errors --}}
   @if ($errors->any())
     <div class="mb-4 rounded bg-rose-50 text-rose-700 border border-rose-200 px-4 py-3">
       <div class="font-medium">Terjadi kesalahan:</div>
@@ -38,7 +38,7 @@
     </div>
   @endif
 
-  {{-- Form Update --}}
+  {{-- Update --}}
   <form method="POST"
         action="{{ route('admin.forms.update', $form) }}"
         enctype="multipart/form-data"
@@ -51,9 +51,7 @@
       {{-- Department --}}
       <div>
         <label class="block text-sm font-medium text-slate-700">Departemen</label>
-        <select name="department_id"
-                class="mt-1 w-full rounded-lg border px-3 py-2"
-                required>
+        <select name="department_id" class="mt-1 w-full rounded-lg border px-3 py-2" required>
           @foreach($departments as $d)
             <option value="{{ $d->id }}" @selected(old('department_id',$form->department_id)==$d->id)>
               {{ $d->name }}
@@ -65,24 +63,21 @@
       {{-- Title --}}
       <div>
         <label class="block text-sm font-medium text-slate-700">Judul</label>
-        <input type="text"
-               name="title"
-               value="{{ old('title',$form->title) }}"
-               class="mt-1 w-full rounded-lg border px-3 py-2"
-               required maxlength="190">
+        <input type="text" name="title" value="{{ old('title',$form->title) }}"
+               class="mt-1 w-full rounded-lg border px-3 py-2" required maxlength="190">
       </div>
 
       {{-- Type --}}
       <div>
         <label class="block text-sm font-medium text-slate-700">Tipe</label>
-        <select name="type" x-model="type"
-                class="mt-1 w-full rounded-lg border px-3 py-2" required>
+        <select name="type" x-model="type" class="mt-1 w-full rounded-lg border px-3 py-2" required>
           <option value="builder">Builder</option>
-          <option value="pdf">PDF</option>
+          {{-- nilai tetap "pdf" untuk kompatibilitas controller --}}
+          <option value="pdf">File (PDF/Word/Excel)</option>
         </select>
       </div>
 
-      {{-- Schema (Builder) --}}
+      {{-- Builder schema --}}
       <div x-show="type==='builder'">
         <label class="block text-sm font-medium text-slate-700">Schema (JSON)</label>
         <textarea name="schema" rows="10"
@@ -98,20 +93,26 @@
         </p>
       </div>
 
-      {{-- PDF (tipe PDF) --}}
+      {{-- File (PDF/Word/Excel) --}}
       <div x-show="type==='pdf'">
-        <label class="block text-sm font-medium text-slate-700">File PDF (opsional untuk ganti)</label>
-        <input type="file" name="pdf" accept="application/pdf"
+        <label class="block text-sm font-medium text-slate-700">Unggah File (opsional untuk ganti)</label>
+        <input type="file" name="pdf"
+               accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                class="mt-1 block w-full text-sm file:mr-4 file:py-2 file:px-4
                       file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700
                       hover:file:bg-emerald-100">
+        <p class="text-xs text-slate-500 mt-1">
+          Format: PDF, DOC/DOCX, XLS/XLSX — maks 30 MB. File akan dikompresi otomatis saat disimpan.
+        </p>
+
         @if($form->pdf_path)
           <p class="text-xs text-slate-600 mt-1">
             File sekarang:
             <a class="underline" target="_blank"
                href="{{ Storage::disk('public')->url($form->pdf_path) }}">
-              {{ $form->pdf_path }}
+              {{ basename($form->pdf_path) }}
             </a>
+            <span class="text-slate-400">({{ $form->pdf_path }})</span>
           </p>
         @endif
       </div>
@@ -132,7 +133,7 @@
     </div>
   </form>
 
-  {{-- Form Delete (dipisah) --}}
+  {{-- Delete --}}
   <form method="POST"
         action="{{ route('admin.forms.destroy', $form) }}"
         class="mt-4"
@@ -144,14 +145,13 @@
   </form>
 </div>
 
-<div id="form-data"
-     data-type='@json(old("type", $form->type))'></div>
-
+{{-- Inisialisasi Alpine --}}
+<div id="form-data" data-type='@json(old("type", $form->type))'></div>
 <script>
   function formEdit(){
     const el = document.getElementById('form-data');
     return {
-      type: JSON.parse(el.dataset.type)   // ← hasil tetap string "builder"/"pdf"
+      type: JSON.parse(el.dataset.type) // "builder" / "pdf"
     }
   }
 </script>

@@ -83,10 +83,8 @@
         $isAdmin = $isSuper || ($user && method_exists($user,'isAdmin') && $user->isAdmin());
         $isBasic = $user && !$isAdmin;
 
-        // home untuk masing2 role
-        $homeUrl = $isAdmin
-          ? (Route::has('admin.dashboard') ? route('admin.dashboard') : url('/'))
-          : (Route::has('daily.index') ? route('daily.index') : url('/'));
+        // home untuk SEMUA role = admin.dashboard
+        $homeUrl = Route::has('admin.dashboard') ? route('admin.dashboard') : url('/');
 
         // helper class item nav
         $navItemClass = function(bool $active = false){
@@ -161,9 +159,9 @@
           {{-- USER BIASA: Dashboard, FORM (front), Tanya Jawab --}}
           @else
             <div class="mt-2 grid gap-1">
-              {{-- Dashboard user diarahkan ke /daily (index) --}}
-              <a href="{{ Route::has('daily.index') ? route('daily.index') : url('/') }}"
-                 class="{{ $navItemClass(request()->routeIs('daily.*')) }}">🏛️ Dashboard</a>
+              {{-- Dashboard semua role -> admin.dashboard --}}
+              <a href="{{ route('admin.dashboard') }}"
+                 class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
 
               {{-- FORM versi front --}}
               @if(Route::has('front.forms.index'))
@@ -363,16 +361,17 @@
           <div>
             <div class="px-3 text-xs uppercase tracking-wider text-coal-500 dark:text-coal-300">Menu</div>
             <div class="mt-2 grid gap-1">
-              @if(Route::has('daily.index'))
-                <a href="{{ route('daily.index') }}"
-                   class="{{ $navItemClass(request()->routeIs('daily.*')) }}">🏛️ Dashboard</a>
-              @endif
+              {{-- Dashboard semua role -> admin.dashboard --}}
+              <a href="{{ route('admin.dashboard') }}"
+                 class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
 
+              {{-- FORM versi front --}}
               @if(Route::has('front.forms.index'))
                 <a href="{{ route('front.forms.index') }}"
                    class="{{ $navItemClass(request()->routeIs('front.forms.*')) }}">🧾 FORM</a>
               @endif
 
+              {{-- Tanya Jawab --}}
               @if(Route::has('admin.qa.index'))
                 <a href="{{ route('admin.qa.index') }}"
                    class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
@@ -384,11 +383,18 @@
           <div class="mt-6">
             <div class="px-3 text-xs uppercase tracking-wider text-coal-500 dark:text-coal-300">HSE / KPI</div>
             <div class="mt-2 grid gap-1">
+              {{-- Input Harian: aktif di create/store/edit/update --}}
               @if(Route::has('daily.index'))
-                <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>
+                <a href="{{ route('daily.index') }}"
+                   class="{{ $navItemClass(request()->routeIs(['daily.create','daily.store','daily.edit','daily.update'])) }}">
+                  ✍️ Input Harian
+                </a>
               @endif
+
+              {{-- Rekap Bulanan --}}
               @if(Route::has('admin.reports.monthly'))
-                <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+                <a href="{{ route('admin.reports.monthly') }}"
+                   class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
               @endif
             </div>
           </div>
@@ -489,10 +495,9 @@
               </div>
             @else
               <div class="p-4 grid gap-1 flex-1">
-                @if(Route::has('daily.index'))
-                  <a href="{{ route('daily.index') }}"
-                     class="{{ $navItemClass(request()->routeIs('daily.*')) }}">🏛️ Dashboard</a>
-                @endif
+                {{-- Dashboard semua role -> admin.dashboard --}}
+                <a href="{{ route('admin.dashboard') }}"
+                   class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
 
                 @if(Route::has('front.forms.index'))
                   <a href="{{ route('front.forms.index') }}"

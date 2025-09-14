@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Login — PT Andalan Artha Primanusa</title>
+  <title>Login — Andalan Group</title>
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -241,7 +241,7 @@
           </form>
 
           <div class="mt-6 text-center text-xs text-ivory-100/50">
-            © {{ date('Y') }} PT Andalan Artha Primanusa
+            © {{ date('Y') }} Andalan Group
           </div>
         </div>
       </div>

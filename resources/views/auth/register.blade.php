@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Register — PT Andalan Artha Primanusa</title>
+  <title>Register — Andalan Group</title>
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -46,7 +46,7 @@
   <!-- LEFT: IMAGE + OVERLAY -->
   <div class="hidden md:block md:col-span-7 relative">
     <!-- Background -->
-    <div class="absolute inset-0 bg-cover bg-center bg-[url('{{ asset('assets/images/foto1.png') }}')]"></div>
+    <div class="absolute inset-0 bg-cover bg-center bg-[url('{{ asset('assets/images/foto2.png') }}')]"></div>
     <div class="absolute inset-0 bg-gradient-to-tr from-maroon-900/95 via-maroon-800/75 to-maroon-900/10"></div>
 
     <!-- Branding + Visi Misi -->
@@ -59,7 +59,7 @@
       <div class="p-10 lg:p-14 space-y-6">
         <h1 class="font-serif text-4xl lg:text-5xl leading-tight">Bergabung dengan<br>Generasi Baru</h1>
         <p class="mt-2 max-w-xl text-ivory-100/80">
-          Daftarkan akun Anda untuk akses aplikasi internal PT Andalan Artha Primanusa.
+          Daftarkan akun Anda untuk akses aplikasi internal Andalan Group.
         </p>
         <div class="mt-6 h-[2px] w-40 bg-gradient-to-r from-gold to-transparent"></div>
 
@@ -154,7 +154,7 @@
           </form>
 
           <div class="mt-6 text-center text-xs text-ivory-100/50">
-            © {{ date('Y') }} PT Andalan Artha Primanusa
+            © {{ date('Y') }} Andalan Group
           </div>
         </div>
       </div>

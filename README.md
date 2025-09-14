@@ -1,6 +1,6 @@
 # 📘 Mandala Apps
 
-**Mandala Apps** adalah platform aplikasi internal yang dikembangkan untuk mendukung operasional dan manajemen **PT Andalan Artha Primanusa**.  
+**Mandala Apps** adalah platform aplikasi internal yang dikembangkan untuk mendukung operasional dan manajemen **Andalan Group**.  
 Aplikasi ini dibangun dengan prinsip **efisiensi, keamanan, dan skalabilitas**, sehingga mampu menjadi fondasi digital dalam transformasi perusahaan.  
 
 ---

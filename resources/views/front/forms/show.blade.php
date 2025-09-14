@@ -9,6 +9,7 @@
   class="bg-ivory-100 dark:bg-coal-900 min-h-screen text-coal-800 dark:text-ivory-100"
 >
   <div class="max-w-3xl mx-auto px-4 py-8">
+
     {{-- Breadcrumbs --}}
     <nav class="text-sm text-coal-500 dark:text-coal-400 mb-4">
       <a href="{{ route('dashboard') }}" class="hover:underline text-maroon-700 dark:text-maroon-300">Beranda</a>
@@ -48,91 +49,116 @@
     @endif
 
     @php
-      // ============== TIPE & PDF ==============
-      $isPdf = ($form->type ?? '') === 'pdf';
-      $pdfExists = false;
-      $pdfUrl = null;
+      use Illuminate\Support\Str;
+      use Illuminate\Support\Facades\Storage;
 
-      if ($isPdf && $form->pdf_path) {
-        $pdfExists = Storage::disk('public')->exists($form->pdf_path);
-        if ($pdfExists) {
-          // pastikan sudah: php artisan storage:link
-          $pdfUrl = asset('storage/'.$form->pdf_path);
-        }
+      // ====== INFO FILE TERKAIT FORM (normalisasi path) ======
+      $hasFile = !empty($form->pdf_path);
+      $rawPath = $hasFile ? trim((string) $form->pdf_path, '/') : null;
+      // buang prefix "public/" atau "storage/" jika ada agar tidak dobel
+      $path    = $rawPath ? preg_replace('#^(public/|storage/)#', '', $rawPath) : null;
+
+      $fileExists = $path ? Storage::disk('public')->exists($path) : false;
+
+      // URL publik (wajib: php artisan storage:link)
+      $url = $fileExists ? asset('storage/'.ltrim($path, '/')) : null;
+
+      $ext      = $path ? strtolower(pathinfo($path, PATHINFO_EXTENSION)) : null;
+      $isPdf    = $ext === 'pdf';
+      $isOffice = in_array($ext, ['doc','docx','xls','xlsx','ppt','pptx']);
+
+      // Size (opsional)
+      $size = null;
+      if ($fileExists) {
+        try {
+          $bytes = Storage::disk('public')->size($path);
+          $units = ['B','KB','MB','GB'];
+          $pow   = $bytes > 0 ? floor(log($bytes, 1024)) : 0;
+          $pow   = min($pow, count($units)-1);
+          $size  = number_format($bytes / pow(1024, $pow), $pow ? 2 : 0).' '.$units[$pow];
+        } catch (\Throwable $e) {}
       }
 
-      // ============== NORMALISASI SCHEMA ==============
+      // ====== NORMALISASI SCHEMA ======
       $raw = $form->schema ?? [];
       if (is_string($raw)) {
         $decoded = json_decode($raw, true);
         if (json_last_error() === JSON_ERROR_NONE) $raw = $decoded;
       }
-
       $fields = [];
       if (is_array($raw)) {
-        if (isset($raw['fields']) && is_array($raw['fields'])) {
-          $fields = $raw['fields'];     // bentuk { "fields": [...] }
-        } elseif (array_keys($raw) === range(0, max(count($raw)-1, 0))) {
-          $fields = $raw;               // bentuk [...]
-        }
+        if (isset($raw['fields']) && is_array($raw['fields']))       $fields = $raw['fields'];
+        elseif (array_keys($raw) === range(0, max(count($raw)-1,0)))  $fields = $raw;
       }
       $hasFields = !empty($fields);
 
-      // ============== Helper OLD aman ==============
-      if (!function_exists('fraw')) {
-        function fraw($name) { return old("data.$name"); } // boleh array
-      }
-      if (!function_exists('fval')) {
-        function fval($name) {
-          $v = old("data.$name");
-          return is_array($v) ? '' : $v; // string-only untuk value=""
-        }
-      }
-
-      // ============== Helper opsi (value,label) ==============
+      // helpers OLD
+      if (!function_exists('fraw')) { function fraw($name){ return old("data.$name"); } }
+      if (!function_exists('fval')) { function fval($name){ $v = old("data.$name"); return is_array($v) ? '' : $v; } }
       if (!function_exists('opt_tuple')) {
-        function opt_tuple($optKey, $opt) {
+        function opt_tuple($optKey,$opt){
           if (is_array($opt)) {
-            if (array_key_exists('value', $opt)) {
-              $val = (string)$opt['value'];
-              $lab = (string)($opt['label'] ?? $opt['value']);
-              return [$val, $lab];
-            }
-            if (array_key_exists(0, $opt)) {
-              $val = (string)$opt[0];
-              $lab = (string)($opt[1] ?? $opt[0]);
-              return [$val, $lab];
-            }
+            if (array_key_exists('value',$opt)) { $val=(string)$opt['value']; $lab=(string)($opt['label']??$opt['value']); return [$val,$lab]; }
+            if (array_key_exists(0,$opt))       { $val=(string)$opt[0];       $lab=(string)($opt[1]??$opt[0]);          return [$val,$lab]; }
             return [(string)$optKey, json_encode($opt, JSON_UNESCAPED_UNICODE)];
           }
           $val = is_int($optKey) ? (string)$opt : (string)$optKey;
           $lab = (string)$opt;
-          return [$val, $lab];
+          return [$val,$lab];
         }
       }
     @endphp
 
-    {{-- PREVIEW PDF (khusus tipe PDF) --}}
-    @if($isPdf)
+    {{-- ====== PREVIEW FILE ====== --}}
+    @if($hasFile)
       <div class="mb-6">
-        @if($pdfExists)
-          <div class="rounded-xl border overflow-hidden bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 shadow-soft">
+        @if($fileExists && $isPdf)
+          {{-- HANYA PDF yang di-embed --}}
+          <div class="rounded-xl border overflow-hidden bg-white dark:bg-coal-900 dark:border-coal-800 shadow-soft">
             <iframe
-              src="{{ $pdfUrl }}#toolbar=1&navpanes=0&scrollbar=1"
+              src="{{ $url }}#toolbar=1&navpanes=0&scrollbar=1"
               class="w-full"
-              style="height: 75vh;"
-            ></iframe>
+              style="height:75vh"></iframe>
           </div>
-          <div class="mt-2">
-            <a class="text-sm text-maroon-700 hover:underline dark:text-maroon-300" href="{{ $pdfUrl }}" target="_blank">Buka / Unduh PDF</a>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <a href="{{ $url }}" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 dark:hover:bg-coal-800">
+              🔎 Buka di Tab Baru
+            </a>
+            <a href="{{ $url }}" download
+               class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+              ⬇️ Download @if($size)<span class="opacity-80 text-xs">({{ $size }})</span>@endif
+            </a>
           </div>
+
+        @elseif($fileExists && ($isOffice || !$isPdf))
+          {{-- Word/Excel/PPT/dll: TIDAK di-embed, hanya tombol --}}
+          <div class="p-4 rounded-lg border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800">
+            <div class="text-sm">
+              File: <span class="font-medium uppercase">{{ $ext }}</span>
+              @if($size) • <span class="text-slate-500">{{ $size }}</span> @endif
+            </div>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <a href="{{ $url }}" target="_blank" rel="noopener"
+                 class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 dark:hover:bg-coal-800">
+                🔎 Buka di Tab Baru
+              </a>
+              <a href="{{ $url }}" download
+                 class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                ⬇️ Download
+              </a>
+            </div>
+          </div>
+
         @else
           <div class="rounded-lg border p-3 bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-900/30">
-            File PDF belum tersedia. Silakan hubungi admin untuk mengunggah PDF terlebih dahulu.
+            File tidak ditemukan di <code>storage/app/public/{{ $path }}</code>. Pastikan sudah menjalankan
+            <code>php artisan storage:link</code> dan path tersimpan **tanpa** awalan <code>public/</code> atau <code>storage/</code>.
           </div>
         @endif
       </div>
     @endif
+    {{-- ====== /PREVIEW FILE ====== --}}
 
     <form method="POST"
           action="{{ route('front.forms.store', $form) }}"
@@ -142,13 +168,10 @@
       <input type="hidden" name="form_id" value="{{ $form->id }}">
 
       <div class="rounded-2xl border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 p-5 space-y-5 shadow-soft">
-        @if($isPdf && !$hasFields)
-          {{-- PDF tanpa field: hanya info (tanpa input apa pun) --}}
-          @if($pdfExists)
-            <div class="text-sm text-coal-600 dark:text-coal-300">
-              Dokumen PDF ditampilkan di atas. Tidak ada isian tambahan.
-            </div>
-          @endif
+        @if($fileExists && $isPdf && !$hasFields)
+          <div class="text-sm text-coal-600 dark:text-coal-300">
+            Dokumen PDF ditampilkan di atas. Tidak ada isian tambahan.
+          </div>
         @else
           {{-- Render fields --}}
           @forelse($fields as $i => $field)
@@ -210,8 +233,8 @@
                   @break
 
                 @case('checkbox')
-                  @if($multiple && !empty($options))
-                    @php $oval = fraw($name); @endphp
+                  @php $oval = fraw($name); @endphp
+                  @if(!empty($options))
                     <div class="mt-1 space-y-2">
                       @foreach($options as $optKey => $opt)
                         @php [$v,$l] = opt_tuple($optKey, $opt); @endphp
@@ -292,10 +315,10 @@
       </div>
 
       @php
-        // Tampilkan tombol submit hanya jika:
-        // - BUKAN PDF, atau
-        // - PDF & file-nya ada & ADA field tambahan
-        $showSubmit = (!$isPdf) || ($isPdf && $pdfExists && $hasFields);
+        // Tampilkan tombol submit jika:
+        // - tidak ada file, atau
+        // - ada file & juga ada field tambahan
+        $showSubmit = (!$fileExists) || ($fileExists && $hasFields);
       @endphp
 
       @if($showSubmit)
@@ -311,7 +334,6 @@
           </a>
         </div>
       @else
-        {{-- PDF tanpa field: hanya tombol kembali --}}
         <div class="mt-6">
           <a href="{{ url()->previous() }}"
              class="px-4 py-2 rounded-xl border border-maroon-600 text-maroon-700 hover:bg-maroon-50/60 transition
