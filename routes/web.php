@@ -46,8 +46,8 @@ use App\Http\Controllers\User\IndicatorDailyController;
 use App\Http\Controllers\Admin\UserSiteAccessController;
 
 // Redirect root ke dashboard
-Route::get('/', fn () => redirect()->route('admin.dashboard'));
-Route::get('/dashboard', fn () => redirect()->route('admin.dashboard'))
+Route::get('/', fn() => redirect()->route('admin.dashboard'));
+Route::get('/dashboard', fn() => redirect()->route('admin.dashboard'))
     ->middleware('auth')
     ->name('dashboard');
 
@@ -59,15 +59,14 @@ Route::middleware('auth')->group(function () {
     // FRONT (user)
     // ==============================
     Route::prefix('forms')->name('front.forms.')->group(function () {
-        // List
         Route::get('/', [FormBrowseController::class, 'index'])->name('index');
 
-        // Riwayat entries user (letakkan SEBELUM catch-all slug)
+        // Riwayat entries user
         Route::get('/entries', [FrontEntryController::class, 'index'])->name('entries.index');
         Route::get('/entries/{entry}', [FrontEntryController::class, 'show'])
             ->name('entries.show')->whereNumber('entry');
 
-        // === Compatibility: akses /forms/{id} → redirect ke slug ===
+        // Compatibility: /forms/{id} redirect ke slug
         Route::get('/{id}', function ($id) {
             $form = \App\Models\Form::query()
                 ->select(['id', 'slug'])
@@ -79,19 +78,17 @@ Route::middleware('auth')->group(function () {
 
         // Show/Fill (pakai slug)
         Route::get('/{form:slug}', [FormBrowseController::class, 'show'])->name('show');
-
-        // Alias "fill" (opsional)
         Route::get('/{form:slug}/fill', [FormBrowseController::class, 'show'])->name('fill');
 
-        // Submit (alias "store")
+        // Submit
         Route::post('/{form:slug}', [FrontEntryController::class, 'store'])->name('store');
         Route::post('/{form:slug}/submit', [FrontEntryController::class, 'store'])->name('submit');
 
-        // Preview (opsional)
+        // Preview
         Route::get('/{form:slug}/preview', [FormBrowseController::class, 'preview'])->name('preview');
 
-        // Thanks page (opsional)
-        Route::get('/{form:slug}/thanks', fn () => view('front.forms.thanks'))->name('thanks');
+        // Thanks
+        Route::get('/{form:slug}/thanks', fn() => view('front.forms.thanks'))->name('thanks');
     });
 
     // Download lampiran entry (front)
@@ -100,7 +97,7 @@ Route::middleware('auth')->group(function () {
         ->whereNumber('file');
 
     // ==============================
-    // USER — Daily HSE (view semua; create/update/delete via Policy per site)
+    // USER — Daily HSE
     // ==============================
     Route::get('/daily', [IndicatorDailyController::class, 'index'])->name('daily.index');
     Route::post('/daily', [IndicatorDailyController::class, 'store'])->name('daily.store');
@@ -119,9 +116,8 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard/data/top-forms', [DashboardController::class, 'topForms'])->name('dashboard.data.top_forms');
         Route::get('dashboard/data/by-department', [DashboardController::class, 'byDepartment'])->name('dashboard.data.by_department');
         Route::get('dashboard/data/by-aggregate', [DashboardController::class, 'byAggregate'])->name('dashboard.data.by_aggregate');
-        // ==== END DASHBOARD ====
 
-        // ==== ACTIVE SITE SWITCH (accessible for any authenticated user) ====
+        // ==== ACTIVE SITE SWITCH ====
         Route::post('sites/switch', [AdminSiteController::class, 'switch'])->name('sites.switch');
 
         // Manage Users (active/toggle)
@@ -143,21 +139,21 @@ Route::middleware('auth')->group(function () {
         Route::delete('departments/{department}/members/{user}', [DepartmentMemberController::class, 'destroy'])->name('departments.members.destroy');
 
         // ==============================
-        // HSE / KPI (Sites, Indicators, Input, Report)
+        // HSE / KPI
         // ==============================
         Route::middleware('can:is-admin')->group(function () {
             Route::resource('sites', AdminSiteController::class)->except(['show']);
             Route::resource('groups', AdminIndicatorGroupController::class)->except(['show']);
             Route::resource('indicators', AdminIndicatorController::class)->except(['show']);
 
-            // Kelola akses user↔site (admin only)
+            // Kelola akses user↔site
             Route::get('site-access', [UserSiteAccessController::class, 'index'])->name('site_access.index');
             Route::post('site-access', [UserSiteAccessController::class, 'store'])->name('site_access.store');
-            Route::post('site-access/bulk', [UserSiteAccessController::class, 'bulk'])->name('site_access.bulk'); // attach massal
-            Route::post('site-access/bulk-detach', [UserSiteAccessController::class, 'bulkDetachSites'])->name('site_access.bulk_detach'); // detach massal
+            Route::post('site-access/bulk', [UserSiteAccessController::class, 'bulk'])->name('site_access.bulk');
+            Route::post('site-access/bulk-detach', [UserSiteAccessController::class, 'bulkDetachSites'])->name('site_access.bulk_detach');
             Route::delete('site-access/{userSiteAccess}', [UserSiteAccessController::class, 'destroy'])
                 ->name('site_access.destroy')->whereNumber('userSiteAccess');
-            Route::delete('site-access', [UserSiteAccessController::class, 'destroySelected'])->name('site_access.destroy_selected'); // hapus terpilih
+            Route::delete('site-access', [UserSiteAccessController::class, 'destroySelected'])->name('site_access.destroy_selected');
         });
 
         // Operasional
@@ -165,22 +161,20 @@ Route::middleware('auth')->group(function () {
         Route::get('daily/create', [AdminDailyInputController::class, 'create'])->name('daily.create');
         Route::post('daily',       [AdminDailyInputController::class, 'store'])->name('daily.store');
 
-        // Rekap generik (harian/mingguan/bulanan/tahunan)
+        // Rekap
         Route::get('reports', [AdminReportController::class, 'report'])->name('reports.index');
-
-        // Tetap ada: bulanan (backward compatibility)
         Route::get('reports/monthly', [AdminReportController::class, 'monthly'])->name('reports.monthly');
 
         // ==============================
-        // DOCUMENTS
+        // DOCUMENTS (BERSIH)
         // ==============================
         Route::prefix('documents')->name('documents.')->group(function () {
-            // CRUD & export
             Route::get('/', [\App\Http\Controllers\Admin\DocumentController::class, 'index'])->name('index');
             Route::get('/create', [\App\Http\Controllers\Admin\DocumentController::class, 'create'])
                 ->name('create')->middleware('can:create,App\Models\Document');
             Route::post('/', [\App\Http\Controllers\Admin\DocumentController::class, 'store'])
                 ->name('store')->middleware('can:create,App\Models\Document');
+
             Route::get('/{document}', [\App\Http\Controllers\Admin\DocumentController::class, 'show'])
                 ->name('show')->middleware('can:view,document');
             Route::get('/{document}/edit', [\App\Http\Controllers\Admin\DocumentController::class, 'edit'])
@@ -192,15 +186,17 @@ Route::middleware('auth')->group(function () {
             Route::get('/{document}/export', [\App\Http\Controllers\Admin\DocumentController::class, 'export'])
                 ->name('export')->middleware('can:export,document');
 
-            // === ACL (Kelola akses dokumen) ===
+            // === ACL ===
             Route::get('/{document}/acl', [DocumentAclController::class, 'index'])
                 ->name('acl.index')->middleware('can:share,document');
+            Route::post('/{document}/acl', [DocumentAclController::class, 'store'])
+                ->name('acl.store.single')->middleware('can:share,document');
             Route::delete('/{document}/acl/{acl}', [DocumentAclController::class, 'destroy'])
                 ->name('acl.destroy')->middleware('can:share,document')->whereNumber('acl');
 
             // BULK store ACL (tanpa {document})
             Route::post('/acl', [DocumentAclController::class, 'storeBulk'])->name('acl.store');
-        })->whereNumber('document');
+        });
 
         // ==============================
         // DOCUMENT TEMPLATES
@@ -215,35 +211,20 @@ Route::middleware('auth')->group(function () {
             Route::get('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'show'])->name('show');
         })->whereNumber('template');
 
-        Route::post('/upload-temp', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'uploadTemp'])
-            ->name('upload_temp');
-        Route::post('/uploads/image', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'storeImage'])
-            ->name('uploads.image');
+        Route::post('/upload-temp', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'uploadTemp'])->name('upload_temp');
+        Route::post('/uploads/image', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'storeImage'])->name('uploads.image');
 
-        // Entries (admin): list/detail/hapus
+        // Entries
         Route::resource('entries', AdminEntryController::class)
             ->only(['index', 'show', 'destroy'])
             ->where(['entry' => '[0-9]+']);
 
-        // Export CSV entries
         Route::get('entries/export', [AdminEntryController::class, 'export'])->name('entries.export');
-
-        // Unduh PDF jawaban (admin)
-        Route::get('entries/{entry}/download-pdf', [AdminEntryController::class, 'downloadPdf'])
-            ->name('entries.download_pdf')
-            ->whereNumber('entry');
-
-        // Approval (admin)
-        Route::post('entries/{entry}/approval', [EntryApprovalController::class, 'act'])
-            ->name('entries.approval')
-            ->whereNumber('entry');
-
-        Route::get('/entries/{entry}/download-all', [AdminEntryController::class, 'downloadAll'])
-            ->name('entries.download_all');
-        Route::get('/entries/{entry}/data.pdf', [AdminEntryController::class, 'downloadDataPdf'])
-            ->name('entries.data_pdf');
-        Route::get('/entries/export-zip', [AdminEntryController::class, 'exportZip'])
-            ->name('entries.export_zip');
+        Route::get('entries/{entry}/download-pdf', [AdminEntryController::class, 'downloadPdf'])->name('entries.download_pdf')->whereNumber('entry');
+        Route::post('entries/{entry}/approval', [EntryApprovalController::class, 'act'])->name('entries.approval')->whereNumber('entry');
+        Route::get('entries/{entry}/download-all', [AdminEntryController::class, 'downloadAll'])->name('entries.download_all');
+        Route::get('entries/{entry}/data.pdf', [AdminEntryController::class, 'downloadDataPdf'])->name('entries.data_pdf');
+        Route::get('entries/export-zip', [AdminEntryController::class, 'exportZip'])->name('entries.export_zip');
 
         // ==============================
         // QA

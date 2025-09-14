@@ -80,4 +80,10 @@ class Document extends Model
     {
         $this->attributes['project_code'] = $v ? strtoupper(trim($v)) : null;
     }
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->withTrashed()
+            ->where($field ?? $this->getRouteKeyName(), $value)
+            ->firstOrFail();
+    }
 }

@@ -147,7 +147,7 @@
               @if(Route::has('admin.qa.index'))
                 <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
               @endif
-
+<!-- 
               @if($isSuper)
                 @if(Route::has('admin.documents.acl.index'))
                   <a href="{{ route('admin.documents.acl.index', 1) }}" class="{{ $navItemClass(request()->routeIs('admin.documents.acl.*')) }}">🔐 Akses Dokumen</a>
@@ -155,7 +155,7 @@
                 @if(Route::has('admin.users.active.index'))
                   <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
                 @endif
-              @endif
+              @endif -->
             </div>
 
           {{-- USER BIASA: Dashboard, FORM (front), Tanya Jawab --}}
@@ -317,7 +317,7 @@
               @if(Route::has('admin.qa.index'))
                 <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
               @endif
-
+<!-- 
               @if($isSuper)
                 @if(Route::has('admin.documents.acl.index'))
                   <a href="{{ route('admin.documents.acl.index', 1) }}"
@@ -326,7 +326,7 @@
                 @if(Route::has('admin.users.active.index'))
                   <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
                 @endif
-              @endif
+              @endif -->
             </div>
           </div>
 

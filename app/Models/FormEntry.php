@@ -2,43 +2,49 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class FormEntry extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'form_id',
         'user_id',
-        'data',              // JSON
-        'pdf_output_path',   // path file bukti PDF (opsional)
+        'data',             // JSON jawaban user
+        'pdf_output_path',  // path file PDF (opsional)
     ];
 
     protected $casts = [
-        'data' => 'array',   // supaya $entry->data jadi array
+        'data' => 'array',  // otomatis JSON <-> array
     ];
 
-    // ========== RELASI ==========
+    // === Accessor/Alias ===
+    public function getAnswersAttribute(): array
+    {
+        // supaya $entry->answers bisa dipakai di view
+        return $this->data ?? [];
+    }
+
+    // === RELASI ===
     public function form()
     {
-        // pastikan model Form ada di App\Models\Form
-        return $this->belongsTo(Form::class, 'form_id');
+        return $this->belongsTo(Form::class);
     }
 
     public function user()
     {
-        // pastikan User ada di App\Models\User
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
     public function files()
     {
-        // tabel default: form_entry_files, FK: form_entry_id
-        return $this->hasMany(FormEntryFile::class, 'form_entry_id');
+        return $this->hasMany(FormEntryFile::class);
     }
 
     public function approvals()
     {
-        // kalau kamu pakai tabel approval
-        return $this->hasMany(FormEntryApproval::class, 'form_entry_id');
+        return $this->hasMany(FormEntryApproval::class);
     }
 }

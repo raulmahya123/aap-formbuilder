@@ -10,7 +10,7 @@ return new class extends Migration {
       $t->id();
       $t->foreignId('form_id')->constrained()->cascadeOnDelete();
       $t->foreignId('user_id')->constrained()->cascadeOnDelete();
-      $t->json('data');                           // data isian user (untuk builder/pdf)
+      $t->json('data')->nullable();                          // data isian user (untuk builder/pdf)
       $t->string('pdf_output_path')->nullable();  // hasil render PDF jawaban (opsional)
       $t->timestamps();
       $t->index(['form_id','user_id']);

@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Form;
 use App\Models\FormEntry;
-// Opsional jika ada tabel file lampiran:
-use App\Models\EntryFile;
+use App\Models\FormEntryFile; // <- ganti model file yg benar
+use Illuminate\Support\Str;
 
 class FormEntryController extends Controller
 {
@@ -26,7 +26,6 @@ class FormEntryController extends Controller
 
     public function show(FormEntry $entry)
     {
-        // Batasi akses hanya pemilik (opsional)
         if (Auth::check() && $entry->user_id && $entry->user_id !== Auth::id()) {
             abort(403);
         }
@@ -36,55 +35,58 @@ class FormEntryController extends Controller
 
     public function store(Request $r, Form $form)
     {
-        // Validasi minimal (silakan sesuaikan field)
-        $data = $r->validate([
-            'answers' => 'nullable|array',
-            'answers.*' => 'nullable|string',
-            // contoh upload file (opsional):
-            // 'files.*' => 'file|max:10240',
-        ]);
+        // Ambil payload jawaban. Dukung dua skema name:
+        // - data[...]
+        // - answers[...]
+        $payload = (array) $r->input('data', $r->input('answers', []));
+
+        // (opsional) bersihkan '' jadi null
+        array_walk($payload, function (&$v) {
+            if ($v === '') $v = null;
+        });
 
         $entry = FormEntry::create([
             'form_id' => $form->id,
-            'user_id' => optional(Auth::user())->id,
-            'answers' => $data['answers'] ?? [],
-            // simpan meta lain jika perlu...
+            'user_id' => Auth::id(),
+            'data'    => $payload, // <-- SIMPAN KE 'data', bukan 'answers'
         ]);
 
-        // (Opsional) simpan file
-        // if ($r->hasFile('files')) {
-        //     foreach ($r->file('files') as $upload) {
-        //         $path = $upload->store("form_entries/{$entry->id}", 'public');
-        //         EntryFile::create([
-        //             'entry_id' => $entry->id,
-        //             'disk' => 'public',
-        //             'path' => $path,
-        //             'original_name' => $upload->getClientOriginalName(),
-        //             'mime' => $upload->getClientMimeType(),
-        //         ]);
-        //     }
-        // }
+        // ===== Simpan lampiran (opsional) =====
+        // Form input: <input type="file" name="files[]" multiple>
+        if ($r->hasFile('files')) {
+            foreach ((array) $r->file('files') as $i => $upload) {
+                if (!$upload || !$upload->isValid()) continue;
 
-        // Redirect yang PASTI ADA: entries.show
+                $dir  = 'form-entry-files/'.date('Y/m/d');
+                $path = $upload->store($dir, 'public');
+
+                $entry->files()->create([
+                    'path'          => $path,
+                    'original_name' => $upload->getClientOriginalName(),
+                    'mime'          => $upload->getClientMimeType(),
+                    'size'          => $upload->getSize(),
+                    'field_name'    => 'files', // kalau kamu simpan by field
+                ]);
+            }
+        }
+
         return redirect()
-            ->route('front.forms.entries.show', $entry->id)
+            ->route('front.forms.entries.show', $entry) // route kamu ada: front.forms.entries.show
             ->with('success', 'Terima kasih! Entri kamu sudah tersimpan.');
     }
 
     public function downloadAttachment(int $file)
     {
-        // Contoh implementasi sederhana (pakai tabel entry_files)
-        $fileRow = EntryFile::query()->findOrFail($file);
+        $fileRow = FormEntryFile::query()->with('entry')->findOrFail($file);
 
-        // (Opsional) cek kepemilikan
         if (Auth::check() && $fileRow->entry && $fileRow->entry->user_id && $fileRow->entry->user_id !== Auth::id()) {
             abort(403);
         }
 
         $disk = $fileRow->disk ?? 'public';
-        if (!Storage::disk($disk)->exists($fileRow->path)) {
-            abort(404);
-        }
-        return Storage::disk($disk)->download($fileRow->path, $fileRow->original_name ?? basename($fileRow->path));
+        abort_unless(Storage::disk($disk)->exists($fileRow->path), 404);
+
+        $name = $fileRow->original_name ?: basename($fileRow->path);
+        return Storage::disk($disk)->download($fileRow->path, $name);
     }
 }
