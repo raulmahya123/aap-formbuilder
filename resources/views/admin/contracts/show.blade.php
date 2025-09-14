@@ -14,7 +14,10 @@
     <div class="flex flex-wrap items-center gap-2">
       <a href="{{ route('admin.contracts.download', $contract) }}"
          class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.586l3.293-3.293 1.414 1.414L12 17.414l-4.707-4.707 1.414-1.414L12 13.586V3h0z"/><path d="M5 19h14v2H5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 3v10.586l3.293-3.293 1.414 1.414L12 17.414l-4.707-4.707 1.414-1.414L12 13.586V3h0z"/>
+          <path d="M5 19h14v2H5z"/>
+        </svg>
         Download PDF
       </a>
       <a href="{{ route('admin.contracts.index') }}"
@@ -31,6 +34,8 @@
   @if(session('err'))
     <div class="p-3 rounded-xl bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>
   @endif
+
+
 
   {{-- Grid: Info + ACL --}}
   <div class="grid lg:grid-cols-3 gap-6">
@@ -88,7 +93,6 @@
             <form method="post" action="{{ route('admin.contracts.share', $contract) }}"
                   class="flex flex-col sm:flex-row gap-2">
               @csrf
-              {{-- jika kamu kirim $users ke view, pakai select multiple; jika tidak, pakai input email --}}
               @isset($users)
                 <select name="emails[]" multiple size="6"
                         class="flex-1 border rounded-xl px-3 py-2 focus:outline-none focus:border-[#7A2C2F]">
@@ -147,6 +151,22 @@
       </div>
     </div>
   </div>
-
+  {{-- Preview PDF --}}
+  <div class="rounded-2xl border shadow-sm overflow-hidden">
+    <div class="px-4 py-3 bg-[#7A2C2F] text-white">
+      <div class="font-semibold">Preview Dokumen</div>
+    </div>
+    <div class="p-4">
+      <iframe
+        src="{{ route('admin.contracts.preview', $contract) }}"
+        style="width:100%;height:800px;border:1px solid #e5e7eb;border-radius:12px"
+        loading="lazy">
+      </iframe>
+      <p class="text-sm text-slate-500 mt-2">
+        Jika preview tidak muncul, klik
+        <a class="underline" href="{{ route('admin.contracts.download', $contract) }}">Unduh PDF</a>.
+      </p>
+    </div>
+  </div>
 </div>
 @endsection

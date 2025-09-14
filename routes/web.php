@@ -46,9 +46,10 @@ use App\Http\Controllers\User\IndicatorDailyController;
 use App\Http\Controllers\Admin\UserSiteAccessController;
 
 // ==============================
-// CONTRACTS (baru)
+// CONTRACTS (Admin & User)
 // ==============================
-use App\Http\Controllers\Admin\ContractController;
+use App\Http\Controllers\Admin\ContractController as AdminContractController;
+use App\Http\Controllers\User\ContractController as UserContractController;
 
 // Redirect root ke dashboard
 Route::get('/', fn() => redirect()->route('admin.dashboard'));
@@ -108,6 +109,17 @@ Route::middleware('auth')->group(function () {
     Route::post('/daily', [IndicatorDailyController::class, 'store'])->name('daily.store');
     Route::put('/daily/{daily}', [IndicatorDailyController::class, 'update'])->name('daily.update')->whereNumber('daily');
     Route::delete('/daily/{daily}', [IndicatorDailyController::class, 'destroy'])->name('daily.destroy')->whereNumber('daily');
+
+    // ==============================
+    // USER — Contracts (INI YANG DIPAKAI MENU "KONTRAK SAYA")
+    // ==============================
+    Route::prefix('user')->name('user.')->group(function () {
+        Route::get('contracts', [UserContractController::class, 'index'])->name('contracts.index');
+        Route::get('contracts/{contract}', [UserContractController::class, 'show'])->name('contracts.show')->whereNumber('contract');
+        Route::get('contracts/{contract}/download', [UserContractController::class, 'download'])->name('contracts.download')->whereNumber('contract');
+        Route::get('contracts/{contract}/preview', [\App\Http\Controllers\User\ContractController::class, 'preview'])
+            ->name('contracts.preview')->whereNumber('contract');
+    });
 
     // ==============================
     // ADMIN
@@ -210,11 +222,11 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'index'])->name('index');
             Route::get('/create', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'create'])->name('create');
             Route::post('/', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'store'])->name('store');
-            Route::get('/{template}/edit', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'edit'])->name('edit');
-            Route::put('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'update'])->name('update');
-            Route::delete('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'destroy'])->name('destroy');
-            Route::get('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'show'])->name('show');
-        })->whereNumber('template');
+            Route::get('/{template}/edit', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'edit'])->name('edit')->whereNumber('template');
+            Route::put('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'update'])->name('update')->whereNumber('template');
+            Route::delete('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'destroy'])->name('destroy')->whereNumber('template');
+            Route::get('/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'show'])->name('show')->whereNumber('template');
+        });
 
         Route::post('/upload-temp', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'uploadTemp'])->name('upload_temp');
         Route::post('/uploads/image', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'storeImage'])->name('uploads.image');
@@ -227,8 +239,8 @@ Route::middleware('auth')->group(function () {
         Route::get('entries/export', [AdminEntryController::class, 'export'])->name('entries.export');
         Route::get('entries/{entry}/download-pdf', [AdminEntryController::class, 'downloadPdf'])->name('entries.download_pdf')->whereNumber('entry');
         Route::post('entries/{entry}/approval', [EntryApprovalController::class, 'act'])->name('entries.approval')->whereNumber('entry');
-        Route::get('entries/{entry}/download-all', [AdminEntryController::class, 'downloadAll'])->name('entries.download_all');
-        Route::get('entries/{entry}/data.pdf', [AdminEntryController::class, 'downloadDataPdf'])->name('entries.data_pdf');
+        Route::get('entries/{entry}/download-all', [AdminEntryController::class, 'downloadAll'])->name('entries.download_all')->whereNumber('entry');
+        Route::get('entries/{entry}/data.pdf', [AdminEntryController::class, 'downloadDataPdf'])->name('entries.data_pdf')->whereNumber('entry');
         Route::get('entries/export-zip', [AdminEntryController::class, 'exportZip'])->name('entries.export_zip');
 
         // ==============================
@@ -239,30 +251,40 @@ Route::middleware('auth')->group(function () {
             Route::get('/public', [QaThreadController::class, 'public'])->name('public');
             Route::get('/create', [QaThreadController::class, 'create'])->name('create');
             Route::post('/', [QaThreadController::class, 'store'])->name('store');
-            Route::get('/{thread}', [QaThreadController::class, 'show'])->name('show');
-            Route::post('/{thread}/messages', [QaMessageController::class, 'store'])->name('messages.store');
-            Route::post('/{thread}/resolve', [QaThreadController::class, 'resolve'])->name('resolve');
+            Route::get('/{thread}', [QaThreadController::class, 'show'])->name('show')->whereNumber('thread');
+            Route::post('/{thread}/messages', [QaMessageController::class, 'store'])->name('messages.store')->whereNumber('thread');
+            Route::post('/{thread}/resolve', [QaThreadController::class, 'resolve'])->name('resolve')->whereNumber('thread');
         });
 
         // ==============================
-        // CONTRACTS
+        // CONTRACTS (ADMIN)
+        // ==============================
+        // ==============================
+        // CONTRACTS (ADMIN)
         // ==============================
         Route::prefix('contracts')->name('contracts.')->group(function () {
-            Route::get('/', [ContractController::class, 'index'])->name('index');
-            Route::get('/create', [ContractController::class, 'create'])
+            Route::get('/', [AdminContractController::class, 'index'])->name('index');
+            Route::get('/create', [AdminContractController::class, 'create'])
                 ->name('create')->middleware('can:create,App\Models\Contract');
-            Route::post('/', [ContractController::class, 'store'])
+            Route::post('/', [AdminContractController::class, 'store'])
                 ->name('store')->middleware('can:create,App\Models\Contract');
+            Route::delete('/{contract}', [AdminContractController::class, 'destroy'])
+                ->name('destroy')->whereNumber('contract');
 
-            Route::get('/{contract}', [ContractController::class, 'show'])
-                ->name('show')->middleware('can:view,contract');
-            Route::get('/{contract}/download', [ContractController::class, 'download'])
-                ->name('download')->middleware('can:view,contract');
+            Route::get('/{contract}', [AdminContractController::class, 'show'])
+                ->name('show')->middleware('can:view,contract')->whereNumber('contract');
 
-            Route::post('/{contract}/share', [ContractController::class, 'share'])
-                ->name('share')->middleware('can:share,contract');
-            Route::delete('/{contract}/revoke', [ContractController::class, 'revoke'])
-                ->name('revoke')->middleware('can:share,contract');
+            Route::get('/{contract}/download', [AdminContractController::class, 'download'])
+                ->name('download')->middleware('can:view,contract')->whereNumber('contract');
+
+            // 👉 Tambahkan ini untuk preview
+            Route::get('/{contract}/preview', [AdminContractController::class, 'preview'])
+                ->name('preview')->middleware('can:view,contract')->whereNumber('contract');
+
+            Route::post('/{contract}/share', [AdminContractController::class, 'share'])
+                ->name('share')->middleware('can:share,contract')->whereNumber('contract');
+            Route::delete('/{contract}/revoke', [AdminContractController::class, 'revoke'])
+                ->name('revoke')->middleware('can:share,contract')->whereNumber('contract');
         });
-    });
-});
+    }); // end prefix admin
+}); // end middleware auth
