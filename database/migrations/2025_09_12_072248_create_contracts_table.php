@@ -6,18 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
   public function up(): void {
-    Schema::create('contracts', function (Blueprint $t) {
-      $t->id();
-      $t->string('title');
-      $t->string('slug')->unique();
-      $t->text('description')->nullable();
-      $t->json('images');                           // simpan path foto
-      $t->enum('visibility', ['whitelist','link','private'])->default('whitelist');
-      $t->foreignId('site_id')->nullable()->constrained('sites')->nullOnDelete();
-      $t->foreignId('created_by')->constrained('users')->cascadeOnDelete();
-      $t->timestamp('expires_at')->nullable();
-      $t->timestamps();
-    });
+    Schema::create('contracts', function (Blueprint $table) {
+    $table->id();
+    $table->uuid('uuid')->unique();
+    $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
+    $table->string('title');
+    $table->string('file_path');
+    $table->unsignedBigInteger('size_bytes')->nullable();
+    $table->string('mime')->default('application/pdf');
+    $table->timestamps();
+});
   }
   public function down(): void {
     Schema::dropIfExists('contracts');

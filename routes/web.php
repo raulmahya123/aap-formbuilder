@@ -45,6 +45,11 @@ use App\Http\Controllers\User\IndicatorDailyController;
 // ==============================
 use App\Http\Controllers\Admin\UserSiteAccessController;
 
+// ==============================
+// CONTRACTS (baru)
+// ==============================
+use App\Http\Controllers\Admin\ContractController;
+
 // Redirect root ke dashboard
 Route::get('/', fn() => redirect()->route('admin.dashboard'));
 Route::get('/dashboard', fn() => redirect()->route('admin.dashboard'))
@@ -166,7 +171,7 @@ Route::middleware('auth')->group(function () {
         Route::get('reports/monthly', [AdminReportController::class, 'monthly'])->name('reports.monthly');
 
         // ==============================
-        // DOCUMENTS (BERSIH)
+        // DOCUMENTS
         // ==============================
         Route::prefix('documents')->name('documents.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\DocumentController::class, 'index'])->name('index');
@@ -237,6 +242,27 @@ Route::middleware('auth')->group(function () {
             Route::get('/{thread}', [QaThreadController::class, 'show'])->name('show');
             Route::post('/{thread}/messages', [QaMessageController::class, 'store'])->name('messages.store');
             Route::post('/{thread}/resolve', [QaThreadController::class, 'resolve'])->name('resolve');
+        });
+
+        // ==============================
+        // CONTRACTS
+        // ==============================
+        Route::prefix('contracts')->name('contracts.')->group(function () {
+            Route::get('/', [ContractController::class, 'index'])->name('index');
+            Route::get('/create', [ContractController::class, 'create'])
+                ->name('create')->middleware('can:create,App\Models\Contract');
+            Route::post('/', [ContractController::class, 'store'])
+                ->name('store')->middleware('can:create,App\Models\Contract');
+
+            Route::get('/{contract}', [ContractController::class, 'show'])
+                ->name('show')->middleware('can:view,contract');
+            Route::get('/{contract}/download', [ContractController::class, 'download'])
+                ->name('download')->middleware('can:view,contract');
+
+            Route::post('/{contract}/share', [ContractController::class, 'share'])
+                ->name('share')->middleware('can:share,contract');
+            Route::delete('/{contract}/revoke', [ContractController::class, 'revoke'])
+                ->name('revoke')->middleware('can:share,contract');
         });
     });
 });

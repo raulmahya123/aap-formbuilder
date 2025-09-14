@@ -35,7 +35,8 @@ use App\Policies\IndicatorPolicy;
 use App\Policies\IndicatorDailyPolicy;
 use App\Policies\IndicatorValuePolicy;
 use App\Policies\UserSiteAccessPolicy;
-
+use App\Models\Contract;
+use App\Policies\ContractPolicy;
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -57,6 +58,7 @@ class AuthServiceProvider extends ServiceProvider
         IndicatorDaily::class   => IndicatorDailyPolicy::class,
         IndicatorValue::class   => IndicatorValuePolicy::class,
         UserSiteAccessPolicy::class => UserSiteAccessPolicy::class,
+        Contract::class         => ContractPolicy::class,
     ];
 
     /**
@@ -105,6 +107,11 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('daily-input', function ($user, $site) {
             // Reuse rule site-access
             return Gate::forUser($user)->allows('site-access', $site);
+        });
+        Gate::define('contract-upload', function ($user) {
+            // contoh: hanya admin boleh upload
+            return method_exists($user, 'isAdmin') && $user->isAdmin();
+            // atau kalau semua user login boleh: return true;
         });
     }
 }

@@ -1,125 +1,176 @@
 <?php
 
-// app/Http/Controllers/Admin/ContractController.php
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Contract, ContractAccess};
+use App\Models\{Contract, User};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
+
 
 class ContractController extends Controller
 {
-  public function index(Request $r) {
-    $q = Contract::query()->withCount('accesses')->latest();
-    if ($r->filled('site_id')) $q->where('site_id', $r->integer('site_id'));
-    return view('admin.contracts.index', ['contracts' => $q->paginate(15)]);
-  }
+    /**
+     * Daftar kontrak yang dimiliki user atau dibagikan ke user.
+     */
+    public function index(Request $request)
+    {
+        $user = $request->user();
 
-  public function create() { return view('admin.contracts.create'); }
+        $contracts = Contract::query()
+            ->with(['owner:id,name,email'])
+            ->when($request->filled('q'), function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->q . '%');
+            })
+            ->where(function ($w) use ($user) {
+                $w->where('owner_id', $user->id)
+                  ->orWhereIn('id', function ($sub) use ($user) {
+                      $sub->select('contract_id')
+                          ->from('contract_acls')
+                          ->where('user_id', $user->id);
+                  });
+            })
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
 
-  public function store(Request $r) {
-    $data = $r->validate([
-      'title'       => ['required','string','max:200'],
-      'description' => ['nullable','string'],
-      'visibility'  => ['required', Rule::in(['whitelist','link','private'])],
-      'site_id'     => ['nullable','exists:sites,id'],
-      'expires_at'  => ['nullable','date'],
-      'images.*'    => ['required','image','mimes:jpg,jpeg,png','max:4096'],
-    ]);
-
-    $paths = [];
-    foreach ($r->file('images', []) as $file) {
-      $paths[] = $file->store('contracts/'.date('Y/m'), 'public');
+        return view('admin.contracts.index', compact('contracts'));
     }
 
-    $contract = Contract::create([
-      ...$data,
-      'images'     => $paths,
-      'created_by' => $r->user()->id,
-    ]);
+    /**
+     * Form upload kontrak.
+     */
+    public function create()
+{
+    $users = User::select('id','name','email')
+        ->orderBy('name')
+        ->get();
 
-    return redirect()->route('admin.contracts.edit', $contract)->with('ok','Kontrak dibuat.');
-  }
+    return view('admin.contracts.create', compact('users'));
+}
+    /**
+     * Simpan kontrak + set ACL awal (optional: by emails).
+     */
+    public function store(Request $request)
+    {
+        $this->authorize('create', Contract::class);
 
-  public function edit(Contract $contract) {
-    $contract->load('accesses');
-    return view('admin.contracts.edit', compact('contract'));
-  }
+        $data = $request->validate([
+            'title'      => ['required', 'string', 'max:255'],
+            'file'       => ['required', 'file', 'mimes:pdf', 'max:20480'], // 20MB
+            'emails'     => ['nullable'], // bisa array atau string "a@b.com, c@d.com"
+            'emails.*'   => ['sometimes', 'email'],
+        ]);
 
-  public function update(Request $r, Contract $contract) {
-    $data = $r->validate([
-      'title'       => ['required','string','max:200'],
-      'description' => ['nullable','string'],
-      'visibility'  => ['required', Rule::in(['whitelist','link','private'])],
-      'site_id'     => ['nullable','exists:sites,id'],
-      'expires_at'  => ['nullable','date'],
-      'images.*'    => ['nullable','image','mimes:jpg,jpeg,png','max:4096'],
-      'remove'      => ['array'], // index gambar yang dihapus
-    ]);
+        // Normalisasi emails: dukung array atau string dipisah koma
+        $emails = [];
+        if ($request->has('emails')) {
+            if (is_array($request->emails)) {
+                $emails = array_filter(array_map('trim', $request->emails));
+            } elseif (is_string($request->emails)) {
+                $emails = array_filter(array_map('trim', explode(',', $request->emails)));
+            }
+            $emails = array_values(array_unique($emails));
+        }
 
-    // remove selected
-    $imgs = collect($contract->images);
-    foreach ($data['remove'] ?? [] as $i) {
-      if (isset($imgs[$i])) {
-        Storage::disk('public')->delete($imgs[$i]);
-        $imgs->forget($i);
-      }
+        // Simpan file ke disk private
+        $file = $request->file('file');
+        $path = $file->store('contracts', 'private');
+
+        $contract = Contract::create([
+            'owner_id'   => $request->user()->id,
+            'title'      => $data['title'],
+            'file_path'  => $path,
+            'size_bytes' => $file->getSize(),
+            'mime'       => $file->getMimeType() ?: 'application/pdf',
+        ]);
+
+        // Set ACL awal: hanya user terdaftar
+        if (!empty($emails)) {
+            $userIds = User::whereIn('email', $emails)->pluck('id')->all();
+            if ($userIds) {
+                $contract->viewers()->syncWithPivotValues($userIds, ['perm' => 'view'], false);
+            }
+        }
+
+        return redirect()
+            ->route('admin.contracts.show', $contract)
+            ->with('ok', 'Kontrak diunggah & akses (viewer) diset.');
     }
-    // add new
-    foreach ($r->file('images', []) as $file) {
-      $imgs->push($file->store('contracts/'.date('Y/m'), 'public'));
+
+    /**
+     * Detail kontrak + daftar viewers.
+     */
+    public function show(Request $request, Contract $contract)
+    {
+        $this->authorize('view', $contract);
+
+        $contract->load(['owner:id,name,email', 'viewers:id,name,email']);
+
+        return view('admin.contracts.show', compact('contract'));
     }
 
-    $contract->update([
-      ...collect($data)->except(['images','remove'])->all(),
-      'images' => array_values($imgs->all()),
-    ]);
+    /**
+     * Download file PDF dari disk private (cek policy view).
+     */
+    public function download(Request $request, Contract $contract)
+    {
+        $this->authorize('view', $contract);
 
-    return back()->with('ok','Kontrak diperbarui.');
-  }
+        $downloadName = Str::of($contract->title)->slug('_') . '.pdf';
 
-  public function destroy(Contract $contract) {
-    foreach ($contract->images as $p) Storage::disk('public')->delete($p);
-    $contract->delete();
-    return redirect()->route('admin.contracts.index')->with('ok','Kontrak dihapus.');
-  }
-
-  // === ACCESS MANAGEMENT ===
-  public function accessStore(Request $r, Contract $contract) {
-    $this->authorize('manage', $contract);
-    $data = $r->validate([
-      'email'  => ['required','email:rfc,dns'],
-      'status' => ['required', Rule::in(['approved','blocked','pending'])],
-    ]);
-    ContractAccess::updateOrCreate(
-      ['contract_id' => $contract->id, 'email' => strtolower($data['email'])],
-      ['status' => $data['status']]
-    );
-    return back()->with('ok','Whitelist diperbarui.');
-  }
-
-  public function accessDestroy(Contract $contract, ContractAccess $access) {
-    $this->authorize('manage', $contract);
-    abort_unless($access->contract_id === $contract->id, 404);
-    $access->delete();
-    return back()->with('ok','Email dihapus dari whitelist.');
-  }
-
-  // CSV import (kolom: email,status)
-  public function accessImport(Request $r, Contract $contract) {
-    $this->authorize('manage', $contract);
-    $r->validate(['file' => ['required','file','mimes:csv,txt','max:1024']]);
-    $rows = array_map('str_getcsv', file($r->file('file')->getRealPath()));
-    foreach ($rows as [$email, $status]) {
-      if (!filter_var($email, FILTER_VALIDATE_EMAIL)) continue;
-      $status = in_array($status, ['approved','blocked','pending']) ? $status : 'approved';
-      ContractAccess::updateOrCreate(
-        ['contract_id'=>$contract->id, 'email'=>strtolower($email)],
-        ['status'=>$status]
-      );
+        return Storage::disk('private')->download($contract->file_path, $downloadName);
     }
-    return back()->with('ok','Import whitelist selesai.');
-  }
+
+    /**
+     * Tambah viewers berdasarkan email (hanya owner melalui policy 'share').
+     */
+    public function share(Request $request, Contract $contract)
+    {
+        $this->authorize('share', $contract);
+
+        $data = $request->validate([
+            'emails'   => ['required'], // array atau string koma
+            'emails.*' => ['sometimes', 'email'],
+        ]);
+
+        // Normalisasi emails
+        $emails = [];
+        if (is_array($request->emails)) {
+            $emails = array_filter(array_map('trim', $request->emails));
+        } elseif (is_string($request->emails)) {
+            $emails = array_filter(array_map('trim', explode(',', $request->emails)));
+        }
+        $emails = array_values(array_unique($emails));
+
+        if (empty($emails)) {
+            return back()->with('err', 'Tidak ada email yang valid.');
+        }
+
+        $userIds = User::whereIn('email', $emails)->pluck('id')->all();
+        if (empty($userIds)) {
+            return back()->with('err', 'Tidak ada user terdaftar yang cocok dengan email tersebut.');
+        }
+
+        $contract->viewers()->syncWithPivotValues($userIds, ['perm' => 'view'], false);
+
+        return back()->with('ok', 'Akses viewer ditambahkan/diperbarui.');
+    }
+
+    /**
+     * Cabut akses viewer tertentu (hanya owner).
+     */
+    public function revoke(Request $request, Contract $contract)
+    {
+        $this->authorize('share', $contract);
+
+        $data = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $contract->viewers()->detach($data['user_id']);
+
+        return back()->with('ok', 'Akses viewer dicabut.');
+    }
 }
