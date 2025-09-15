@@ -157,6 +157,11 @@ Route::middleware('auth')->group(function () {
         Route::get('forms/{form}/builder', [AdminFormController::class, 'builder'])->name('forms.builder');
         Route::put('forms/{form}/builder', [AdminFormController::class, 'saveSchema'])->name('forms.builder.save');
 
+        /* ⇩⇩ Tambahkan ini ⇩⇩ */
+        // Lihat file (inline) dan unduh file — tidak bergantung ke /public/storage
+        Route::get('forms/{form}/file', [AdminFormController::class, 'file'])->name('forms.file');
+        Route::get('forms/{form}/download', [AdminFormController::class, 'download'])->name('forms.download');
+        /* ⇧⇧ Tambahkan ini ⇧⇧ */
         // Kelola anggota & role per department
         Route::get('departments/{department}/members', [DepartmentMemberController::class, 'index'])->name('departments.members');
         Route::post('departments/{department}/members', [DepartmentMemberController::class, 'store'])->name('departments.members.store');

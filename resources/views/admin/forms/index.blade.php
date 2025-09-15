@@ -124,16 +124,43 @@
                 <span class="uppercase">{{ $doc }}</span>
 
                 {{-- Kalau tipe file & ada file, tampilkan ekstensi + link --}}
-                @if($isFileType && $f->pdf_path)
-                  <span>•</span>
-                  <span class="uppercase">{{ $ext }}</span>
-                  <span>•</span>
-                  <a class="underline hover:no-underline"
-                     target="_blank"
-                     href="{{ Storage::disk('public')->url($f->pdf_path) }}">
-                    Lihat file
-                  </a>
-                @endif
+               {{-- Kalau tipe file & ada file, tampilkan ekstensi + link (pakai route streaming) --}}
+@if($isFileType && $f->pdf_path)
+  @php
+    // Tentukan URL untuk "Lihat file" (prioritas route streaming; fallback ke Storage::url jika ada)
+    $fileUrl = null;
+    if (Route::has('admin.forms.file')) {
+        $fileUrl = route('admin.forms.file', $f);
+    } elseif (Storage::disk('public')->exists($f->pdf_path)) {
+        $fileUrl = Storage::disk('public')->url($f->pdf_path);
+    }
+  @endphp
+
+  <span>•</span>
+  <span class="uppercase">{{ $ext }}</span>
+
+  @if($fileUrl)
+    <span>•</span>
+    <a class="underline hover:no-underline"
+       target="_blank"
+       href="{{ $fileUrl }}">
+      Lihat file
+    </a>
+  @else
+    <span>•</span>
+    <span class="text-rose-600 dark:text-rose-300">File tidak ditemukan</span>
+  @endif
+
+  {{-- Tautan unduh pakai route streaming jika tersedia --}}
+  @if(Route::has('admin.forms.download'))
+    <span>•</span>
+    <a class="underline hover:no-underline"
+       href="{{ route('admin.forms.download', $f) }}">
+      Unduh
+    </a>
+  @endif
+@endif
+
               </div>
             </a>
 

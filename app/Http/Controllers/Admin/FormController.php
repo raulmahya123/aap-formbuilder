@@ -7,12 +7,14 @@ use App\Models\{Form, Department};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Storage, Log, Schema};
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
 class FormController extends Controller
 {
     /** Daftar nilai yang diizinkan */
-    private const DOC_TYPES = ['SOP','IK','FORM'];
-    private const FORM_TYPES = ['builder','pdf'];
+    private const DOC_TYPES = ['SOP', 'IK', 'FORM'];
+    private const FORM_TYPES = ['builder', 'pdf'];
 
     public function index(Request $r)
     {
@@ -30,7 +32,7 @@ class FormController extends Controller
             }
         }
 
-        $forms = $q->paginate(20)->appends($r->only('department_id','doc_type'));
+        $forms = $q->paginate(20)->appends($r->only('department_id', 'doc_type'));
         $departments = Department::orderBy('name')->get();
 
         return view('admin.forms.index', compact('forms', 'departments'));
@@ -80,7 +82,7 @@ class FormController extends Controller
             $ok = false;
             if ($ext === 'pdf') {
                 $ok = $this->compressPdf(Storage::disk('public')->path($storedTemp), $outAbs);
-            } elseif (in_array($ext, ['docx','xlsx'], true)) {
+            } elseif (in_array($ext, ['docx', 'xlsx'], true)) {
                 $ok = $this->recompressOfficeZip(Storage::disk('public')->path($storedTemp), $outAbs);
             }
 
@@ -120,7 +122,7 @@ class FormController extends Controller
 
         // QUICK UPDATE dari Builder: hanya doc_type
         $onlyDocType = $r->has('doc_type')
-            && !$r->hasAny(['department_id','title','type','schema','pdf','is_active']);
+            && !$r->hasAny(['department_id', 'title', 'type', 'schema', 'pdf', 'is_active']);
 
         if ($onlyDocType) {
             $r->validate([
@@ -168,7 +170,7 @@ class FormController extends Controller
             $ok = false;
             if ($ext === 'pdf') {
                 $ok = $this->compressPdf(Storage::disk('public')->path($storedTemp), $outAbs);
-            } elseif (in_array($ext, ['docx','xlsx'], true)) {
+            } elseif (in_array($ext, ['docx', 'xlsx'], true)) {
                 $ok = $this->recompressOfficeZip(Storage::disk('public')->path($storedTemp), $outAbs);
             }
 
@@ -252,11 +254,11 @@ class FormController extends Controller
         if ($gs === '') return false;
 
         $cmd = escapeshellcmd($gs)
-            .' -sDEVICE=pdfwrite -dCompatibilityLevel=1.4'
-            .' -dPDFSETTINGS=/' . $preset
-            .' -dNOPAUSE -dQUIET -dBATCH'
-            .' -sOutputFile=' . escapeshellarg($outPath)
-            .' ' . escapeshellarg($inPath);
+            . ' -sDEVICE=pdfwrite -dCompatibilityLevel=1.4'
+            . ' -dPDFSETTINGS=/' . $preset
+            . ' -dNOPAUSE -dQUIET -dBATCH'
+            . ' -sOutputFile=' . escapeshellarg($outPath)
+            . ' ' . escapeshellarg($inPath);
 
         @shell_exec($cmd);
 
@@ -299,5 +301,76 @@ class FormController extends Controller
         $zipIn->close();
 
         return file_exists($outPath) && filesize($outPath) > 0;
+    }
+    public function file(Form $form)
+    {
+        $this->authorize('update', $form); // atau 'view' sesuai policy kamu
+        abort_unless($form->pdf_path, 404, 'File belum diunggah.');
+
+        $disk = Storage::disk('public');
+        abort_unless($disk->exists($form->pdf_path), 404, 'File tidak ditemukan di storage.');
+
+        $abs  = $disk->path($form->pdf_path);
+        $ext  = strtolower(pathinfo($abs, PATHINFO_EXTENSION));
+        $mime = $this->guessMime($abs, $ext);
+
+        // Nama file yang rapi
+        $filename = $this->downloadName($form, $ext);
+
+        // Tampilkan inline (browser handle sendiri: pdf/word/excel bisa diunduh bila tidak didukung)
+        return response()->file($abs, [
+            'Content-Type'        => $mime,
+            'Content-Disposition' => 'inline; filename="' . addslashes($filename) . '"',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    // ======== FORCE DOWNLOAD ========
+    public function download(Form $form)
+    {
+        $this->authorize('update', $form); // atau 'view'
+        abort_unless($form->pdf_path, 404);
+
+        $disk = Storage::disk('public');
+        abort_unless($disk->exists($form->pdf_path), 404);
+
+        $abs  = $disk->path($form->pdf_path);
+        $ext  = strtolower(pathinfo($abs, PATHINFO_EXTENSION));
+        $mime = $this->guessMime($abs, $ext);
+        $filename = $this->downloadName($form, $ext);
+
+        return response()->download($abs, $filename, [
+            'Content-Type' => $mime,
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    // ======== Helpers ========
+    private function guessMime(string $absPath, ?string $ext = null): string
+    {
+        // Coba fileinfo
+        if (function_exists('mime_content_type')) {
+            $m = @mime_content_type($absPath);
+            if ($m) return $m;
+        }
+
+        // Fallback by extension
+        $ext = strtolower($ext ?? pathinfo($absPath, PATHINFO_EXTENSION));
+        return match ($ext) {
+            'pdf'  => 'application/pdf',
+            'doc'  => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'xls'  => 'application/vnd.ms-excel',
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            default => 'application/octet-stream',
+        };
+    }
+
+    private function downloadName(Form $form, string $ext): string
+    {
+        $base = trim(($form->title ?: 'form'), " \t\n\r\0\x0B.");
+        $base = Str::slug($base, '-');
+        if ($base === '') $base = "form-{$form->id}";
+        return $base . '.' . $ext;
     }
 }
