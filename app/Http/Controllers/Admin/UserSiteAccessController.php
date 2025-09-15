@@ -7,130 +7,123 @@ use App\Models\UserSiteAccess;
 use App\Models\User;
 use App\Models\Site;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class UserSiteAccessController extends Controller
 {
-    // Tampilkan daftar akses + form tambah
+    /**
+     * Tampilkan daftar akses + filter + data untuk dropdown.
+     * Query:
+     * - site_id (opsional untuk filter & prefilling form)
+     * - email   (opsional untuk filter & prefilling form)
+     */
     public function index(Request $r)
     {
-        // pastikan ada Policy ability: manageSiteAccess
         $this->authorize('manageSiteAccess', UserSiteAccess::class);
 
-        $q = UserSiteAccess::with(['user:id,name,email', 'site:id,name,code'])
-            ->orderBy('id'); // perapihan
+        $siteId = $r->integer('site_id') ?: null;
+        $email  = trim((string) $r->get('email', ''));
 
-        if ($r->filled('site_id')) {
-            $q->where('site_id', (int) $r->site_id);
-        }
-        if ($r->filled('user_id')) {
-            $q->where('user_id', (int) $r->user_id);
-        }
+        $q = UserSiteAccess::query()
+            ->with(['user:id,name,email', 'site:id,name,code'])
+            ->when($siteId, fn($qq) => $qq->where('site_id', $siteId))
+            // karena email dipilih dari dropdown, pakai kecocokan eksak saja
+            ->when($email !== '', function ($qq) use ($email) {
+                $qq->whereHas('user', function ($u) use ($email) {
+                    $u->where('email', '=', $email);
+                });
+            })
+            ->orderBy('id');
 
         return view('admin.site-access.index', [
             'accesses' => $q->paginate(20)->withQueryString(),
-            'users'    => User::orderBy('name')->get(['id','name','email']),
             'sites'    => Site::orderBy('code')->get(['id','name','code']),
+            'emails'   => User::orderBy('email')->pluck('email'),
+            'siteId'   => $siteId,
+            'email'    => $email,
         ]);
     }
 
-    // Tambah akses (assign)
+    /**
+     * Tambahkan akses (site_id, email).
+     * Body:
+     * - site_id: required|exists:sites,id
+     * - email:   required|exists:users,email
+     */
     public function store(Request $r)
     {
         $this->authorize('manageSiteAccess', UserSiteAccess::class);
 
         $data = $r->validate([
-            'user_id' => ['required','exists:users,id'],
-            'site_id' => [
-                'required','exists:sites,id',
-                Rule::unique('user_site_access')->where(fn ($q) =>
-                    $q->where('user_id', $r->user_id)
-                      ->where('site_id', $r->site_id)
-                ),
-            ],
+            'site_id' => ['required','integer','exists:sites,id'],
+            'email'   => ['required','email','exists:users,email'],
         ]);
 
-        UserSiteAccess::create($data);
+        // Ambil user_id dari email
+        $userId = (int) User::where('email', $data['email'])->value('id');
 
-        return back()->with('ok', 'Akses site berhasil ditambahkan.');
+        try {
+            // Idempotent: tidak membuat duplikat bila sudah ada
+            $access = UserSiteAccess::firstOrCreate(
+                ['user_id' => $userId, 'site_id' => (int) $data['site_id']]
+            );
+
+            $wasCreated = $access->wasRecentlyCreated;
+
+            return back()->with(
+                $wasCreated ? 'ok' : 'info',
+                $wasCreated ? 'Akses site ditambahkan.' : 'Data akses sudah ada.'
+            );
+        } catch (\Illuminate\Database\QueryException $e) {
+            // fallback jika keburu tabrakan race condition
+            $sqlState  = (string) ($e->errorInfo[0] ?? '');
+            $driverErr = (int)    ($e->errorInfo[1] ?? 0);
+
+            // MySQL duplicate: 1062, PostgreSQL unique_violation: 23505
+            if ($driverErr === 1062 || $sqlState === '23505') {
+                return back()->with('info', 'Data akses sudah ada.');
+            }
+
+            throw $e;
+        }
     }
 
-    // Hapus akses (revoke)
+    /**
+     * Hapus akses berdasarkan ID pivot (route model binding).
+     * Route: DELETE admin.site_access.destroy
+     */
     public function destroy(UserSiteAccess $userSiteAccess)
     {
         $this->authorize('manageSiteAccess', UserSiteAccess::class);
 
         $userSiteAccess->delete();
 
-        return back()->with('ok', 'Akses site berhasil dihapus.');
+        return back()->with('ok', 'Akses site dihapus.');
     }
 
-    // (Opsional) Tambah massal: 1 user ke banyak site
-    public function bulkAttachSites(Request $r)
+    /**
+     * (Opsional) Cabut akses berdasarkan pasangan (site_id, email).
+     * Body/Query:
+     * - site_id: required|exists:sites,id
+     * - email:   required|exists:users,email
+     */
+    public function revokeByPair(Request $r)
     {
         $this->authorize('manageSiteAccess', UserSiteAccess::class);
 
         $data = $r->validate([
-            'user_id'    => ['required','exists:users,id'],
-            'site_ids'   => ['required','array'],
-            'site_ids.*' => ['integer','exists:sites,id'],
+            'site_id' => ['required','integer','exists:sites,id'],
+            'email'   => ['required','email','exists:users,email'],
         ]);
 
-        $user = User::findOrFail($data['user_id']);
-        // kalau relasi pivot bernama 'sites' (belongsToMany)
-        if (method_exists($user, 'sites')) {
-            $user->sites()->syncWithoutDetaching($data['site_ids']);
-        } else {
-            // fallback via model pivot
-            foreach ($data['site_ids'] as $sid) {
-                UserSiteAccess::firstOrCreate(['user_id' => $user->id, 'site_id' => $sid]);
-            }
-        }
+        $userId = (int) User::where('email', $data['email'])->value('id');
 
-        return back()->with('ok', 'Akses site berhasil ditambahkan (bulk).');
-    }
+        $deleted = UserSiteAccess::where('site_id', (int) $data['site_id'])
+            ->where('user_id', $userId)
+            ->delete();
 
-    // Alias agar sesuai route admin.site_access.bulk
-    public function bulk(Request $r)
-    {
-        return $this->bulkAttachSites($r);
-    }
-
-    // Cabut massal: 1 user dari banyak site
-    public function bulkDetachSites(Request $r)
-    {
-        $this->authorize('manageSiteAccess', UserSiteAccess::class);
-
-        $data = $r->validate([
-            'user_id'    => ['required','exists:users,id'],
-            'site_ids'   => ['required','array'],
-            'site_ids.*' => ['integer','exists:sites,id'],
-        ]);
-
-        $user = User::findOrFail($data['user_id']);
-        if (method_exists($user, 'sites')) {
-            $user->sites()->detach($data['site_ids']);
-        } else {
-            UserSiteAccess::where('user_id', $user->id)
-                ->whereIn('site_id', $data['site_ids'])
-                ->delete();
-        }
-
-        return back()->with('ok', 'Akses site berhasil dicabut (bulk).');
-    }
-
-    // Hapus banyak akses berdasarkan ID pivot (checkbox pada tabel)
-    public function destroySelected(Request $r)
-    {
-        $this->authorize('manageSiteAccess', UserSiteAccess::class);
-
-        $data = $r->validate([
-            'ids'   => ['required','array'],
-            'ids.*' => ['integer','exists:user_site_access,id'],
-        ]);
-
-        UserSiteAccess::whereIn('id', $data['ids'])->delete();
-
-        return back()->with('ok', 'Akses terpilih berhasil dihapus.');
+        return back()->with(
+            $deleted ? 'ok' : 'info',
+            $deleted ? 'Akses site dicabut.' : 'Tidak ada data untuk dicabut.'
+        );
     }
 }

@@ -16,30 +16,51 @@
 
 @section('content')
 @php
-  // variabel yang disediakan controller:
-  // $accesses (Paginator), $users (id, name, email), $sites (id, code, name)
+  // Controller menyediakan:
+  // $accesses (Paginator)
+  // $sites (id, code, name)
+  // $emails (Collection email untuk dropdown)
+  $siteId = $siteId ?? request('site_id');
+  $email  = $email  ?? request('email');
 @endphp
+
+{{-- Flash message (opsional) --}}
+@if(session('ok') || session('info') || session('error'))
+  <div class="mb-4 rounded-lg border p-3
+              @if(session('ok')) border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 @endif
+              @if(session('info')) border-amber-300 bg-amber-50 dark:bg-amber-900/20 @endif
+              @if(session('error')) border-rose-300 bg-rose-50 dark:bg-rose-900/20 @endif">
+    <div class="text-sm">
+      {{ session('ok') ?? session('info') ?? session('error') }}
+    </div>
+  </div>
+@endif
 
 {{-- Filter --}}
 <form method="GET" class="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-  <div>
-    <label class="block text-sm mb-1">Filter User</label>
-    <select name="user_id" class="w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-900">
-      <option value="">— Semua User —</option>
-      @foreach($users as $u)
-        <option value="{{ $u->id }}" @selected(request('user_id') == $u->id)>{{ $u->name }} {{ $u->email ? '— '.$u->email : '' }}</option>
-      @endforeach
-    </select>
-  </div>
   <div>
     <label class="block text-sm mb-1">Filter Site</label>
     <select name="site_id" class="w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-900">
       <option value="">— Semua Site —</option>
       @foreach($sites as $s)
-        <option value="{{ $s->id }}" @selected(request('site_id') == $s->id)>{{ $s->code }} — {{ $s->name }}</option>
+        <option value="{{ $s->id }}" @selected($siteId == $s->id)>{{ $s->code }} — {{ $s->name }}</option>
       @endforeach
     </select>
   </div>
+
+  <div>
+    <label class="block text-sm mb-1">Filter Email</label>
+    <select
+      name="email"
+      class="w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-900"
+    >
+      <option value="">— Semua Email —</option>
+      @foreach($emails as $e)
+        <option value="{{ $e }}" @selected($email === $e)>{{ $e }}</option>
+      @endforeach
+    </select>
+  </div>
+
   <div class="flex items-end gap-2">
     <button class="px-3 py-2 rounded-lg border">Terapkan</button>
     <a href="{{ route('admin.site_access.index') }}" class="px-3 py-2 rounded-lg border">Reset</a>
@@ -48,82 +69,57 @@
 
 <div class="grid lg:grid-cols-2 gap-6">
 
-  {{-- Form Tambah Akses --}}
+  {{-- Form Tambah Akses (per-site & per-email) --}}
   <div class="rounded-2xl border p-4">
-    <h2 class="font-semibold mb-3">Tambah Akses (User ↔ Site)</h2>
+    <h2 class="font-semibold mb-3">Tambah Akses (Email ↔ Site)</h2>
 
     <form method="POST" action="{{ route('admin.site_access.store') }}" class="grid gap-3">
       @csrf
 
       <div>
-        <label class="block text-sm mb-1">Pilih User</label>
-        <select name="user_id" class="w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-900" required>
-          <option value="">— Pilih User —</option>
-          @foreach($users as $u)
-            <option value="{{ $u->id }}" @selected(old('user_id') == $u->id)>{{ $u->name }} {{ $u->email ? '— '.$u->email : '' }}</option>
-          @endforeach
-        </select>
-        @error('user_id') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
-      </div>
-
-      <div>
-        <label class="block text-sm mb-1">Pilih Site</label>
+        <label class="block text-sm mb-1">Site</label>
         <select name="site_id" class="w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-900" required>
           <option value="">— Pilih Site —</option>
           @foreach($sites as $s)
-            <option value="{{ $s->id }}" @selected(old('site_id') == $s->id)>{{ $s->code }} — {{ $s->name }}</option>
+            <option value="{{ $s->id }}" @selected(old('site_id', $siteId) == $s->id)>{{ $s->code }} — {{ $s->name }}</option>
           @endforeach
         </select>
         @error('site_id') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
       </div>
 
+      <div>
+        <label class="block text-sm mb-1">Email User</label>
+        <select
+          name="email"
+          class="w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-900"
+          required
+        >
+          <option value="">— Pilih Email —</option>
+          @foreach($emails as $e)
+            <option value="{{ $e }}" @selected(old('email', $email) === $e)>{{ $e }}</option>
+          @endforeach
+        </select>
+        @error('email') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
+      </div>
+
       <div class="pt-2">
         <button class="px-4 py-2 rounded-lg border border-maroon-700 text-maroon-700 hover:bg-maroon-50
-                       dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20">
+                       dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-coal-900/20">
           + Tambah Akses
         </button>
       </div>
     </form>
   </div>
 
-  {{-- (Opsional) Form Bulk Attach: 1 user -> banyak site --}}
-  @if(Route::has('admin.site_access.bulk'))
+  {{-- Info Panduan (opsional) --}}
   <div class="rounded-2xl border p-4">
-    <h2 class="font-semibold mb-3">Tambah Akses Massal (User → Banyak Site)</h2>
-
-    <form method="POST" action="{{ route('admin.site_access.bulk') }}" class="grid gap-3">
-      @csrf
-
-      <div>
-        <label class="block text-sm mb-1">User</label>
-        <select name="user_id" class="w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-900" required>
-          <option value="">— Pilih User —</option>
-          @foreach($users as $u)
-            <option value="{{ $u->id }}">{{ $u->name }} {{ $u->email ? '— '.$u->email : '' }}</option>
-          @endforeach
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-sm mb-1">Sites</label>
-        <select name="site_ids[]" multiple size="8"
-                class="w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-900 nice-scroll" required>
-          @foreach($sites as $s)
-            <option value="{{ $s->id }}">{{ $s->code }} — {{ $s->name }}</option>
-          @endforeach
-        </select>
-        <p class="text-xs text-coal-500 mt-1">Tahan Ctrl / Cmd untuk pilih banyak.</p>
-      </div>
-
-      <div class="pt-2">
-        <button class="px-4 py-2 rounded-lg border border-maroon-700 text-maroon-700 hover:bg-maroon-50
-                       dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20">
-          + Tambah Akses Massal
-        </button>
-      </div>
-    </form>
+    <h2 class="font-semibold mb-3">Panduan</h2>
+    <ul class="list-disc pl-5 space-y-1 text-sm text-coal-700 dark:text-coal-200">
+      <li>Pilih <strong>Site</strong> dan <strong>Email</strong> user, lalu klik <em>Tambah Akses</em>.</li>
+      <li>Gunakan filter di atas untuk menyaring daftar berdasarkan Site/Email.</li>
+      <li>Untuk mencabut akses, klik tombol <em>Hapus</em> pada baris yang diinginkan.</li>
+    </ul>
   </div>
-  @endif
 
 </div>
 

@@ -6,9 +6,14 @@ use App\Models\User;
 
 class UserSiteAccessPolicy
 {
+    /**
+     * Hanya admin & super admin yang boleh kelola akses site.
+     * Kalau isAdmin() kamu sudah memasukkan super admin, cukup return $user->isAdmin().
+     */
     public function manageSiteAccess(User $user): bool
     {
-        // Ganti logika sesuai sistem role Anda
-        return $user->is_admin ?? false;
+        if (method_exists($user, 'isAdmin') && $user->isAdmin()) return true;
+        if (method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) return true;
+        return false;
     }
 }

@@ -186,10 +186,18 @@ Route::middleware('auth')->group(function () {
         });
 
         // Operasional
-        Route::get('daily',        [AdminDailyInputController::class, 'index'])->name('daily.index');
-        Route::get('daily/create', [AdminDailyInputController::class, 'create'])->name('daily.create');
-        Route::post('daily',       [AdminDailyInputController::class, 'store'])->name('daily.store');
+        // Operasional Daily (admin pasti boleh; non-admin bisa kamu longgarkan via Gate kalau perlu)
+        Route::get('daily',        [AdminDailyInputController::class, 'index'])
+            ->name('daily.index')
+            ->middleware('can:is-admin'); // listing hanya admin (opsional)
 
+        Route::get('daily/create', [AdminDailyInputController::class, 'create'])
+            ->name('daily.create')
+            ->middleware('can:daily.manage'); // tanpa site_id ⇒ Gate kamu meloloskan admin
+
+        Route::post('daily',       [AdminDailyInputController::class, 'store'])
+            ->name('daily.store')
+            ->middleware('can:daily.manage'); // StoreDailyRequest juga meng-autorize
         // Rekap
         Route::get('reports', [AdminReportController::class, 'report'])->name('reports.index');
         Route::get('reports/monthly', [AdminReportController::class, 'monthly'])->name('reports.monthly');

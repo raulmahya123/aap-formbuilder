@@ -34,9 +34,10 @@ use App\Policies\IndicatorGroupPolicy;
 use App\Policies\IndicatorPolicy;
 use App\Policies\IndicatorDailyPolicy;
 use App\Policies\IndicatorValuePolicy;
-use App\Policies\UserSiteAccessPolicy;
+// use App\Policies\UserSiteAccessPolicy; // HAPUS dari mapping kalau tidak ada model-nya
 use App\Models\Contract;
 use App\Policies\ContractPolicy;
+
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -57,7 +58,9 @@ class AuthServiceProvider extends ServiceProvider
         Indicator::class        => IndicatorPolicy::class,
         IndicatorDaily::class   => IndicatorDailyPolicy::class,
         IndicatorValue::class   => IndicatorValuePolicy::class,
-        UserSiteAccessPolicy::class => UserSiteAccessPolicy::class,
+
+        // ⚠️ JANGAN pakai policy class sebagai key.
+        // UserSiteAccessPolicy::class => UserSiteAccessPolicy::class, // <-- HAPUS
         Contract::class         => ContractPolicy::class,
     ];
 
@@ -76,16 +79,16 @@ class AuthServiceProvider extends ServiceProvider
         // === Gate existing: approval entry (opsional) ===
         Gate::define('entry-approve', function ($user, FormEntry $entry) {
             // Contoh: super admin atau admin departemen yang bersangkutan
-            return ($user->isSuperAdmin ?? fn() => false)()
+            return (method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin())
                 || (method_exists($user, 'isDeptAdminOf') && $user->isDeptAdminOf($entry->form->department_id));
         });
 
-        // === Gate baru: admin sederhana ===
+        // === Gate helper: admin sederhana ===
         Gate::define('is-admin', function ($user) {
             return method_exists($user, 'isAdmin') && $user->isAdmin();
         });
 
-        // === Gate baru: akses ke Site tertentu (admin selalu lolos) ===
+        // === Gate akses ke Site tertentu (admin selalu lolos) ===
         // Parameter $site bisa berupa instance Site atau ID numerik.
         Gate::define('site-access', function ($user, $site) {
             $siteId = is_numeric($site) ? (int) $site : ($site->id ?? null);
@@ -103,13 +106,30 @@ class AuthServiceProvider extends ServiceProvider
             return false;
         });
 
-        // === Gate baru: input harian (admin atau user yang punya akses ke site) ===
-        Gate::define('daily-input', function ($user, $site) {
-            // Reuse rule site-access
+        // === Gate baru: DAILY MANAGE (dipakai oleh StoreDailyRequest) ===
+        // Izinkan admin dan siapa pun yang punya akses ke site (via 'site-access').
+        Gate::define('daily.manage', function ($user, $site = null) {
+            // Admin langsung lolos
+            if (method_exists($user, 'isAdmin') && $user->isAdmin()) {
+                return true;
+            }
+
+            // Jika dipanggil tanpa konteks site tertentu, batasi ke admin saja
+            if ($site === null) {
+                return false;
+            }
+
+            // Jika ada konteks site, reuse rule site-access
             return Gate::forUser($user)->allows('site-access', $site);
         });
+
+        // === Gate lama: daily-input (boleh dipakai untuk blade/menu)
+        Gate::define('daily-input', function ($user, $site) {
+            return Gate::forUser($user)->allows('site-access', $site);
+        });
+
+        // === Gate upload kontrak ===
         Gate::define('contract-upload', function ($user) {
-            // contoh: hanya admin boleh upload
             return method_exists($user, 'isAdmin') && $user->isAdmin();
             // atau kalau semua user login boleh: return true;
         });
