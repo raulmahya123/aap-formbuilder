@@ -226,12 +226,6 @@
             📍 {{ $activeSite?->code ?? 'ALL' }}
           </span>
         @endif
-
-        {{-- theme toggle --}}
-        <button @click="dark=!dark" class="p-2 rounded-lg border border-coal-200 dark:border-coal-700" title="Toggle theme">
-          <span x-show="!dark">🌙</span><span x-show="dark" x-cloak>☀️</span>
-        </button>
-
         @auth
           <span class="hidden sm:inline text-sm text-coal-600 dark:text-coal-300">{{ auth()->user()->name }}</span>
         @endauth
@@ -262,9 +256,6 @@
             <div class="text-sm font-semibold truncate">{{ auth()->user()->name }}</div>
             <div class="text-xs text-coal-500 dark:text-coal-400 truncate">{{ auth()->user()->email ?? '' }}</div>
           </div>
-          <button @click="dark=!dark" class="ml-auto p-2 rounded-lg border border-coal-200 dark:border-coal-700" title="Toggle theme">
-            <span x-show="!dark">🌙</span><span x-show="dark" x-cloak>☀️</span>
-          </button>
         </div>
       </div>
       @endauth
@@ -459,7 +450,7 @@
                   <div class="text-xs text-coal-500 dark:text-coal-400 truncate">{{ auth()->user()->email ?? '' }}</div>
                 </div>
                 <button @click="dark=!dark" class="ml-auto p-2 rounded-lg border border-coal-200 dark:border-coal-700" title="Toggle theme">
-                  <span x-show="!dark">🌙</span><span x-show="dark" x-cloak>☀️</span>
+                  <span x-show="!dark"></span><span x-show="dark" x-cloak>☀️</span>
                 </button>
               </div>
             </div>
@@ -615,29 +606,6 @@
 
           {{-- Right header actions + compact site switcher --}}
           <div class="flex items-center gap-3">
-            @if($sites->count() > 0)
-            <div class="hidden md:flex items-center gap-2">
-              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs
-                             border-maroon-700 text-maroon-800 dark:text-maroon-300 dark:border-maroon-600 bg-maroon-50/70
-                             dark:bg-maroon-900/20">
-                📍 {{ $activeSite?->code ?? 'ALL' }}
-              </span>
-              @if(Route::has('admin.sites.switch'))
-              <form method="POST" action="{{ route('admin.sites.switch') }}" class="flex items-center gap-2">
-                @csrf
-                <select name="site_id" class="border rounded px-2 py-1 bg-white dark:bg-coal-900 text-sm">
-                  <option value="">ALL</option>
-                  @foreach($sites as $s)
-                    <option value="{{ $s->id }}" @selected($activeSiteId==$s->id)>{{ $s->code }}</option>
-                  @endforeach
-                </select>
-                <button class="px-2 py-1 rounded border border-coal-300 dark:border-coal-700 text-sm">
-                  Set
-                </button>
-              </form>
-              @endif
-            </div>
-            @endif
 
             @hasSection('actions')
               @yield('actions')

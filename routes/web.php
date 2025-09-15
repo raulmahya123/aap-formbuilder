@@ -199,8 +199,7 @@ Route::middleware('auth')->group(function () {
             ->name('daily.store')
             ->middleware('can:daily.manage'); // StoreDailyRequest juga meng-autorize
         // Rekap
-        Route::get('reports', [AdminReportController::class, 'report'])->name('reports.index');
-        Route::get('reports/monthly', [AdminReportController::class, 'monthly'])->name('reports.monthly');
+        Route::get('reports/monthly', [AdminReportController::class, 'report'])->name('reports.monthly');
 
         // ==============================
         // DOCUMENTS

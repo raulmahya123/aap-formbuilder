@@ -9,6 +9,7 @@ use App\Models\IndicatorGroup;
 use App\Models\Site;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
@@ -17,7 +18,7 @@ class ReportController extends Controller
     // =========================
     public function report(Request $r)
     {
-        $scope = $r->string('scope')->lower()->value() ?: 'month'; // day|week|month|year
+        $scope  = $r->string('scope')->lower()->value() ?: 'month'; // day|week|month|year
         $siteId = $r->input('site_id'); // null = semua site
 
         // Normalisasi parameter tanggal berdasar scope
@@ -74,22 +75,18 @@ class ReportController extends Controller
             ];
         }
 
+        // ===== Trend series sesuai scope (day/week/month => harian; year => bulanan)
+        [$trendLabels, $trendValues, $trendLabel] = $this->trendSeries($scope, $siteId ? (int)$siteId : null, $startDate, $endDate);
+
         // Form state untuk view
-        $period   = $periodLabel;
+        $period = $periodLabel;
+
         return view('admin.reports.aggregate', compact(
             'sites','siteId','scope','year','month','week','date',
-            'data','period','groups','charts'
+            'data','period','groups','charts',
+            'trendLabels','trendValues','trendLabel'
         ));
     }
-
-    // Backward compatibility (route lama)
-    public function monthly(Request $r)
-    {
-        // delegasi ke report() dengan scope=month
-        $r->merge(['scope' => 'month']);
-        return $this->report($r);
-    }
-
     // =========================
     // Helpers: Range resolver
     // =========================
@@ -100,8 +97,7 @@ class ReportController extends Controller
                 $d = Carbon::parse($date)->startOfDay();
                 return [$d->toDateString(), $d->copy()->endOfDay()->toDateString(), $d->isoFormat('D MMMM YYYY')];
 
-            case 'week':
-                // ISO week (Senin–Minggu)
+            case 'week': // ISO week (Mon–Sun)
                 $start = Carbon::now()->setISODate($year, max(1, min(53, $week)))->startOfWeek(Carbon::MONDAY);
                 $end   = $start->copy()->endOfWeek(Carbon::SUNDAY);
                 $label = "Minggu {$week} — " . $start->isoFormat('D MMM') . ' s.d ' . $end->isoFormat('D MMM YYYY');
@@ -123,7 +119,6 @@ class ReportController extends Controller
     // =========================
     // Helpers: Kalkulasi nilai
     // =========================
-
     private function calcValueForRange(?int $siteId, string $startDate, string $endDate, Indicator $ind): float
     {
         if (!$ind->is_derived) {
@@ -166,7 +161,7 @@ class ReportController extends Controller
 
     private function substituteFormula(string $formula, array $vars): string
     {
-        uksort($vars, fn($a, $b) => strlen($b) <=> strlen($a)); // panjang dulu
+        uksort($vars, fn($a, $b) => strlen($b) <=> strlen($a));
         $expr = $formula;
         foreach ($vars as $code => $val) {
             $expr = preg_replace('/\b' . preg_quote($code, '/') . '\b/', (string) ($val ?: 0), $expr);
@@ -183,5 +178,62 @@ class ReportController extends Controller
 
         try { /** @noinspection PhpEvalInspection */ return (float) eval("return (float)($expr);"); }
         catch (\Throwable $e) { return 0.0; }
+    }
+
+    // =========================
+    // Trend builder
+    // =========================
+    /**
+     * @return array{0: array, 1: array, 2: string} [labels, values, datasetLabel]
+     */
+    private function trendSeries(string $scope, ?int $siteId, string $startDate, string $endDate): array
+    {
+        $start = Carbon::parse($startDate);
+        $end   = Carbon::parse($endDate);
+
+        // day/week/month => granularitas harian; year => bulanan
+        if (in_array($scope, ['day','week','month'], true)) {
+            // ambil semua total per tanggal
+            $q = IndicatorDaily::query()
+                ->selectRaw('date, SUM(value) as total')
+                ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+                ->when($siteId, fn($qq)=>$qq->where('site_id', $siteId))
+                ->groupBy('date')
+                ->orderBy('date');
+
+            $rows = $q->get()->keyBy('date');
+
+            $labels = [];
+            $values = [];
+            $cursor = $start->copy();
+            while ($cursor->lte($end)) {
+                $d = $cursor->toDateString();
+                $labels[] = $cursor->isoFormat('D MMM'); // contoh: 5 Sep
+                $values[] = (float) ($rows[$d]->total ?? 0);
+                $cursor->addDay();
+            }
+            $label = 'Total Harian';
+            return [$labels, $values, $label];
+        }
+
+        // year => per bulan
+        $q = IndicatorDaily::query()
+            ->selectRaw('DATE_FORMAT(date, "%Y-%m") as ym, SUM(value) as total')
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->when($siteId, fn($qq)=>$qq->where('site_id', $siteId))
+            ->groupBy('ym')
+            ->orderBy('ym');
+
+        $rows = $q->get()->keyBy('ym');
+
+        $labels = [];
+        $values = [];
+        for ($m=1; $m<=12; $m++) {
+            $ym = sprintf('%04d-%02d', (int)$start->format('Y'), $m);
+            $labels[] = Carbon::create((int)$start->format('Y'), $m, 1)->isoFormat('MMM');
+            $values[] = (float) ($rows[$ym]->total ?? 0);
+        }
+        $label = 'Total Bulanan';
+        return [$labels, $values, $label];
     }
 }
