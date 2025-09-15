@@ -11,14 +11,25 @@ return new class extends Migration {
       $t->foreignId('department_id')->constrained()->cascadeOnDelete();
       $t->foreignId('created_by')->constrained('users')->cascadeOnDelete();
       $t->foreignId('site_id')->nullable()->constrained('sites')->nullOnDelete();
+
       $t->string('title');
       $t->string('slug')->unique();
-      $t->enum('type', ['builder','pdf']);        // builder = form dinamis; pdf = unggah PDF
-      $t->json('schema')->nullable();             // hanya utk builder
-      $t->string('pdf_path')->nullable();         // hanya utk type=pdf
+
+      // TANPA default
+      $t->enum('doc_type', ['SOP','IK','FORM'])->index();
+
+      $t->text('description')->nullable();
+
+      $t->enum('type', ['builder','pdf']);
+      $t->json('schema')->nullable();
+      $t->string('pdf_path')->nullable();
+
       $t->boolean('is_active')->default(true);
       $t->timestamps();
     });
   }
-  public function down(): void { Schema::dropIfExists('forms'); }
+
+  public function down(): void {
+    Schema::dropIfExists('forms');
+  }
 };

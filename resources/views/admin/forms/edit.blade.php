@@ -67,6 +67,20 @@
                class="mt-1 w-full rounded-lg border px-3 py-2" required maxlength="190">
       </div>
 
+      {{-- Jenis Dokumen (SOP/IK/FORM) --}}
+      @php
+        $selectedDocType = old('doc_type', $form->doc_type);
+      @endphp
+      <div>
+        <label class="block text-sm font-medium text-slate-700">Jenis Dokumen</label>
+        <select name="doc_type" id="doc_type" class="mt-1 w-full rounded-lg border px-3 py-2" required>
+          <option value="SOP"  @selected($selectedDocType==='SOP')>SOP</option>
+          <option value="IK"   @selected($selectedDocType==='IK')>IK</option>
+          <option value="FORM" @selected($selectedDocType==='FORM')>FORM</option>
+        </select>
+        <p class="text-xs text-slate-500 mt-1">Kategori dokumen. Tidak mengubah tipe implementasi di bawah.</p>
+      </div>
+
       {{-- Type --}}
       <div>
         <label class="block text-sm font-medium text-slate-700">Tipe</label>
@@ -96,7 +110,7 @@
       {{-- File (PDF/Word/Excel) --}}
       <div x-show="type==='pdf'">
         <label class="block text-sm font-medium text-slate-700">Unggah File (opsional untuk ganti)</label>
-        <input type="file" name="pdf"
+        <input type="file" name="pdf" id="pdfInput"
                accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                class="mt-1 block w-full text-sm file:mr-4 file:py-2 file:px-4
                       file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700

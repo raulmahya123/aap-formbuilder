@@ -2,9 +2,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\SiteRequest;
 use App\Models\Site;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SiteController extends Controller
 {
@@ -15,6 +15,7 @@ class SiteController extends Controller
             ->when($q, fn($qq) => $qq->where(fn($w) =>
                 $w->where('name', 'like', "%$q%")
                   ->orWhere('code', 'like', "%$q%")
+                  ->orWhere('description', 'like', "%$q%")
             ))
             ->orderBy('code')
             ->paginate(15)
@@ -29,9 +30,16 @@ class SiteController extends Controller
         return view('admin.sites.form', compact('site'));
     }
 
-    public function store(SiteRequest $request)
+    public function store(Request $request)
     {
-        $site = Site::create($request->validated());
+        $data = $request->validate([
+            'code'        => ['required','string','max:20','unique:sites,code'],
+            'name'        => ['required','string','max:150'],
+            'description' => ['nullable','string'], // kalau kolom TEXT, tak perlu max
+        ]);
+
+        $site = Site::create($data);
+
         return redirect()->route('admin.sites.index')
             ->with('success', "Site {$site->code} berhasil dibuat.");
     }
@@ -41,9 +49,19 @@ class SiteController extends Controller
         return view('admin.sites.form', compact('site'));
     }
 
-    public function update(SiteRequest $request, Site $site)
+    public function update(Request $request, Site $site)
     {
-        $site->update($request->validated());
+        $data = $request->validate([
+            'code'        => [
+                'required','string','max:20',
+                Rule::unique('sites','code')->ignore($site->id),
+            ],
+            'name'        => ['required','string','max:150'],
+            'description' => ['nullable','string'],
+        ]);
+
+        $site->update($data);
+
         return redirect()->route('admin.sites.index')
             ->with('success', "Site {$site->code} diperbarui.");
     }
@@ -54,25 +72,22 @@ class SiteController extends Controller
         return back()->with('success', "Site {$site->code} dihapus.");
     }
 
-    /**
-     * Switch active site (untuk sidebar switcher).
-     */
     public function switch(Request $request)
     {
         $request->validate([
             'site_id' => ['nullable','integer','exists:sites,id'],
+            // jika pakai UUID: ['nullable','uuid','exists:sites,uuid'],
         ]);
 
-        // Validasi tambahan: jika bukan admin, cek apakah user punya akses ke site tsb
         if (!auth()->user()->isSuperAdmin() && !\Gate::allows('is-admin')) {
-            if ($request->filled('site_id') && method_exists(auth()->user(),'hasSite')
+            if ($request->filled('site_id')
+                && method_exists(auth()->user(),'hasSite')
                 && !auth()->user()->hasSite((int)$request->site_id)) {
                 return back()->with('error','Kamu tidak punya akses ke site tersebut.');
             }
         }
 
         session(['active_site_id' => $request->site_id ?: null]);
-
         return back()->with('ok','Active site updated.');
     }
 }

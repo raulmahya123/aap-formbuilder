@@ -9,20 +9,28 @@ class Form extends Model
 {
     protected $fillable = [
         'department_id',
-        'site_id',        // ⬅️ ditambahkan
+        'site_id',
         'created_by',
         'title',
         'slug',
+        'doc_type',   // <-- WAJIB: biar mass-assignment mengisi doc_type
         'type',
         'schema',
         'pdf_path',
         'is_active',
+        'description', // kalau kolom ini ada di tabel (sesuai scopeSearch)
     ];
 
     protected $casts = [
         'schema'    => 'array',
         'is_active' => 'boolean',
     ];
+
+    // (Opsional tapi bagus) normalisasi ke uppercase saat set
+    public function setDocTypeAttribute($value): void
+    {
+        $this->attributes['doc_type'] = $value ? strtoupper($value) : null;
+    }
 
     // Pakai slug untuk route model binding: {form:slug}
     public function getRouteKeyName()
@@ -33,12 +41,10 @@ class Form extends Model
     protected static function booted()
     {
         static::creating(function (self $form) {
-            // Ambil dasar slug: prioritas slug dari request, kalau kosong pakai title
+            // slug dari slug (jika sudah ada) atau title
             $base = Str::slug($form->slug ?: $form->title);
             $slug = $base;
             $i = 1;
-
-            // Selalu cek bentrokan (global)
             while (static::where('slug', $slug)->exists()) {
                 $slug = "{$base}-{$i}";
                 $i++;
@@ -47,12 +53,10 @@ class Form extends Model
         });
 
         static::updating(function (self $form) {
-            // Kalau slug dikosongkan, regenerate unik dari title
             if (blank($form->slug)) {
                 $base = Str::slug($form->title);
                 $slug = $base;
                 $i = 1;
-
                 while (static::where('slug', $slug)->where('id', '!=', $form->id)->exists()) {
                     $slug = "{$base}-{$i}";
                     $i++;
@@ -63,32 +67,17 @@ class Form extends Model
     }
 
     // ===== Relasi =====
-    public function department()
-    {
-        return $this->belongsTo(Department::class);
-    }
+    public function department() { return $this->belongsTo(Department::class); }
 
-    public function site()
-    {
-        // default FK: site_id
-        return $this->belongsTo(Site::class, 'site_id');
-    }
+    public function site() { return $this->belongsTo(Site::class, 'site_id'); }
 
-    public function creator()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
+    public function creator() { return $this->belongsTo(User::class, 'created_by'); }
 
-    public function entries()
-    {
-        return $this->hasMany(FormEntry::class);
-    }
+    public function entries() { return $this->hasMany(FormEntry::class); }
 
-    // ===== Scopes bantu (opsional tapi praktis) =====
+    // ===== Scopes =====
     public function scopeActive($q, bool $onlyActive = true)
-    {
-        return $onlyActive ? $q->where('is_active', true) : $q;
-    }
+    { return $onlyActive ? $q->where('is_active', true) : $q; }
 
     public function scopeSearch($q, ?string $term)
     {
@@ -97,17 +86,13 @@ class Form extends Model
 
         return $q->where(function ($w) use ($term) {
             $w->where('title', 'like', "%{$term}%")
-              ->orWhere('description', 'like', "%{$term}%");
+              ->orWhere('description', 'like', "%{$term}%"); // pastikan kolom description ada
         });
     }
 
     public function scopeForSite($q, $siteId)
-    {
-        return $siteId ? $q->where('site_id', $siteId) : $q;
-    }
+    { return $siteId ? $q->where('site_id', $siteId) : $q; }
 
     public function scopeForDepartment($q, $deptId)
-    {
-        return $deptId ? $q->where('department_id', $deptId) : $q;
-    }
+    { return $deptId ? $q->where('department_id', $deptId) : $q; }
 }

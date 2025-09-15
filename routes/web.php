@@ -67,6 +67,12 @@ Route::middleware('auth')->group(function () {
     Route::prefix('forms')->name('front.forms.')->group(function () {
         Route::get('/', [FormBrowseController::class, 'index'])->name('index');
 
+        // >>> Tambahkan ini (HARUS sebelum /{form:slug})
+        Route::get('/type/{doc_type}', [FormBrowseController::class, 'index'])
+            ->whereIn('doc_type', ['SOP', 'IK', 'FORM'])
+            ->name('index.type');
+        // <<<
+
         // Riwayat entries user
         Route::get('/entries', [FrontEntryController::class, 'index'])->name('entries.index');
         Route::get('/entries/{entry}', [FrontEntryController::class, 'show'])
@@ -97,6 +103,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{form:slug}/thanks', fn() => view('front.forms.thanks'))->name('thanks');
     });
 
+
     // Download lampiran entry (front)
     Route::get('/entry-file/{file}', [FrontEntryController::class, 'downloadAttachment'])
         ->name('front.entry.download.attachment')
@@ -111,7 +118,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/daily/{daily}', [IndicatorDailyController::class, 'destroy'])->name('daily.destroy')->whereNumber('daily');
 
     // ==============================
-    // USER — Contracts (INI YANG DIPAKAI MENU "KONTRAK SAYA")
+    // USER — Contracts (menu "KONTRAK SAYA")
     // ==============================
     Route::prefix('user')->name('user.')->group(function () {
         Route::get('contracts', [UserContractController::class, 'index'])->name('contracts.index');
@@ -145,7 +152,7 @@ Route::middleware('auth')->group(function () {
         // Departments CRUD
         Route::resource('departments', DepartmentController::class);
 
-        // Forms CRUD (admin)
+        // Forms CRUD (admin) + Builder
         Route::resource('forms', AdminFormController::class)->except('show');
         Route::get('forms/{form}/builder', [AdminFormController::class, 'builder'])->name('forms.builder');
         Route::put('forms/{form}/builder', [AdminFormController::class, 'saveSchema'])->name('forms.builder.save');
@@ -259,9 +266,6 @@ Route::middleware('auth')->group(function () {
         // ==============================
         // CONTRACTS (ADMIN)
         // ==============================
-        // ==============================
-        // CONTRACTS (ADMIN)
-        // ==============================
         Route::prefix('contracts')->name('contracts.')->group(function () {
             Route::get('/', [AdminContractController::class, 'index'])->name('index');
             Route::get('/create', [AdminContractController::class, 'create'])
@@ -277,7 +281,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/{contract}/download', [AdminContractController::class, 'download'])
                 ->name('download')->middleware('can:view,contract')->whereNumber('contract');
 
-            // 👉 Tambahkan ini untuk preview
+            // Preview
             Route::get('/{contract}/preview', [AdminContractController::class, 'preview'])
                 ->name('preview')->middleware('can:view,contract')->whereNumber('contract');
 

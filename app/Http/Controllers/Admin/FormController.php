@@ -5,17 +5,32 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\{Form, Department};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Storage, Log};
+use Illuminate\Support\Facades\{Storage, Log, Schema};
 use Illuminate\Validation\Rule;
 
 class FormController extends Controller
 {
+    /** Daftar nilai yang diizinkan */
+    private const DOC_TYPES = ['SOP','IK','FORM'];
+    private const FORM_TYPES = ['builder','pdf'];
+
     public function index(Request $r)
     {
         $q = Form::with(['department', 'creator'])->latest();
-        if ($r->filled('department_id')) $q->where('department_id', $r->department_id);
 
-        $forms = $q->paginate(20);
+        if ($r->filled('department_id')) {
+            $q->where('department_id', $r->department_id);
+        }
+
+        // filter doc_type (opsional): ?doc_type=SOP|IK|FORM
+        if ($r->filled('doc_type') && Schema::hasColumn('forms', 'doc_type')) {
+            $docType = strtoupper((string)$r->doc_type);
+            if (in_array($docType, self::DOC_TYPES, true)) {
+                $q->where('doc_type', $docType);
+            }
+        }
+
+        $forms = $q->paginate(20)->appends($r->only('department_id','doc_type'));
         $departments = Department::orderBy('name')->get();
 
         return view('admin.forms.index', compact('forms', 'departments'));
@@ -29,15 +44,17 @@ class FormController extends Controller
 
     public function store(Request $r)
     {
+        // Validasi: tanpa default DB → wajib pilih doc_type di form
         $r->validate([
             'department_id' => ['required', 'exists:departments,id'],
             'title'         => ['required', 'string', 'max:190'],
-            'type'          => ['required', Rule::in(['builder','pdf'])], // tetap 'pdf' agar kompatibel
+            'doc_type'      => ['required', Rule::in(self::DOC_TYPES)],
+            'type'          => ['required', Rule::in(self::FORM_TYPES)],
             'schema'        => ['nullable', 'json'],
-            // saat create dan type=pdf, wajib ada file
             'pdf'           => ['required_if:type,pdf', 'file', 'mimes:pdf,doc,docx,xls,xlsx', 'max:30720'],
+            'is_active'     => ['nullable', 'boolean'],
         ], [
-            'pdf.required_if' => 'Harap unggah file referensi saat memilih tipe File.',
+            'pdf.required_if' => 'Saat memilih tipe File, harap unggah file referensi.',
         ]);
 
         $this->authorize('create', [Form::class, (int)$r->department_id]);
@@ -45,40 +62,34 @@ class FormController extends Controller
         Log::info('forms.store payload', [
             'type'        => $r->input('type'),
             'hasFile_pdf' => $r->hasFile('pdf'),
+            'doc_type'    => $r->input('doc_type'),
         ]);
 
+        // Upload/kompres file bila type=pdf
         $filePath = null;
-
         if ($r->type === 'pdf' && $r->hasFile('pdf')) {
             $uploaded   = $r->file('pdf');
             $storedTemp = $uploaded->store('forms/tmp', 'public');
 
-            // Tentukan tujuan akhir
             $ext    = strtolower($uploaded->getClientOriginalExtension());
             $outRel = 'forms/files/' . uniqid('form_') . '.' . $ext;
             $outAbs = Storage::disk('public')->path($outRel);
 
-            // Pastikan folder ada
             Storage::disk('public')->makeDirectory('forms/files');
 
-            // Kompres sesuai tipe
             $ok = false;
             if ($ext === 'pdf') {
                 $ok = $this->compressPdf(Storage::disk('public')->path($storedTemp), $outAbs);
-            } elseif (in_array($ext, ['docx','xlsx'])) {
+            } elseif (in_array($ext, ['docx','xlsx'], true)) {
                 $ok = $this->recompressOfficeZip(Storage::disk('public')->path($storedTemp), $outAbs);
-            } else {
-                // doc/xls lama: tidak bisa di-zip ulang; biarkan apa adanya (ok tetap false agar fallback)
             }
 
             if (!$ok) {
-                // fallback: simpan file asli ke folder final
+                // fallback: simpan apa adanya
                 $outRel = $uploaded->store('forms/files', 'public');
             }
 
-            // bersihkan temp
             Storage::disk('public')->delete($storedTemp);
-
             $filePath = $outRel;
         }
 
@@ -86,11 +97,11 @@ class FormController extends Controller
             'department_id' => (int)$r->department_id,
             'created_by'    => $r->user()->id,
             'title'         => $r->title,
-            'type'          => $r->type,
+            'doc_type'      => strtoupper($r->doc_type),                   // SOP/IK/FORM
+            'type'          => $r->type,                                   // builder/pdf
             'schema'        => $r->type === 'builder' ? json_decode($r->schema, true) : null,
-            // gunakan kolom lama 'pdf_path' untuk semua jenis file agar tanpa migrasi
             'pdf_path'      => $filePath,
-            'is_active'     => (bool)$r->boolean('is_active', true),
+            'is_active'     => $r->boolean('is_active', true),
         ]);
 
         return redirect()->route('admin.forms.edit', $form)->with('ok', 'Form dibuat');
@@ -107,12 +118,25 @@ class FormController extends Controller
     {
         $this->authorize('update', $form);
 
+        // QUICK UPDATE dari Builder: hanya doc_type
+        $onlyDocType = $r->has('doc_type')
+            && !$r->hasAny(['department_id','title','type','schema','pdf','is_active']);
+
+        if ($onlyDocType) {
+            $r->validate([
+                'doc_type' => ['required', Rule::in(self::DOC_TYPES)],
+            ]);
+            $form->update(['doc_type' => strtoupper($r->doc_type)]);
+            return response()->json(['ok' => true, 'doc_type' => $form->doc_type]);
+        }
+
+        // Validasi jalur update penuh (file opsional)
         $r->validate([
             'department_id' => ['required', 'exists:departments,id'],
             'title'         => ['required', 'string', 'max:190'],
-            'type'          => ['required', Rule::in(['builder','pdf'])],
+            'doc_type'      => ['required', Rule::in(self::DOC_TYPES)],
+            'type'          => ['required', Rule::in(self::FORM_TYPES)],
             'schema'        => ['nullable', 'json'],
-            // di update, file opsional
             'pdf'           => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx', 'max:30720'],
             'is_active'     => ['nullable', 'boolean'],
         ]);
@@ -121,10 +145,12 @@ class FormController extends Controller
             'id'          => $form->id,
             'type'        => $r->input('type'),
             'hasFile_pdf' => $r->hasFile('pdf'),
+            'doc_type'    => $r->input('doc_type'),
         ]);
 
         $filePath = $form->pdf_path;
 
+        // Jika type=pdf dan ada file baru → proses
         if ($r->type === 'pdf' && $r->hasFile('pdf')) {
             if ($filePath) {
                 Storage::disk('public')->delete($filePath);
@@ -142,7 +168,7 @@ class FormController extends Controller
             $ok = false;
             if ($ext === 'pdf') {
                 $ok = $this->compressPdf(Storage::disk('public')->path($storedTemp), $outAbs);
-            } elseif (in_array($ext, ['docx','xlsx'])) {
+            } elseif (in_array($ext, ['docx','xlsx'], true)) {
                 $ok = $this->recompressOfficeZip(Storage::disk('public')->path($storedTemp), $outAbs);
             }
 
@@ -154,13 +180,20 @@ class FormController extends Controller
             $filePath = $outRel;
         }
 
+        // Opsi: jika user ganti dari pdf -> builder dan tidak upload file baru, bersihkan file lama
+        if ($r->type === 'builder' && $form->type === 'pdf' && $form->pdf_path) {
+            Storage::disk('public')->delete($form->pdf_path);
+            $filePath = null;
+        }
+
         $form->update([
             'department_id' => (int)$r->department_id,
             'title'         => $r->title,
+            'doc_type'      => strtoupper($r->doc_type),
             'type'          => $r->type,
             'schema'        => $r->type === 'builder' ? json_decode($r->schema, true) : null,
-            'pdf_path'      => $filePath, // kolom lama dipakai generik
-            'is_active'     => (bool)$r->boolean('is_active', true),
+            'pdf_path'      => $filePath,
+            'is_active'     => $r->boolean('is_active', true),
         ]);
 
         return back()->with('ok', 'Form diperbarui');
@@ -214,14 +247,10 @@ class FormController extends Controller
      */
     private function compressPdf(string $inPath, string $outPath): bool
     {
-        // Preset kualitas: /screen (kecil), /ebook (sedang), /printer (bagus)
         $preset = 'screen';
-
-        // Cek ketersediaan gs
         $gs = trim((string)@shell_exec('which gs'));
         if ($gs === '') return false;
 
-        // Perintah Ghostscript
         $cmd = escapeshellcmd($gs)
             .' -sDEVICE=pdfwrite -dCompatibilityLevel=1.4'
             .' -dPDFSETTINGS=/' . $preset
@@ -252,8 +281,8 @@ class FormController extends Controller
         }
 
         for ($i = 0; $i < $zipIn->numFiles; $i++) {
-            $stat  = $zipIn->statIndex($i);
-            $name  = $stat['name'];
+            $stat   = $zipIn->statIndex($i);
+            $name   = $stat['name'];
             $stream = $zipIn->getStream($name);
             if (!$stream) continue;
 
@@ -261,8 +290,6 @@ class FormController extends Controller
             fclose($stream);
 
             $zipOut->addFromString($name, $data);
-
-            // Set level kompresi maksimum (kalau didukung)
             if (defined('\ZipArchive::CM_DEFLATE')) {
                 $zipOut->setCompressionName($name, \ZipArchive::CM_DEFLATE, 9);
             }

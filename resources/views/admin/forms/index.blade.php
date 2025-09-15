@@ -32,6 +32,46 @@
       @endif
     </div>
 
+    {{-- FILTER BAR --}}
+    <div class="mb-4 space-y-3">
+      {{-- Tabs Jenis Dokumen --}}
+      @php
+        $dt = strtoupper(request('doc_type', ''));
+        $tab = fn($active) => $active
+          ? 'bg-maroon-700 text-white'
+          : 'bg-white text-coal-700 dark:bg-coal-900 dark:text-ivory-100 border border-coal-300 dark:border-coal-700 hover:bg-ivory-100 dark:hover:bg-coal-800/70';
+      @endphp
+      <div class="flex flex-wrap items-center gap-2 text-sm">
+        <a href="{{ request()->fullUrlWithQuery(['doc_type'=>null,'page'=>null]) }}" class="px-3 py-1.5 rounded-xl {{ $tab(!$dt) }}">Semua</a>
+        <a href="{{ request()->fullUrlWithQuery(['doc_type'=>'SOP','page'=>null]) }}" class="px-3 py-1.5 rounded-xl {{ $tab($dt==='SOP') }}">SOP</a>
+        <a href="{{ request()->fullUrlWithQuery(['doc_type'=>'IK','page'=>null]) }}" class="px-3 py-1.5 rounded-xl {{ $tab($dt==='IK') }}">IK</a>
+        <a href="{{ request()->fullUrlWithQuery(['doc_type'=>'FORM','page'=>null]) }}" class="px-3 py-1.5 rounded-xl {{ $tab($dt==='FORM') }}">FORM</a>
+      </div>
+
+      {{-- Filter Department --}}
+      @isset($departments)
+        <form method="get" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <select name="department_id" class="px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 bg-white dark:bg-coal-900">
+            <option value="">Semua Departemen</option>
+            @foreach($departments as $d)
+              <option value="{{ $d->id }}" @selected((string)request('department_id')===(string)$d->id)>{{ $d->name }}</option>
+            @endforeach
+          </select>
+          {{-- pertahankan doc_type saat filter --}}
+          @if(request('doc_type'))
+            <input type="hidden" name="doc_type" value="{{ request('doc_type') }}">
+          @endif
+          <button class="px-4 py-2 rounded-lg border border-coal-300 dark:border-coal-700 hover:bg-ivory-100 dark:hover:bg-coal-800/60">
+            Terapkan
+          </button>
+          <a href="{{ route('admin.forms.index') }}"
+             class="px-3 py-2 rounded-lg border border-slate-300 dark:border-coal-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100/60 dark:hover:bg-coal-800/60">
+            Reset
+          </a>
+        </form>
+      @endisset
+    </div>
+
     <!-- LIST FORM -->
     <div class="space-y-3">
       @forelse($forms as $f)
@@ -42,13 +82,30 @@
           if ($isFileType && $f->pdf_path) {
             $ext = strtolower(pathinfo($f->pdf_path, PATHINFO_EXTENSION));
           }
+
+          // === doc_type badge ===
+          $doc = strtoupper($f->doc_type ?? 'FORM');
+          $docClass = match ($doc) {
+            'SOP'  => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+            'IK'   => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+            default=> 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+          };
+
+          // URL front show aman (slug / id)
+          $frontUrl = '#';
+          if (Route::has('front.forms.show')) {
+            $frontUrl = route('front.forms.show', $f->slug ?: $f);
+          }
         @endphp
 
         <div class="p-4 rounded-xl border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 shadow-soft hover:bg-ivory-100 dark:hover:bg-coal-800/50 transition">
           <div class="flex items-start justify-between gap-3">
-            <a class="flex-1" href="{{ route('front.forms.show', $f->slug) }}">
-              <div class="font-medium flex items-center gap-2">
+            <a class="flex-1" href="{{ $frontUrl }}">
+              <div class="font-medium flex flex-wrap items-center gap-2">
                 {{ $f->title }}
+
+                {{-- doc_type badge --}}
+                <span class="text-[10px] px-2 py-0.5 rounded-full {{ $docClass }}">{{ $doc }}</span>
 
                 {{-- Status aktif --}}
                 @if($f->is_active)
@@ -61,6 +118,10 @@
               <div class="text-sm text-coal-500 dark:text-coal-400 mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span>{{ $typeLabel }}</span>
                 <span>— {{ $f->department->name ?? 'Tanpa Departemen' }}</span>
+
+                {{-- Tambahan info (opsional): tampilkan doc_type juga sebagai teks kecil --}}
+                <span>•</span>
+                <span class="uppercase">{{ $doc }}</span>
 
                 {{-- Kalau tipe file & ada file, tampilkan ekstensi + link --}}
                 @if($isFileType && $f->pdf_path)
@@ -90,7 +151,7 @@
                 @endcan
               @endif
 
-              {{-- Edit (opsional, kalau ada route dan punya izin) --}}
+              {{-- Edit --}}
               @can('update', $f)
                 @if(Route::has('admin.forms.edit'))
                   <a href="{{ route('admin.forms.edit', $f) }}"

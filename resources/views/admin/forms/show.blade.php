@@ -2,7 +2,20 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto p-6 bg-white rounded-xl">
-  <h1 class="text-xl font-semibold mb-4">{{ $form->title }}</h1>
+  <h1 class="text-xl font-semibold mb-2 flex items-center gap-2">
+    {{ $form->title }}
+
+    {{-- doc_type badge --}}
+    @php
+      $doc = strtoupper($form->doc_type ?? 'FORM');
+      $docClass = match ($doc) {
+        'SOP'  => 'bg-blue-100 text-blue-700',
+        'IK'   => 'bg-amber-100 text-amber-700',
+        default=> 'bg-slate-100 text-slate-700',
+      };
+    @endphp
+    <span class="text-[10px] px-2 py-0.5 rounded-full {{ $docClass }}">{{ $doc }}</span>
+  </h1>
 
   {{-- Preview / Download referensi untuk tipe "file" (value tetap 'pdf') --}}
   @if($form->type === 'pdf' && $form->pdf_path)
@@ -41,7 +54,6 @@
           href="{{ $url }}"
           download
           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition">
-          {{-- ikon download sederhana --}}
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 16l4-5h-3V4h-2v7H8l4 5z"/><path d="M5 18h14v2H5z"/>
           </svg>
@@ -69,6 +81,9 @@
     enctype="multipart/form-data">
     @csrf
 
+    {{-- kirimkan doc_type sebagai informasi tambahan (backend sebaiknya tetap override dari $form) --}}
+    <input type="hidden" name="doc_type" value="{{ $form->doc_type ?? 'FORM' }}">
+
     @if ($form->type === 'builder')
       @foreach (($form->schema['fields'] ?? []) as $field)
         @php
@@ -80,13 +95,10 @@
           $options  = $field['options'] ?? [];
           $help     = $field['help'] ?? null;
 
-          // siapkan accept untuk input file dari schema 'mimes'
           $acceptStr = null;
           if ($type === 'file' && !empty($field['mimes'])) {
             $m = array_map('trim', explode(',', $field['mimes']));
-            // ekstensi dengan titik
             $exts = array_map(fn($x) => '.'.strtolower($x), $m);
-            // gabungan ext dan mime
             $acceptStr = implode(',', array_merge($exts, $m));
           }
         @endphp
@@ -96,7 +108,6 @@
             {{ $label }} @if($required)<span class="text-red-600">*</span>@endif
           </label>
 
-          {{-- Text-like inputs --}}
           @if (in_array($type, ['text','email','date','number']))
             <input
               id="{{ $name }}"
@@ -106,7 +117,6 @@
               value="{{ old($name) }}"
               @if($required) required @endif>
 
-          {{-- Textarea --}}
           @elseif ($type === 'textarea')
             <textarea
               id="{{ $name }}"
@@ -115,7 +125,6 @@
               class="border rounded w-full px-3 py-2"
               @if($required) required @endif>{{ old($name) }}</textarea>
 
-          {{-- Select --}}
           @elseif ($type === 'select')
             <select
               id="{{ $name }}"
@@ -129,7 +138,6 @@
               @endforeach
             </select>
 
-          {{-- Radio --}}
           @elseif ($type === 'radio')
             <div class="flex flex-wrap gap-3">
               @foreach ($options as $i => $opt)
@@ -146,7 +154,6 @@
               @endforeach
             </div>
 
-          {{-- Checkbox (multi) --}}
           @elseif ($type === 'checkbox')
             <div class="flex flex-wrap gap-3">
               @php($oldArr = collect(old($name, [])))
@@ -163,7 +170,6 @@
               @endforeach
             </div>
 
-          {{-- File upload --}}
           @elseif ($type === 'file')
             <input
               id="{{ $name }}"
@@ -179,7 +185,6 @@
               <p class="text-xs text-slate-500">Maks: {{ $field['max'] }} KB</p>
             @endif
 
-          {{-- Default --}}
           @else
             <input
               id="{{ $name }}"
@@ -190,12 +195,10 @@
               @if($required) required @endif>
           @endif
 
-          {{-- Help text --}}
           @if ($help)
             <p class="text-xs text-slate-500 mt-1">{{ $help }}</p>
           @endif
 
-          {{-- Error per-field --}}
           @error($name)
             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
           @enderror

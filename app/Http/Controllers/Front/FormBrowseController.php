@@ -12,27 +12,47 @@ class FormBrowseController extends Controller
      * List semua form yang user boleh lihat.
      */
     public function index(Request $r)
-    {
-        $user = $r->user();
+{
+    $DOCS = ['SOP','IK','FORM'];
 
-        $q = Form::query()
-            ->with('department')
-            ->where('is_active', true);
+    // Prioritas: route param → query string
+    $dt = strtoupper((string)($r->route('doc_type') ?? $r->input('doc_type') ?? $r->input('doctype')));
+    $currentDocType = in_array($dt, $DOCS, true) ? $dt : null;
 
-        // Filter berdasarkan department/site user (opsional)
-        // contoh: hanya department yg user punya akses
-        if (!$user->isAdmin()) {
-            $q->whereIn('department_id', $user->departments()->pluck('departments.id'));
-        }
+    $q = Form::query()
+        ->with(['department','site'])
+        ->when($r->filled('q'), function ($qb) use ($r) {
+            $term = '%'.$r->q.'%';
+            $qb->where(function ($qq) use ($term) {
+                $qq->where('title','like',$term)->orWhere('description','like',$term);
+            });
+        })
+        ->where('is_active', true)
+        ->when($currentDocType, fn($qb) => $qb->where('doc_type', $currentDocType))
+        ->latest();
 
-        if ($r->filled('q')) {
-            $q->where('title', 'like', "%{$r->q}%");
-        }
+    // counts mengikuti pencarian (tanpa filter doc_type, supaya semua tab punya angka)
+    $base = Form::query()
+        ->when($r->filled('q'), function ($qb) use ($r) {
+            $term = '%'.$r->q.'%';
+            $qb->where(function ($qq) use ($term) {
+                $qq->where('title','like',$term)->orWhere('description','like',$term);
+            });
+        })
+        ->where('is_active', true);
 
-        $forms = $q->paginate(20);
+    $counts = [
+        'SOP'  => (clone $base)->where('doc_type','SOP')->count(),
+        'IK'   => (clone $base)->where('doc_type','IK')->count(),
+        'FORM' => (clone $base)->where('doc_type','FORM')->count(),
+        'ALL'  => (clone $base)->count(),
+    ];
 
-        return view('front.forms.index', compact('forms'));
-    }
+    $forms = $q->paginate(12)->appends($r->query());
+
+    return view('front.forms.index', compact('forms','counts','currentDocType'));
+}
+
 
     /**
      * Tampilkan 1 form (isi atau preview).
