@@ -67,33 +67,56 @@ class DailyInputController extends Controller
     }
 
     public function store(StoreDailyRequest $r)
-    {
-        $siteId = (int) $r->site_id;
+{
+    $siteId = (int) $r->site_id;
 
-        // Pastikan otorisasi per-site (admin auto lolos; user biasa harus punya akses ke site)
-        if (Gate::has('daily.manage')) {
-            Gate::authorize('daily.manage', $siteId);
-        } else {
-            Gate::authorize('site-access',  $siteId);
-        }
-
-        $date   = Carbon::parse($r->date)->toDateString();
-        $values = $r->values ?? [];
-        $notes  = $r->notes ?? [];
-
-        DB::transaction(function () use ($siteId, $date, $values, $notes) {
-            foreach ($values as $indicatorId => $val) {
-                if ($val === null || $val === '') continue;
-
-                IndicatorDaily::updateOrCreate(
-                    ['site_id' => $siteId, 'indicator_id' => $indicatorId, 'date' => $date],
-                    ['value' => $val, 'note' => $notes[$indicatorId] ?? null]
-                );
-            }
-        });
-
-        return back()->with('ok', 'Data harian tersimpan.');
+    // Otorisasi
+    if (Gate::has('daily.manage')) {
+        Gate::authorize('daily.manage', $siteId);
+    } else {
+        Gate::authorize('site-access',  $siteId);
     }
+
+    $date   = \Carbon\Carbon::parse($r->date)->toDateString();
+    $values = $r->values ?? [];
+    $notes  = $r->notes ?? [];
+
+    DB::transaction(function () use ($siteId, $date, $values, $notes) {
+        foreach ($values as $indicatorId => $val) {
+            if ($val === null || $val === '') continue;
+
+            // pastikan numeric
+            $delta = (float) $val;
+
+            // kunci baris per (site, indicator, date)
+            $row = \App\Models\IndicatorDaily::where([
+                'site_id'      => $siteId,
+                'indicator_id' => $indicatorId,
+                'date'         => $date,
+            ])->lockForUpdate()->first();
+
+            if ($row) {
+                $row->value = (float) $row->value + $delta; // AKUMULASI
+                // gabung/catat catatan baru (opsional)
+                if (!empty($notes[$indicatorId])) {
+                    $row->note = trim(($row->note ? $row->note."\n" : '').$notes[$indicatorId]);
+                }
+                $row->save();
+            } else {
+                \App\Models\IndicatorDaily::create([
+                    'site_id'      => $siteId,
+                    'indicator_id' => $indicatorId,
+                    'date'         => $date,
+                    'value'        => $delta,
+                    'note'         => $notes[$indicatorId] ?? null,
+                ]);
+            }
+        }
+    });
+
+    return back()->with('ok', 'Data harian diakumulasi.');
+}
+
 
     // List per hari (dibatasi sesuai akses)
     public function index(Request $r)
