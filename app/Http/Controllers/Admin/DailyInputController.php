@@ -7,6 +7,7 @@ use App\Http\Requests\StoreDailyRequest;
 use App\Models\IndicatorDaily;
 use App\Models\IndicatorGroup;
 use App\Models\Site;
+use App\Support\ShiftWindow; // 👈 tambahkan
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,34 +18,24 @@ class DailyInputController extends Controller
     public function __construct()
     {
         $this->middleware(['auth']);
-        // opsional: kalau mau benar2 admin-only untuk halaman ini, aktifkan baris di bawah
         // $this->middleware('can:is-admin')->only(['index','create']);
     }
 
     /** helper: daftar site_id yang boleh untuk user (null = semua) */
-    // app/Http/Controllers/Admin/DailyInputController.php
-
-    /** helper: daftar site_id yang boleh untuk user
-     *  - Super Admin : null  (semua site)
-     *  - Admin/User  : array (hanya site yang di-assign)
-     */
     private function allowedSiteIds($user): ?array
     {
         if (!$user) return [];
 
-        // HANYA super admin yang dapat semua site
         if (method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) {
             return null; // semua site
         }
 
-        // Admin biasa & user: harus punya akses (pivot user_site_access)
         if (method_exists($user, 'sites')) {
             return $user->sites()->pluck('sites.id')->all();
         }
 
-        return []; // tidak ada akses
+        return [];
     }
-
 
     public function create(Request $r)
     {
@@ -52,73 +43,95 @@ class DailyInputController extends Controller
 
         $sitesQ = Site::query()->orderBy('code');
         if (is_array($allowed)) {
-            // jika tidak ada akses sama sekali, kosongkan daftar sites
             $sitesQ->whereIn('id', $allowed ?: [-1]);
         }
         $sites = $sitesQ->get(['id', 'code', 'name']);
 
-        $date  = $r->input('date', now()->toDateString());
+        $date  = $r->input('date', now(config('shifts.timezone', 'Asia/Jakarta'))->toDateString());
 
         $groups = IndicatorGroup::with(['indicators' => function ($q) {
             $q->where('is_active', true)->orderBy('order_index');
         }])->where('is_active', true)->orderBy('order_index')->get();
 
-        return view('admin.daily.create', compact('sites', 'date', 'groups'));
+        // 👇 auto-deteksi shift & flag telat (untuk watermark di view)
+        $shiftInfo = ShiftWindow::detect($date);
+
+        return view('admin.daily.create', [
+            'sites' => $sites,
+            'date'  => $date,
+            'groups' => $groups,
+            'showLateWatermark' => $shiftInfo['is_late'],
+            'currentShift'      => $shiftInfo['shift'],
+            'shiftRanges'       => $shiftInfo['ranges'],
+        ]);
     }
 
     public function store(StoreDailyRequest $r)
-{
-    $siteId = (int) $r->site_id;
+    {
+        $siteId = (int) $r->site_id;
 
-    // Otorisasi
-    if (Gate::has('daily.manage')) {
-        Gate::authorize('daily.manage', $siteId);
-    } else {
-        Gate::authorize('site-access',  $siteId);
-    }
+        // Otorisasi
+        if (Gate::has('daily.manage')) {
+            Gate::authorize('daily.manage', $siteId);
+        } else {
+            Gate::authorize('site-access',  $siteId);
+        }
 
-    $date   = \Carbon\Carbon::parse($r->date)->toDateString();
-    $values = $r->values ?? [];
-    $notes  = $r->notes ?? [];
+        $date   = Carbon::parse($r->date, config('shifts.timezone', 'Asia/Jakarta'))->toDateString();
+        $values = $r->values ?? [];
+        $notes  = $r->notes ?? [];
 
-    DB::transaction(function () use ($siteId, $date, $values, $notes) {
-        foreach ($values as $indicatorId => $val) {
-            if ($val === null || $val === '') continue;
+        // 👇 deteksi sekali (tanpa user milih shift/waktu)
+        // app/Http/Controllers/Admin/DailyInputController.php  (ubah bagian store)
+        $shiftInfo     = ShiftWindow::detect($date);
+        $currentShift  = $shiftInfo['shift'] ?? $shiftInfo['closest_shift']; // << pakai fallback
+        $inputAt       = $shiftInfo['now'];
+        $isLate        = $shiftInfo['is_late'];
 
-            // pastikan numeric
-            $delta = (float) $val;
+        DB::transaction(function () use ($siteId, $date, $values, $notes, $currentShift, $inputAt, $isLate) {
+            foreach ($values as $indicatorId => $val) {
+                if ($val === null || $val === '') continue;
 
-            // kunci baris per (site, indicator, date)
-            $row = \App\Models\IndicatorDaily::where([
-                'site_id'      => $siteId,
-                'indicator_id' => $indicatorId,
-                'date'         => $date,
-            ])->lockForUpdate()->first();
+                $delta = (float) $val;
 
-            if ($row) {
-                $row->value = (float) $row->value + $delta; // AKUMULASI
-                // gabung/catat catatan baru (opsional)
-                if (!empty($notes[$indicatorId])) {
-                    $row->note = trim(($row->note ? $row->note."\n" : '').$notes[$indicatorId]);
-                }
-                $row->save();
-            } else {
-                \App\Models\IndicatorDaily::create([
+                $row = IndicatorDaily::where([
                     'site_id'      => $siteId,
                     'indicator_id' => $indicatorId,
                     'date'         => $date,
-                    'value'        => $delta,
-                    'note'         => $notes[$indicatorId] ?? null,
-                ]);
+                ])->lockForUpdate()->first();
+
+                if ($row) {
+                    // akumulasi nilai & update note
+                    $row->value = (float) $row->value + $delta;
+                    if (!empty($notes[$indicatorId])) {
+                        $row->note = trim(($row->note ? $row->note . "\n" : '') . $notes[$indicatorId]);
+                    }
+                    // 👇 update metadata shift setiap input
+                    $row->shift    = $currentShift;
+                    $row->input_at = $inputAt;
+                    $row->is_late  = $isLate;
+                    $row->save();
+                } else {
+                    IndicatorDaily::create([
+                        'site_id'      => $siteId,
+                        'indicator_id' => $indicatorId,
+                        'date'         => $date,
+                        'value'        => $delta,
+                        'note'         => $notes[$indicatorId] ?? null,
+                        // 👇 auto set tanpa input user
+                        'shift'        => $currentShift,
+                        'input_at'     => $inputAt,
+                        'is_late'      => $isLate,
+                    ]);
+                }
             }
-        }
-    });
+        });
 
-    return back()->with('ok', 'Data harian diakumulasi.');
-}
+        return back()
+            ->with('ok', 'Data harian diakumulasi.')
+            ->with('late', $isLate); // opsional: untuk banner/watermark
+    }
 
-
-    // List per hari (dibatasi sesuai akses)
     public function index(Request $r)
     {
         $allowed = $this->allowedSiteIds($r->user());
@@ -140,12 +153,10 @@ class DailyInputController extends Controller
             ->whereBetween('date', [$start, $end])
             ->orderBy('date');
 
-        // batasi sesuai akses
         if (is_array($allowed)) {
             $rowsQ->whereIn('site_id', $allowed ?: [-1]);
         }
 
-        // filter UI
         if ($siteId) $rowsQ->where('site_id', $siteId);
 
         $rows = $rowsQ->paginate(50)->withQueryString();

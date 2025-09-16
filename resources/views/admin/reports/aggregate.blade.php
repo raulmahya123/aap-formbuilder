@@ -60,26 +60,45 @@
 
   <button class="px-4 py-2 bg-maroon-600 hover:bg-maroon-700 text-white rounded-lg md:col-span-1">Terapkan</button>
 </form>
-
 {{-- Stat Cards --}}
-<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+<div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
   <div class="p-4 border rounded-lg bg-white dark:bg-coal-900">
     <div class="text-xs">Total Groups</div>
     <div class="text-xl font-bold">{{ $groups->count() }}</div>
   </div>
+
   <div class="p-4 border rounded-lg bg-white dark:bg-coal-900">
     <div class="text-xs">Indicators</div>
     <div class="text-xl font-bold">{{ collect($groups)->flatMap(fn($g)=>$g->indicators)->count() }}</div>
   </div>
+
   <div class="p-4 border rounded-lg bg-white dark:bg-coal-900">
     <div class="text-xs">Scope</div>
     <div class="text-xl font-bold uppercase">{{ $scope }}</div>
   </div>
+
   <div class="p-4 border rounded-lg bg-white dark:bg-coal-900">
     <div class="text-xs">Periode</div>
     <div class="text-sm font-semibold">{{ $period }}</div>
   </div>
+
+  {{-- 👇 Tambahan: Total On-time --}}
+  <div class="p-4 border rounded-lg bg-white dark:bg-coal-900">
+    <div class="text-xs">On-time Total</div>
+    <div class="text-xl font-bold text-emerald-600">
+      {{ number_format($totalOntime ?? 0, 0, ',', '.') }}
+    </div>
+  </div>
+
+  {{-- 👇 Tambahan: Total Late --}}
+  <div class="p-4 border rounded-lg bg-white dark:bg-coal-900">
+    <div class="text-xs">Late Total</div>
+    <div class="text-xl font-bold text-rose-600">
+      {{ number_format($totalLate ?? 0, 0, ',', '.') }}
+    </div>
+  </div>
 </div>
+
 
 {{-- Charts: Top + Trend --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
@@ -117,30 +136,50 @@
         <tr>
           <th class="px-3 py-2 w-10 text-left">#</th>
           <th class="px-3 py-2 text-left">Indicator</th>
-          <th class="px-3 py-2 text-right w-48">Total</th>
+          <th class="px-3 py-2 text-right w-36">On-time</th>
+          <th class="px-3 py-2 text-right w-36">Late</th>
+          <th class="px-3 py-2 text-right w-40">Total</th>
           <th class="px-3 py-2 w-24 text-left">Unit</th>
         </tr>
       </thead>
       <tbody class="divide-y">
         @foreach(($data[$g->code] ?? []) as $row)
+          @php
+            $ind = $row['indicator'];
+            $fmt = $ind->data_type === 'int' ? 0 : 2;
+          @endphp
           <tr class="hover:bg-gray-50 dark:hover:bg-coal-800 transition">
-            <td class="px-3 py-2">{{ $row['indicator']->order_index }}</td>
+            <td class="px-3 py-2">{{ $ind->order_index }}</td>
             <td class="px-3 py-2">
-              <div class="font-medium">{{ $row['indicator']->name }}</div>
-              @if($row['indicator']->is_derived)
-                <div class="text-xs text-gray-500 font-mono">= {{ $row['indicator']->formula }}</div>
+              <div class="font-medium">{{ $ind->name }}</div>
+              @if($ind->is_derived)
+                <div class="text-xs text-gray-500 font-mono">= {{ $ind->formula }}</div>
               @endif
             </td>
-            <td class="px-3 py-2 text-right font-semibold">
-              {{ number_format($row['value'], $row['indicator']->data_type==='int' ? 0 : 2) }}
+
+            {{-- On-time --}}
+            <td class="px-3 py-2 text-right font-semibold text-emerald-600 dark:text-emerald-400">
+              {{ number_format($row['on_time'] ?? 0, $fmt, ',', '.') }}
             </td>
-            <td class="px-3 py-2">{{ $row['indicator']->unit ?? '-' }}</td>
+
+            {{-- Late --}}
+            <td class="px-3 py-2 text-right font-semibold text-rose-600 dark:text-rose-400">
+              {{ number_format($row['late'] ?? 0, $fmt, ',', '.') }}
+            </td>
+
+            {{-- Total --}}
+            <td class="px-3 py-2 text-right font-bold">
+              {{ number_format($row['total'] ?? 0, $fmt, ',', '.') }}
+            </td>
+
+            <td class="px-3 py-2">{{ $ind->unit ?? '-' }}</td>
           </tr>
         @endforeach
       </tbody>
     </table>
   </div>
 @endforeach
+
 @endsection
 
 @push('scripts')

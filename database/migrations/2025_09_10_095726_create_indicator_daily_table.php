@@ -13,12 +13,19 @@ return new class extends Migration {
             $t->date('date');
             $t->decimal('value', 18, 4)->default(0);
             $t->text('note')->nullable();
+
+            // 👇 tambahan untuk shift & keterlambatan
+            $t->unsignedTinyInteger('shift')->nullable(); // 1 / 2 / null
+            $t->timestamp('input_at')->nullable();        // kapan user submit
+            $t->boolean('is_late')->default(false);       // true kalau di luar jam shift
+
             $t->timestamps();
 
             $t->unique(['site_id','indicator_id','date']);
             $t->index(['site_id','indicator_id','date']);
         });
     }
+
     public function down(): void {
         Schema::dropIfExists('indicator_daily');
     }

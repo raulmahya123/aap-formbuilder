@@ -3,13 +3,48 @@
 @section('title','Input Harian')
 
 @section('content')
-<h1 class="text-2xl font-bold mb-6 text-maroon-700">Input Harian Per Site</h1>
+{{-- ===== Overlay Watermark TELAT (opsional, kirim $showLateWatermark dari controller) ===== --}}
+@if(!empty($showLateWatermark))
+  <div class="pointer-events-none select-none fixed inset-0 flex items-center justify-center" style="z-index:0">
+    <div class="font-black tracking-widest uppercase"
+         style="color: rgba(220,38,38,.12); font-size: clamp(3rem,12vw,10rem); transform: rotate(-20deg);">
+      LATE INPUT
+    </div>
+  </div>
+@endif
+
+<h1 class="text-2xl font-bold mb-6 text-maroon-700">
+  Input Harian Per Site
+  @isset($currentShift)
+    <span class="ml-2 text-sm px-2 py-1 rounded bg-gray-100 border">
+      Shift {{ $currentShift ?? '—' }}
+    </span>
+  @endisset
+</h1>
 
 @php
   // dari controller: $sites (sudah terfilter), $date, $groups
   $selectedSite = old('site_id', request('site_id'));
   $hasAnyAllowedSite = $sites->filter(fn($s) => auth()->user()?->can('daily.manage', $s->id))->count() > 0;
+
+  // ==== READ-ONLY MODE ====
+  // Kirim $readOnly=true dari controller jika ingin paksa view-only.
+  // Fallback: kalau tidak punya izin di site terpilih => readonly.
+  $computedReadonly = false;
+  if (isset($readOnly)) {
+    $computedReadonly = (bool) $readOnly;
+  } elseif ($selectedSite) {
+    $computedReadonly = !auth()->user()?->can('daily.manage', (int)$selectedSite);
+  } else {
+    $computedReadonly = !$hasAnyAllowedSite;
+  }
 @endphp
+
+@if($computedReadonly)
+  <div class="max-w-6xl mb-4 p-3 rounded-lg border border-blue-200 bg-blue-50 text-blue-900 text-sm">
+    Mode tampilan saja. Kamu tidak dapat mengubah data pada halaman ini.
+  </div>
+@endif
 
 @if(!$hasAnyAllowedSite)
   <div class="max-w-6xl mb-6 p-4 rounded-lg border border-amber-200 bg-amber-50 text-amber-900">
@@ -19,21 +54,26 @@
 @endif
 
 <form action="{{ route('admin.daily.store') }}" method="post"
-      class="space-y-6 max-w-6xl bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+      class="relative space-y-6 max-w-6xl bg-white rounded-xl border border-gray-200 shadow-sm p-6 {{ $computedReadonly ? 'opacity-95' : '' }}">
   @csrf
+
+  {{-- Jika readonly total, blok pointer supaya benar2 tidak bisa edit --}}
+  @if($computedReadonly)
+    <div class="absolute inset-0 rounded-xl" style="pointer-events: none;"></div>
+  @endif
 
   {{-- Header input: site & tanggal --}}
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <div>
       <label class="block text-sm font-semibold text-gray-700 mb-1">Site</label>
       <select name="site_id"
-              class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
-              required>
+              class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400 {{ $computedReadonly ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : '' }}"
+              @if($computedReadonly) disabled @endif required>
         @php $printed = false; @endphp
         @foreach($sites as $s)
           @can('daily.manage', $s->id)
             @php $printed = true; @endphp
-            <option value="{{ $s->id }}" @selected($selectedSite == $s->id)>
+            <option value="{{ $s->id }}" @selected($selectedSite == $s->id)">
               {{ $s->code }} — {{ $s->name }}
             </option>
           @endcan
@@ -49,8 +89,8 @@
     <div>
       <label class="block text-sm font-semibold text-gray-700 mb-1">Tanggal</label>
       <input type="date" name="date" value="{{ old('date', $date) }}"
-             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
-             required>
+             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400 {{ $computedReadonly ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : '' }}"
+             @if($computedReadonly) readonly disabled @endif required>
       @error('date') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
     </div>
   </div>
@@ -68,20 +108,20 @@
               <th class="px-3 py-2 text-left w-10">#</th>
               <th class="px-3 py-2 text-left">Indicator</th>
               <th class="px-3 py-2 text-left w-44">Value</th>
-              <th class="px-3 py-2 text-left w-40">Threshold</th> {{-- <- pindah di sini, sebelah value --}}
+              <th class="px-3 py-2 text-left w-40">Threshold</th>
               <th class="px-3 py-2 text-left">Unit/Note</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
             @foreach($g->indicators as $i)
               @php
-                // Tentukan step sesuai tipe data
                 $step = match($i->data_type) {
                   'int'      => '1',
                   'currency' => '0.01',
                   'rate'     => '0.0001',
-                  default    => '0.0001', // decimal
+                  default    => '0.0001',
                 };
+                $disabledClass = ($computedReadonly || $i->is_derived) ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '';
               @endphp
 
               <tr class="hover:bg-gray-50 transition">
@@ -107,13 +147,14 @@
                       type="number"
                       step="{{ $step }}"
                       value="{{ old("values.$i->id") }}"
-                      class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
-                      placeholder="0">
+                      class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400 {{ $disabledClass }}"
+                      placeholder="0"
+                      @if($computedReadonly) readonly disabled @endif>
                   @endif
                   @error("values.$i->id") <div class="text-xs text-rose-600 mt-1">{{ $message }}</div> @enderror
                 </td>
 
-                {{-- Kolom Threshold (view only) --}}
+                {{-- Threshold (view only) --}}
                 <td class="px-3 py-2 align-top">
                   <div class="mt-0.5 font-mono text-sm text-gray-800">
                     {{ $i->threshold !== null && $i->threshold !== '' ? $i->threshold : '—' }}
@@ -124,8 +165,9 @@
                   <div class="text-xs text-gray-500">Unit: {{ $i->unit ?? '-' }}</div>
                   <input name="notes[{{ $i->id }}]"
                          value="{{ old("notes.$i->id") }}"
-                         class="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
-                         placeholder="Catatan (opsional)">
+                         class="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400 {{ $disabledClass }}"
+                         placeholder="Catatan (opsional)"
+                         @if($computedReadonly) readonly disabled @endif>
                 </td>
               </tr>
             @endforeach
@@ -136,10 +178,10 @@
   @endforeach
 
   {{-- Tombol submit --}}
-  <div>
+  <div class="{{ $computedReadonly ? 'opacity-60 pointer-events-none' : '' }}">
     <button
       class="mt-6 px-6 py-2.5 rounded-lg bg-maroon-600 hover:bg-maroon-700 text-white shadow disabled:opacity-60 disabled:cursor-not-allowed"
-      @if(!$hasAnyAllowedSite) disabled @endif>
+      @if(!$hasAnyAllowedSite || $computedReadonly) disabled @endif>
       Simpan
     </button>
     <a href="{{ route('admin.daily.index') }}"
