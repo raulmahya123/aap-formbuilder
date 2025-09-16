@@ -5,16 +5,16 @@
 <h1 class="text-2xl font-bold mb-6 text-maroon-700">New Indicator</h1>
 
 <form action="{{ route('admin.indicators.store') }}" method="post"
-      class="space-y-5 max-w-2xl bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+  class="space-y-5 max-w-2xl bg-white rounded-xl border border-gray-200 shadow-sm p-6">
   @csrf
 
   <div>
     <label class="block text-sm font-semibold text-gray-700 mb-1">Group</label>
     <select name="indicator_group_id"
-            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
-            required>
+      class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
+      required>
       @foreach($groups as $g)
-        <option value="{{ $g->id }}">{{ $g->name }}</option>
+      <option value="{{ $g->id }}">{{ $g->name }}</option>
       @endforeach
     </select>
   </div>
@@ -23,14 +23,14 @@
     <div>
       <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
       <input name="name"
-             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
-             required>
+        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
+        required>
     </div>
     <div>
       <label class="block text-sm font-semibold text-gray-700 mb-1">Code</label>
       <input name="code"
-             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
-             placeholder="LTI" required>
+        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
+        placeholder="LTI" required>
     </div>
   </div>
 
@@ -38,7 +38,7 @@
     <div>
       <label class="block text-sm font-semibold text-gray-700 mb-1">Data Type</label>
       <select name="data_type"
-              class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
+        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
         <option>int</option>
         <option selected>decimal</option>
         <option>currency</option>
@@ -48,7 +48,7 @@
     <div>
       <label class="block text-sm font-semibold text-gray-700 mb-1">Agg</label>
       <select name="agg"
-              class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
+        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
         <option selected>sum</option>
         <option>avg</option>
         <option>max</option>
@@ -56,22 +56,28 @@
       </select>
     </div>
     <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-1">Threshold</label>
+      <input type="text" name="threshold" value="{{ old('threshold', $indicator->threshold ?? '') }}"
+        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
+        placeholder="mis: 95.5 / HIGH / OK">
+    </div>
+    <div>
       <label class="block text-sm font-semibold text-gray-700 mb-1">Unit</label>
       <input name="unit"
-             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
-             placeholder="jam/kasus/Rp">
+        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
+        placeholder="jam/kasus/Rp">
     </div>
     <div>
       <label class="block text-sm font-semibold text-gray-700 mb-1">Order</label>
       <input type="number" name="order_index" value="0"
-             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
+        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
     </div>
   </div>
 
   <div class="p-4 rounded-lg border border-gray-200 bg-gray-50">
     <label class="flex items-center gap-2 text-gray-700 font-medium">
       <input type="checkbox" name="is_derived" value="1" id="chkDerived"
-             class="h-4 w-4 text-maroon-600 border-gray-300 rounded focus:ring-maroon-500">
+        class="h-4 w-4 text-maroon-600 border-gray-300 rounded focus:ring-maroon-500">
       <span>Derived (pakai formula)</span>
     </label>
     <div class="mt-2">
@@ -80,7 +86,7 @@
         <code class="font-mono text-sm text-maroon-700">LTI / MAN_HOURS * 1e6</code>)
       </label>
       <textarea name="formula" rows="2"
-                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"></textarea>
+        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"></textarea>
     </div>
   </div>
 
@@ -89,7 +95,7 @@
       Save
     </button>
     <a href="{{ route('admin.indicators.index') }}"
-       class="px-5 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700">
+      class="px-5 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700">
       Cancel
     </a>
   </div>
