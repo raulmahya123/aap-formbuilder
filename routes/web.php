@@ -39,7 +39,7 @@ use App\Http\Controllers\Admin\ReportController as AdminReportController;
 // USER Controllers (baru HSE)
 // ==============================
 use App\Http\Controllers\User\IndicatorDailyController;
-
+use App\Http\Controllers\User\DailyNoteController;
 // ==============================
 // Admin kelola akses user↔site (baru)
 // ==============================
@@ -64,6 +64,12 @@ Route::middleware('auth')->group(function () {
     // ==============================
     // FRONT (user)
     // ==============================
+
+    Route::middleware(['auth'])->prefix('daily-notes')->name('user.daily_notes.')->group(function () {
+        Route::get('/', [DailyNoteController::class, 'index'])->name('index');
+        Route::get('/create', [DailyNoteController::class, 'create'])->name('create');
+        Route::post('/', [DailyNoteController::class, 'store'])->name('store');
+    });
     Route::prefix('forms')->name('front.forms.')->group(function () {
         Route::get('/', [FormBrowseController::class, 'index'])->name('index');
 

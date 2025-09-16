@@ -158,6 +158,12 @@
                    👥 Manage Users
                 </a>
               @endif
+
+              {{-- 📝 Catatan Harian (Topbar Mobile Admin) --}}
+              @if(Route::has('user.daily_notes.index'))
+                <a href="{{ route('user.daily_notes.index') }}"
+                   class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
+              @endif
             </div>
 
           {{-- USER BIASA --}}
@@ -178,6 +184,12 @@
 
               @if(Route::has('admin.qa.index'))
                 <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+              @endif
+
+              {{-- 📝 Catatan Harian (Topbar Mobile Non-Admin) --}}
+              @if(Route::has('user.daily_notes.index'))
+                <a href="{{ route('user.daily_notes.index') }}"
+                   class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
               @endif
             </div>
           @endif
@@ -206,6 +218,12 @@
               <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
             @elseif(Route::has('daily.index'))
               <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>
+            @endif
+
+            {{-- 📝 Catatan Harian (Topbar Mobile – section HSE/KPI) --}}
+            @if(Route::has('user.daily_notes.index'))
+              <a href="{{ route('user.daily_notes.index') }}"
+                 class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
             @endif
 
             {{-- Rekap Bulanan: semua user --}}
@@ -352,6 +370,13 @@
               @if(Route::has('admin.daily.create'))
                 <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
               @endif
+
+              {{-- 📝 Catatan Harian (Sidebar Desktop Admin) --}}
+              @if(Route::has('user.daily_notes.index'))
+                <a href="{{ route('user.daily_notes.index') }}"
+                   class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
+              @endif
+
               @if(Route::has('admin.reports.monthly'))
                 <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
               @endif
@@ -392,6 +417,13 @@
               @if(Route::has('daily.index'))
                 <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>
               @endif
+
+              {{-- 📝 Catatan Harian (Sidebar Desktop Non-Admin) --}}
+              @if(Route::has('user.daily_notes.index'))
+                <a href="{{ route('user.daily_notes.index') }}"
+                   class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
+              @endif
+
               @if(Route::has('admin.reports.monthly'))
                 <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
               @endif
@@ -544,6 +576,13 @@
                   @if(Route::has('admin.daily.create'))
                     <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
                   @endif
+
+                  {{-- 📝 Catatan Harian (Mobile Drawer Admin) --}}
+                  @if(Route::has('user.daily_notes.index'))
+                    <a href="{{ route('user.daily_notes.index') }}"
+                       class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
+                  @endif
+
                   @if(Route::has('admin.reports.monthly'))
                     <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
                   @endif
@@ -554,6 +593,13 @@
                   @if(Route::has('daily.index'))
                     <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>
                   @endif
+
+                  {{-- 📝 Catatan Harian (Mobile Drawer Non-Admin) --}}
+                  @if(Route::has('user.daily_notes.index'))
+                    <a href="{{ route('user.daily_notes.index') }}"
+                       class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
+                  @endif
+
                   @if(Route::has('admin.reports.monthly'))
                     <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
                   @endif
@@ -620,6 +666,15 @@
 
           {{-- Right header actions + compact site switcher --}}
           <div class="flex items-center gap-3">
+
+            {{-- ➕ Catatan Baru (quick action) --}}
+            @if(Route::has('user.daily_notes.create'))
+              <a href="{{ route('user.daily_notes.create') }}"
+                 class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-maroon-700 text-maroon-700 hover:bg-maroon-50
+                        dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20 text-sm">
+                ➕ Catatan Baru
+              </a>
+            @endif
 
             @hasSection('actions')
               @yield('actions')
