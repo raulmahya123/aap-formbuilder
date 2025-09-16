@@ -150,6 +150,14 @@
               @if(Route::has('admin.contracts.index'))
                 <a href="{{ route('admin.contracts.index') }}" class="{{ $navItemClass(request()->routeIs('admin.contracts.*')) }}">📑 Contracts</a>
               @endif
+
+              {{-- 🔒 Super Admin only: Manage Users (Topbar Mobile) --}}
+              @if($isSuper && Route::has('admin.users.active.index'))
+                <a href="{{ route('admin.users.active.index') }}"
+                   class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">
+                   👥 Manage Users
+                </a>
+              @endif
             </div>
 
           {{-- USER BIASA --}}
@@ -318,6 +326,11 @@
 
               @if(Route::has('admin.contracts.index'))
                 <a href="{{ route('admin.contracts.index') }}" class="{{ $navItemClass(request()->routeIs('admin.contracts.*')) }}">📑 Contracts</a>
+              @endif
+
+              {{-- 🔒 Super Admin only: Manage Users (Sidebar Desktop) --}}
+              @if($isSuper && Route::has('admin.users.active.index'))
+                <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
               @endif
             </div>
           </div>
@@ -488,6 +501,7 @@
                   <a href="{{ route('admin.contracts.index') }}" class="{{ $navItemClass(request()->routeIs('admin.contracts.*')) }}">📑 Contracts</a>
                 @endif
 
+                {{-- 🔒 Super Admin only: Manage Users (Mobile Drawer Admin) --}}
                 @if($isSuper && Route::has('admin.users.active.index'))
                   <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
                 @endif

@@ -145,10 +145,15 @@ Route::middleware('auth')->group(function () {
         Route::post('sites/switch', [AdminSiteController::class, 'switch'])->name('sites.switch');
 
         // Manage Users (active/toggle)
-        Route::get('/users/active', [UserActiveController::class, 'index'])->name('users.active.index');
-        Route::patch('/users/{user}/toggle', [UserActiveController::class, 'toggle'])->name('users.active.toggle');
-        Route::patch('/users/{user}/update', [UserActiveController::class, 'update'])->name('users.active.update');
+        Route::get('/users/active', [UserActiveController::class, 'index'])
+            ->name('users.active.index');
 
+        Route::patch('/users/{user}/toggle', [UserActiveController::class, 'toggle'])
+            ->name('users.active.toggle');
+
+        // Konsisten pakai PUT untuk update eksplisit
+        Route::put('/users/{user}/active', [UserActiveController::class, 'update'])
+            ->name('users.active.update');
         // Departments CRUD
         Route::resource('departments', DepartmentController::class);
 

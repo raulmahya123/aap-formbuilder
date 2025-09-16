@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-
 class UserActiveController extends Controller
 {
     public function __construct()
@@ -40,6 +39,11 @@ class UserActiveController extends Controller
             return back()->with('error', 'Tidak bisa menonaktifkan akun Anda sendiri.');
         }
 
+        // cegah menonaktifkan super admin mana pun
+        if (method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) {
+            return back()->with('error', 'Tidak bisa menonaktifkan Super Admin.');
+        }
+
         $user->is_active = !$user->is_active;
         $user->save();
 
@@ -54,6 +58,15 @@ class UserActiveController extends Controller
         $request->validate([
             'is_active' => 'required|boolean',
         ]);
+
+        // cegah self-deactivate & nonaktifkan super admin
+        if ($user->id === Auth::id()) {
+            return back()->with('error', 'Tidak bisa menonaktifkan akun Anda sendiri.');
+        }
+
+        if (method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) {
+            return back()->with('error', 'Tidak bisa menonaktifkan Super Admin.');
+        }
 
         $user->is_active = $request->boolean('is_active');
         $user->save();
