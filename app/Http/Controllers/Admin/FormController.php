@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 class FormController extends Controller
 {
     /** Daftar nilai yang diizinkan */
-    private const DOC_TYPES = ['SOP', 'IK', 'FORM'];
+    private const DOC_TYPES  = ['SOP', 'IK', 'FORM'];
     private const FORM_TYPES = ['builder', 'pdf'];
 
     public function index(Request $r)
@@ -26,13 +26,21 @@ class FormController extends Controller
 
         // filter doc_type (opsional): ?doc_type=SOP|IK|FORM
         if ($r->filled('doc_type') && Schema::hasColumn('forms', 'doc_type')) {
-            $docType = strtoupper((string)$r->doc_type);
+            $docType = strtoupper((string) $r->doc_type);
             if (in_array($docType, self::DOC_TYPES, true)) {
                 $q->where('doc_type', $docType);
             }
         }
 
-        $forms = $q->paginate(20)->appends($r->only('department_id', 'doc_type'));
+        // === Per Page (10/20/50/100; default 10) ===
+        $allowed  = [10, 20, 50, 100];
+        $perPage  = (int) $r->input('per_page', 10);
+        if (!in_array($perPage, $allowed, true)) {
+            $perPage = 10;
+        }
+
+        $forms       = $q->paginate($perPage)
+                         ->appends($r->only('department_id', 'doc_type', 'per_page'));
         $departments = Department::orderBy('name')->get();
 
         return view('admin.forms.index', compact('forms', 'departments'));
@@ -59,7 +67,7 @@ class FormController extends Controller
             'pdf.required_if' => 'Saat memilih tipe File, harap unggah file referensi.',
         ]);
 
-        $this->authorize('create', [Form::class, (int)$r->department_id]);
+        $this->authorize('create', [Form::class, (int) $r->department_id]);
 
         Log::info('forms.store payload', [
             'type'        => $r->input('type'),
@@ -96,7 +104,7 @@ class FormController extends Controller
         }
 
         $form = Form::create([
-            'department_id' => (int)$r->department_id,
+            'department_id' => (int) $r->department_id,
             'created_by'    => $r->user()->id,
             'title'         => $r->title,
             'doc_type'      => strtoupper($r->doc_type),                   // SOP/IK/FORM
@@ -189,7 +197,7 @@ class FormController extends Controller
         }
 
         $form->update([
-            'department_id' => (int)$r->department_id,
+            'department_id' => (int) $r->department_id,
             'title'         => $r->title,
             'doc_type'      => strtoupper($r->doc_type),
             'type'          => $r->type,
@@ -248,59 +256,59 @@ class FormController extends Controller
      * Kompres PDF menggunakan Ghostscript. Return true jika sukses.
      */
     // GANTI method compressPdf() Anda menjadi:
-private function compressPdf(string $inPath, string $outPath): bool
-{
-    // Jika fungsi shell_exec tidak tersedia/disabled → skip kompres
-    if (!function_exists('shell_exec')) {
-        Log::warning('PDF compress skipped: shell_exec() is disabled.');
-        return false;
-    }
-
-    // Deteksi OS & cari binary Ghostscript
-    $isWin = (\PHP_OS_FAMILY ?? php_uname('s')) === 'Windows';
-
-    $candidates = [];
-    if ($isWin) {
-        // Coba where, lalu beberapa path umum
-        $where = @shell_exec('where gswin64c 2>NUL') ?: @shell_exec('where gswin32c 2>NUL');
-        if ($where) $candidates[] = trim($where);
-        $candidates[] = 'C:\\Program Files\\gs\\gs10.00.0\\bin\\gswin64c.exe';
-        $candidates[] = 'C:\\Program Files\\gs\\gs9.56.1\\bin\\gswin64c.exe';
-        $candidates[] = 'C:\\Program Files\\gs\\gs9.55.0\\bin\\gswin64c.exe';
-    } else {
-        // Linux/macOS
-        $which = @shell_exec('command -v gs 2>/dev/null') ?: @shell_exec('which gs 2>/dev/null');
-        if ($which) $candidates[] = trim($which);
-        $candidates[] = '/usr/bin/gs';
-        $candidates[] = '/usr/local/bin/gs';
-    }
-
-    $gs = null;
-    foreach ($candidates as $bin) {
-        if ($bin && is_file($bin) && is_executable($bin)) {
-            $gs = $bin;
-            break;
+    private function compressPdf(string $inPath, string $outPath): bool
+    {
+        // Jika fungsi shell_exec tidak tersedia/disabled → skip kompres
+        if (!function_exists('shell_exec')) {
+            Log::warning('PDF compress skipped: shell_exec() is disabled.');
+            return false;
         }
+
+        // Deteksi OS & cari binary Ghostscript
+        $isWin = (\PHP_OS_FAMILY ?? php_uname('s')) === 'Windows';
+
+        $candidates = [];
+        if ($isWin) {
+            // Coba where, lalu beberapa path umum
+            $where = @shell_exec('where gswin64c 2>NUL') ?: @shell_exec('where gswin32c 2>NUL');
+            if ($where) $candidates[] = trim($where);
+            $candidates[] = 'C:\\Program Files\\gs\\gs10.00.0\\bin\\gswin64c.exe';
+            $candidates[] = 'C:\\Program Files\\gs\\gs9.56.1\\bin\\gswin64c.exe';
+            $candidates[] = 'C:\\Program Files\\gs\\gs9.55.0\\bin\\gswin64c.exe';
+        } else {
+            // Linux/macOS
+            $which = @shell_exec('command -v gs 2>/dev/null') ?: @shell_exec('which gs 2>/dev/null');
+            if ($which) $candidates[] = trim($which);
+            $candidates[] = '/usr/bin/gs';
+            $candidates[] = '/usr/local/bin/gs';
+        }
+
+        $gs = null;
+        foreach ($candidates as $bin) {
+            if ($bin && is_file($bin) && is_executable($bin)) {
+                $gs = $bin;
+                break;
+            }
+        }
+        if (!$gs) {
+            Log::warning('PDF compress skipped: Ghostscript not found.');
+            return false;
+        }
+
+        $preset = 'screen'; // atau ebook/printer sesuai kebutuhan
+        $cmd = escapeshellcmd($gs)
+            .' -sDEVICE=pdfwrite -dCompatibilityLevel=1.4'
+            .' -dPDFSETTINGS=/'.$preset
+            .' -dNOPAUSE -dQUIET -dBATCH'
+            .' -sOutputFile='.escapeshellarg($outPath)
+            .' '.escapeshellarg($inPath)
+            .' 2>&1';
+
+        // Jalankan; error diarahkan ke stdout (agar tidak memicu warning)
+        @shell_exec($cmd);
+
+        return is_file($outPath) && filesize($outPath) > 0;
     }
-    if (!$gs) {
-        Log::warning('PDF compress skipped: Ghostscript not found.');
-        return false;
-    }
-
-    $preset = 'screen'; // atau ebook/printer sesuai kebutuhan
-    $cmd = escapeshellcmd($gs)
-        .' -sDEVICE=pdfwrite -dCompatibilityLevel=1.4'
-        .' -dPDFSETTINGS=/'.$preset
-        .' -dNOPAUSE -dQUIET -dBATCH'
-        .' -sOutputFile='.escapeshellarg($outPath)
-        .' '.escapeshellarg($inPath)
-        .' 2>&1';
-
-    // Jalankan; error diarahkan ke stdout (agar tidak memicu warning)
-    @shell_exec($cmd);
-
-    return is_file($outPath) && filesize($outPath) > 0;
-}
 
     /**
      * Re-compress DOCX/XLSX (ZIP container) dengan level maksimal.
@@ -339,6 +347,7 @@ private function compressPdf(string $inPath, string $outPath): bool
 
         return file_exists($outPath) && filesize($outPath) > 0;
     }
+
     public function file(Form $form)
     {
         $this->authorize('update', $form); // atau 'view' sesuai policy kamu
@@ -356,9 +365,9 @@ private function compressPdf(string $inPath, string $outPath): bool
 
         // Tampilkan inline (browser handle sendiri: pdf/word/excel bisa diunduh bila tidak didukung)
         return response()->file($abs, [
-            'Content-Type'        => $mime,
-            'Content-Disposition' => 'inline; filename="' . addslashes($filename) . '"',
-            'X-Content-Type-Options' => 'nosniff',
+            'Content-Type'            => $mime,
+            'Content-Disposition'     => 'inline; filename="' . addslashes($filename) . '"',
+            'X-Content-Type-Options'  => 'nosniff',
         ]);
     }
 
@@ -371,13 +380,13 @@ private function compressPdf(string $inPath, string $outPath): bool
         $disk = Storage::disk('public');
         abort_unless($disk->exists($form->pdf_path), 404);
 
-        $abs  = $disk->path($form->pdf_path);
-        $ext  = strtolower(pathinfo($abs, PATHINFO_EXTENSION));
-        $mime = $this->guessMime($abs, $ext);
+        $abs      = $disk->path($form->pdf_path);
+        $ext      = strtolower(pathinfo($abs, PATHINFO_EXTENSION));
+        $mime     = $this->guessMime($abs, $ext);
         $filename = $this->downloadName($form, $ext);
 
         return response()->download($abs, $filename, [
-            'Content-Type' => $mime,
+            'Content-Type'           => $mime,
             'X-Content-Type-Options' => 'nosniff',
         ]);
     }
