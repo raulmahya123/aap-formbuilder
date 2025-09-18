@@ -11,7 +11,7 @@
   {{-- Judul tidak perlu diisi user, otomatis Daily Hari Ini --}}
   <div>
     <label class="block font-semibold">Judul</label>
-    <input type="text" value="Daily Hari Ini" class="w-full border rounded p-2 bg-gray-100 text-gray-600">
+    <input type="text" class="w-full border rounded p-2 bg-gray-100 text-gray-600">
   </div>
 
   <div>
