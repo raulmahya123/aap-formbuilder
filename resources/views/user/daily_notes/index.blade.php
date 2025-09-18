@@ -58,7 +58,7 @@
             $wib = $n->note_time?->timezone('Asia/Jakarta');
           @endphp
           <tr class="text-sm align-top">
-            <td class="px-4 py-3 font-medium">{{ $n->title ?? 'Daily Hari Ini' }}</td>
+            <td class="px-4 py-3 font-medium">{{ $n->title}}</td>
             <td class="px-4 py-3 text-coal-700 dark:text-coal-300">
               {{ Str::limit($n->content, 160) }}
             </td>

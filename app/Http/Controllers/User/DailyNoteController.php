@@ -25,7 +25,7 @@ class DailyNoteController extends Controller
                 $kw = $request->q;
                 $q->where(function ($w) use ($kw) {
                     $w->where('title', 'like', "%{$kw}%")
-                      ->orWhere('content', 'like', "%{$kw}%");
+                        ->orWhere('content', 'like', "%{$kw}%");
                 });
             })
             ->orderByDesc('note_time')
@@ -48,12 +48,12 @@ class DailyNoteController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'content' => ['required', 'string'], // title dihapus dari validasi
-            'title' => ['required', 'string'], // title dihapus dari validasi
+            'title'   => ['required', 'string', 'max:255'], // user wajib isi title
+            'content' => ['required', 'string'],
         ]);
 
         $data['user_id']   = auth()->id();
-        $data['note_time'] = Carbon::now('Asia/Jakarta'); // simpan WIB
+        $data['note_time'] = Carbon::now('Asia/Jakarta');
 
         DailyNote::create($data);
 
