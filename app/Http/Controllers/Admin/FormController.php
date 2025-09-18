@@ -247,23 +247,60 @@ class FormController extends Controller
     /**
      * Kompres PDF menggunakan Ghostscript. Return true jika sukses.
      */
-    private function compressPdf(string $inPath, string $outPath): bool
-    {
-        $preset = 'screen';
-        $gs = trim((string)@shell_exec('which gs'));
-        if ($gs === '') return false;
-
-        $cmd = escapeshellcmd($gs)
-            . ' -sDEVICE=pdfwrite -dCompatibilityLevel=1.4'
-            . ' -dPDFSETTINGS=/' . $preset
-            . ' -dNOPAUSE -dQUIET -dBATCH'
-            . ' -sOutputFile=' . escapeshellarg($outPath)
-            . ' ' . escapeshellarg($inPath);
-
-        @shell_exec($cmd);
-
-        return file_exists($outPath) && filesize($outPath) > 0;
+    // GANTI method compressPdf() Anda menjadi:
+private function compressPdf(string $inPath, string $outPath): bool
+{
+    // Jika fungsi shell_exec tidak tersedia/disabled → skip kompres
+    if (!function_exists('shell_exec')) {
+        Log::warning('PDF compress skipped: shell_exec() is disabled.');
+        return false;
     }
+
+    // Deteksi OS & cari binary Ghostscript
+    $isWin = (\PHP_OS_FAMILY ?? php_uname('s')) === 'Windows';
+
+    $candidates = [];
+    if ($isWin) {
+        // Coba where, lalu beberapa path umum
+        $where = @shell_exec('where gswin64c 2>NUL') ?: @shell_exec('where gswin32c 2>NUL');
+        if ($where) $candidates[] = trim($where);
+        $candidates[] = 'C:\\Program Files\\gs\\gs10.00.0\\bin\\gswin64c.exe';
+        $candidates[] = 'C:\\Program Files\\gs\\gs9.56.1\\bin\\gswin64c.exe';
+        $candidates[] = 'C:\\Program Files\\gs\\gs9.55.0\\bin\\gswin64c.exe';
+    } else {
+        // Linux/macOS
+        $which = @shell_exec('command -v gs 2>/dev/null') ?: @shell_exec('which gs 2>/dev/null');
+        if ($which) $candidates[] = trim($which);
+        $candidates[] = '/usr/bin/gs';
+        $candidates[] = '/usr/local/bin/gs';
+    }
+
+    $gs = null;
+    foreach ($candidates as $bin) {
+        if ($bin && is_file($bin) && is_executable($bin)) {
+            $gs = $bin;
+            break;
+        }
+    }
+    if (!$gs) {
+        Log::warning('PDF compress skipped: Ghostscript not found.');
+        return false;
+    }
+
+    $preset = 'screen'; // atau ebook/printer sesuai kebutuhan
+    $cmd = escapeshellcmd($gs)
+        .' -sDEVICE=pdfwrite -dCompatibilityLevel=1.4'
+        .' -dPDFSETTINGS=/'.$preset
+        .' -dNOPAUSE -dQUIET -dBATCH'
+        .' -sOutputFile='.escapeshellarg($outPath)
+        .' '.escapeshellarg($inPath)
+        .' 2>&1';
+
+    // Jalankan; error diarahkan ke stdout (agar tidak memicu warning)
+    @shell_exec($cmd);
+
+    return is_file($outPath) && filesize($outPath) > 0;
+}
 
     /**
      * Re-compress DOCX/XLSX (ZIP container) dengan level maksimal.

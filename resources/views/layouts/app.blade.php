@@ -4,7 +4,6 @@
   lang="{{ str_replace('_','-', app()->getLocale()) }}"
   x-data="layout()"
   x-init="init()"
-  :class="dark ? 'dark scroll-smooth' : 'scroll-smooth'"
   class="scroll-smooth"
 >
 <head>
@@ -22,30 +21,13 @@
   @vite(['resources/css/app.css','resources/js/app.js'])
   @stack('styles')
 
-  {{-- Prevent FOUC on initial theme --}}
-  <script>
-    (function () {
-      const isDark = localStorage.getItem('theme') === 'dark';
-      if (isDark) document.documentElement.classList.add('dark');
-    })();
-  </script>
-
   <script>
     function layout() {
       return {
-        dark: localStorage.getItem('theme') === 'dark',
+        // HANYA untuk drawer mobile
         sidebarOpen: false,
-
-        init() {
-          // Sync <html> class & localStorage saat toggle
-          this.$watch('dark', (v) => {
-            document.documentElement.classList.toggle('dark', v);
-            localStorage.setItem('theme', v ? 'dark' : 'light');
-          });
-        },
-
+        init() {},
         toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; },
-
         userInitials(name) {
           if (!name) return 'U';
           return name.trim().split(/\s+/).map(s => s[0]).slice(0,2).join('').toUpperCase();
@@ -79,7 +61,7 @@
   </style>
 </head>
 
-<body class="min-h-screen bg-ivory-100 text-coal-900 dark:bg-coal-900 dark:text-ivory-100">
+<body class="min-h-screen bg-ivory-100 text-coal-900">
 
   {{-- ===== Mobile hamburger (tanpa topbar) ===== --}}
   <div class="lg:hidden fixed top-3 left-3 z-[60]">
@@ -89,9 +71,8 @@
       aria-label="Open menu"
       :aria-expanded="sidebarOpen"
       class="inline-flex h-10 w-10 items-center justify-center rounded-xl border
-             border-coal-200/80 dark:border-coal-700/70 bg-white/80 dark:bg-coal-900/70
-             backdrop-blur shadow-sm text-coal-700 dark:text-ivory-200
-             hover:bg-ivory-100/90 dark:hover:bg-coal-800/70 transition"
+             border-coal-200 bg-white/80 backdrop-blur shadow-sm text-coal-700
+             hover:bg-ivory-100 transition"
     >
       <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -135,8 +116,7 @@
       @if(session('ok') || session('success'))
         <div class="px-4 lg:px-8 pb-4" role="status" aria-live="polite">
           <div class="rounded border p-3
-                      bg-emerald-50 text-emerald-800 border-emerald-200
-                      dark:bg-emerald-900/20 dark:text-emerald-200 dark:border-emerald-900">
+                      bg-emerald-50 text-emerald-800 border-emerald-200">
             {{ session('ok') ?? session('success') }}
           </div>
         </div>
@@ -146,8 +126,7 @@
       @if(session('error'))
         <div class="px-4 lg:px-8 pb-4" role="alert" aria-live="assertive">
           <div class="rounded border p-3
-                      bg-rose-50 text-rose-800 border-rose-200
-                      dark:bg-rose-900/20 dark:text-rose-200 dark:border-rose-900">
+                      bg-rose-50 text-rose-800 border-rose-200">
             {{ session('error') }}
           </div>
         </div>
