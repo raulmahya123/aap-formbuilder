@@ -52,22 +52,56 @@
       use Illuminate\Support\Str;
       use Illuminate\Support\Facades\Storage;
 
-      // ====== INFO FILE TERKAIT FORM (normalisasi path) ======
-      $hasFile = !empty($form->pdf_path);
-      $rawPath = $hasFile ? trim((string) $form->pdf_path, '/') : null;
-      // buang prefix "public/" atau "storage/" jika ada agar tidak dobel
-      $path    = $rawPath ? preg_replace('#^(public/|storage/)#', '', $rawPath) : null;
+      /** ================== FILE HANDLING (normalisasi + fallback) ================== */
+      $hasFile  = !empty($form->pdf_path);
+      $rawPath  = $hasFile ? trim((string) $form->pdf_path, '/') : null;
 
+      // buang prefix public/ atau storage/ agar tidak dobel
+      $basePath = $rawPath ? preg_replace('#^(public/|storage/)#', '', $rawPath) : null;
+
+      // kumpulkan kandidat path
+      $candidates = [];
+      if ($basePath) {
+        $candidates[] = $basePath;
+        if (!Str::startsWith($basePath, 'forms/files/')) {
+          $candidates[] = 'forms/files/'.ltrim($basePath, '/');
+        }
+      }
+
+      // tebak nama dari slug/kode/judul/id
+      $slugGuess = Str::slug($form->slug ?? $form->code ?? $form->title ?? (string)$form->id, '-');
+      if ($slugGuess) {
+        $candidates[] = "forms/files/{$slugGuess}.pdf";
+      }
+
+      // hilangkan duplikat & kosong
+      $candidates = array_values(array_filter(array_unique($candidates)));
+
+      // cari kandidat yang benar-benar ada
+      $resolvedPath = null;
+      foreach ($candidates as $cand) {
+        if (Storage::disk('public')->exists($cand)) { $resolvedPath = $cand; break; }
+      }
+
+      // fallback terakhir: kalau hanya ada 1 PDF di forms/files, pakai itu
+      if (!$resolvedPath) {
+        $all = collect(Storage::disk('public')->files('forms/files'))
+          ->filter(fn($p) => Str::lower(pathinfo($p, PATHINFO_EXTENSION)) === 'pdf')
+          ->values();
+        if ($all->count() === 1) { $resolvedPath = $all->first(); }
+      }
+
+      $path       = $resolvedPath; // final (bisa null)
       $fileExists = $path ? Storage::disk('public')->exists($path) : false;
 
-      // URL publik (wajib: php artisan storage:link)
-      $url = $fileExists ? asset('storage/'.ltrim($path, '/')) : null;
+      // URL publik (pakai Storage::url supaya aman)
+      $url = $fileExists ? Storage::url($path) : null;
 
       $ext      = $path ? strtolower(pathinfo($path, PATHINFO_EXTENSION)) : null;
       $isPdf    = $ext === 'pdf';
       $isOffice = in_array($ext, ['doc','docx','xls','xlsx','ppt','pptx']);
 
-      // Size (opsional)
+      // size
       $size = null;
       if ($fileExists) {
         try {
@@ -79,20 +113,23 @@
         } catch (\Throwable $e) {}
       }
 
-      // ====== NORMALISASI SCHEMA ======
-      $raw = $form->schema ?? [];
-      if (is_string($raw)) {
-        $decoded = json_decode($raw, true);
-        if (json_last_error() === JSON_ERROR_NONE) $raw = $decoded;
+      /** ================== SCHEMA HANDLING (agar $hasFields terdefinisi) ================== */
+      $rawSchema = $form->schema ?? [];
+      if (is_string($rawSchema)) {
+        $decoded = json_decode($rawSchema, true);
+        if (json_last_error() === JSON_ERROR_NONE) { $rawSchema = $decoded; }
       }
       $fields = [];
-      if (is_array($raw)) {
-        if (isset($raw['fields']) && is_array($raw['fields']))       $fields = $raw['fields'];
-        elseif (array_keys($raw) === range(0, max(count($raw)-1,0)))  $fields = $raw;
+      if (is_array($rawSchema)) {
+        if (isset($rawSchema['fields']) && is_array($rawSchema['fields'])) {
+          $fields = $rawSchema['fields'];
+        } elseif (array_keys($rawSchema) === range(0, max(count($rawSchema)-1,0))) {
+          $fields = $rawSchema;
+        }
       }
       $hasFields = !empty($fields);
 
-      // helpers OLD
+      // helpers lama
       if (!function_exists('fraw')) { function fraw($name){ return old("data.$name"); } }
       if (!function_exists('fval')) { function fval($name){ $v = old("data.$name"); return is_array($v) ? '' : $v; } }
       if (!function_exists('opt_tuple')) {
@@ -132,7 +169,7 @@
           </div>
 
         @elseif($fileExists && ($isOffice || !$isPdf))
-          {{-- Word/Excel/PPT/dll: TIDAK di-embed, hanya tombol --}}
+          {{-- Word/Excel/PPT/dll: tombol saja --}}
           <div class="p-4 rounded-lg border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800">
             <div class="text-sm">
               File: <span class="font-medium uppercase">{{ $ext }}</span>
@@ -152,8 +189,14 @@
 
         @else
           <div class="rounded-lg border p-3 bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-900/30">
-            File tidak ditemukan di <code>storage/app/public/{{ $path }}</code>. Pastikan sudah menjalankan
-            <code>php artisan storage:link</code> dan path tersimpan **tanpa** awalan <code>public/</code> atau <code>storage/</code>.
+            File tidak ditemukan.
+            @if($rawPath)
+              <div class="mt-1 text-xs">
+                Dicari dari: <code>{{ $rawPath }}</code> → kandidat: <code>{{ implode(', ', $candidates) }}</code>
+              </div>
+            @endif
+            Pastikan file ada di <code>storage/app/public/...</code>, symlink <code>public/storage</code> aktif, dan
+            kolom <code>pdf_path</code> berisi path relatif (tanpa awalan <code>public/</code> atau <code>storage/</code>).
           </div>
         @endif
       </div>
