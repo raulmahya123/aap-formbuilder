@@ -107,12 +107,23 @@
           if (Route::has('front.forms.show')) {
             $frontUrl = route('front.forms.show', $f->slug ?: $f);
           }
+
+          // === NOMOR URUT GLOBAL (nyambung antar halaman)
+          $no = method_exists($forms, 'firstItem') && $forms->firstItem()
+              ? $forms->firstItem() + $loop->index
+              : $loop->iteration; // fallback bila bukan paginator
         @endphp
 
         <div class="p-4 rounded-xl border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 shadow-soft hover:bg-ivory-100 dark:hover:bg-coal-800/50 transition">
           <div class="flex items-start justify-between gap-3">
             <a class="flex-1" href="{{ $frontUrl }}">
               <div class="font-medium flex flex-wrap items-center gap-2">
+                {{-- Badge nomor urut --}}
+                <span class="inline-flex items-center justify-center w-6 h-6 text-xs font-semibold rounded-full
+                             bg-slate-200 text-slate-800 dark:bg-coal-800 dark:text-ivory-200">
+                  {{ $no }}
+                </span>
+
                 {{ $f->title }}
 
                 {{-- doc_type badge --}}
