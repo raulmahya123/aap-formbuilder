@@ -8,20 +8,28 @@
       class="space-y-4 max-w-xl bg-white p-6 rounded-xl shadow">
   @csrf
 
-  {{-- Judul tidak perlu diisi user, otomatis Daily Hari Ini --}}
+  {{-- Judul wajib diisi user --}}
   <div>
     <label class="block font-semibold">Judul</label>
-    <input type="text" class="w-full border rounded p-2 bg-gray-100 text-gray-600">
+    <input type="text" name="title" value="{{ old('title') }}"
+           class="w-full border rounded p-2 @error('title') border-red-500 @enderror" required>
+    @error('title')
+      <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+    @enderror
   </div>
 
   <div>
     <label class="block font-semibold">Isi Catatan</label>
-    <textarea name="content" rows="5" class="w-full border rounded p-2" required></textarea>
+    <textarea name="content" rows="5"
+              class="w-full border rounded p-2 @error('content') border-red-500 @enderror" required>{{ old('content') }}</textarea>
+    @error('content')
+      <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+    @enderror
   </div>
 
   <div>
     <label class="block font-semibold">Waktu</label>
-    <input type="text" value="{{ now()->format('d-m-Y H:i') }}"
+    <input type="text" value="{{ now('Asia/Jakarta')->format('d-m-Y H:i') }}"
            class="w-full border rounded p-2 bg-gray-100 text-gray-600" readonly>
   </div>
 

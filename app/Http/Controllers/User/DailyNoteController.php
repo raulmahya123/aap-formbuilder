@@ -30,7 +30,7 @@ class DailyNoteController extends Controller
                 $kw = trim($request->q);
                 $q->where(function ($w) use ($kw) {
                     $w->where('title', 'like', "%{$kw}%")
-                      ->orWhere('content', 'like', "%{$kw}%");
+                        ->orWhere('content', 'like', "%{$kw}%");
                 });
             })
             ->orderByDesc('note_time')
