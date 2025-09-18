@@ -49,11 +49,11 @@ class DailyNoteController extends Controller
     {
         $data = $request->validate([
             'content' => ['required', 'string'], // title dihapus dari validasi
+            'title' => ['required', 'string'], // title dihapus dari validasi
         ]);
 
         $data['user_id']   = auth()->id();
         $data['note_time'] = Carbon::now('Asia/Jakarta'); // simpan WIB
-        $data['title']     = 'Daily Hari Ini';            // judul fix
 
         DailyNote::create($data);
 
