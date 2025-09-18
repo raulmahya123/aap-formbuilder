@@ -15,16 +15,29 @@
 
     <div class="flex items-center gap-2">
       <form method="get" class="flex flex-wrap items-center gap-2">
-        {{-- Filter tanggal (harian). Default: hari ini WIB dari controller ($targetDate) --}}
+        {{-- Filter tanggal (default: $targetDate dari controller) --}}
         <input type="date" name="date"
-               value="{{ $targetDate ?? request('date') ?? now('Asia/Jakarta')->format('Y-m-d') }}"
+               value="{{ $targetDate ?? now('Asia/Jakarta')->format('Y-m-d') }}"
                class="border rounded-lg px-3 py-2 bg-white dark:bg-coal-900">
-        <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari isi…"
+
+        {{-- Pencarian --}}
+        <input type="text" name="q" value="{{ $query ?? '' }}" placeholder="Cari judul / isi…"
                class="border rounded-lg px-3 py-2 bg-white dark:bg-coal-900" />
+
+        {{-- Pilihan jumlah data per halaman --}}
+        <select name="perPage" class="border rounded-lg px-3 py-2 bg-white dark:bg-coal-900">
+          @foreach([10,25,50,100] as $opt)
+            <option value="{{ $opt }}" {{ ($perPage ?? 10) == $opt ? 'selected' : '' }}>
+              {{ $opt }}/hal
+            </option>
+          @endforeach
+        </select>
+
         <button class="px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 hover:bg-ivory-100 dark:hover:bg-coal-900">
           Filter
         </button>
-        @if(request()->hasAny(['date','q']))
+
+        @if(request()->hasAny(['date','q','perPage']))
           <a href="{{ route('user.daily_notes.index') }}" class="text-sm underline">Reset</a>
         @endif
       </form>
@@ -54,11 +67,10 @@
       <tbody class="divide-y divide-gray-200 dark:divide-coal-800">
         @forelse($notes as $n)
           @php
-            // gunakan note_time sebagai sumber waktu
             $wib = $n->note_time?->timezone('Asia/Jakarta');
           @endphp
           <tr class="text-sm align-top">
-            <td class="px-4 py-3 font-medium">{{ $n->title}}</td>
+            <td class="px-4 py-3 font-medium">{{ $n->title }}</td>
             <td class="px-4 py-3 text-coal-700 dark:text-coal-300">
               {{ Str::limit($n->content, 160) }}
             </td>

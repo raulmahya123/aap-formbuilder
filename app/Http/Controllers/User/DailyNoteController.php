@@ -17,26 +17,33 @@ class DailyNoteController extends Controller
             ? Carbon::parse($request->date, 'Asia/Jakarta')->startOfDay()
             : Carbon::now('Asia/Jakarta')->startOfDay();
 
+        // Opsi jumlah item per halaman (default 10, max 100)
+        $perPage = (int) $request->input('perPage', 10);
+        $perPage = $perPage > 0 && $perPage <= 100 ? $perPage : 10;
+
         $notes = DailyNote::with('user')
+            ->where('user_id', Auth::id()) // hanya catatan milik user yang login
             // hanya tampilkan catatan pada hari target (WIB)
             ->whereDate('note_time', $targetDate->toDateString())
             // opsional: pencarian isi/judul
             ->when($request->filled('q'), function ($q) use ($request) {
-                $kw = $request->q;
+                $kw = trim($request->q);
                 $q->where(function ($w) use ($kw) {
                     $w->where('title', 'like', "%{$kw}%")
-                        ->orWhere('content', 'like', "%{$kw}%");
+                      ->orWhere('content', 'like', "%{$kw}%");
                 });
             })
             ->orderByDesc('note_time')
             ->orderByDesc('id')
-            ->paginate(10)
+            ->paginate($perPage)
             ->withQueryString();
 
         return view('user.daily_notes.index', [
             'notes'      => $notes,
             // untuk prefill input <input type="date">
             'targetDate' => $targetDate->toDateString(),
+            'perPage'    => $perPage,
+            'query'      => $request->q,
         ]);
     }
 
@@ -52,7 +59,7 @@ class DailyNoteController extends Controller
             'content' => ['required', 'string'],
         ]);
 
-        $data['user_id']   = auth()->id();
+        $data['user_id']   = Auth::id();
         $data['note_time'] = Carbon::now('Asia/Jakarta');
 
         DailyNote::create($data);
