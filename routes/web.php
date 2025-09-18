@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Storage;
 // ==============================
 // ADMIN Controllers (existing)
 // ==============================
@@ -58,6 +58,24 @@ Route::get('/dashboard', fn() => redirect()->route('admin.dashboard'))
     ->name('dashboard');
 
 require __DIR__ . '/auth.php';
+
+Route::get('/pubfile/{path}', function (string $path) {
+    $path = ltrim($path, '/');
+    if (Str::contains($path, ['..', "\0"])) abort(404);
+    $disk = Storage::disk('public');
+    abort_unless($disk->exists($path), 404);
+    $absolute = $disk->path($path);
+    $mime = @mime_content_type($absolute) ?: ($disk->mimeType($path) ?? 'application/octet-stream');
+    return response()->file($absolute, ['Content-Type' => $mime, 'X-Content-Type-Options' => 'nosniff']);
+})->where('path','.*')->name('pubfile.stream');
+
+// Download (attachment)
+Route::get('/pubfile-dl/{path}', function (string $path) {
+    $path = ltrim($path, '/');
+    $disk = Storage::disk('public');
+    abort_unless($disk->exists($path), 404);
+    return response()->download($disk->path($path), basename($path));
+})->where('path','.*')->name('pubfile.download');
 
 Route::middleware('auth')->group(function () {
 

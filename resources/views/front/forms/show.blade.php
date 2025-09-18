@@ -94,8 +94,12 @@
       $path       = $resolvedPath; // final (bisa null)
       $fileExists = $path ? Storage::disk('public')->exists($path) : false;
 
-      // URL publik (pakai Storage::url supaya aman)
-      $url = $fileExists ? Storage::url($path) : null;
+      // URL publik biasa (kalau symlink /storage sehat) — tidak dipakai untuk iframe
+      $urlPublic     = $fileExists ? Storage::url($path) : null;
+
+      // URL streaming (bypass symlink /storage)
+      $streamUrl     = $fileExists ? route('pubfile.stream',  ['path' => $path]) : null;
+      $downloadUrl   = $fileExists ? route('pubfile.download',['path' => $path]) : null;
 
       $ext      = $path ? strtolower(pathinfo($path, PATHINFO_EXTENSION)) : null;
       $isPdf    = $ext === 'pdf';
@@ -153,19 +157,21 @@
           {{-- HANYA PDF yang di-embed --}}
           <div class="rounded-xl border overflow-hidden bg-white dark:bg-coal-900 dark:border-coal-800 shadow-soft">
             <iframe
-              src="{{ $url }}#toolbar=1&navpanes=0&scrollbar=1"
+              src="{{ $streamUrl }}#toolbar=1&navpanes=0&scrollbar=1"
               class="w-full"
               style="height:75vh"></iframe>
           </div>
           <div class="mt-3 flex flex-wrap gap-2">
-            <a href="{{ $url }}" target="_blank" rel="noopener"
+            <a href="{{ $streamUrl }}" target="_blank" rel="noopener"
                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 dark:hover:bg-coal-800">
               🔎 Buka di Tab Baru
             </a>
-            <a href="{{ $url }}" download
+            <a href="{{ $downloadUrl }}" download
                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
               ⬇️ Download @if($size)<span class="opacity-80 text-xs">({{ $size }})</span>@endif
             </a>
+            {{-- Opsional tampilkan juga link publik biasa untuk debug --}}
+            {{-- <a href="{{ $urlPublic }}" class="text-xs underline" target="_blank">/storage (debug)</a> --}}
           </div>
 
         @elseif($fileExists && ($isOffice || !$isPdf))
@@ -176,11 +182,11 @@
               @if($size) • <span class="text-slate-500">{{ $size }}</span> @endif
             </div>
             <div class="mt-3 flex flex-wrap gap-2">
-              <a href="{{ $url }}" target="_blank" rel="noopener"
+              <a href="{{ $streamUrl }}" target="_blank" rel="noopener"
                  class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 dark:hover:bg-coal-800">
                 🔎 Buka di Tab Baru
               </a>
-              <a href="{{ $url }}" download
+              <a href="{{ $downloadUrl }}" download
                  class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
                 ⬇️ Download
               </a>
@@ -195,8 +201,8 @@
                 Dicari dari: <code>{{ $rawPath }}</code> → kandidat: <code>{{ implode(', ', $candidates) }}</code>
               </div>
             @endif
-            Pastikan file ada di <code>storage/app/public/...</code>, symlink <code>public/storage</code> aktif, dan
-            kolom <code>pdf_path</code> berisi path relatif (tanpa awalan <code>public/</code> atau <code>storage/</code>).
+            Pastikan file ada di <code>storage/app/public/...</code>, symlink <code>public/storage</code> aktif,
+            atau gunakan route streaming <code>pubfile.*</code> (sudah dipakai di halaman ini).
           </div>
         @endif
       </div>
@@ -358,9 +364,6 @@
       </div>
 
       @php
-        // Tampilkan tombol submit jika:
-        // - tidak ada file, atau
-        // - ada file & juga ada field tambahan
         $showSubmit = (!$fileExists) || ($fileExists && $hasFields);
       @endphp
 
