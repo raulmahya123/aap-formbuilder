@@ -9,7 +9,7 @@
   x-data="{ scope: '{{ $scope ?? 'month' }}' }">
   <input type="hidden" name="scope" :value="scope">
 
-  <select name="site_id" class="border rounded-lg px-3 py-2 md:col-span-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
+  <select name="site_id" class="border rounded-lg px-3 py-2 md:grid-cols-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
     <option value="">Semua Site</option>
     @foreach($sites as $s)
       <option value="{{ $s->id }}" @selected(($siteId ?? null)===$s->id)>{{ $s->code }} — {{ $s->name }}</option>
@@ -106,25 +106,55 @@
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
     @foreach(($data[$g->code] ?? []) as $row)
       @php
-        $ind      = $row['indicator'];
-        $label    = $ind->name;
-        $unit     = $ind->unit ?? '';
-        $value    = is_numeric($row['total'] ?? null) ? (float)$row['total'] : 0.0;
-        $thrRaw   = $row['threshold'] ?? null;
-        $thrVal   = is_numeric($thrRaw) ? (float)$thrRaw : null;
+        // === Helpers: parser angka & formatter tanpa ",00" jika bulat ===
+        $parseNum = function ($raw) {
+            if ($raw === null) return null;
+            $s = trim((string)$raw);
+            $s = preg_replace('/[^0-9,.\-]/', '', $s);
+            $s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$))/', '', $s);
+            if (str_contains($s, ',') && !str_contains($s, '.')) $s = str_replace(',', '.', $s);
+            if (substr_count($s, '.') > 1) {
+                $last = strrpos($s, '.');
+                $s = str_replace('.', '', substr($s, 0, $last)) . substr($s, $last);
+            }
+            return is_numeric($s) ? (float)$s : null;
+        };
+        $fmtSmart = function ($v, $preferInt = false) {
+            if ($preferInt || fmod($v, 1.0) == 0.0) return number_format($v, 0, ',', '.');
+            return number_format($v, 2, ',', '.');
+        };
+
+        $ind    = $row['indicator'];
+        $label  = $ind->name;
+
+        // --- NORMALISASI UNIT ---
+        $unitRaw   = trim((string)($ind->unit ?? ''));
+        $isPercent = ($unitRaw === '%') || (strcasecmp($unitRaw,'percent')===0) || (strcasecmp($unitRaw,'percentage')===0) || (strcasecmp($unitRaw,'persen')===0);
+        $unitOut   = $isPercent ? '%' : $unitRaw;
+
+        // tipe data (longgar)
+        $dtype  = in_array(strtolower($ind->data_type ?? 'int'), ['int','integer','count','qty']) ? 'int' : 'float';
+        $isInt  = ($dtype === 'int');
+
+        $onVal    = is_numeric($row['on_time'] ?? null) ? (float)$row['on_time'] : 0.0;
+        $lateVal  = is_numeric($row['late']    ?? null) ? (float)$row['late']    : 0.0;
+        $totalVal = is_numeric($row['total']   ?? null) ? (float)$row['total']   : ($onVal + $lateVal);
+
+        $thrRaw = $row['threshold'] ?? null;
+        $thrVal = $parseNum($thrRaw);
+
+        $isOver = $thrVal !== null && $totalVal > $thrVal;
+
+        // label "Target:" pada kartu
+        $tBase  = $thrVal === null ? null : $fmtSmart(max(0,$thrVal), $isInt);
+        $tLabel = $tBase === null ? null : ($isPercent ? ($tBase.'%') : ($tBase.($unitOut? ' '.$unitOut : '')));
       @endphp
 
       <div class="p-4 border rounded-lg bg-white dark:bg-coal-900">
         <div class="flex items-center justify-between mb-2">
           <div class="font-medium">{{ $label }}</div>
           <div class="text-xs text-gray-500">
-            @if($thrVal !== null)
-              @php
-                $tBase   = number_format(max(0,$thrVal), ($ind->data_type==='int'?0:2), ',', '.');
-                $tLabel  = trim((string)$unit) === '%' ? ($tBase.'%') : ($tBase.($unit ? ' '.$unit : ''));
-              @endphp
-              Target: {{ $tLabel }}
-            @endif
+            @if($tLabel) Target: {{ $tLabel }} @endif
           </div>
         </div>
 
@@ -133,10 +163,10 @@
           class="mini-gauge w-full"
           style="height: 120px"
           data-label="{{ $label }}"
-          data-unit="{{ $unit }}"
-          data-value="{{ $value }}"
+          data-unit="{{ $unitOut }}" {{-- kirim % ke JS bila persen --}}
+          data-value="{{ $totalVal }}"
           @if($thrVal !== null) data-threshold="{{ $thrVal }}" @endif
-          data-dtype="{{ ($ind->data_type ?? 'int') === 'int' ? 'int' : 'float' }}"
+          data-dtype="{{ $dtype }}"
         ></div>
       </div>
     @endforeach
@@ -162,14 +192,44 @@
       <tbody class="divide-y">
         @foreach(($data[$g->code] ?? []) as $row)
           @php
+            // helpers
+            $parseNum = function ($raw) {
+                if ($raw === null) return null;
+                $s = trim((string)$raw);
+                $s = preg_replace('/[^0-9,.\-]/', '', $s);
+                $s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$))/', '', $s);
+                if (str_contains($s, ',') && !str_contains($s, '.')) $s = str_replace(',', '.', $s);
+                if (substr_count($s, '.') > 1) {
+                    $last = strrpos($s, '.');
+                    $s = str_replace('.', '', substr($s, 0, $last)) . substr($s, $last);
+                }
+                return is_numeric($s) ? (float)$s : null;
+            };
+            $fmtSmart = function ($v, $preferInt = false) {
+                if ($preferInt || fmod($v, 1.0) == 0.0) return number_format($v, 0, ',', '.');
+                return number_format($v, 2, ',', '.');
+            };
+
             $ind      = $row['indicator'];
-            $fmt      = $ind->data_type === 'int' ? 0 : 2;
+            $dtype    = in_array(strtolower($ind->data_type ?? 'int'), ['int','integer','count','qty']) ? 'int' : 'float';
+            $isInt    = ($dtype === 'int');
+
+            // normalisasi unit
+            $unitRaw   = trim((string)($ind->unit ?? ''));
+            $isPercent = ($unitRaw === '%') || (strcasecmp($unitRaw,'percent')===0) || (strcasecmp($unitRaw,'percentage')===0) || (strcasecmp($unitRaw,'persen')===0);
+            $unitOut   = $isPercent ? '%' : $unitRaw;
+
             $onVal    = is_numeric($row['on_time'] ?? null) ? (float)$row['on_time'] : 0.0;
-            $lateVal  = is_numeric($row['late'] ?? null)    ? (float)$row['late']    : 0.0;
-            $totalVal = is_numeric($row['total'] ?? null)   ? (float)$row['total']   : ($onVal + $lateVal);
-            $thrRaw   = $row['threshold'] ?? null;
-            $thrVal   = is_numeric($thrRaw) ? (float)$thrRaw : null;
+            $lateVal  = is_numeric($row['late']    ?? null) ? (float)$row['late']    : 0.0;
+            $totalVal = is_numeric($row['total']   ?? null) ? (float)$row['total']   : ($onVal + $lateVal);
+
+            $thrVal   = $parseNum($row['threshold'] ?? null);
             $isOver   = $thrVal !== null && $totalVal > $thrVal;
+
+            // tampilan angka
+            $onDisp    = $fmtSmart($onVal,   $isInt);
+            $lateDisp  = $fmtSmart($lateVal, $isInt);
+            $totalDisp = $fmtSmart($totalVal,$isInt);
           @endphp
 
           <tr class="hover:bg-gray-50 dark:hover:bg-coal-800 transition">
@@ -181,29 +241,64 @@
               @endif
             </td>
             <td class="px-3 py-2 text-right font-semibold text-emerald-600 dark:text-emerald-400">
-              {{ number_format($onVal, $fmt, ',', '.') }}
+              {{ $onDisp }}
             </td>
             <td class="px-3 py-2 text-right font-semibold text-rose-600 dark:text-rose-400">
-              {{ number_format($lateVal, $fmt, ',', '.') }}
+              {{ $lateDisp }}
             </td>
             <td class="px-3 py-2 text-right font-bold {{ $isOver ? 'text-rose-600 dark:text-rose-400' : '' }}">
-              {{ number_format($totalVal, $fmt, ',', '.') }}
+              {{ $totalDisp }}
             </td>
 
-            {{-- Threshold: 0/0% fallback + tampilkan % bila unit persen --}}
-            <td class="px-3 py-2 text-right text-sm text-gray-700 dark:text-gray-300">
+            {{-- Threshold (FULL CODE, inline, sesuai permintaan) --}}
+            <td class="px-3 py-2 align-top text-right text-sm text-gray-700 dark:text-gray-300">
               @php
-                // fallback universal ke 0 bila null/empty/'-'
-                $thrClean = ($thrVal === null ? 0 : max(0, $thrVal));
-                $thrBase  = number_format($thrClean, $fmt, ',', '.');
-                $thrDisp  = trim((string)$ind->unit) === '%' ? ($thrBase.'%') : $thrBase;
+                $thrRawCell = $row['threshold'] ?? '';
+                $unitRawCell = trim((string)($ind->unit ?? ''));
+                $thrHasPercentCell = is_string($thrRawCell) && str_contains($thrRawCell, '%');
+                $isPercentCell = (
+                  $unitRawCell === '%'
+                  || strcasecmp($unitRawCell,'percent')===0
+                  || strcasecmp($unitRawCell,'percentage')===0
+                  || strcasecmp($unitRawCell,'persen')===0
+                  || $thrHasPercentCell
+                );
+
+                // fallback universal: kosong / '-' → "0"
+                $valCell = trim((string)$thrRawCell);
+                if ($valCell === '' || $valCell === '-') {
+                  $valCell = '0';
+                }
+
+                // parse angka longgar
+                $sCell = preg_replace('/[^0-9,.\-]/', '', $valCell);
+                $sCell = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$))/', '', $sCell);
+                if (str_contains($sCell, ',') && !str_contains($sCell, '.')) {
+                  $sCell = str_replace(',', '.', $sCell);
+                }
+                if (substr_count($sCell, '.') > 1) {
+                  $lastDot = strrpos($sCell, '.');
+                  $sCell = str_replace('.', '', substr($sCell, 0, $lastDot)) . substr($sCell, $lastDot);
+                }
+
+                $numCell = is_numeric($sCell) ? (float)$sCell : null;
+
+                // formatter: tanpa ,00 jika bulat
+                $fmtCell = function (float $v) {
+                  return (fmod($v, 1.0) == 0.0)
+                    ? number_format($v, 0, ',', '.')
+                    : number_format($v, 2, ',', '.');
+                };
+
+                $displayCell = $numCell === null ? $valCell : $fmtCell(max(0, $numCell));
+                if ($isPercentCell) $displayCell .= '%';
               @endphp
-              {{ $thrDisp }}
+              <div class="mt-0.5 font-mono">{{ $displayCell }}</div>
             </td>
 
-            {{-- Unit: jika persen, tampil '-' agar tidak dobel dengan % di angka --}}
+            {{-- Unit: bila persen → tampil "-" agar tidak dobel --}}
             <td class="px-3 py-2">
-              {{ trim((string)$ind->unit) === '%' ? '-' : ($ind->unit ?? '-') }}
+              {{ $isPercent ? '-' : ($unitOut ?: '-') }}
             </td>
           </tr>
         @endforeach
@@ -222,12 +317,17 @@
   // ===== Utilities
   const clamp = (x,a,b)=> Math.max(a, Math.min(b,x));
   const fmtNum = (v, dtype='int') => {
-    const nf0 = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 });
-    const nf2 = new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    return dtype==='int' ? nf0.format(v) : nf2.format(v);
+    // hilangkan .00 jika integer
+    if (Number.isFinite(v) && Math.abs(v - Math.round(v)) < 1e-9) {
+      return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(v);
+    }
+    if (dtype === 'int') {
+      return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(v);
+    }
+    return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
   };
 
-  // rotate hue (simple RGB→HSL→RGB) to vary colors per card
+  // rotate hue
   const rotHue = (hex, deg) => {
     const n = hex.replace('#','');
     const r = parseInt(n.slice(0,2),16)/255;
@@ -248,7 +348,6 @@
     }
     h = (h*360 + deg) % 360; if (h<0) h+=360;
 
-    // HSL->RGB
     const hue2rgb = (p,q,t)=>{ if(t<0)t+=1; if(t>1)t-=1;
       if(t<1/6)return p+(q-p)*6*t;
       if(t<1/2)return q;
@@ -269,7 +368,12 @@
   // Build one gauge SVG
   function renderGauge(el, idx) {
     const label = el.dataset.label || 'Indicator';
-    const unit  = el.dataset.unit || '';
+
+    // pastikan % muncul saat persen
+    const unitRaw = (el.dataset.unit || '').trim();
+    const isPct   = unitRaw === '%' || /percent|percentage|persen/i.test(unitRaw);
+    const unit    = isPct ? '%' : unitRaw;
+
     const value = Number(el.dataset.value || 0);
     const thr   = (el.dataset.threshold !== undefined) ? Number(el.dataset.threshold) : null;
     const dtype = el.dataset.dtype || 'int';
@@ -282,11 +386,11 @@
     const min = 0;
     const max = (thr && thr>0) ? thr*1.2 : Math.max(value, 1) * 1.1;
 
-    // zones from fractions (based on threshold)
+    // zones
     const fracs = [0.60, 0.80, 0.90, 1.00, 1.20];
     const edges = [min, ...(thr? fracs.map(f => Math.max(min, thr*f)) : [0.6,0.8,0.9,1.0].map(f => f*max)), max];
 
-    // colorful zones (rotate palette by idx)
+    // colors
     const base = ['#ef4444','#f59e0b','#facc15','#84cc16','#22c55e'];
     const deg  = (idx*25) % 360;
     const zonesColor = base.map(c => rotHue(c, deg));
@@ -306,7 +410,7 @@
       return `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;
     };
 
-    // compose segments
+    // segments
     let segs = '';
     for (let i=0;i<5;i++){
       const a0 = toAng(edges[i]);
@@ -317,14 +421,14 @@
     // threshold tick
     let thrTick = '';
     if (!Number.isNaN(thr) && thr!==null) {
-      const ath = toAng(clamp(thr,min,max));
+      const ath = toAng(Math.max(min, Math.min(max, thr)));
       const rIn=R-16, rOut=R+2;
       const [x0,y0]=polar(ath,rIn), [x1,y1]=polar(ath,rOut);
       thrTick = `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="${isDark?'#fbbf24':'#d97706'}" stroke-width="2.4" stroke-dasharray="4 4"/>`;
     }
 
     // needle
-    const ratio = clamp((value-min)/(max-min), 0, 1);
+    const ratio = Math.max(0, Math.min(1, (value-min)/(max-min)));
     const ang   = -90 + 180*ratio;
     const len   = R*0.76;
     const [nx,ny] = polar(ang,len);
@@ -337,7 +441,7 @@
       <circle cx="${cx}" cy="${cy}" r="6.5" fill="${isDark?'#cbd5e1':'#334155'}"/>
     `;
 
-    // labels small (Poor..Best) — compact
+    // labels small
     const lbls = ['Poor','Average','Fair','Good','Best'];
     const labR = R-30;
     let labTxt = '';
@@ -347,9 +451,11 @@
       labTxt += `<text x="${tx}" y="${ty}" font-size="10" text-anchor="middle" dominant-baseline="middle" fill="${txt}" style="font-weight:600">${lbls[i]}</text>`;
     }
 
-    // center values
-    const valTxt  = fmtNum(value, dtype) + (unit ? ' '+unit : '');
-    const thrTxt  = (thr!==null && !Number.isNaN(thr)) ? 'Threshold: '+fmtNum(thr, dtype)+(unit==='%' ? '%' : (unit? ' '+unit : '')) : '';
+    // center values (paksa % saat persen)
+    const valTxt  = isPct ? `${fmtNum(value, dtype)}%` : `${fmtNum(value, dtype)}${unit ? ' ' + unit : ''}`;
+    const thrTxt  = (thr!==null && !Number.isNaN(thr))
+      ? `Threshold: ${isPct ? fmtNum(thr, dtype) + '%' : fmtNum(thr, dtype) + (unit ? ' ' + unit : '')}`
+      : '';
     const center = `
       <text x="${cx}" y="${cy-10}" text-anchor="middle" font-size="16" fill="${txt}" style="font-weight:700">${valTxt}</text>
       ${ thrTxt ? `<text x="${cx}" y="${cy+8}" text-anchor="middle" font-size="11" fill="${isDark?'#a3a3a3':'#6b7280'}">${thrTxt}</text>` : '' }
