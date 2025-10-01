@@ -46,15 +46,13 @@
                   <span class="px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">No</span>
                 @endif
               </td>
-{{-- Threshold --}}
-<td class="px-3 py-2">
-  @if(empty($i->threshold))
-    <span class="text-gray-400">—</span>
-  @else
-    <span class="font-mono text-gray-700">{{ $i->threshold }}</span>
-  @endif
-</td>
 
+              {{-- Threshold --}}
+              <td class="px-3 py-2">
+                <span class="font-mono text-gray-700">
+                  {{ $i->threshold !== null && $i->threshold !== '' ? $i->threshold : 0 }}
+                </span>
+              </td>
 
               <td class="px-3 py-2 text-right space-x-2">
                 <a href="{{ route('admin.indicators.edit',$i) }}"
