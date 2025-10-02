@@ -1,10 +1,13 @@
+{{-- resources/views/admin/reports/aggregate.blade.php --}}
 @extends('layouts.app')
 @section('title','Rekap')
 
 @section('content')
 <h1 class="text-2xl font-bold mb-4 text-maroon-700">Rekap — {{ $period }}</h1>
 
-{{-- Filter (scope: day/week/month/year) --}}
+{{-- =========================
+     Filter (scope: day/week/month/year)
+========================= --}}
 <form method="get" class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-3"
   x-data="{ scope: '{{ $scope ?? 'month' }}' }">
   <input type="hidden" name="scope" :value="scope">
@@ -47,7 +50,7 @@
         <option value="{{ $m }}" @selected(($month ?? now()->month)===$m)>{{ $m }}</option>
       @endfor
     </select>
-    <input type="number" name="year" value={{ $year ?? now()->year }}
+    <input type="number" name="year" value="{{ $year ?? now()->year }}"
       class="border rounded-lg px-3 py-2 w-28 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
       :disabled="scope!=='month'">
   </div>
@@ -60,7 +63,9 @@
   <button class="px-4 py-2 bg-maroon-600 hover:bg-maroon-700 text-white rounded-lg md:col-span-1">Terapkan</button>
 </form>
 
-{{-- Stat Cards --}}
+{{-- =========================
+     Stat Cards
+========================= --}}
 <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
   <div class="p-4 border rounded-lg bg-white dark:bg-coal-900">
     <div class="text-xs">Total Groups</div>
@@ -82,7 +87,6 @@
     <div class="text-sm font-semibold">{{ $period }}</div>
   </div>
 
-  {{-- On-time Total --}}
   <div class="p-4 border rounded-lg bg-white dark:bg-coal-900">
     <div class="text-xs">On-time Total</div>
     <div class="text-xl font-bold text-emerald-600">
@@ -90,7 +94,6 @@
     </div>
   </div>
 
-  {{-- Late Total --}}
   <div class="p-4 border rounded-lg bg-white dark:bg-coal-900">
     <div class="text-xs">Late Total</div>
     <div class="text-xl font-bold text-rose-600">
@@ -99,81 +102,193 @@
   </div>
 </div>
 
-{{-- === METER: 1 indikator = 1 gauge semicircle kecil === --}}
+@php
+  // ===== Helpers
+  $toFloat = function($raw) {
+    if ($raw === null) return 0.0;
+    $s = trim((string)$raw);
+    if ($s === '' || $s === '-') return 0.0;
+    $s = preg_replace('/[^0-9,.\-]/', '', $s);
+    $s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$))/', '', $s);
+    if (str_contains($s, ',') && !str_contains($s, '.')) $s = str_replace(',', '.', $s);
+    if (substr_count($s, '.') > 1) { $p = strrpos($s,'.'); $s = str_replace('.', '', substr($s,0,$p)).substr($s,$p); }
+    return is_numeric($s) ? (float)$s : 0.0;
+  };
+
+  // indikator lagging
+  $isLaggingInd = function($ind) {
+    $t = strtolower((string)($ind->type ?? $ind->category ?? ''));
+    $slug = strtolower((string)($ind->slug ?? $ind->code ?? ''));
+    return (bool)($ind->is_lagging ?? false) || $t==='lagging' || str_contains($slug,'lag');
+  };
+
+  // group lagging → jika name/code mengandung "lag"
+  $isLaggingGroup = function($g) {
+    $s = strtolower((string)($g->name ?? '').' '.(string)($g->code ?? ''));
+    return str_contains($s, 'lag'); // match "lag", "lagging"
+  };
+
+  // base/Deskripsi → tidak tampil threshold
+  $isBase = function($ind) {
+    $n = strtolower((string)($ind->name ?? ''));
+    $t = strtolower((string)($ind->type ?? $ind->category ?? ''));
+    return str_contains($n,'deskripsi') || str_contains($n,'base') || in_array($t, ['base','description','deskripsi']);
+  };
+@endphp
+
+{{-- =========================
+     BAGIAN 1 — LAGGING GROUPS (KOTAK-KOTAK SAJA)
+========================= --}}
+@php $anyLagCards = false; @endphp
 @foreach($groups as $g)
-  <div class="mb-2 text-sm font-semibold text-maroon-700">{{ $g->name }}</div>
+  @php
+    $rowsAll = collect($data[$g->code] ?? []);
+    // Jika group memang lagging → ambil semua indikatornya ke kartu
+    // Jika bukan, ambil hanya indikator yang ditandai lagging
+    $rows = $isLaggingGroup($g) ? $rowsAll : $rowsAll->filter(fn($r) => $isLaggingInd($r['indicator']));
+  @endphp
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-    @foreach(($data[$g->code] ?? []) as $row)
-      @php
-        // === Helpers: parser angka & formatter tanpa ",00" jika bulat ===
-        $parseNum = function ($raw) {
-            if ($raw === null) return null;
-            $s = trim((string)$raw);
-            $s = preg_replace('/[^0-9,.\-]/', '', $s);
-            $s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$))/', '', $s);
-            if (str_contains($s, ',') && !str_contains($s, '.')) $s = str_replace(',', '.', $s);
-            if (substr_count($s, '.') > 1) {
-                $last = strrpos($s, '.');
-                $s = str_replace('.', '', substr($s, 0, $last)) . substr($s, $last);
-            }
-            return is_numeric($s) ? (float)$s : null;
-        };
-        $fmtSmart = function ($v, $preferInt = false) {
-            if ($preferInt || fmod($v, 1.0) == 0.0) return number_format($v, 0, ',', '.');
-            return number_format($v, 2, ',', '.');
-        };
+  @if($rows->isNotEmpty())
+    @if(!$anyLagCards)
+      <div class="mb-2 text-sm font-semibold text-maroon-700">Lagging Indicators</div>
+      @php $anyLagCards = true; @endphp
+    @endif
 
-        $ind    = $row['indicator'];
-        $label  = $ind->name;
+    <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 mb-6">
+      @foreach($rows as $r)
+        @php
+          $ind   = $r['indicator'];
+          $unit  = trim((string)($ind->unit ?? ''));
+          $isPct = ($unit==='%' || preg_match('/percent|percentage|persen/i',$unit));
 
-        // --- NORMALISASI UNIT ---
-        $unitRaw   = trim((string)($ind->unit ?? ''));
-        $isPercent = ($unitRaw === '%') || (strcasecmp($unitRaw,'percent')===0) || (strcasecmp($unitRaw,'percentage')===0) || (strcasecmp($unitRaw,'persen')===0);
-        $unitOut   = $isPercent ? '%' : $unitRaw;
+          $on    = $toFloat($r['on_time'] ?? 0);
+          $late  = $toFloat($r['late'] ?? 0);
+          $total = $toFloat($r['total'] ?? ($on + $late));
 
-        // tipe data (longgar)
-        $dtype  = in_array(strtolower($ind->data_type ?? 'int'), ['int','integer','count','qty']) ? 'int' : 'float';
-        $isInt  = ($dtype === 'int');
+          $thrRaw = $r['threshold'] ?? null;
+          $thr    = $thrRaw===null ? null : $toFloat($thrRaw);
+          $hasThr = is_numeric($thr) && $thr>0;
 
-        $onVal    = is_numeric($row['on_time'] ?? null) ? (float)$row['on_time'] : 0.0;
-        $lateVal  = is_numeric($row['late']    ?? null) ? (float)$row['late']    : 0.0;
-        $totalVal = is_numeric($row['total']   ?? null) ? (float)$row['total']   : ($onVal + $lateVal);
+          $meet   = $hasThr ? ($total >= $thr) : null;
+          $pct    = $hasThr ? max(0, min(100, $thr==0?100:($total/$thr)*100)) : null;
 
-        $thrRaw = $row['threshold'] ?? null;
-        $thrVal = $parseNum($thrRaw);
+          $fmt = fn($v)=> number_format($v, $isPct?2:0, ',', '.');
+        @endphp
 
-        $isOver = $thrVal !== null && $totalVal > $thrVal;
-
-        // label "Target:" pada kartu
-        $tBase  = $thrVal === null ? null : $fmtSmart(max(0,$thrVal), $isInt);
-        $tLabel = $tBase === null ? null : ($isPercent ? ($tBase.'%') : ($tBase.($unitOut? ' '.$unitOut : '')));
-      @endphp
-
-      <div class="p-4 border rounded-lg bg-white dark:bg-coal-900">
-        <div class="flex items-center justify-between mb-2">
-          <div class="font-medium">{{ $label }}</div>
-          <div class="text-xs text-gray-500">
-            @if($tLabel) Target: {{ $tLabel }} @endif
+        <div class="p-4 border rounded-lg bg-white dark:bg-coal-900">
+          <div class="text-xs">{{ $ind->name }}</div>
+          <div class="text-xl font-bold">
+            {{ $fmt($total) }}{{ $isPct ? '%' : ($unit ? ' '.$unit : '') }}
           </div>
-        </div>
 
-        {{-- meter kecil: dirender oleh JS berdasarkan data-* --}}
-        <div
-          class="mini-gauge w-full"
-          style="height: 120px"
-          data-label="{{ $label }}"
-          data-unit="{{ $unitOut }}" {{-- kirim % ke JS bila persen --}}
-          data-value="{{ $totalVal }}"
-          @if($thrVal !== null) data-threshold="{{ $thrVal }}" @endif
-          data-dtype="{{ $dtype }}"
-        ></div>
-      </div>
-    @endforeach
-  </div>
+          @if($hasThr)
+            <div class="mt-2 text-[11px] text-gray-600 dark:text-gray-300">
+              Threshold:
+              <span class="font-semibold">{{ $fmt($thr) }}{{ $isPct ? '%' : ($unit ? ' '.$unit : '') }}</span>
+              <span class="ml-2 px-1.5 py-0.5 rounded border
+                {{ $meet ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                         : 'bg-rose-100 text-rose-700 border-rose-200' }}">
+                {{ $meet ? '≥ threshold' : '< threshold' }}
+              </span>
+            </div>
+            <div class="mt-2 w-full h-2.5 rounded-full bg-gray-200 dark:bg-coal-800 overflow-hidden">
+              <div class="h-2.5 rounded-full {{ $meet ? 'bg-emerald-500' : 'bg-rose-500' }}"
+                   style="width: {{ number_format($pct,2,'.','') }}%"></div>
+            </div>
+          @endif
+        </div>
+      @endforeach
+    </div>
+  @endif
 @endforeach
 
-{{-- Table --}}
+{{-- =========================
+     BAGIAN 2 — OPERATIONAL / LEADING (GRAFIK GABUNGAN SAJA)
+     * SKIP semua group yang terdeteksi lagging by name/code
+========================= --}}
+@foreach($groups as $g)
+  @continue($isLaggingGroup($g)) {{-- <-- inilah kuncinya: JANGAN render chart untuk group Lagging --}}
+
+  @php
+    $rows = collect($data[$g->code] ?? []);
+    // hanya indikator non-lagging
+    $leadRows = $rows->reject(fn($r) => $isLaggingInd($r['indicator']));
+  @endphp
+
+  @if($leadRows->isNotEmpty())
+    <div class="mb-2 text-sm font-semibold text-maroon-700">
+      Operational / Leading Indicators — {{ $g->name }}
+    </div>
+    <div class="p-4 mb-8 border rounded-lg bg-white dark:bg-coal-900">
+      @php
+        $cid    = 'grp_'.$g->code;
+        $labels = $leadRows->map(fn($r) => $r['indicator']->name)->values();
+        $onList = $leadRows->map(fn($r) => $toFloat($r['on_time'] ?? 0))->values();
+        $ltList = $leadRows->map(fn($r) => $toFloat($r['late'] ?? 0))->values();
+
+        // Garis threshold hanya untuk indikator non-base
+        $thrList= $leadRows->map(function($r) use($toFloat) {
+          $ind = $r['indicator'];
+          $n   = strtolower((string)($ind->name ?? ''));
+          $t   = strtolower((string)($ind->type ?? $ind->category ?? ''));
+          $isBase = str_contains($n,'deskripsi') || str_contains($n,'base') || in_array($t,['base','description','deskripsi']);
+          if ($isBase) return null;
+          $v = $toFloat($r['threshold'] ?? null);
+          return $v>0 ? $v : null;
+        })->values();
+      @endphp
+      <canvas id="{{ $cid }}" height="320"></canvas>
+    </div>
+
+    @push('scripts')
+    @once
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @endonce
+    <script>
+    (() => {
+      const id = @json($cid);
+      const ctx = document.getElementById(id);
+      if (!ctx) return;
+
+      const labels = @json($labels);
+      const onData = @json($onList);
+      const ltData = @json($ltList);
+      const thrRaw = @json($thrList);
+
+      const maxThr = Math.max(...thrRaw.filter(v => v!==null), 0);
+      const thrData = thrRaw.map(v => (v===null ? null : v));
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            { label:'On-time', data:onData, backgroundColor:'#10b981', borderWidth:0, stack:'s' },
+            { label:'Late',    data:ltData, backgroundColor:'#ef4444', borderWidth:0, stack:'s' },
+            ...(maxThr>0 ? [{
+              type:'line', label:'Threshold (non-base)', data:thrData,
+              borderColor:'#f59e0b', borderWidth:2, pointRadius:2, spanGaps:true, yAxisID:'y'
+            }] : [])
+          ]
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false, animation:{duration:900, easing:'easeOutQuart'},
+          plugins:{ legend:{position:'bottom'},
+            tooltip:{ mode:'index', intersect:false,
+              callbacks:{ label:(ctx)=>`${ctx.dataset.label}: ${new Intl.NumberFormat('id-ID').format(ctx.parsed.y ?? ctx.parsed)}` }
+            }},
+          scales:{ x:{stacked:true, grid:{display:false}}, y:{stacked:true, beginAtZero:true, grid:{color:'rgba(148,163,184,.25)'}} }
+        }
+      });
+    })();
+    </script>
+    @endpush
+  @endif
+@endforeach
+
+{{-- =========================
+     BAGIAN 3 — TABEL DETAIL (threshold kosong untuk Base)
+========================= --}}
 @foreach($groups as $g)
   <div class="mb-6 border rounded-lg bg-white dark:bg-coal-900 overflow-hidden">
     <div class="px-3 py-2 font-semibold bg-maroon-700 text-white">{{ $g->name }}</div>
@@ -192,44 +307,33 @@
       <tbody class="divide-y">
         @foreach(($data[$g->code] ?? []) as $row)
           @php
-            // helpers
-            $parseNum = function ($raw) {
-                if ($raw === null) return null;
-                $s = trim((string)$raw);
-                $s = preg_replace('/[^0-9,.\-]/', '', $s);
-                $s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$))/', '', $s);
-                if (str_contains($s, ',') && !str_contains($s, '.')) $s = str_replace(',', '.', $s);
-                if (substr_count($s, '.') > 1) {
-                    $last = strrpos($s, '.');
-                    $s = str_replace('.', '', substr($s, 0, $last)) . substr($s, $last);
-                }
-                return is_numeric($s) ? (float)$s : null;
-            };
-            $fmtSmart = function ($v, $preferInt = false) {
-                if ($preferInt || fmod($v, 1.0) == 0.0) return number_format($v, 0, ',', '.');
-                return number_format($v, 2, ',', '.');
-            };
-
             $ind      = $row['indicator'];
-            $dtype    = in_array(strtolower($ind->data_type ?? 'int'), ['int','integer','count','qty']) ? 'int' : 'float';
-            $isInt    = ($dtype === 'int');
+            $unitRaw  = trim((string)($ind->unit ?? ''));
+            $isPercent= ($unitRaw === '%') || preg_match('/percent|percentage|persen/i',$unitRaw);
+            $unitOut  = $isPercent ? '%' : $unitRaw;
 
-            // normalisasi unit
-            $unitRaw   = trim((string)($ind->unit ?? ''));
-            $isPercent = ($unitRaw === '%') || (strcasecmp($unitRaw,'percent')===0) || (strcasecmp($unitRaw,'percentage')===0) || (strcasecmp($unitRaw,'persen')===0);
-            $unitOut   = $isPercent ? '%' : $unitRaw;
+            $onVal    = $toFloat($row['on_time'] ?? 0);
+            $lateVal  = $toFloat($row['late'] ?? 0);
+            $totalVal = $toFloat($row['total'] ?? ($onVal + $lateVal));
 
-            $onVal    = is_numeric($row['on_time'] ?? null) ? (float)$row['on_time'] : 0.0;
-            $lateVal  = is_numeric($row['late']    ?? null) ? (float)$row['late']    : 0.0;
-            $totalVal = is_numeric($row['total']   ?? null) ? (float)$row['total']   : ($onVal + $lateVal);
+            $n = strtolower((string)($ind->name ?? ''));
+            $t = strtolower((string)($ind->type ?? $ind->category ?? ''));
+            $isBaseLocal = str_contains($n,'deskripsi') || str_contains($n,'base') || in_array($t,['base','description','deskripsi']);
 
-            $thrVal   = $parseNum($row['threshold'] ?? null);
-            $isOver   = $thrVal !== null && $totalVal > $thrVal;
-
-            // tampilan angka
-            $onDisp    = $fmtSmart($onVal,   $isInt);
-            $lateDisp  = $fmtSmart($lateVal, $isInt);
-            $totalDisp = $fmtSmart($totalVal,$isInt);
+            if ($isBaseLocal) {
+              $thrDisp = '-';
+              $isOver  = false;
+            } else {
+              $thrRaw  = $row['threshold'] ?? null;
+              $thrNum  = $thrRaw===null ? null : $toFloat($thrRaw);
+              if ($thrRaw===null || trim((string)$thrRaw)==='') {
+                $thrDisp = '0' . ($isPercent?'%':($unitOut? ' '.$unitOut : ''));
+              } else {
+                $fmtNum = fmod($thrNum,1.0)==0.0 ? number_format($thrNum,0,',','.') : number_format($thrNum,2,',','.');
+                $thrDisp = $fmtNum . ($isPercent?'%':($unitOut? ' '.$unitOut : ''));
+              }
+              $isOver = ($thrNum !== null) && ($totalVal > $thrNum);
+            }
           @endphp
 
           <tr class="hover:bg-gray-50 dark:hover:bg-coal-800 transition">
@@ -241,62 +345,17 @@
               @endif
             </td>
             <td class="px-3 py-2 text-right font-semibold text-emerald-600 dark:text-emerald-400">
-              {{ $onDisp }}
+              {{ number_format($onVal,0,',','.') }}
             </td>
             <td class="px-3 py-2 text-right font-semibold text-rose-600 dark:text-rose-400">
-              {{ $lateDisp }}
+              {{ number_format($lateVal,0,',','.') }}
             </td>
-            <td class="px-3 py-2 text-right font-bold {{ $isOver ? 'text-rose-600 dark:text-rose-400' : '' }}">
-              {{ $totalDisp }}
+            <td class="px-3 py-2 text-right font-bold {{ (!$isBaseLocal && $isOver) ? 'text-rose-600 dark:text-rose-400' : '' }}">
+              {{ fmod($totalVal,1.0)==0.0 ? number_format($totalVal,0,',','.') : number_format($totalVal,2,',','.') }}
             </td>
-
-            {{-- Threshold (FULL CODE, inline, sesuai permintaan) --}}
-            <td class="px-3 py-2 align-top text-right text-sm text-gray-700 dark:text-gray-300">
-              @php
-                $thrRawCell = $row['threshold'] ?? '';
-                $unitRawCell = trim((string)($ind->unit ?? ''));
-                $thrHasPercentCell = is_string($thrRawCell) && str_contains($thrRawCell, '%');
-                $isPercentCell = (
-                  $unitRawCell === '%'
-                  || strcasecmp($unitRawCell,'percent')===0
-                  || strcasecmp($unitRawCell,'percentage')===0
-                  || strcasecmp($unitRawCell,'persen')===0
-                  || $thrHasPercentCell
-                );
-
-                // fallback universal: kosong / '-' → "0"
-                $valCell = trim((string)$thrRawCell);
-                if ($valCell === '' || $valCell === '-') {
-                  $valCell = '0';
-                }
-
-                // parse angka longgar
-                $sCell = preg_replace('/[^0-9,.\-]/', '', $valCell);
-                $sCell = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$))/', '', $sCell);
-                if (str_contains($sCell, ',') && !str_contains($sCell, '.')) {
-                  $sCell = str_replace(',', '.', $sCell);
-                }
-                if (substr_count($sCell, '.') > 1) {
-                  $lastDot = strrpos($sCell, '.');
-                  $sCell = str_replace('.', '', substr($sCell, 0, $lastDot)) . substr($sCell, $lastDot);
-                }
-
-                $numCell = is_numeric($sCell) ? (float)$sCell : null;
-
-                // formatter: tanpa ,00 jika bulat
-                $fmtCell = function (float $v) {
-                  return (fmod($v, 1.0) == 0.0)
-                    ? number_format($v, 0, ',', '.')
-                    : number_format($v, 2, ',', '.');
-                };
-
-                $displayCell = $numCell === null ? $valCell : $fmtCell(max(0, $numCell));
-                if ($isPercentCell) $displayCell .= '%';
-              @endphp
-              <div class="mt-0.5 font-mono">{{ $displayCell }}</div>
+            <td class="px-3 py-2 align-top text-right text-sm text-gray-700 dark:text-gray-300 font-mono">
+              {{ $thrDisp }}
             </td>
-
-            {{-- Unit: bila persen → tampil "-" agar tidak dobel --}}
             <td class="px-3 py-2">
               {{ $isPercent ? '-' : ($unitOut ?: '-') }}
             </td>
@@ -307,186 +366,3 @@
   </div>
 @endforeach
 @endsection
-
-@push('scripts')
-<script>
-(() => {
-  const isDark = document.documentElement.classList.contains('dark');
-  const txt    = isDark ? '#e5e7eb' : '#1f2937';
-
-  // ===== Utilities
-  const clamp = (x,a,b)=> Math.max(a, Math.min(b,x));
-  const fmtNum = (v, dtype='int') => {
-    // hilangkan .00 jika integer
-    if (Number.isFinite(v) && Math.abs(v - Math.round(v)) < 1e-9) {
-      return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(v);
-    }
-    if (dtype === 'int') {
-      return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(v);
-    }
-    return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
-  };
-
-  // rotate hue
-  const rotHue = (hex, deg) => {
-    const n = hex.replace('#','');
-    const r = parseInt(n.slice(0,2),16)/255;
-    const g = parseInt(n.slice(2,4),16)/255;
-    const b = parseInt(n.slice(4,6),16)/255;
-    const max=Math.max(r,g,b), min=Math.min(r,g,b);
-    let h,s,l=(max+min)/2;
-    if (max===min){ h=s=0; }
-    else {
-      const d=max-min;
-      s = l>0.5 ? d/(2-max-min) : d/(max+min);
-      switch(max){
-        case r: h=(g-b)/d + (g<b?6:0); break;
-        case g: h=(b-r)/d + 2; break;
-        case b: h=(r-g)/d + 4; break;
-      }
-      h/=6;
-    }
-    h = (h*360 + deg) % 360; if (h<0) h+=360;
-
-    const hue2rgb = (p,q,t)=>{ if(t<0)t+=1; if(t>1)t-=1;
-      if(t<1/6)return p+(q-p)*6*t;
-      if(t<1/2)return q;
-      if(t<2/3)return p+(q-p)*(2/3-t)*6;
-      return p; };
-    let r2,g2,b2;
-    if (s===0){ r2=g2=b2=l; }
-    else {
-      const q=l<0.5 ? l*(1+s) : l+s-l*s, p=2*l-q;
-      r2=hue2rgb(p,q,(h/360)+1/3);
-      g2=hue2rgb(p,q,(h/360));
-      b2=hue2rgb(p,q,(h/360)-1/3);
-    }
-    const toHex = x=> ('0'+Math.round(x*255).toString(16)).slice(-2);
-    return '#'+toHex(r2)+toHex(g2)+toHex(b2);
-  };
-
-  // Build one gauge SVG
-  function renderGauge(el, idx) {
-    const label = el.dataset.label || 'Indicator';
-
-    // pastikan % muncul saat persen
-    const unitRaw = (el.dataset.unit || '').trim();
-    const isPct   = unitRaw === '%' || /percent|percentage|persen/i.test(unitRaw);
-    const unit    = isPct ? '%' : unitRaw;
-
-    const value = Number(el.dataset.value || 0);
-    const thr   = (el.dataset.threshold !== undefined) ? Number(el.dataset.threshold) : null;
-    const dtype = el.dataset.dtype || 'int';
-
-    // size
-    const W = Math.max(el.clientWidth || 260, 220);
-    const H = Math.max(parseInt(getComputedStyle(el).height,10) || 120, 90);
-
-    // scale based on threshold
-    const min = 0;
-    const max = (thr && thr>0) ? thr*1.2 : Math.max(value, 1) * 1.1;
-
-    // zones
-    const fracs = [0.60, 0.80, 0.90, 1.00, 1.20];
-    const edges = [min, ...(thr? fracs.map(f => Math.max(min, thr*f)) : [0.6,0.8,0.9,1.0].map(f => f*max)), max];
-
-    // colors
-    const base = ['#ef4444','#f59e0b','#facc15','#84cc16','#22c55e'];
-    const deg  = (idx*25) % 360;
-    const zonesColor = base.map(c => rotHue(c, deg));
-
-    // geometry
-    const cx = W/2, cy = H-8;
-    const R  = Math.min(W, H*2)/2 - 10;
-
-    const toAng = v => -90 + 180 * ((v-min)/(max-min));
-    const polar = (ang, r)=> {
-      const rad = ang*Math.PI/180;
-      return [cx + r*Math.cos(rad), cy + r*Math.sin(rad)];
-    };
-    const arcPath = (a0,a1,r) => {
-      const [x0,y0] = polar(a0,r), [x1,y1] = polar(a1,r);
-      const large = (Math.abs(a1-a0)>180)?1:0;
-      return `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;
-    };
-
-    // segments
-    let segs = '';
-    for (let i=0;i<5;i++){
-      const a0 = toAng(edges[i]);
-      const a1 = toAng(edges[i+1]);
-      segs += `<path d="${arcPath(a0,a1,R)}" stroke="${zonesColor[i]}" stroke-width="14" fill="none" />`;
-    }
-
-    // threshold tick
-    let thrTick = '';
-    if (!Number.isNaN(thr) && thr!==null) {
-      const ath = toAng(Math.max(min, Math.min(max, thr)));
-      const rIn=R-16, rOut=R+2;
-      const [x0,y0]=polar(ath,rIn), [x1,y1]=polar(ath,rOut);
-      thrTick = `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="${isDark?'#fbbf24':'#d97706'}" stroke-width="2.4" stroke-dasharray="4 4"/>`;
-    }
-
-    // needle
-    const ratio = Math.max(0, Math.min(1, (value-min)/(max-min)));
-    const ang   = -90 + 180*ratio;
-    const len   = R*0.76;
-    const [nx,ny] = polar(ang,len);
-    const meet  = (thr!==null && !Number.isNaN(thr)) ? (value >= thr) : null;
-    const needleColor = (meet===false) ? (isDark?'#f87171':'#dc2626') : (isDark?'#cbd5e1':'#334155');
-
-    const needle = `
-      <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}"
-            stroke="${needleColor}" stroke-width="4" stroke-linecap="round"/>
-      <circle cx="${cx}" cy="${cy}" r="6.5" fill="${isDark?'#cbd5e1':'#334155'}"/>
-    `;
-
-    // labels small
-    const lbls = ['Poor','Average','Fair','Good','Best'];
-    const labR = R-30;
-    let labTxt = '';
-    for (let i=0;i<5;i++){
-      const aMid = (toAng(edges[i])+toAng(edges[i+1]))/2;
-      const [tx,ty]=polar(aMid, labR);
-      labTxt += `<text x="${tx}" y="${ty}" font-size="10" text-anchor="middle" dominant-baseline="middle" fill="${txt}" style="font-weight:600">${lbls[i]}</text>`;
-    }
-
-    // center values (paksa % saat persen)
-    const valTxt  = isPct ? `${fmtNum(value, dtype)}%` : `${fmtNum(value, dtype)}${unit ? ' ' + unit : ''}`;
-    const thrTxt  = (thr!==null && !Number.isNaN(thr))
-      ? `Threshold: ${isPct ? fmtNum(thr, dtype) + '%' : fmtNum(thr, dtype) + (unit ? ' ' + unit : '')}`
-      : '';
-    const center = `
-      <text x="${cx}" y="${cy-10}" text-anchor="middle" font-size="16" fill="${txt}" style="font-weight:700">${valTxt}</text>
-      ${ thrTxt ? `<text x="${cx}" y="${cy+8}" text-anchor="middle" font-size="11" fill="${isDark?'#a3a3a3':'#6b7280'}">${thrTxt}</text>` : '' }
-    `;
-
-    // svg
-    const svg = `
-      <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Gauge ${label}">
-        <defs>
-          <filter id="sg${idx}" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity=".18"/>
-          </filter>
-        </defs>
-        <g filter="url(#sg${idx})">${segs}</g>
-        ${thrTick}
-        ${needle}
-        ${labTxt}
-        ${center}
-      </svg>
-      ${ meet!==null ? `<div style="margin-top:2px;font-size:11px;display:inline-flex;align-items:center;gap:6px;color:${meet? (isDark?'#10b981':'#059669'):(isDark?'#fca5a5':'#dc2626')}">
-          <span style="display:inline-block;width:8px;height:8px;border-radius:9999px;background:${meet? (isDark?'#10b981':'#10b981'):(isDark?'#ef4444':'#ef4444')}"></span>
-          ${meet? '≥ threshold' : '&lt; threshold'}
-        </div>` : '' }
-    `;
-
-    el.innerHTML = svg;
-  }
-
-  // render all
-  const items = Array.from(document.querySelectorAll('.mini-gauge'));
-  items.forEach((el, i) => renderGauge(el, i));
-})();
-</script>
-@endpush
