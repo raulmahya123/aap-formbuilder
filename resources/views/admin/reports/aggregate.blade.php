@@ -171,44 +171,59 @@ $makeThresholdLabel = function($thrRaw, $thrFloat) {
           $on    = $toFloat($r['on_time'] ?? 0);
           $late  = $toFloat($r['late'] ?? 0);
           $total = $toFloat($r['total'] ?? ($on + $late));
+
           $thrRaw   = $r['threshold'] ?? null;
           $thrFloat = $thrRaw===null ? null : $toFloat($thrRaw);
           $hasThr   = is_numeric($thrFloat) && $thrFloat>0;
           $thrLabel = $makeThresholdLabel($thrRaw,$thrFloat);
-          $pct      = ($hasThr && $thrFloat>0) ? max(0,min(100,($total/$thrFloat)*100)) : null;
-          $meet     = $hasThr ? ($total >= $thrFloat) : null;
+
+          $pct   = ($hasThr && $thrFloat>0) ? max(0,min(100,($total/$thrFloat)*100)) : null;
+          $meet  = $hasThr ? ($total >= $thrFloat) : null;
         @endphp
 
-        {{-- Card A: nilai --}}
         <div class="stat-card">
-          <div class="text-xs">{{ $ind->name }}</div>
-          <div class="text-xl font-bold">{{ number_format($total, fmod($total,1.0)==0.0?0:2, ',', '.') }}{{ $unit ? ' '.$unit : '' }}</div>
-        </div>
-
-        {{-- Card B: % of threshold --}}
-        <div class="stat-card">
-          <div class="flex items-center justify-between">
-            <div class="text-xs">% of Threshold</div>
+          {{-- Header: Nama + badge meet target --}}
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="text-xs">{{ $ind->name }}</div>
+              <div class="text-xl font-bold">
+                {{ number_format($total, fmod($total,1.0)==0.0?0:2, ',', '.') }}{{ $unit ? ' '.$unit : '' }}
+              </div>
+            </div>
             @if($hasThr)
-              <span class="text-[10px] px-1.5 py-0.5 rounded border {{ $meet ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-rose-100 text-rose-700 border-rose-200' }}">
+              <span class="text-[10px] px-1.5 py-0.5 rounded border shrink-0
+                {{ $meet ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-rose-100 text-rose-700 border-rose-200' }}">
                 {{ $meet ? '≥' : '<' }} target
               </span>
             @endif
           </div>
-          <div class="text-xl font-bold">{{ $hasThr ? number_format($pct,0,',','.') . '%' : '—' }}</div>
-          @if(!($thrRaw===null || trim((string)$thrRaw)===''))
-            <div class="mt-2 text-[11px] text-gray-600">Target: <span class="font-semibold">{{ $thrLabel }}</span></div>
-          @endif
-          @if($hasThr)
-            <div class="mt-2 progress-bar">
-              <div class="progress-fill {{ $meet ? 'bg-emerald-500' : 'bg-rose-500' }}" style="width: {{ (float)$pct }}%"></div>
+
+          {{-- Body: % of Threshold + progress + target --}}
+          <div class="mt-2">
+            <div class="text-xs text-gray-600">% of Threshold</div>
+            <div class="text-lg font-semibold leading-tight">
+              {{ $hasThr ? number_format($pct,0,',','.') . '%' : '—' }}
             </div>
-          @endif
+
+            @if($hasThr)
+              <div class="mt-2 progress-bar">
+                <div class="progress-fill {{ $meet ? 'bg-emerald-500' : 'bg-rose-500' }}"
+                     style="width: {{ (float)$pct }}%"></div>
+              </div>
+            @endif
+
+            @if(!($thrRaw===null || trim((string)$thrRaw)===''))
+              <div class="mt-1 text-[11px] text-gray-600">
+                Target: <span class="font-semibold">{{ $thrLabel }}</span>
+              </div>
+            @endif
+          </div>
         </div>
       @endforeach
     </div>
   @endif
 @endforeach
+
 
 {{-- ========================= BAGIAN 2 — OPERATIONAL / LEADING ========================= --}}
 @foreach($groups as $g)
