@@ -53,16 +53,16 @@ class ReportController extends Controller
                 $ontime  = (float) ($row->ontime_total ?? 0);
                 $late    = (float) ($row->late_total ?? 0);
 
-                // langsung ikut dari model (float|null sesuai casts di model)
-                $thr = ($ind->threshold !== null && $ind->threshold !== '') ? (float) $ind->threshold : null;
-
+                // simpan threshold original (string/angka/null)
+                $thrRaw = $ind->threshold;
+                
                 $data[$g->code][] = [
                     'indicator' => $ind,
-                    'value'     => $total,   // alias
+                    'value'     => $total,
                     'total'     => $total,
                     'on_time'   => $ontime,
                     'late'      => $late,
-                    'threshold' => $thr,
+                    'threshold' => $thrRaw, // jgn dipaksa float
                 ];
             }
         }
@@ -81,7 +81,7 @@ class ReportController extends Controller
         $totalLate   = (float) ($sum->late_total ?? 0);
         $totalOntime = (float) ($sum->ontime_total ?? 0);
 
-        // ===== Charts per group (pakai total) + threshold sejajar (opsional di view) =====
+        // ===== Charts per group =====
         $charts = [];
         foreach ($groups as $g) {
             $rows   = $data[$g->code] ?? [];
@@ -96,7 +96,20 @@ class ReportController extends Controller
                 $labels[]  = $ind->name;
                 $values[]  = (float) $rrow['total'];
                 $units[]   = $ind->unit ?? '-';
-                $thrArr[]  = $rrow['threshold']; // float|null
+
+                // parse threshold ke float hanya kalau numeric murni
+                $thrRaw = $rrow['threshold'];
+                $thrNum = null;
+                if (is_numeric($thrRaw)) {
+                    $thrNum = (float) $thrRaw;
+                } elseif (is_string($thrRaw)) {
+                    $s = trim($thrRaw);
+                    $s = preg_replace('/[^0-9,.\-]/', '', $s);
+                    $s = str_replace([','], ['.'], $s);
+                    if (is_numeric($s)) $thrNum = (float) $s;
+                }
+                $thrArr[] = $thrNum;
+
                 if (($ind->data_type ?? 'int') !== 'int') $allInt = false;
             }
 
