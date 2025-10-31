@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Form;
 use App\Models\FormEntry;
+use App\Models\Department; // <= tambah
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -27,6 +28,7 @@ class FormController extends Controller
 
     public function index(Request $r)
     {
+        // ===== base query list form
         $q = Form::query()
             ->with(['department','site'])
             ->when($r->filled('q'), function ($qb) use ($r) {
@@ -36,17 +38,22 @@ class FormController extends Controller
                        ->orWhere('description','like', $term);
                 });
             })
-            ->where('is_active', true)
-            ->latest();
+            ->where('is_active', true);
 
-        // === filter doc_type (opsional)
+        // filter department (opsional)
+        if ($r->filled('department_id')) {
+            $q->where('department_id', (int) $r->department_id);
+        }
+
+        // filter doc_type (opsional)
         $currentDocType = $this->normalizeDocType($r);
         if ($currentDocType) {
             $q->where('doc_type', $currentDocType);
         }
 
-        // === counts per doc_type (mengikuti filter pencarian "q" & is_active)
+        // ===== counts per doc_type (mengikuti filter q + department_id + is_active)
         $baseForCount = Form::query()
+            ->where('is_active', true)
             ->when($r->filled('q'), function ($qb) use ($r) {
                 $term = '%'.$r->q.'%';
                 $qb->where(function ($qq) use ($term) {
@@ -54,7 +61,7 @@ class FormController extends Controller
                        ->orWhere('description','like', $term);
                 });
             })
-            ->where('is_active', true);
+            ->when($r->filled('department_id'), fn($qb) => $qb->where('department_id', (int) $r->department_id));
 
         $counts = [
             'SOP'  => (clone $baseForCount)->where('doc_type','SOP')->count(),
@@ -63,9 +70,19 @@ class FormController extends Controller
             'ALL'  => (clone $baseForCount)->count(),
         ];
 
-        $forms = $q->paginate(12)->appends($r->query());
+        // ===== pagination
+        $perPage = in_array((int)$r->per_page, [10,12,20,50,100], true) ? (int)$r->per_page : 12;
+        $forms = $q->latest()->paginate($perPage)->appends($r->query());
 
-        return view('front.forms.index', compact('forms','counts','currentDocType'));
+        // ===== kirim semua departemen untuk grid tiles (color opsional)
+        $departments = Department::orderBy('name')->get(['id','name','color']);
+
+        return view('front.forms.index', [
+            'forms'          => $forms,
+            'counts'         => $counts,
+            'currentDocType' => $currentDocType,
+            'departments'    => $departments,
+        ]);
     }
 
     public function show(Form $form)

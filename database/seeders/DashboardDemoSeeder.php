@@ -46,61 +46,112 @@ class DashboardDemoSeeder extends Seeder
                 );
             }
 
-            // ====== Departments ======
-            $deptNames = ['Operations','Finance','HR','IT','Legal'];
-            $deptIds = [];
-            foreach ($deptNames as $i => $nm) {
-                $id = $i + 1;
+            // ====== 10 Departments (dengan optional color) ======
+            $deptDefs = [
+                ['name'=>'Operasional',           'slug'=>'operasional', 'color'=>'#e61caf'],
+                ['name'=>'HRGA',                  'slug'=>'hrga',        'color'=>'#ff3b30'],
+                ['name'=>'Finance',               'slug'=>'finance',     'color'=>'#34c759'],
+                ['name'=>'IT',                    'slug'=>'it',          'color'=>'#0ea5e9'],
+                ['name'=>'HSE',                   'slug'=>'hse',         'color'=>'#f59e0b'],
+                ['name'=>'SCM/Procurement',       'slug'=>'scm',         'color'=>'#8b5cf6'],
+                ['name'=>'Engineering',           'slug'=>'engineering', 'color'=>'#ef4444'],
+                ['name'=>'Marketing',             'slug'=>'marketing',   'color'=>'#14b8a6'],
+                ['name'=>'Sales',                 'slug'=>'sales',       'color'=>'#f97316'],
+                ['name'=>'Admin',                 'slug'=>'admin',       'color'=>'#64748b'],
+            ];
+            $hasColor = Schema::hasColumn('departments','color');
+
+            $deptIds   = [];
+            $deptNames = [];
+            foreach ($deptDefs as $i => $def) {
+                $id  = $i + 1; // keep deterministic IDs
                 $row = [
                     'id'         => $id,
-                    'name'       => $nm,
+                    'name'       => $def['name'],
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
-                if (Schema::hasColumn('departments','slug')) {
-                    $row['slug'] = Str::slug($nm).'-'.$id;
-                }
-                $this->fillAudit('departments', $row, $defaultUserId); // <<< NEW
+                if (Schema::hasColumn('departments','slug'))  $row['slug']  = $def['slug'].'-'.$id;
+                if ($hasColor)                                 $row['color'] = $def['color'];
+                $this->fillAudit('departments', $row, $defaultUserId);
+
                 DB::table('departments')->insert($row);
-                $deptIds[] = $id;
+
+                $deptIds[]   = $id;
+                $deptNames[] = $def['name'];
             }
 
-            // ====== Forms (tiap dept 2 form) ======
-            $formId = 1;
-            $forms = [];
-            foreach ($deptIds as $deptId) {
-                for ($k=1;$k<=2;$k++) {
-                    $title = match ($deptId) {
-                        1 => ($k===1 ? 'Daily Ops Report' : 'Equipment Checklist'),
-                        2 => ($k===1 ? 'Expense Claim' : 'Budget Request'),
-                        3 => ($k===1 ? 'Leave Request' : 'Recruitment Request'),
-                        4 => ($k===1 ? 'IT Support Ticket' : 'Access Request'),
-                        5 => ($k===1 ? 'Contract Review' : 'Compliance Report'),
-                        default => "Form $deptId-$k",
-                    };
+            // ====== Forms: tiap departemen bikin MIN 3 (SOP, IK, FORM) ======
+            // Kolom yang bisa ada: slug, doc_type, type(builder/pdf), schema, pdf_path, is_active, status
+            $forms   = [];
+            $formSeq = 1;
+
+            $docTypes = ['SOP','IK','FORM'];
+            $titleBank = [
+                'SOP'  => ['Prosedur Operasional', 'Panduan Proses', 'Instruksi Kinerja'],
+                'IK'   => ['Instruksi Kerja Mesin', 'Instruksi Kerja Shift', 'Instruksi Kalibrasi'],
+                'FORM' => ['Form Pengajuan', 'Form Pemeriksaan', 'Form Checklist'],
+            ];
+
+            foreach ($deptIds as $idx => $deptId) {
+                $deptName = $deptNames[$idx];
+
+                foreach ($docTypes as $dt) {
+                    // pilih judul base dari bank + departemen
+                    $base = $titleBank[$dt][array_rand($titleBank[$dt])];
+                    $title = "{$base} — {$deptName}";
+
+                    // type: aman default 'builder' (biar tak wajib pdf_path)
+                    $type  = 'builder';
+
                     $row = [
-                        'id'            => $formId,
+                        'id'            => $formSeq,
                         'department_id' => $deptId,
                         'title'         => $title,
-                        'is_active'     => ($k % 2 === 1) ? 1 : 0,
+                        'doc_type'      => $dt,           // <— penting untuk filter
+                        'type'          => $type,         // builder/pdf
+                        'schema'        => $type === 'builder' ? json_encode(['fields'=>[]]) : null,
+                        'pdf_path'      => null,          // kalau type=pdf & butuh file, isi path sesuai storage kamu
+                        'is_active'     => 1,
                         'created_at'    => $now,
                         'updated_at'    => $now,
                     ];
-                    if (Schema::hasColumn('forms','slug')) {
-                        $row['slug'] = Str::slug($title).'-'.$formId;
-                    }
-                    // jika ada kolom status NOT NULL tanpa default, boleh set di sini:
-                    if (Schema::hasColumn('forms','status') && !isset($row['status'])) {
-                        $row['status'] = 'published'; // sesuaikan default projectmu
-                    }
-                    $this->fillAudit('forms', $row, $defaultUserId); // <<< NEW
+
+                    if (Schema::hasColumn('forms','slug'))    $row['slug'] = Str::slug($title).'-'.$formSeq;
+                    if (Schema::hasColumn('forms','status'))  $row['status'] = 'published';
+
+                    $this->fillAudit('forms', $row, $defaultUserId);
+
                     $forms[] = $row;
-                    $formId++;
+                    $formSeq++;
                 }
+
+                // (Opsional) tambah 1 form ekstra random supaya variasi jumlah
+                $extraDt = $docTypes[array_rand($docTypes)];
+                $extraTitle = "Dokumen Tambahan — {$deptName}";
+                $rowExtra = [
+                    'id'            => $formSeq,
+                    'department_id' => $deptId,
+                    'title'         => $extraTitle,
+                    'doc_type'      => $extraDt,
+                    'type'          => 'builder',
+                    'schema'        => json_encode(['fields'=>[]]),
+                    'pdf_path'      => null,
+                    'is_active'     => (random_int(0,1) ? 1 : 0),
+                    'created_at'    => $now,
+                    'updated_at'    => $now,
+                ];
+                if (Schema::hasColumn('forms','slug'))    $rowExtra['slug'] = Str::slug($extraTitle).'-'.$formSeq;
+                if (Schema::hasColumn('forms','status'))  $rowExtra['status'] = 'published';
+                $this->fillAudit('forms', $rowExtra, $defaultUserId);
+
+                $forms[] = $rowExtra;
+                $formSeq++;
             }
+
             DB::table('forms')->insert($forms);
 
-            // ====== Document Templates ======
+            // ====== Document Templates (6 pcs) ======
             $templates = [];
             for ($i=1; $i<=6; $i++) {
                 $name = 'Template #'.$i;
@@ -113,22 +164,22 @@ class DashboardDemoSeeder extends Seeder
                 if (Schema::hasColumn('document_templates','slug')) {
                     $row['slug'] = Str::slug($name).'-'.$i;
                 }
-                $this->fillAudit('document_templates', $row, $defaultUserId); // <<< NEW
+                $this->fillAudit('document_templates', $row, $defaultUserId);
                 $templates[] = $row;
             }
             DB::table('document_templates')->insert($templates);
 
             // ====== Documents & ACLs (30 hari) ======
             $documents = [];
-            $docAcls = [];
-            $docId = 1;
+            $docAcls   = [];
+            $docId     = 1;
             for ($days=29; $days>=0; $days--) {
                 $d = Carbon::today()->subDays($days);
-                foreach ($deptIds as $deptId) {
+                foreach ($deptIds as $k => $deptId) {
                     $count = random_int(0, 5);
                     for ($i=0; $i<$count; $i++) {
                         $tplId = random_int(1, count($templates));
-                        $title = "Doc $tplId / ".$d->toDateString()." / ".$deptNames[$deptId-1];
+                        $title = "Doc {$tplId} / ".$d->toDateString()." / ".$deptNames[$k];
                         $createdAt = $d->copy()->addMinutes(random_int(0, 1439));
 
                         $row = [
@@ -140,13 +191,13 @@ class DashboardDemoSeeder extends Seeder
                             'updated_at'           => $createdAt,
                         ];
                         if (Schema::hasColumn('documents','slug')) {
-                            $row['slug'] = Str::slug("doc-$tplId-".$d->toDateString()."-".$deptId).'-'.$docId;
+                            $row['slug'] = Str::slug("doc-{$tplId}-".$d->toDateString()."-".$deptId).'-'.$docId;
                         }
-                        $this->fillAudit('documents', $row, $defaultUserId); // <<< NEW
+                        $this->fillAudit('documents', $row, $defaultUserId);
                         $documents[] = $row;
 
                         $userId = random_int(1, 3);
-                        $docAcls[] = [
+                        $acl = [
                             'document_id'  => $docId,
                             'user_id'      => $userId,
                             'department_id'=> $deptId,
@@ -154,31 +205,27 @@ class DashboardDemoSeeder extends Seeder
                             'created_at'   => $createdAt,
                             'updated_at'   => $createdAt,
                         ];
-                        // kalau document_acls juga punya created_by/updated_by:
-                        if (Schema::hasColumn('document_acls','created_by')) {
-                            $docAcls[count($docAcls)-1]['created_by'] = $defaultUserId;
-                        }
-                        if (Schema::hasColumn('document_acls','updated_by')) {
-                            $docAcls[count($docAcls)-1]['updated_by'] = $defaultUserId;
-                        }
+                        if (Schema::hasColumn('document_acls','created_by')) $acl['created_by'] = $defaultUserId;
+                        if (Schema::hasColumn('document_acls','updated_by')) $acl['updated_by'] = $defaultUserId;
+                        $docAcls[] = $acl;
 
                         $docId++;
                     }
                 }
             }
             if ($documents) DB::table('documents')->insert($documents);
-            if ($docAcls) DB::table('document_acls')->insert($docAcls);
+            if ($docAcls)   DB::table('document_acls')->insert($docAcls);
 
             // ====== Form Entries (30 hari) ======
             $formEntries = [];
-            $entryId = 1;
-            $allFormIds = array_column($forms, 'id');
+            $entryId     = 1;
+            $allFormIds  = array_column($forms, 'id');
             for ($days=29; $days>=0; $days--) {
                 $d = Carbon::today()->subDays($days);
                 foreach ($allFormIds as $fid) {
-                    $count = random_int(0, 25);
+                    $count = random_int(0, 12); // sedikit lebih ringan
                     for ($i=0; $i<$count; $i++) {
-                        $userId = random_int(1, 3);
+                        $userId  = random_int(1, 3);
                         $created = $d->copy()->addMinutes(random_int(0, 1439));
                         $row = [
                             'id'         => $entryId,
@@ -187,7 +234,6 @@ class DashboardDemoSeeder extends Seeder
                             'created_at' => $created,
                             'updated_at' => $created,
                         ];
-                        // jika ada kolom created_by/updated_by di form_entries:
                         if (Schema::hasColumn('form_entries','created_by')) $row['created_by'] = $userId;
                         if (Schema::hasColumn('form_entries','updated_by')) $row['updated_by'] = $userId;
 
