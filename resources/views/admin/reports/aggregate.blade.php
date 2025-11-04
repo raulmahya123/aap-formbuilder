@@ -12,20 +12,17 @@
 
   /* ===== Tinggi chart ===== */
   .chart-card-bar{height:360px}
-  .chart-card-mini{height:170px} /* lega utk label, ticks, threshold text */
+  .chart-card-mini{height:170px}
   .chart-card-donut{height:auto}
   .chart-card-bar canvas,
   .chart-card-mini canvas{width:100%!important;height:100%!important;display:block}
 
-  /* khusus DONUT: tinggi canvas dipisah dari header card */
   .chart-card-donut .chart-canvas{height:200px}
   .chart-card-donut .chart-canvas canvas{width:100%!important;height:100%!important;display:block}
 
-  /* Mini & Donut: jangan potong ticks/tooltips/arc/threshold text */
   .chart-wrap.chart-card-mini,
-  .chart-wrap.chart-card-donut{overflow:visible}
+  .chart-wrap.chart-card_donut{overflow:visible}
 
-  /* Header mini/donut rapi dan tak menutup canvas */
   .chart-card-mini .chart-head,
   .chart-card-donut .chart-head{display:flex;align-items:center;gap:.375rem;margin-bottom:.25rem;line-height:1.1}
   .chart-card-mini .chart-title,
@@ -34,12 +31,10 @@
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
   }
 
-  /* Dark mode (optional) */
   .dark .stat-card,.dark .chart-wrap{background:#0f141a;border-color:#263241}
 </style>
 @endpush
 
-{{-- MUAT Chart.js --}}
 @push('scripts')
 @once
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -47,12 +42,37 @@
 @endpush
 
 @section('content')
-<h1 class="text-2xl font-bold mb-4 text-maroon-700">Rekap — {{ $period }}</h1>
+@php
+  use Illuminate\Support\Carbon;
+
+  // ====== SELALU gunakan Asia/Jakarta untuk semua perhitungan tanggal di view ======
+  $tz = 'Asia/Jakarta';
+
+  // Normalisasi nilai default agar tidak pernah ikut UTC
+  $scopeNow = $scope ?? 'month';
+  $today    = now($tz);
+  $dateObj  = isset($date) && $date ? Carbon::parse($date, $tz) : $today->copy();
+  $yearVal  = isset($year) && $year ? (int)$year : (int)$today->year;
+  $weekVal  = isset($week) && $week ? (int)$week : (int)$today->isoWeek;
+  $monthVal = isset($month) && $month ? (int)$month : (int)$today->month;
+
+  // pastikan $period sudah siap dari controller; kalau tidak, fallback yang aman
+  $periodSafe = $period ?? match($scopeNow){
+      'day'   => $dateObj->toDateString(),
+      'week'  => "Minggu {$weekVal}, {$yearVal}",
+      'year'  => (string)$yearVal,
+      default => sprintf('%02d/%d',$monthVal,$yearVal)
+  };
+@endphp
+
+<h1 class="text-2xl font-bold mb-4 text-maroon-700">Rekap — {{ $periodSafe }}</h1>
 
 {{-- ========================= Filter ========================= --}}
 <form method="get" class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-3"
-  x-data="{ scope: '{{ $scope ?? 'month' }}' }">
+  x-data="{ scope: '{{ $scopeNow }}' }">
   <input type="hidden" name="scope" :value="scope">
+  {{-- kirimkan timezone agar controller bisa ikutkan --}}
+  <input type="hidden" name="tz" value="{{ $tz }}">
 
   <select name="site_id" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
     <option value="">Semua Site</option>
@@ -69,16 +89,16 @@
   </select>
 
   {{-- DAY --}}
-  <input type="date" name="date" value="{{ $date ?? now()->toDateString() }}"
+  <input type="date" name="date" value="{{ $dateObj->setTimezone($tz)->toDateString() }}"
          class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
          x-show="scope==='day'" :disabled="scope!=='day'">
 
   {{-- WEEK --}}
   <div class="flex gap-2" x-show="scope==='week'">
-    <input type="number" name="week" value="{{ $week ?? now()->isoWeek }}"
+    <input type="number" name="week" value="{{ $weekVal }}"
            class="border rounded-lg px-3 py-2 w-24 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
            :disabled="scope!=='week'">
-    <input type="number" name="year" value="{{ $year ?? now()->year }}"
+    <input type="number" name="year" value="{{ $yearVal }}"
            class="border rounded-lg px-3 py-2 w-28 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
            :disabled="scope!=='week'">
   </div>
@@ -88,16 +108,16 @@
     <select name="month" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
             :disabled="scope!=='month'">
       @for($m=1;$m<=12;$m++)
-        <option value="{{ $m }}" @selected(($month ?? now()->month)===$m)>{{ $m }}</option>
+        <option value="{{ $m }}" @selected($monthVal===$m)>{{ $m }}</option>
       @endfor
     </select>
-    <input type="number" name="year" value="{{ $year ?? now()->year }}"
+    <input type="number" name="year" value="{{ $yearVal }}"
            class="border rounded-lg px-3 py-2 w-28 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
            :disabled="scope!=='month'">
   </div>
 
   {{-- YEAR --}}
-  <input type="number" name="year" value="{{ $year ?? now()->year }}"
+  <input type="number" name="year" value="{{ $yearVal }}"
          class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
          x-show="scope==='year'" :disabled="scope!=='year'">
 
@@ -119,8 +139,8 @@
 <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
   <div class="stat-card"><div class="text-xs">Total Groups</div><div class="text-xl font-bold">{{ $groups->count() }}</div></div>
   <div class="stat-card"><div class="text-xs">Indicators</div><div class="text-xl font-bold">{{ collect($groups)->flatMap(fn($g)=>$g->indicators)->count() }}</div></div>
-  <div class="stat-card"><div class="text-xs">Scope</div><div class="text-xl font-bold uppercase">{{ $scope }}</div></div>
-  <div class="stat-card"><div class="text-xs">Periode</div><div class="text-sm font-semibold">{{ $period }}</div></div>
+  <div class="stat-card"><div class="text-xs">Scope</div><div class="text-xl font-bold uppercase">{{ $scopeNow }}</div></div>
+  <div class="stat-card"><div class="text-xs">Periode</div><div class="text-sm font-semibold">{{ $periodSafe }}</div></div>
   <div class="stat-card"><div class="text-xs">Grand Total</div><div class="text-xl font-bold">{{ number_format($grandTotal, 0, ',', '.') }}</div></div>
   <div class="stat-card"><div class="text-xs">Site</div><div class="text-sm font-semibold">{{ optional($sites->firstWhere('id',$siteId))->code ?? 'Semua' }}</div></div>
 </div>
@@ -156,16 +176,16 @@ $makeThresholdLabel = function($thrRaw, $thrFloat) {
 
 /** ====== Label default per scope ====== */
 $makeScopeLabels = function($scope, $month = null) {
-  $m = (int)($month ?: now()->month);
+  $m = (int)($month ?: now($tz)->month);
   switch ($scope) {
-    case 'year':  return range(1,12);     // Jan..Des
-    case 'month': return [$m];            // hanya bulan terpilih
-    case 'week':  return [1,2,3,4,5];     // Sen..Jum
+    case 'year':  return range(1,12);
+    case 'month': return [$m];
+    case 'week':  return [1,2,3,4,5];
     default:      return ['Total'];
   }
 };
-$buckets = $buckets ?? null; // optional dari controller
-$series  = $series  ?? null; // optional dari controller
+$buckets = $buckets ?? null;
+$series  = $series  ?? null;
 @endphp
 
 {{-- ========================= BAGIAN 1 — LAGGING (mini bar) ========================= --}}
@@ -191,24 +211,23 @@ $series  = $series  ?? null; // optional dari controller
           $total   = $toFloat($r['total'] ?? ($onVal + $lateVal));
           $cid     = 'lagmini_'.$g->code.'_'.$ind->code;
 
-          $currScope = $scope ?? 'month';
-          $lbls = $buckets ?: $makeScopeLabels($currScope, $month ?? now()->month);
+          $currScope = $scopeNow;
+          $lbls = $buckets ?: $makeScopeLabels($currScope, $monthVal);
           $lenLabels = count($lbls);
 
-          // ===== Seri data (selalu sepanjang scope) =====
           $vals = $series[$g->code][$ind->code] ?? null;
           if (!is_array($vals) || empty($vals)) {
             if ($currScope === 'year') {
-              $vals   = array_fill(0, 12, 0);         // tampilkan semua bulan
-              $anchor = max(0, min(11, (int)($month ?? now()->month) - 1));
-              $vals[$anchor] = $total;               // bulan aktif berisi total
+              $vals   = array_fill(0, 12, 0);
+              $anchor = max(0, min(11, (int)$monthVal - 1));
+              $vals[$anchor] = $total;
               $lenLabels = 12; $lbls = range(1,12);
             } elseif ($currScope === 'week') {
               $vals = array_fill(0, 5, 0); $vals[4] = $total;
               $lenLabels = 5; $lbls = [1,2,3,4,5];
             } elseif ($currScope === 'month') {
               $vals = [ $total ];
-              $lenLabels = 1; $lbls = [$month ?? now()->month];
+              $lenLabels = 1; $lbls = [$monthVal];
             } else {
               $vals = [ $total ];
               $lenLabels = 1;
@@ -219,16 +238,13 @@ $series  = $series  ?? null; // optional dari controller
             if (count($vals) > $lenLabels) $vals = array_slice($vals, 0, $lenLabels);
           }
 
-          // ===== Threshold =====
           $thrRaw = $r['threshold'] ?? null;
           $thrNum = ($thrRaw===null) ? null : $toFloat($thrRaw);
           $thrSeries = is_numeric($thrNum) ? array_fill(0, $lenLabels, (float)$thrNum) : null;
 
-          // Headroom sumbu Y
           $maxData  = max(array_map(fn($v)=> (is_numeric($v)? (float)$v : 0), $vals ?: [0]));
           $chartMax = max($maxData, (float)($thrNum ?? 0), 1) * 1.15;
 
-          // Warna bar
           $palette = ['#0ea5e9','#10b981','#8b5cf6','#f59e0b','#14b8a6','#22c55e'];
           $barColors = [];
           foreach ($vals as $i => $v) {
@@ -247,7 +263,7 @@ $series  = $series  ?? null; // optional dari controller
           (function(){
             var el=document.getElementById(@js($cid)); if(!el) return;
 
-            var scopeNow = @json($scope ?? 'month');
+            var scopeNow = @json($scopeNow);
             var isYear   = scopeNow === 'year';
             var isWeek   = scopeNow === 'week';
             var isMonth  = scopeNow === 'month';
@@ -256,7 +272,6 @@ $series  = $series  ?? null; // optional dari controller
             var monthShort = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
             var weekdayShort = ['Sen','Sel','Rab','Kam','Jum'];
 
-            // render semua bulan/hari
             var labels = rawLabels.map(function(v,i){
               if (isYear)  return monthShort[i] || String(v);
               if (isWeek)  return weekdayShort[i] || String(v);
@@ -273,7 +288,6 @@ $series  = $series  ?? null; // optional dari controller
             var thrValue  = @json($thrNum);
             var suggested = @json($chartMax);
 
-            // Teks threshold di kiri
             var thresholdLabel = {
               id: 'thresholdLabel',
               afterDatasetsDraw(chart){
@@ -292,7 +306,6 @@ $series  = $series  ?? null; // optional dari controller
               }
             };
 
-            // Label angka di atas bar — hide kalau 0
             var valueLabels = {
               id: 'valueLabels',
               afterDatasetsDraw(chart){
@@ -305,7 +318,7 @@ $series  = $series  ?? null; // optional dari controller
                 var meta = chart.getDatasetMeta(0);
                 meta.data.forEach(function(elm, i){
                   var v = chart.data.datasets[0].data[i];
-                  if (v==null || Number(v)===0) return; // <— JANGAN tulis nol
+                  if (v==null || Number(v)===0) return;
                   var txt = new Intl.NumberFormat('id-ID').format(v);
                   var x = elm.x, y = elm.y - 4;
                   if (y < top + 8) y = top + 8;
@@ -367,7 +380,7 @@ $series  = $series  ?? null; // optional dari controller
                     grid:{display:false},
                     ticks:{
                       display:true,
-                      autoSkip: !(isYear || isWeek || isMonth), /* year/week/month -> tampil semua */
+                      autoSkip: !(isYear || isWeek || isMonth),
                       maxRotation:0, minRotation:0, font:{size:10}, padding:2,
                       maxTicksLimit: (isYear?12:(isWeek?5:1))
                     }
@@ -384,7 +397,6 @@ $series  = $series  ?? null; // optional dari controller
     </div>
   @endif
 @endforeach
-
 
 {{-- ========================= BAGIAN 2 — OPERATIONAL / LEADING ========================= --}}
 @foreach($groups as $g)
@@ -419,7 +431,7 @@ $series  = $series  ?? null; // optional dari controller
             $remain   = $hasThr ? max($thrNum - $total, 0) : 0;
             $pct      = $hasThr ? max(0, min(100, ($total/$thrNum)*100)) : null;
 
-            $thrDisp  = $hasThr ? $makeThresholdLabel($thrRaw,$thrNum) : '-';
+            $thrDisp  = $hasThr ? (fmod((float)$thrNum,1.0)==0.0 ? number_format((float)$thrNum,0,',','.') : number_format((float)$thrNum,2,',','.')) : '-';
 
             $did = 'donut_base_'.$g->code.'_'.$ind->code;
           @endphp
@@ -487,7 +499,6 @@ $series  = $series  ?? null; // optional dari controller
         @endforeach
       </div>
     @else
-      {{-- Bar besar: Total per indikator + garis threshold --}}
       @php
         $cid    = 'grp_'.$g->code;
         $labels = $leadRows->map(fn($r)=>$r['indicator']->name)->values();
@@ -540,7 +551,7 @@ $series  = $series  ?? null; // optional dari controller
             var meta = chart.getDatasetMeta(0);
             meta.data.forEach(function(elm, i){
               var v = chart.data.datasets[0].data[i];
-              if (v==null || Number(v)===0) return; // hide nol
+              if (v==null || Number(v)===0) return;
               var txt = new Intl.NumberFormat('id-ID').format(v);
               var x = elm.x, y = elm.y - 6;
               if (y < top + 10) y = top + 10;
@@ -601,7 +612,6 @@ $series  = $series  ?? null; // optional dari controller
   @endif
 @endforeach
 
-
 {{-- ========================= BAGIAN 3 — DETAIL TABEL (Total saja) ========================= --}}
 @foreach($groups as $g)
   <div class="mb-6 chart-wrap overflow-hidden">
@@ -628,7 +638,9 @@ $series  = $series  ?? null; // optional dari controller
             else{
               $thrRaw=$row['threshold'] ?? null;
               $thrNum=$thrRaw===null ? null : $toFloat($thrRaw);
-              $thrDisp=$makeThresholdLabel($thrRaw,$thrNum);
+              $thrDisp=($thrRaw===null || trim((string)$thrRaw)==='')
+                ? '0'
+                : (fmod((float)$thrNum,1.0)==0.0 ? number_format((float)$thrNum,0,',','.') : number_format((float)$thrNum,2,',','.'));
               $isOver=($thrNum !== null) && ($totalVal > $thrNum);
             }
           @endphp
