@@ -15,12 +15,14 @@
       $activeDoc     = strtoupper(request('doc_type', ''));
       $activeDept    = request('department_id') ? (string) request('department_id') : null;
       $activeCompany = request('company_id') ? (string) request('company_id') : null;
+      $activeSite    = request('site_id') ? (string) request('site_id') : null;
 
-      // Builder untuk link filter atas (global) — pertahankan dept/company jika sudah dipilih
-      $makeTop = function (?string $doc) use ($pp, $activeDept, $activeCompany) {
+      // Builder untuk link filter atas (global) — pertahankan dept/company/site jika sudah dipilih
+      $makeTop = function (?string $doc) use ($pp, $activeDept, $activeCompany, $activeSite) {
         return route('admin.forms.index', array_filter([
           'department_id' => $activeDept ?: null,
           'company_id'    => $activeCompany ?: null,
+          'site_id'       => $activeSite ?: null,
           'doc_type'      => $doc ?: null,
           'per_page'      => $pp,
         ]));
@@ -32,23 +34,19 @@
 
       <div class="flex items-center gap-2">
         <a href="{{ $makeTop(null) }}"
-           class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 dark:border-coal-700 hover:bg-slate-100/70 dark:hover:bg-coal-800/60
-                  {{ $activeDoc==='' ? 'ring-2 ring-offset-1 ring-slate-300 dark:ring-slate-500' : '' }}">
+           class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 dark:border-coal-700 hover:bg-slate-100/70 dark:hover:bg-coal-800/60 {{ $activeDoc==='' ? 'ring-2 ring-offset-1 ring-slate-300 dark:ring-slate-500' : '' }}">
           Semua
         </a>
         <a href="{{ $makeTop('SOP') }}"
-           class="text-xs px-3 py-1.5 rounded-lg bg-[color:var(--brand-maroon,#7b1d2e)] text-white hover:brightness-110
-                  {{ $activeDoc==='SOP' ? 'ring-2 ring-offset-1 ring-maroon-300' : '' }}">
+           class="text-xs px-3 py-1.5 rounded-lg bg-[color:var(--brand-maroon,#7b1d2e)] text-white hover:brightness-110 {{ $activeDoc==='SOP' ? 'ring-2 ring-offset-1 ring-maroon-300' : '' }}">
           SOP
         </a>
         <a href="{{ $makeTop('IK') }}"
-           class="text-xs px-3 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-500
-                  {{ $activeDoc==='IK' ? 'ring-2 ring-offset-1 ring-amber-300' : '' }}">
+           class="text-xs px-3 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-500 {{ $activeDoc==='IK' ? 'ring-2 ring-offset-1 ring-amber-300' : '' }}">
           IK
         </a>
         <a href="{{ $makeTop('FORM') }}"
-           class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700
-                  {{ $activeDoc==='FORM' ? 'ring-2 ring-offset-1 ring-slate-300' : '' }}">
+           class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700 {{ $activeDoc==='FORM' ? 'ring-2 ring-offset-1 ring-slate-300' : '' }}">
           FORM
         </a>
 
@@ -64,21 +62,39 @@
     </div>
 
     {{-- ===================================================== --}}
-    {{--  GRID DEPARTEMEN — DITEMPELIN FILTER PERUSAHAAN      --}}
+    {{--  GRID DEPARTEMEN — DITEMPELIN FILTER PERUSAHAAN/SITE  --}}
     {{-- ===================================================== --}}
     @isset($departments)
       @php
         $pp = (int) request('per_page', 10); // re-ensure
 
-        // Link builder: kombinasi dept + (opsional) company + (opsional) doc_type
-        $makeDeptCompany = function ($deptId, ?string $companyId, ?string $doc) use ($pp) {
+        // Link builder: kombinasi dept + (opsional) company + (opsional) site + (opsional) doc_type
+        $makeDeptCompany = function ($deptId, ?string $companyId, ?string $doc) use ($pp, $activeSite) {
           return route('admin.forms.index', array_filter([
             'department_id' => $deptId,
             'company_id'    => $companyId ?: null,
+            'site_id'       => $activeSite ?: null,
             'doc_type'      => $doc ?: null,
             'per_page'      => $pp,
           ]));
         };
+
+        // Builder dengan site eksplisit
+        $makeDeptCompanySite = function ($deptId, ?string $companyId, ?string $siteId, ?string $doc) use ($pp) {
+          return route('admin.forms.index', array_filter([
+            'department_id' => $deptId,
+            'company_id'    => $companyId ?: null,
+            'site_id'       => $siteId ?: null,
+            'doc_type'      => $doc ?: null,
+            'per_page'      => $pp,
+          ]));
+        };
+
+        // Map sites by company untuk render chip "Site"
+        /** @var \Illuminate\Support\Collection|\App\Models\Site[] $sites */
+        $sitesByCompany = collect(($sites ?? []))->groupBy(function($s){ return (string)$s->company_id; })->map(function($rows){
+          return $rows->map(fn($s)=>['id'=>(string)$s->id,'name'=>$s->name,'company_id'=>(string)$s->company_id])->values();
+        })->toArray();
 
         $colorOf = fn($d) => $d->color ?? '#7b1d2e'; // maroon default
       @endphp
@@ -106,7 +122,7 @@
                   <div class="text-lg font-semibold text-slate-900 dark:text-ivory-100 -mt-0.5">
                     {{ $d->name }}
                   </div>
-                  <div class="text-sm text-slate-500">Pilih perusahaan & tipe dokumen</div>
+                  <div class="text-sm text-slate-500">Pilih perusahaan, site & tipe dokumen</div>
                 </div>
               </div>
             </div>
@@ -140,24 +156,47 @@
               </div>
             @endisset
 
-            {{-- Baris 2: Chip SOP/IK/FORM yang mempertahankan pilihan perusahaan --}}
+            {{-- Baris 1.5: Filter Site (muncul hanya jika company aktif) --}}
+            @if($isActiveDept && $activeCompany && !empty($sitesByCompany[$activeCompany] ?? []))
+              <div class="mt-2 overflow-x-auto">
+                <div class="flex items-center gap-2 min-w-max">
+                  <a href="{{ $makeDeptCompanySite($d->id, $activeCompany, null, $activeDoc ?: null) }}"
+                     class="text-[11px] px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-coal-700 hover:bg-slate-100/70 dark:hover:bg-coal-800/60
+                            {{ empty($activeSite) ? 'ring-2 ring-offset-1 ring-slate-300 dark:ring-slate-500' : '' }}">
+                    Semua Site
+                  </a>
+                  @foreach(($sitesByCompany[$activeCompany] ?? []) as $s)
+                    @php $siteActive = $activeSite === (string)$s['id']; @endphp
+                    <a href="{{ $makeDeptCompanySite($d->id, $activeCompany, (string)$s['id'], $activeDoc ?: null) }}"
+                       class="text-[11px] px-2.5 py-1.5 rounded-lg border
+                              {{ $siteActive
+                                  ? 'border-emerald-600 text-emerald-700 bg-emerald-50 ring-2 ring-offset-1 ring-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300'
+                                  : 'border-slate-300 dark:border-coal-700 hover:bg-slate-100/70 dark:hover:bg-coal-800/60 text-slate-700 dark:text-slate-300' }}">
+                      {{ $s['name'] }}
+                    </a>
+                  @endforeach
+                </div>
+              </div>
+            @endif
+
+            {{-- Baris 2: Chip SOP/IK/FORM yang mempertahankan pilihan perusahaan & site --}}
             <div class="mt-2 flex flex-wrap items-center gap-2">
-              <a href="{{ $makeDeptCompany($d->id, $activeCompany ?: null, null) }}"
+              <a href="{{ $makeDeptCompanySite($d->id, $activeCompany ?: null, $activeSite ?: null, null) }}"
                  class="text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-coal-700 hover:bg-slate-100/70 dark:hover:bg-coal-800/60
                         {{ $isActiveDept && $activeDoc==='' ? 'ring-2 ring-offset-1 ring-slate-300 dark:ring-slate-500' : '' }}">
                 Semua Dokumen
               </a>
-              <a href="{{ $makeDeptCompany($d->id, $activeCompany ?: null, 'SOP') }}"
+              <a href="{{ $makeDeptCompanySite($d->id, $activeCompany ?: null, $activeSite ?: null, 'SOP') }}"
                  class="text-xs px-2.5 py-1.5 rounded-lg bg-[color:var(--brand-maroon,#7b1d2e)] text-white hover:brightness-110
                         {{ $isActiveDept && $activeDoc==='SOP' ? 'ring-2 ring-offset-1 ring-maroon-300' : '' }}">
                 SOP
               </a>
-              <a href="{{ $makeDeptCompany($d->id, $activeCompany ?: null, 'IK') }}"
+              <a href="{{ $makeDeptCompanySite($d->id, $activeCompany ?: null, $activeSite ?: null, 'IK') }}"
                  class="text-xs px-2.5 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-500
                         {{ $isActiveDept && $activeDoc==='IK' ? 'ring-2 ring-offset-1 ring-amber-300' : '' }}">
                 IK
               </a>
-              <a href="{{ $makeDeptCompany($d->id, $activeCompany ?: null, 'FORM') }}"
+              <a href="{{ $makeDeptCompanySite($d->id, $activeCompany ?: null, $activeSite ?: null, 'FORM') }}"
                  class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700
                         {{ $isActiveDept && $activeDoc==='FORM' ? 'ring-2 ring-offset-1 ring-slate-300' : '' }}">
                 FORM
@@ -170,7 +209,7 @@
 
     {{-- ===== VISIBILITY GUARD: tampilkan list hanya jika ada salah satu filter ===== --}}
     @php
-      $shouldShowList = $activeDept || $activeCompany || in_array($activeDoc, ['SOP','IK','FORM']);
+      $shouldShowList = $activeDept || $activeCompany || $activeSite || in_array($activeDoc, ['SOP','IK','FORM']);
     @endphp
 
     {{-- ===== LIST FORM ===== --}}
@@ -220,6 +259,11 @@
                   @if(isset($f->company) && $f->company)
                     <span>•</span>
                     <span class="truncate">Perusahaan: {{ $f->company->code ?? '' }} {{ $f->company->name ?? '' }}</span>
+                  @endif
+
+                  @if(isset($f->site) && $f->site)
+                    <span>•</span>
+                    <span class="truncate">Site: {{ $f->site->name }}</span>
                   @endif
 
                   <span>•</span>
@@ -305,7 +349,8 @@
         <div class="p-4 rounded-xl border bg-white dark:bg-coal-900 border-slate-200/70 dark:border-coal-800">
           <div class="text-sm text-slate-600 dark:text-slate-300">
             Pilih <span class="font-semibold">Departemen</span>, lalu tentukan
-            <span class="font-semibold">Perusahaan</span> dan <span class="font-semibold">SOP/IK/FORM</span> dari kartu departemen.
+            <span class="font-semibold">Perusahaan</span>, <span class="font-semibold">Site</span> (opsional),
+            dan <span class="font-semibold">SOP/IK/FORM</span> dari kartu departemen.
           </div>
         </div>
       </div>

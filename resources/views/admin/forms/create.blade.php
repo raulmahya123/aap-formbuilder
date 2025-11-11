@@ -2,6 +2,22 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+  // ==== Defaults & dataset untuk JS ====
+  $selectedDocType    = old('doc_type', request('doc_type', 'SOP'));
+  $selectedType       = old('type', 'builder');
+  $selectedCompanyId  = old('company_id', request('company_id'));
+  $selectedSiteId     = old('site_id');
+
+  /** @var \Illuminate\Support\Collection|\App\Models\Site[] $sites */
+  // Buat key company_id jadi STRING agar aman di JS saat akses SITES_BY_COMPANY[String(id)]
+  $sitesByCompany = collect($sites ?? [])->groupBy(function($s){
+    return (string) $s->company_id;
+  })->map(function($rows){
+    return $rows->map(fn($s)=>['id'=>$s->id,'name'=>$s->name,'company_id'=>$s->company_id])->values();
+  })->toArray();
+@endphp
+
 <div class="max-w-3xl mx-auto p-6 bg-white rounded-xl">
   <h1 class="text-xl font-semibold mb-4">Buat Form</h1>
 
@@ -18,18 +34,6 @@
     </div>
   @endif
 
-  @php
-    // default aman: ambil dari old(), kalau kosong coba dari ?doc_type=, lalu fallback ke SOP
-    $selectedDocType = old('doc_type', request('doc_type', 'SOP'));
-    $selectedType    = old('type', 'builder'); // default tampilan pertama: builder
-
-    // Siapkan dataset sites by company untuk JS
-    /** @var \Illuminate\Support\Collection|\App\Models\Site[] $sites */
-    $sitesByCompany = collect($sites ?? [])->groupBy('company_id')->map(function($rows){
-      return $rows->map(fn($s)=>['id'=>$s->id,'name'=>$s->name,'company_id'=>$s->company_id])->values();
-    })->toArray();
-  @endphp
-
   <form action="{{ route('admin.forms.store') }}" method="post" enctype="multipart/form-data" id="form-create">
     @csrf
 
@@ -37,9 +41,9 @@
     <div class="mb-3">
       <label class="block font-medium mb-1">Perusahaan <span class="text-rose-600">*</span></label>
       <select name="company_id" id="company_id" class="border rounded w-full p-2" required>
-        <option value="" disabled {{ old('company_id') ? '' : 'selected' }}>Pilih perusahaan…</option>
+        <option value="" disabled {{ $selectedCompanyId ? '' : 'selected' }}>Pilih perusahaan…</option>
         @foreach(($companies ?? []) as $c)
-          <option value="{{ $c->id }}" @selected((string)old('company_id') === (string)$c->id)>
+          <option value="{{ $c->id }}" @selected((string)$selectedCompanyId === (string)$c->id)>
             {{ $c->code ?? '—' }} — {{ $c->name }}
           </option>
         @endforeach
@@ -51,12 +55,12 @@
     {{-- ===== Site (opsional, otomatis filter by company) ===== --}}
     <div class="mb-3">
       <label class="block font-medium mb-1">Site (Opsional)</label>
-      <select name="site_id" id="site_id" class="border rounded w-full p-2">
+      <select name="site_id" id="site_id" class="border rounded w-full p-2" {{ $selectedCompanyId ? '' : 'disabled' }}>
         <option value="">— Tanpa Site —</option>
-        {{-- options akan diisi via JS berdasar company terpilih, namun kita render juga default dari old() agar aman --}}
-        @if(old('company_id') && !empty($sitesByCompany[(int)old('company_id')]))
-          @foreach($sitesByCompany[(int)old('company_id')] as $s)
-            <option value="{{ $s['id'] }}" @selected((string)old('site_id') === (string)$s['id'])>{{ $s['name'] }}</option>
+        {{-- Render awal (kalau ada default company) --}}
+        @if($selectedCompanyId && !empty($sitesByCompany[(string)$selectedCompanyId]))
+          @foreach($sitesByCompany[(string)$selectedCompanyId] as $s)
+            <option value="{{ $s['id'] }}" @selected((string)$selectedSiteId === (string)$s['id'])>{{ $s['name'] }}</option>
           @endforeach
         @endif
       </select>
@@ -168,7 +172,6 @@
       }
     }
   }
-
   typeSel.addEventListener('change', toggleBoxes);
   toggleBoxes();
 
@@ -176,28 +179,31 @@
   const companySel = document.getElementById('company_id');
   const siteSel    = document.getElementById('site_id');
 
-  // sitesByCompany di-inject dari PHP (array: company_id -> [{id,name,company_id},...])
-  const sitesByCompany = @json($sitesByCompany);
-  const oldSiteId = "{{ old('site_id') }}";
+  // { "<company_id:string>": [{id,name,company_id}, ...] }
+  const SITES_BY_COMPANY = @json($sitesByCompany);
+  const initialCompanyId = "{{ (string) $selectedCompanyId }}";
+  const initialSiteId    = "{{ (string) $selectedSiteId }}";
 
-  function repopulateSites() {
-    const compId = companySel.value ? String(companySel.value) : '';
-    const rows   = sitesByCompany[compId] || sitesByCompany[parseInt(compId)] || [];
+  function getSitesForCompany(id) {
+    if (!id) return [];
+    const key = String(id);
+    return SITES_BY_COMPANY[key] || [];
+  }
+
+  function repopulateSites(prefillSiteId = null) {
+    const compId = companySel.value;
+    const rows   = getSitesForCompany(compId);
 
     // Clear options
     while (siteSel.options.length) siteSel.remove(0);
 
-    // Append default
+    // Default option (null)
     siteSel.appendChild(new Option('— Tanpa Site —', ''));
-
-    if (rows.length === 0) {
-      siteSel.disabled = false; // tetap bisa set null
-      return;
-    }
 
     rows.forEach(r => {
       const opt = new Option(r.name, r.id);
-      if (oldSiteId && String(oldSiteId) === String(r.id)) {
+      // pilih ulang berdasarkan prefill (old() / initial)
+      if (prefillSiteId && String(prefillSiteId) === String(r.id)) {
         opt.selected = true;
       }
       siteSel.appendChild(opt);
@@ -206,23 +212,22 @@
     siteSel.disabled = false;
   }
 
-  // Build map key agar bisa diakses dengan string key juga
-  // (Blade sudah menghasilkan array, tetapi jaga-jaga)
-  const normalized = {};
-  Object.keys(sitesByCompany || {}).forEach(k => {
-    normalized[String(k)] = sitesByCompany[k];
-  });
-  // assign balik
-  // eslint-disable-next-line no-global-assign
-  sitesByCompany = normalized;
-
-  companySel.addEventListener('change', function(){
-    // reset oldSiteId saat user mengganti company
-    window.setTimeout(()=>{ repopulateSites(); }, 0);
+  companySel.addEventListener('change', () => {
+    // Reset site ketika ganti company
+    repopulateSites(null);
   });
 
-  // Init on load jika company sudah dipilih (old)
-  if (companySel.value) repopulateSites();
+  // Init on load
+  if (companySel.value) {
+    // Jika sudah ada default company (old()/query), prefill site juga bila ada
+    repopulateSites(initialSiteId || null);
+  } else {
+    // Kalau belum pilih perusahaan, kunci dropdown site
+    siteSel.disabled = true;
+  }
+
+  // (Opsional) debug:
+  // console.log('SITES_BY_COMPANY', SITES_BY_COMPANY);
 })();
 </script>
 @endsection

@@ -4,6 +4,21 @@
 @section('title','Edit Form: '.$form->title)
 
 @section('content')
+@php
+  // ===== Defaults dari old()/model =====
+  $selectedDocType   = old('doc_type', $form->doc_type);
+  $currentCompanyId  = (string) old('company_id', $form->company_id);
+  $currentSiteId     = (string) old('site_id', $form->site_id);
+
+  /** @var \Illuminate\Support\Collection|\App\Models\Site[] $sites */
+  // Paksa key groupBy ke STRING → JS akses SITES_BY_COMPANY[String(id)] konsisten
+  $sitesByCompany = collect($sites ?? [])->groupBy(function($s){
+    return (string) $s->company_id;
+  })->map(function($rows){
+    return $rows->map(fn($s)=>['id'=>$s->id,'name'=>$s->name,'company_id'=>$s->company_id])->values();
+  })->toArray();
+@endphp
+
 <div class="max-w-4xl mx-auto p-6">
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-xl font-semibold">Edit Form</h1>
@@ -39,25 +54,11 @@
     </div>
   @endif
 
-  @php
-    // Untuk toggle awal tipe
-    $selectedDocType = old('doc_type', $form->doc_type);
-
-    // Siapkan dataset sites by company -> untuk JS filter Site
-    // Pastikan controller mengirim $sites (id, name, company_id)
-    $sitesByCompany = collect($sites ?? [])->groupBy('company_id')->map(function($rows){
-      return $rows->map(fn($s)=>['id'=>$s->id,'name'=>$s->name,'company_id'=>$s->company_id])->values();
-    })->toArray();
-
-    $currentCompanyId = (string) old('company_id', $form->company_id);
-    $currentSiteId    = (string) old('site_id', $form->site_id);
-  @endphp
-
   {{-- Update --}}
   <form method="POST"
         action="{{ route('admin.forms.update', $form) }}"
         enctype="multipart/form-data"
-        x-data="formEdit()">
+        x-data='@json(["type" => old("type", $form->type)])'>
     @csrf
     @method('PUT')
 
@@ -79,10 +80,12 @@
       {{-- Site (opsional, ter-filter by company) --}}
       <div>
         <label class="block text-sm font-medium text-slate-700">Site (Opsional)</label>
-        <select name="site_id" id="site_id" class="mt-1 w-full rounded-lg border px-3 py-2">
+        <select name="site_id" id="site_id"
+                class="mt-1 w-full rounded-lg border px-3 py-2"
+                {{ $currentCompanyId ? '' : 'disabled' }}>
           <option value="">— Tanpa Site —</option>
-          @if($currentCompanyId !== '' && !empty($sitesByCompany[(int)$currentCompanyId]))
-            @foreach($sitesByCompany[(int)$currentCompanyId] as $s)
+          @if($currentCompanyId !== '' && !empty($sitesByCompany[(string)$currentCompanyId]))
+            @foreach($sitesByCompany[(string)$currentCompanyId] as $s)
               <option value="{{ $s['id'] }}" @selected((string)$currentSiteId === (string)$s['id'])>{{ $s['name'] }}</option>
             @endforeach
           @endif
@@ -141,7 +144,7 @@
           class="mt-1 w-full rounded-lg border px-3 py-2 font-mono text-sm"
           placeholder='{"fields":[...]}'>{!!
             json_encode(
-              old('schema',$form->schema ?? ['fields'=>[]]),
+              is_array(old('schema')) ? old('schema') : (old('schema') ?: ($form->schema ?? ['fields'=>[]])),
               JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE
             )
           !!}</textarea>
@@ -204,24 +207,18 @@
   </form>
 </div>
 
-{{-- Inisialisasi & Helpers --}}
+{{-- Bootstrap data untuk JS --}}
 <div id="form-data"
-     data-type='@json(old("type", $form->type))'
      data-sites='@json($sitesByCompany)'
-     data-company='@json($currentCompanyId)'
-     data-site='@json($currentSiteId)'></div>
+     data-company="{{ $currentCompanyId }}"
+     data-site="{{ $currentSiteId }}"></div>
 
 <script>
-  function formEdit(){
-    const el = document.getElementById('form-data');
-    return {
-      type: JSON.parse(el.dataset.type) // "builder" / "pdf"
-    }
-  }
-
   (function(){
     const meta       = document.getElementById('form-data');
     const mapRaw     = JSON.parse(meta.dataset.sites || '{}');
+
+    // company & site JANGAN pakai @@json untuk scalar (ESCAPED agar Blade tidak memproses)
     const currentCid = String(meta.dataset.company || '');
     const currentSid = String(meta.dataset.site || '');
 
@@ -251,8 +248,12 @@
       siteSel.disabled = false;
     }
 
-    // Init pertama: kalau sudah ada company (old atau model), populate
-    if (currentCid !== '') repopulateSites(currentCid, currentSid);
+    // Init pertama: populate jika sudah ada company (old()/model)
+    if (currentCid !== '') {
+      repopulateSites(currentCid, currentSid);
+    } else {
+      siteSel.disabled = true; // kunci sampai perusahaan dipilih
+    }
 
     companySel.addEventListener('change', function(){
       repopulateSites(this.value, null); // reset pilihan site saat ganti company

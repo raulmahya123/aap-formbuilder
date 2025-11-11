@@ -7,7 +7,6 @@ use App\Models\{Form, Department, Company, Site};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Storage, Log, Schema};
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Str;
 use Throwable;
 
 class FormController extends Controller
@@ -16,9 +15,13 @@ class FormController extends Controller
     private const DOC_TYPES  = ['SOP', 'IK', 'FORM'];
     private const FORM_TYPES = ['builder', 'pdf'];
 
+    // =======================
+    // INDEX / LIST
+    // =======================
     public function index(Request $r)
     {
-        $q = Form::with(['department', 'creator', 'company', 'site'])->latest();
+        $q = Form::with(['department:id,name', 'creator:id,name', 'company:id,code,name', 'site:id,name,company_id'])
+            ->latest();
 
         if ($r->filled('department_id')) {
             $q->where('department_id', (int) $r->department_id);
@@ -36,7 +39,7 @@ class FormController extends Controller
             }
         }
 
-        $allowed = [10,20,50,100];
+        $allowed = [10, 20, 50, 100];
         $perPage = (int) $r->input('per_page', 10);
         if (!in_array($perPage, $allowed, true)) $perPage = 10;
 
@@ -48,21 +51,26 @@ class FormController extends Controller
         return view('admin.forms.index', compact('forms','departments','companies','sites'));
     }
 
+    // =======================
+    // CREATE
+    // =======================
     public function create()
     {
         $departments = Department::orderBy('name')->get(['id','name']);
         $companies   = Company::orderBy('code')->get(['id','code','name']);
-        $sites       = Site::orderBy('name')->get(['id','name','company_id']);
+        $sites       = Site::orderBy('name')->get(['id','name','company_id']); // dipakai buat SITES_BY_COMPANY di Blade
 
         return view('admin.forms.create', compact('departments','companies','sites'));
     }
 
+    // =======================
+    // STORE
+    // =======================
     public function store(Request $r)
     {
-        // Catat input awal untuk debug
-        Log::info('forms.store:start', ['input' => $r->all()]);
+        Log::info('forms.store:start', ['input' => $r->except(['pdf'])]);
 
-        // VALIDASI
+        // VALIDASI DASAR
         $validated = $r->validate([
             'company_id'    => ['required', 'exists:companies,id'],
             'site_id'       => ['nullable', 'exists:sites,id'],
@@ -70,20 +78,28 @@ class FormController extends Controller
             'title'         => ['required', 'string', 'max:190'],
             'doc_type'      => ['required', Rule::in(self::DOC_TYPES)],
             'type'          => ['required', Rule::in(self::FORM_TYPES)],
-            'schema'        => ['nullable', 'json'],
+            'schema'        => ['nullable'], // validasi JSON manual di bawah (boleh array/string)
             'pdf'           => ['required_if:type,pdf', 'file', 'mimes:pdf,doc,docx,xls,xlsx', 'max:30720'],
             'is_active'     => ['nullable', 'boolean'],
         ], [
             'pdf.required_if' => 'Saat memilih tipe File, harap unggah file referensi.',
         ]);
 
-        // MATIKAN ini kalau policy belum siap:
-        // $this->authorize('create', [Form::class, (int) $validated['department_id']]);
+        // Validasi relasi: jika site_id diisi, harus milik company_id yg sama
+        if (!empty($validated['site_id'])) {
+            $ok = Site::where('id', $validated['site_id'])
+                ->where('company_id', $validated['company_id'])
+                ->exists();
+            if (!$ok) {
+                return back()
+                    ->withErrors(['site_id' => 'Site tidak sesuai dengan perusahaan yang dipilih.'])
+                    ->withInput();
+            }
+        }
 
-        // PROSES
         try {
             return DB::transaction(function () use ($r, $validated) {
-                // Siapkan file kalau type=pdf
+                // ===== FILE HANDLING =====
                 $filePath = null;
                 if ($validated['type'] === 'pdf' && $r->hasFile('pdf')) {
                     $uploaded   = $r->file('pdf');
@@ -111,23 +127,30 @@ class FormController extends Controller
                     $filePath = $outRel;
                 }
 
-                // Decode schema aman
+                // ===== SCHEMA HANDLING =====
                 $schemaArr = null;
                 if (($validated['type'] ?? null) === 'builder') {
-                    $schemaArr = $r->filled('schema') ? json_decode($validated['schema'], true) : ['fields' => []];
-                    if (!is_array($schemaArr)) {
+                    $raw = $r->input('schema');
+                    if (is_array($raw)) {
+                        $schemaArr = $raw;
+                    } elseif (is_string($raw) && $raw !== '') {
+                        $decoded   = json_decode($raw, true);
+                        $schemaArr = is_array($decoded) ? $decoded : ['fields' => []];
+                    } else {
+                        $schemaArr = ['fields' => []];
+                    }
+                    if (!isset($schemaArr['fields']) || !is_array($schemaArr['fields'])) {
                         $schemaArr = ['fields' => []];
                     }
                 }
 
+                // ===== PAYLOAD =====
                 $payload = [
                     'company_id'    => (int) $validated['company_id'],
                     'site_id'       => !empty($validated['site_id']) ? (int) $validated['site_id'] : null,
                     'department_id' => (int) $validated['department_id'],
                     'created_by'    => optional($r->user())->id,
                     'title'         => $validated['title'],
-                    // Optional slug (kalau tabel ada kolom slug)
-                    // 'slug'          => Str::slug($validated['title']).'-'.Str::random(5),
                     'doc_type'      => strtoupper($validated['doc_type']),
                     'type'          => $validated['type'],
                     'schema'        => $schemaArr,
@@ -166,9 +189,11 @@ class FormController extends Controller
         }
     }
 
+    // =======================
+    // EDIT
+    // =======================
     public function edit(Form $form)
     {
-        // $this->authorize('update', $form);
         $departments = Department::orderBy('name')->get(['id','name']);
         $companies   = Company::orderBy('code')->get(['id','code','name']);
         $sites       = Site::orderBy('name')->get(['id','name','company_id']);
@@ -176,10 +201,11 @@ class FormController extends Controller
         return view('admin.forms.edit', compact('form','departments','companies','sites'));
     }
 
+    // =======================
+    // UPDATE
+    // =======================
     public function update(Request $r, Form $form)
     {
-        // $this->authorize('update', $form);
-
         // Quick update hanya doc_type (AJAX builder)
         $onlyDocType = $r->has('doc_type')
             && !$r->hasAny(['company_id','site_id','department_id','title','type','schema','pdf','is_active']);
@@ -197,10 +223,22 @@ class FormController extends Controller
             'title'         => ['required', 'string', 'max:190'],
             'doc_type'      => ['required', Rule::in(self::DOC_TYPES)],
             'type'          => ['required', Rule::in(self::FORM_TYPES)],
-            'schema'        => ['nullable', 'json'],
+            'schema'        => ['nullable'],
             'pdf'           => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx', 'max:30720'],
             'is_active'     => ['nullable', 'boolean'],
         ]);
+
+        // Validasi relasi site-company saat update
+        if (!empty($validated['site_id'])) {
+            $ok = Site::where('id', $validated['site_id'])
+                ->where('company_id', $validated['company_id'])
+                ->exists();
+            if (!$ok) {
+                return back()
+                    ->withErrors(['site_id' => 'Site tidak sesuai dengan perusahaan yang dipilih.'])
+                    ->withInput();
+            }
+        }
 
         try {
             return DB::transaction(function () use ($r, $validated, $form) {
@@ -242,10 +280,19 @@ class FormController extends Controller
                     $filePath = null;
                 }
 
+                // schema (string/array)
                 $schemaArr = null;
                 if (($validated['type'] ?? null) === 'builder') {
-                    $schemaArr = $r->filled('schema') ? json_decode($validated['schema'], true) : ['fields' => []];
-                    if (!is_array($schemaArr)) {
+                    $raw = $r->input('schema');
+                    if (is_array($raw)) {
+                        $schemaArr = $raw;
+                    } elseif (is_string($raw) && $raw !== '') {
+                        $decoded   = json_decode($raw, true);
+                        $schemaArr = is_array($decoded) ? $decoded : ['fields' => []];
+                    } else {
+                        $schemaArr = ['fields' => []];
+                    }
+                    if (!isset($schemaArr['fields']) || !is_array($schemaArr['fields'])) {
                         $schemaArr = ['fields' => []];
                     }
                 }
@@ -279,10 +326,11 @@ class FormController extends Controller
         }
     }
 
+    // =======================
+    // DESTROY
+    // =======================
     public function destroy(Form $form)
     {
-        // $this->authorize('delete', $form);
-
         try {
             if ($form->pdf_path) {
                 Storage::disk('public')->delete($form->pdf_path);
@@ -295,9 +343,11 @@ class FormController extends Controller
         }
     }
 
+    // =======================
+    // BUILDER VIEW + SAVE
+    // =======================
     public function builder(Form $form)
     {
-        // $this->authorize('update', $form);
         abort_if($form->type !== 'builder', 404, 'Hanya untuk form tipe builder');
         $schema = $form->schema ?? ['fields' => []];
         return view('admin.forms.builder', compact('form','schema'));
@@ -305,23 +355,24 @@ class FormController extends Controller
 
     public function saveSchema(Request $r, Form $form)
     {
-        // $this->authorize('update', $form);
         abort_if($form->type !== 'builder', 404);
 
-        $r->validate(['schema' => ['required', 'json']]);
-        $decoded = json_decode($r->schema, true);
+        $r->validate(['schema' => ['required']]);
 
+        $decoded = is_array($r->schema) ? $r->schema : json_decode((string) $r->schema, true);
         if (!is_array($decoded) || !isset($decoded['fields']) || !is_array($decoded['fields'])) {
-            return back()->withErrors(['schema' => 'Schema tidak valid: butuh objek dengan key "fields" berupa array.'])
-                         ->withInput();
+            return back()
+                ->withErrors(['schema' => 'Schema tidak valid: butuh objek dengan key "fields" berupa array.'])
+                ->withInput();
         }
 
         $form->update(['schema' => $decoded]);
         return redirect()->route('admin.forms.edit', $form)->with('ok', 'Schema tersimpan');
     }
 
-    // ===== Helpers =====
-
+    // =======================
+    // HELPERS
+    // =======================
     private function compressPdf(string $inPath, string $outPath): bool
     {
         if (!function_exists('shell_exec')) {
@@ -329,7 +380,7 @@ class FormController extends Controller
             return false;
         }
 
-        $isWin = (\PHP_OS_FAMILY ?? php_uname('s')) === 'Windows';
+        $isWin = (PHP_OS_FAMILY ?? php_uname('s')) === 'Windows';
         $candidates = [];
 
         if ($isWin) {
@@ -396,6 +447,6 @@ class FormController extends Controller
         $zipOut->close();
         $zipIn->close();
 
-        return file_exists($outPath) && filesize($outPath) > 0;
+        return is_file($outPath) && filesize($outPath) > 0;
     }
 }
