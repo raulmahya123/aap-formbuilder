@@ -107,6 +107,12 @@
           @if(Route::has('admin.sites.index'))
             <a href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}">📍 Sites</a>
           @endif
+
+          {{-- 🆕 Companies (di bawah Sites) --}}
+          @if($isSuper && Route::has('admin.companies.index'))
+            <a href="{{ route('admin.companies.index') }}" class="{{ $navItemClass(request()->routeIs('admin.companies.*')) }}">🏢 Companies</a>
+          @endif
+
           @if(Route::has('admin.groups.index'))
             <a href="{{ route('admin.groups.index') }}" class="{{ $navItemClass(request()->routeIs('admin.groups.*')) }}">🗂️ Indicator Groups</a>
           @endif
@@ -231,7 +237,6 @@
               <div class="text-sm font-semibold truncate">{{ auth()->user()->name }}</div>
               <div class="text-xs text-coal-500 truncate">{{ auth()->user()->email ?? '' }}</div>
             </div>
-            {{-- tombol theme dihapus --}}
           </div>
         </div>
         @endauth
@@ -289,6 +294,12 @@
               @if(Route::has('admin.sites.index'))
                 <a href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}">📍 Sites</a>
               @endif
+
+              {{-- 🆕 Companies (di bawah Sites - mobile) --}}
+              @if($isSuper && Route::has('admin.companies.index'))
+                <a href="{{ route('admin.companies.index') }}" class="{{ $navItemClass(request()->routeIs('admin.companies.*')) }}">🏢 Companies</a>
+              @endif
+
               @if(Route::has('admin.groups.index'))
                 <a href="{{ route('admin.groups.index') }}" class="{{ $navItemClass(request()->routeIs('admin.groups.*')) }}">🗂️ Indicator Groups</a>
               @endif

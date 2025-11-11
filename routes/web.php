@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
 // ==============================
 // ADMIN Controllers (existing)
 // ==============================
@@ -40,6 +42,7 @@ use App\Http\Controllers\Admin\ReportController as AdminReportController;
 // ==============================
 use App\Http\Controllers\User\IndicatorDailyController;
 use App\Http\Controllers\User\DailyNoteController;
+
 // ==============================
 // Admin kelola akses user↔site (baru)
 // ==============================
@@ -50,6 +53,11 @@ use App\Http\Controllers\Admin\UserSiteAccessController;
 // ==============================
 use App\Http\Controllers\Admin\ContractController as AdminContractController;
 use App\Http\Controllers\User\ContractController as UserContractController;
+
+// ==============================
+// COMPANIES (Super Admin CRUD)
+// ==============================
+use App\Http\Controllers\Admin\CompanyController as AdminCompanyController;
 
 // Redirect root ke dashboard
 Route::get('/', fn() => redirect()->route('admin.dashboard'));
@@ -82,16 +90,16 @@ Route::middleware('auth')->group(function () {
     // ==============================
     // FRONT (user)
     // ==============================
-
-    Route::middleware(['auth'])->prefix('daily-notes')->name('user.daily_notes.')->group(function () {
+    Route::prefix('daily-notes')->name('user.daily_notes.')->group(function () {
         Route::get('/', [DailyNoteController::class, 'index'])->name('index');
         Route::get('/create', [DailyNoteController::class, 'create'])->name('create');
         Route::post('/', [DailyNoteController::class, 'store'])->name('store');
     });
+
     Route::prefix('forms')->name('front.forms.')->group(function () {
         Route::get('/', [FormBrowseController::class, 'index'])->name('index');
 
-        // >>> Tambahkan ini (HARUS sebelum /{form:slug})
+        // >>> HARUS sebelum /{form:slug}
         Route::get('/type/{doc_type}', [FormBrowseController::class, 'index'])
             ->whereIn('doc_type', ['SOP', 'IK', 'FORM'])
             ->name('index.type');
@@ -126,7 +134,6 @@ Route::middleware('auth')->group(function () {
         // Thanks
         Route::get('/{form:slug}/thanks', fn() => view('front.forms.thanks'))->name('thanks');
     });
-
 
     // Download lampiran entry (front)
     Route::get('/entry-file/{file}', [FrontEntryController::class, 'downloadAttachment'])
@@ -165,19 +172,28 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard/data/by-department', [DashboardController::class, 'byDepartment'])->name('dashboard.data.by_department');
         Route::get('dashboard/data/by-aggregate', [DashboardController::class, 'byAggregate'])->name('dashboard.data.by_aggregate');
 
+        // ==== COMPANIES (CRUD only; Super Admin) ====
+        Route::middleware('can:is-admin')->prefix('companies')->name('companies.')->group(function () {
+            Route::get('/',               [AdminCompanyController::class, 'index'])->name('index');
+            Route::get('/create',         [AdminCompanyController::class, 'create'])->name('create');
+            Route::post('/',              [AdminCompanyController::class, 'store'])->name('store');
+            Route::get('/{company}',      [AdminCompanyController::class, 'show'])->name('show')->whereNumber('company');
+            Route::get('/{company}/edit', [AdminCompanyController::class, 'edit'])->name('edit')->whereNumber('company');
+            Route::put('/{company}',      [AdminCompanyController::class, 'update'])->name('update')->whereNumber('company');
+            Route::delete('/{company}',   [AdminCompanyController::class, 'destroy'])->name('destroy')->whereNumber('company');
+        });
+
         // ==== ACTIVE SITE SWITCH ====
         Route::post('sites/switch', [AdminSiteController::class, 'switch'])->name('sites.switch');
 
         // Manage Users (active/toggle)
         Route::get('/users/active', [UserActiveController::class, 'index'])
             ->name('users.active.index');
-
         Route::patch('/users/{user}/toggle', [UserActiveController::class, 'toggle'])
             ->name('users.active.toggle');
-
-        // Konsisten pakai PUT untuk update eksplisit
         Route::put('/users/{user}/active', [UserActiveController::class, 'update'])
             ->name('users.active.update');
+
         // Departments CRUD
         Route::resource('departments', DepartmentController::class);
 
@@ -191,6 +207,7 @@ Route::middleware('auth')->group(function () {
         Route::get('forms/{form}/file', [AdminFormController::class, 'file'])->name('forms.file');
         Route::get('forms/{form}/download', [AdminFormController::class, 'download'])->name('forms.download');
         /* ⇧⇧ Tambahkan ini ⇧⇧ */
+
         // Kelola anggota & role per department
         Route::get('departments/{department}/members', [DepartmentMemberController::class, 'index'])->name('departments.members');
         Route::post('departments/{department}/members', [DepartmentMemberController::class, 'store'])->name('departments.members.store');
@@ -209,8 +226,7 @@ Route::middleware('auth')->group(function () {
             Route::post('site-access', [UserSiteAccessController::class, 'store'])->name('site_access.store');
             Route::post('site-access/bulk', [UserSiteAccessController::class, 'bulk'])->name('site_access.bulk');
             Route::post('site-access/bulk-detach', [UserSiteAccessController::class, 'bulkDetachSites'])->name('site_access.bulk_detach');
-            Route::delete('site-access/{userSiteAccess}', [UserSiteAccessController::class, 'destroy'])
-                ->name('site_access.destroy')->whereNumber('userSiteAccess');
+            Route::delete('site-access/{userSiteAccess}', [UserSiteAccessController::class, 'destroy'])->name('site_access.destroy')->whereNumber('userSiteAccess');
             Route::delete('site-access', [UserSiteAccessController::class, 'destroySelected'])->name('site_access.destroy_selected');
         });
 
@@ -227,6 +243,7 @@ Route::middleware('auth')->group(function () {
         Route::post('daily',       [AdminDailyInputController::class, 'store'])
             ->name('daily.store')
             ->middleware('can:daily.manage'); // StoreDailyRequest juga meng-autorize
+
         // Rekap
         Route::get('reports/monthly', [AdminReportController::class, 'report'])->name('reports.monthly');
 
@@ -318,7 +335,6 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/{contract}', [AdminContractController::class, 'show'])
                 ->name('show')->middleware('can:view,contract')->whereNumber('contract');
-
             Route::get('/{contract}/download', [AdminContractController::class, 'download'])
                 ->name('download')->middleware('can:view,contract')->whereNumber('contract');
 

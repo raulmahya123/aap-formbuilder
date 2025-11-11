@@ -1,3 +1,4 @@
+{{-- resources/views/admin/forms/edit.blade.php --}}
 @extends('layouts.app')
 
 @section('title','Edit Form: '.$form->title)
@@ -38,6 +39,20 @@
     </div>
   @endif
 
+  @php
+    // Untuk toggle awal tipe
+    $selectedDocType = old('doc_type', $form->doc_type);
+
+    // Siapkan dataset sites by company -> untuk JS filter Site
+    // Pastikan controller mengirim $sites (id, name, company_id)
+    $sitesByCompany = collect($sites ?? [])->groupBy('company_id')->map(function($rows){
+      return $rows->map(fn($s)=>['id'=>$s->id,'name'=>$s->name,'company_id'=>$s->company_id])->values();
+    })->toArray();
+
+    $currentCompanyId = (string) old('company_id', $form->company_id);
+    $currentSiteId    = (string) old('site_id', $form->site_id);
+  @endphp
+
   {{-- Update --}}
   <form method="POST"
         action="{{ route('admin.forms.update', $form) }}"
@@ -48,47 +63,75 @@
 
     <div class="rounded-2xl border bg-white p-5 space-y-5">
 
+      {{-- Company --}}
+      <div>
+        <label class="block text-sm font-medium text-slate-700">Perusahaan <span class="text-rose-600">*</span></label>
+        <select name="company_id" id="company_id" class="mt-1 w-full rounded-lg border px-3 py-2" required>
+          @foreach($companies as $c)
+            <option value="{{ $c->id }}" @selected((string)old('company_id',$form->company_id)===(string)$c->id)>
+              {{ $c->code }} — {{ $c->name }}
+            </option>
+          @endforeach
+        </select>
+        @error('company_id')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
+      </div>
+
+      {{-- Site (opsional, ter-filter by company) --}}
+      <div>
+        <label class="block text-sm font-medium text-slate-700">Site (Opsional)</label>
+        <select name="site_id" id="site_id" class="mt-1 w-full rounded-lg border px-3 py-2">
+          <option value="">— Tanpa Site —</option>
+          @if($currentCompanyId !== '' && !empty($sitesByCompany[(int)$currentCompanyId]))
+            @foreach($sitesByCompany[(int)$currentCompanyId] as $s)
+              <option value="{{ $s['id'] }}" @selected((string)$currentSiteId === (string)$s['id'])>{{ $s['name'] }}</option>
+            @endforeach
+          @endif
+        </select>
+        @error('site_id')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
+        <p class="text-xs text-slate-500 mt-1">Opsional: hubungkan form ke site tertentu dalam perusahaan.</p>
+      </div>
+
       {{-- Department --}}
       <div>
-        <label class="block text-sm font-medium text-slate-700">Departemen</label>
+        <label class="block text-sm font-medium text-slate-700">Departemen <span class="text-rose-600">*</span></label>
         <select name="department_id" class="mt-1 w-full rounded-lg border px-3 py-2" required>
           @foreach($departments as $d)
-            <option value="{{ $d->id }}" @selected(old('department_id',$form->department_id)==$d->id)>
+            <option value="{{ $d->id }}" @selected((string)old('department_id',$form->department_id)===(string)$d->id)>
               {{ $d->name }}
             </option>
           @endforeach
         </select>
+        @error('department_id')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
       </div>
 
       {{-- Title --}}
       <div>
-        <label class="block text-sm font-medium text-slate-700">Judul</label>
+        <label class="block text-sm font-medium text-slate-700">Judul <span class="text-rose-600">*</span></label>
         <input type="text" name="title" value="{{ old('title',$form->title) }}"
                class="mt-1 w-full rounded-lg border px-3 py-2" required maxlength="190">
+        @error('title')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
       </div>
 
       {{-- Jenis Dokumen (SOP/IK/FORM) --}}
-      @php
-        $selectedDocType = old('doc_type', $form->doc_type);
-      @endphp
       <div>
-        <label class="block text-sm font-medium text-slate-700">Jenis Dokumen</label>
+        <label class="block text-sm font-medium text-slate-700">Jenis Dokumen <span class="text-rose-600">*</span></label>
         <select name="doc_type" id="doc_type" class="mt-1 w-full rounded-lg border px-3 py-2" required>
           <option value="SOP"  @selected($selectedDocType==='SOP')>SOP</option>
           <option value="IK"   @selected($selectedDocType==='IK')>IK</option>
           <option value="FORM" @selected($selectedDocType==='FORM')>FORM</option>
         </select>
+        @error('doc_type')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
         <p class="text-xs text-slate-500 mt-1">Kategori dokumen. Tidak mengubah tipe implementasi di bawah.</p>
       </div>
 
       {{-- Type --}}
       <div>
-        <label class="block text-sm font-medium text-slate-700">Tipe</label>
+        <label class="block text-sm font-medium text-slate-700">Tipe <span class="text-rose-600">*</span></label>
         <select name="type" x-model="type" class="mt-1 w-full rounded-lg border px-3 py-2" required>
           <option value="builder">Builder</option>
-          {{-- nilai tetap "pdf" untuk kompatibilitas controller --}}
           <option value="pdf">File (PDF/Word/Excel)</option>
         </select>
+        @error('type')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
       </div>
 
       {{-- Builder schema --}}
@@ -102,6 +145,7 @@
               JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE
             )
           !!}</textarea>
+        @error('schema')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
         <p class="text-xs text-slate-500 mt-1">
           Isi dengan objek JSON berisi key <code>fields</code> (array).
         </p>
@@ -123,12 +167,13 @@
           <p class="text-xs text-slate-600 mt-1">
             File sekarang:
             <a class="underline" target="_blank"
-               href="{{ Storage::disk('public')->url($form->pdf_path) }}">
+               href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($form->pdf_path) }}">
               {{ basename($form->pdf_path) }}
             </a>
             <span class="text-slate-400">({{ $form->pdf_path }})</span>
           </p>
         @endif
+        @error('pdf')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
       </div>
 
       {{-- Active --}}
@@ -141,7 +186,7 @@
     </div>
 
     <div class="mt-6 flex items-center gap-3">
-      <button class="px-5 py-2.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
+      <button class="px-5 py-2.5 rounded-xl bg-[color:var(--brand-maroon,#7b1d2e)] text-white hover:brightness-105">
         Simpan Perubahan
       </button>
     </div>
@@ -159,8 +204,13 @@
   </form>
 </div>
 
-{{-- Inisialisasi Alpine --}}
-<div id="form-data" data-type='@json(old("type", $form->type))'></div>
+{{-- Inisialisasi & Helpers --}}
+<div id="form-data"
+     data-type='@json(old("type", $form->type))'
+     data-sites='@json($sitesByCompany)'
+     data-company='@json($currentCompanyId)'
+     data-site='@json($currentSiteId)'></div>
+
 <script>
   function formEdit(){
     const el = document.getElementById('form-data');
@@ -168,5 +218,45 @@
       type: JSON.parse(el.dataset.type) // "builder" / "pdf"
     }
   }
+
+  (function(){
+    const meta       = document.getElementById('form-data');
+    const mapRaw     = JSON.parse(meta.dataset.sites || '{}');
+    const currentCid = String(meta.dataset.company || '');
+    const currentSid = String(meta.dataset.site || '');
+
+    // Normalisasi key map ke string
+    const sitesByCompany = {};
+    Object.keys(mapRaw).forEach(k => { sitesByCompany[String(k)] = mapRaw[k]; });
+
+    const companySel = document.getElementById('company_id');
+    const siteSel    = document.getElementById('site_id');
+
+    function repopulateSites(selectedCompanyId, keepSiteId){
+      const rows = sitesByCompany[String(selectedCompanyId)] || [];
+
+      // Clear
+      while (siteSel.options.length) siteSel.remove(0);
+
+      // Default
+      siteSel.appendChild(new Option('— Tanpa Site —',''));
+
+      // Fill
+      rows.forEach(r => {
+        const opt = new Option(r.name, r.id);
+        if (keepSiteId && String(keepSiteId) === String(r.id)) opt.selected = true;
+        siteSel.appendChild(opt);
+      });
+
+      siteSel.disabled = false;
+    }
+
+    // Init pertama: kalau sudah ada company (old atau model), populate
+    if (currentCid !== '') repopulateSites(currentCid, currentSid);
+
+    companySel.addEventListener('change', function(){
+      repopulateSites(this.value, null); // reset pilihan site saat ganti company
+    });
+  })();
 </script>
 @endsection

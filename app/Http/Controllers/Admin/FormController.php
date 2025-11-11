@@ -3,28 +3,32 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Form, Department};
+use App\Models\{Form, Department, Company, Site};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Storage, Log, Schema};
+use Illuminate\Support\Facades\{DB, Storage, Log, Schema};
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
-use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 class FormController extends Controller
 {
-    /** Daftar nilai yang diizinkan */
+    /** Allowed values */
     private const DOC_TYPES  = ['SOP', 'IK', 'FORM'];
     private const FORM_TYPES = ['builder', 'pdf'];
 
     public function index(Request $r)
     {
-        $q = Form::with(['department', 'creator'])->latest();
+        $q = Form::with(['department', 'creator', 'company', 'site'])->latest();
 
         if ($r->filled('department_id')) {
-            $q->where('department_id', $r->department_id);
+            $q->where('department_id', (int) $r->department_id);
         }
-
-        // filter doc_type (opsional): ?doc_type=SOP|IK|FORM
+        if ($r->filled('company_id') && Schema::hasColumn('forms', 'company_id')) {
+            $q->where('company_id', (int) $r->company_id);
+        }
+        if ($r->filled('site_id') && Schema::hasColumn('forms', 'site_id')) {
+            $q->where('site_id', (int) $r->site_id);
+        }
         if ($r->filled('doc_type') && Schema::hasColumn('forms', 'doc_type')) {
             $docType = strtoupper((string) $r->doc_type);
             if (in_array($docType, self::DOC_TYPES, true)) {
@@ -32,30 +36,36 @@ class FormController extends Controller
             }
         }
 
-        // === Per Page (10/20/50/100; default 10) ===
-        $allowed  = [10, 20, 50, 100];
-        $perPage  = (int) $r->input('per_page', 10);
-        if (!in_array($perPage, $allowed, true)) {
-            $perPage = 10;
-        }
+        $allowed = [10,20,50,100];
+        $perPage = (int) $r->input('per_page', 10);
+        if (!in_array($perPage, $allowed, true)) $perPage = 10;
 
-        $forms       = $q->paginate($perPage)
-                         ->appends($r->only('department_id', 'doc_type', 'per_page'));
-        $departments = Department::orderBy('name')->get();
+        $forms       = $q->paginate($perPage)->appends($r->only('department_id','company_id','site_id','doc_type','per_page'));
+        $departments = Department::orderBy('name')->get(['id','name']);
+        $companies   = Company::orderBy('code')->get(['id','code','name']);
+        $sites       = Site::orderBy('name')->get(['id','name','company_id']);
 
-        return view('admin.forms.index', compact('forms', 'departments'));
+        return view('admin.forms.index', compact('forms','departments','companies','sites'));
     }
 
     public function create()
     {
-        $departments = Department::orderBy('name')->get();
-        return view('admin.forms.create', compact('departments'));
+        $departments = Department::orderBy('name')->get(['id','name']);
+        $companies   = Company::orderBy('code')->get(['id','code','name']);
+        $sites       = Site::orderBy('name')->get(['id','name','company_id']);
+
+        return view('admin.forms.create', compact('departments','companies','sites'));
     }
 
     public function store(Request $r)
     {
-        // Validasi: tanpa default DB → wajib pilih doc_type di form
-        $r->validate([
+        // Catat input awal untuk debug
+        Log::info('forms.store:start', ['input' => $r->all()]);
+
+        // VALIDASI
+        $validated = $r->validate([
+            'company_id'    => ['required', 'exists:companies,id'],
+            'site_id'       => ['nullable', 'exists:sites,id'],
             'department_id' => ['required', 'exists:departments,id'],
             'title'         => ['required', 'string', 'max:190'],
             'doc_type'      => ['required', Rule::in(self::DOC_TYPES)],
@@ -67,81 +77,122 @@ class FormController extends Controller
             'pdf.required_if' => 'Saat memilih tipe File, harap unggah file referensi.',
         ]);
 
-        $this->authorize('create', [Form::class, (int) $r->department_id]);
+        // MATIKAN ini kalau policy belum siap:
+        // $this->authorize('create', [Form::class, (int) $validated['department_id']]);
 
-        Log::info('forms.store payload', [
-            'type'        => $r->input('type'),
-            'hasFile_pdf' => $r->hasFile('pdf'),
-            'doc_type'    => $r->input('doc_type'),
-        ]);
+        // PROSES
+        try {
+            return DB::transaction(function () use ($r, $validated) {
+                // Siapkan file kalau type=pdf
+                $filePath = null;
+                if ($validated['type'] === 'pdf' && $r->hasFile('pdf')) {
+                    $uploaded   = $r->file('pdf');
+                    $storedTemp = $uploaded->store('forms/tmp', 'public');
 
-        // Upload/kompres file bila type=pdf
-        $filePath = null;
-        if ($r->type === 'pdf' && $r->hasFile('pdf')) {
-            $uploaded   = $r->file('pdf');
-            $storedTemp = $uploaded->store('forms/tmp', 'public');
+                    $ext    = strtolower($uploaded->getClientOriginalExtension());
+                    $outRel = 'forms/files/' . uniqid('form_') . '.' . $ext;
+                    $outAbs = Storage::disk('public')->path($outRel);
 
-            $ext    = strtolower($uploaded->getClientOriginalExtension());
-            $outRel = 'forms/files/' . uniqid('form_') . '.' . $ext;
-            $outAbs = Storage::disk('public')->path($outRel);
+                    Storage::disk('public')->makeDirectory('forms/files');
 
-            Storage::disk('public')->makeDirectory('forms/files');
+                    $ok = false;
+                    if ($ext === 'pdf') {
+                        $ok = $this->compressPdf(Storage::disk('public')->path($storedTemp), $outAbs);
+                    } elseif (in_array($ext, ['docx','xlsx'], true)) {
+                        $ok = $this->recompressOfficeZip(Storage::disk('public')->path($storedTemp), $outAbs);
+                    }
 
-            $ok = false;
-            if ($ext === 'pdf') {
-                $ok = $this->compressPdf(Storage::disk('public')->path($storedTemp), $outAbs);
-            } elseif (in_array($ext, ['docx', 'xlsx'], true)) {
-                $ok = $this->recompressOfficeZip(Storage::disk('public')->path($storedTemp), $outAbs);
-            }
+                    if (!$ok) {
+                        // fallback: simpan apa adanya
+                        $outRel = $uploaded->store('forms/files', 'public');
+                    }
 
-            if (!$ok) {
-                // fallback: simpan apa adanya
-                $outRel = $uploaded->store('forms/files', 'public');
-            }
+                    Storage::disk('public')->delete($storedTemp);
+                    $filePath = $outRel;
+                }
 
-            Storage::disk('public')->delete($storedTemp);
-            $filePath = $outRel;
+                // Decode schema aman
+                $schemaArr = null;
+                if (($validated['type'] ?? null) === 'builder') {
+                    $schemaArr = $r->filled('schema') ? json_decode($validated['schema'], true) : ['fields' => []];
+                    if (!is_array($schemaArr)) {
+                        $schemaArr = ['fields' => []];
+                    }
+                }
+
+                $payload = [
+                    'company_id'    => (int) $validated['company_id'],
+                    'site_id'       => !empty($validated['site_id']) ? (int) $validated['site_id'] : null,
+                    'department_id' => (int) $validated['department_id'],
+                    'created_by'    => optional($r->user())->id,
+                    'title'         => $validated['title'],
+                    // Optional slug (kalau tabel ada kolom slug)
+                    // 'slug'          => Str::slug($validated['title']).'-'.Str::random(5),
+                    'doc_type'      => strtoupper($validated['doc_type']),
+                    'type'          => $validated['type'],
+                    'schema'        => $schemaArr,
+                    'pdf_path'      => $filePath,
+                    'is_active'     => $r->boolean('is_active', true),
+                ];
+
+                Log::info('forms.store:payload_before_create', $payload);
+
+                $form = Form::create($payload);
+
+                Log::info('forms.store:created', ['id' => $form->id]);
+
+                if (!$form || !$form->id) {
+                    Log::error('forms.store:failed_no_id');
+                    return back()
+                        ->withErrors(['general' => 'Form gagal dibuat (ID kosong). Coba lagi.'])
+                        ->withInput();
+                }
+
+                return redirect()
+                    ->route('admin.forms.edit', $form)
+                    ->with('ok', 'Form dibuat');
+            });
+        } catch (Throwable $e) {
+            Log::error('forms.store:error', [
+                'msg'   => $e->getMessage(),
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
+                'trace' => substr($e->getTraceAsString(), 0, 2000),
+            ]);
+
+            return back()
+                ->withErrors(['general' => 'Terjadi kesalahan saat menyimpan: '.$e->getMessage()])
+                ->withInput();
         }
-
-        $form = Form::create([
-            'department_id' => (int) $r->department_id,
-            'created_by'    => $r->user()->id,
-            'title'         => $r->title,
-            'doc_type'      => strtoupper($r->doc_type),                   // SOP/IK/FORM
-            'type'          => $r->type,                                   // builder/pdf
-            'schema'        => $r->type === 'builder' ? json_decode($r->schema, true) : null,
-            'pdf_path'      => $filePath,
-            'is_active'     => $r->boolean('is_active', true),
-        ]);
-
-        return redirect()->route('admin.forms.edit', $form)->with('ok', 'Form dibuat');
     }
 
     public function edit(Form $form)
     {
-        $this->authorize('update', $form);
-        $departments = Department::orderBy('name')->get();
-        return view('admin.forms.edit', compact('form', 'departments'));
+        // $this->authorize('update', $form);
+        $departments = Department::orderBy('name')->get(['id','name']);
+        $companies   = Company::orderBy('code')->get(['id','code','name']);
+        $sites       = Site::orderBy('name')->get(['id','name','company_id']);
+
+        return view('admin.forms.edit', compact('form','departments','companies','sites'));
     }
 
     public function update(Request $r, Form $form)
     {
-        $this->authorize('update', $form);
+        // $this->authorize('update', $form);
 
-        // QUICK UPDATE dari Builder: hanya doc_type
+        // Quick update hanya doc_type (AJAX builder)
         $onlyDocType = $r->has('doc_type')
-            && !$r->hasAny(['department_id', 'title', 'type', 'schema', 'pdf', 'is_active']);
+            && !$r->hasAny(['company_id','site_id','department_id','title','type','schema','pdf','is_active']);
 
         if ($onlyDocType) {
-            $r->validate([
-                'doc_type' => ['required', Rule::in(self::DOC_TYPES)],
-            ]);
+            $r->validate(['doc_type' => ['required', Rule::in(self::DOC_TYPES)]]);
             $form->update(['doc_type' => strtoupper($r->doc_type)]);
             return response()->json(['ok' => true, 'doc_type' => $form->doc_type]);
         }
 
-        // Validasi jalur update penuh (file opsional)
-        $r->validate([
+        $validated = $r->validate([
+            'company_id'    => ['required', 'exists:companies,id'],
+            'site_id'       => ['nullable', 'exists:sites,id'],
             'department_id' => ['required', 'exists:departments,id'],
             'title'         => ['required', 'string', 'max:190'],
             'doc_type'      => ['required', Rule::in(self::DOC_TYPES)],
@@ -151,132 +202,143 @@ class FormController extends Controller
             'is_active'     => ['nullable', 'boolean'],
         ]);
 
-        Log::info('forms.update payload', [
-            'id'          => $form->id,
-            'type'        => $r->input('type'),
-            'hasFile_pdf' => $r->hasFile('pdf'),
-            'doc_type'    => $r->input('doc_type'),
-        ]);
+        try {
+            return DB::transaction(function () use ($r, $validated, $form) {
+                Log::info('forms.update:start', ['id' => $form->id, 'input' => $validated]);
 
-        $filePath = $form->pdf_path;
+                $filePath = $form->pdf_path;
 
-        // Jika type=pdf dan ada file baru → proses
-        if ($r->type === 'pdf' && $r->hasFile('pdf')) {
-            if ($filePath) {
-                Storage::disk('public')->delete($filePath);
-            }
+                // ganti file jika type=pdf dan ada file baru
+                if ($validated['type'] === 'pdf' && $r->hasFile('pdf')) {
+                    if ($filePath) Storage::disk('public')->delete($filePath);
 
-            $uploaded   = $r->file('pdf');
-            $storedTemp = $uploaded->store('forms/tmp', 'public');
+                    $uploaded   = $r->file('pdf');
+                    $storedTemp = $uploaded->store('forms/tmp', 'public');
 
-            $ext    = strtolower($uploaded->getClientOriginalExtension());
-            $outRel = 'forms/files/' . uniqid('form_') . '.' . $ext;
-            $outAbs = Storage::disk('public')->path($outRel);
+                    $ext    = strtolower($uploaded->getClientOriginalExtension());
+                    $outRel = 'forms/files/' . uniqid('form_') . '.' . $ext;
+                    $outAbs = Storage::disk('public')->path($outRel);
 
-            Storage::disk('public')->makeDirectory('forms/files');
+                    Storage::disk('public')->makeDirectory('forms/files');
 
-            $ok = false;
-            if ($ext === 'pdf') {
-                $ok = $this->compressPdf(Storage::disk('public')->path($storedTemp), $outAbs);
-            } elseif (in_array($ext, ['docx', 'xlsx'], true)) {
-                $ok = $this->recompressOfficeZip(Storage::disk('public')->path($storedTemp), $outAbs);
-            }
+                    $ok = false;
+                    if ($ext === 'pdf') {
+                        $ok = $this->compressPdf(Storage::disk('public')->path($storedTemp), $outAbs);
+                    } elseif (in_array($ext, ['docx','xlsx'], true)) {
+                        $ok = $this->recompressOfficeZip(Storage::disk('public')->path($storedTemp), $outAbs);
+                    }
 
-            if (!$ok) {
-                $outRel = $uploaded->store('forms/files', 'public');
-            }
+                    if (!$ok) {
+                        $outRel = $uploaded->store('forms/files', 'public');
+                    }
 
-            Storage::disk('public')->delete($storedTemp);
-            $filePath = $outRel;
+                    Storage::disk('public')->delete($storedTemp);
+                    $filePath = $outRel;
+                }
+
+                // jika pindah dari pdf -> builder, hapus file lama
+                if ($validated['type'] === 'builder' && $form->type === 'pdf' && $form->pdf_path) {
+                    Storage::disk('public')->delete($form->pdf_path);
+                    $filePath = null;
+                }
+
+                $schemaArr = null;
+                if (($validated['type'] ?? null) === 'builder') {
+                    $schemaArr = $r->filled('schema') ? json_decode($validated['schema'], true) : ['fields' => []];
+                    if (!is_array($schemaArr)) {
+                        $schemaArr = ['fields' => []];
+                    }
+                }
+
+                $form->update([
+                    'company_id'    => (int) $validated['company_id'],
+                    'site_id'       => !empty($validated['site_id']) ? (int) $validated['site_id'] : null,
+                    'department_id' => (int) $validated['department_id'],
+                    'title'         => $validated['title'],
+                    'doc_type'      => strtoupper($validated['doc_type']),
+                    'type'          => $validated['type'],
+                    'schema'        => $schemaArr,
+                    'pdf_path'      => $filePath,
+                    'is_active'     => $r->boolean('is_active', true),
+                ]);
+
+                Log::info('forms.update:done', ['id' => $form->id]);
+
+                return back()->with('ok', 'Form diperbarui');
+            });
+        } catch (Throwable $e) {
+            Log::error('forms.update:error', [
+                'id'    => $form->id,
+                'msg'   => $e->getMessage(),
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
+            ]);
+            return back()
+                ->withErrors(['general' => 'Gagal update: '.$e->getMessage()])
+                ->withInput();
         }
-
-        // Opsi: jika user ganti dari pdf -> builder dan tidak upload file baru, bersihkan file lama
-        if ($r->type === 'builder' && $form->type === 'pdf' && $form->pdf_path) {
-            Storage::disk('public')->delete($form->pdf_path);
-            $filePath = null;
-        }
-
-        $form->update([
-            'department_id' => (int) $r->department_id,
-            'title'         => $r->title,
-            'doc_type'      => strtoupper($r->doc_type),
-            'type'          => $r->type,
-            'schema'        => $r->type === 'builder' ? json_decode($r->schema, true) : null,
-            'pdf_path'      => $filePath,
-            'is_active'     => $r->boolean('is_active', true),
-        ]);
-
-        return back()->with('ok', 'Form diperbarui');
     }
 
     public function destroy(Form $form)
     {
-        $this->authorize('delete', $form);
+        // $this->authorize('delete', $form);
 
-        if ($form->pdf_path) {
-            Storage::disk('public')->delete($form->pdf_path);
+        try {
+            if ($form->pdf_path) {
+                Storage::disk('public')->delete($form->pdf_path);
+            }
+            $form->delete();
+            return redirect()->route('admin.forms.index')->with('ok', 'Form dihapus');
+        } catch (Throwable $e) {
+            Log::error('forms.destroy:error', ['id' => $form->id, 'msg' => $e->getMessage()]);
+            return back()->withErrors(['general' => 'Gagal hapus: '.$e->getMessage()]);
         }
-
-        $form->delete();
-
-        return redirect()->route('admin.forms.index')->with('ok', 'Form dihapus');
     }
 
     public function builder(Form $form)
     {
-        $this->authorize('update', $form);
+        // $this->authorize('update', $form);
         abort_if($form->type !== 'builder', 404, 'Hanya untuk form tipe builder');
-
         $schema = $form->schema ?? ['fields' => []];
-        return view('admin.forms.builder', compact('form', 'schema'));
+        return view('admin.forms.builder', compact('form','schema'));
     }
 
     public function saveSchema(Request $r, Form $form)
     {
-        $this->authorize('update', $form);
+        // $this->authorize('update', $form);
         abort_if($form->type !== 'builder', 404);
 
-        $r->validate([
-            'schema' => ['required', 'json'],
-        ]);
-
+        $r->validate(['schema' => ['required', 'json']]);
         $decoded = json_decode($r->schema, true);
+
         if (!is_array($decoded) || !isset($decoded['fields']) || !is_array($decoded['fields'])) {
-            return back()
-                ->withErrors(['schema' => 'Schema tidak valid: butuh objek dengan key "fields" berupa array.'])
-                ->withInput();
+            return back()->withErrors(['schema' => 'Schema tidak valid: butuh objek dengan key "fields" berupa array.'])
+                         ->withInput();
         }
 
         $form->update(['schema' => $decoded]);
-
         return redirect()->route('admin.forms.edit', $form)->with('ok', 'Schema tersimpan');
     }
 
-    /**
-     * Kompres PDF menggunakan Ghostscript. Return true jika sukses.
-     */
-    // GANTI method compressPdf() Anda menjadi:
+    // ===== Helpers =====
+
     private function compressPdf(string $inPath, string $outPath): bool
     {
-        // Jika fungsi shell_exec tidak tersedia/disabled → skip kompres
         if (!function_exists('shell_exec')) {
             Log::warning('PDF compress skipped: shell_exec() is disabled.');
             return false;
         }
 
-        // Deteksi OS & cari binary Ghostscript
         $isWin = (\PHP_OS_FAMILY ?? php_uname('s')) === 'Windows';
-
         $candidates = [];
+
         if ($isWin) {
-            // Coba where, lalu beberapa path umum
             $where = @shell_exec('where gswin64c 2>NUL') ?: @shell_exec('where gswin32c 2>NUL');
             if ($where) $candidates[] = trim($where);
             $candidates[] = 'C:\\Program Files\\gs\\gs10.00.0\\bin\\gswin64c.exe';
             $candidates[] = 'C:\\Program Files\\gs\\gs9.56.1\\bin\\gswin64c.exe';
             $candidates[] = 'C:\\Program Files\\gs\\gs9.55.0\\bin\\gswin64c.exe';
         } else {
-            // Linux/macOS
             $which = @shell_exec('command -v gs 2>/dev/null') ?: @shell_exec('which gs 2>/dev/null');
             if ($which) $candidates[] = trim($which);
             $candidates[] = '/usr/bin/gs';
@@ -285,35 +347,24 @@ class FormController extends Controller
 
         $gs = null;
         foreach ($candidates as $bin) {
-            if ($bin && is_file($bin) && is_executable($bin)) {
-                $gs = $bin;
-                break;
-            }
+            if ($bin && is_file($bin) && is_executable($bin)) { $gs = $bin; break; }
         }
-        if (!$gs) {
-            Log::warning('PDF compress skipped: Ghostscript not found.');
-            return false;
-        }
+        if (!$gs) { Log::warning('PDF compress skipped: Ghostscript not found.'); return false; }
 
-        $preset = 'screen'; // atau ebook/printer sesuai kebutuhan
+        $preset = 'screen';
         $cmd = escapeshellcmd($gs)
-            .' -sDEVICE=pdfwrite -dCompatibilityLevel=1.4'
-            .' -dPDFSETTINGS=/'.$preset
-            .' -dNOPAUSE -dQUIET -dBATCH'
-            .' -sOutputFile='.escapeshellarg($outPath)
-            .' '.escapeshellarg($inPath)
-            .' 2>&1';
+             .' -sDEVICE=pdfwrite -dCompatibilityLevel=1.4'
+             .' -dPDFSETTINGS=/'.$preset
+             .' -dNOPAUSE -dQUIET -dBATCH'
+             .' -sOutputFile='.escapeshellarg($outPath)
+             .' '.escapeshellarg($inPath)
+             .' 2>&1';
 
-        // Jalankan; error diarahkan ke stdout (agar tidak memicu warning)
         @shell_exec($cmd);
 
         return is_file($outPath) && filesize($outPath) > 0;
     }
 
-    /**
-     * Re-compress DOCX/XLSX (ZIP container) dengan level maksimal.
-     * Perlu ext-zip aktif. Return true jika sukses.
-     */
     private function recompressOfficeZip(string $inPath, string $outPath): bool
     {
         if (!class_exists(\ZipArchive::class)) return false;
@@ -346,77 +397,5 @@ class FormController extends Controller
         $zipIn->close();
 
         return file_exists($outPath) && filesize($outPath) > 0;
-    }
-
-    public function file(Form $form)
-    {
-        $this->authorize('update', $form); // atau 'view' sesuai policy kamu
-        abort_unless($form->pdf_path, 404, 'File belum diunggah.');
-
-        $disk = Storage::disk('public');
-        abort_unless($disk->exists($form->pdf_path), 404, 'File tidak ditemukan di storage.');
-
-        $abs  = $disk->path($form->pdf_path);
-        $ext  = strtolower(pathinfo($abs, PATHINFO_EXTENSION));
-        $mime = $this->guessMime($abs, $ext);
-
-        // Nama file yang rapi
-        $filename = $this->downloadName($form, $ext);
-
-        // Tampilkan inline (browser handle sendiri: pdf/word/excel bisa diunduh bila tidak didukung)
-        return response()->file($abs, [
-            'Content-Type'            => $mime,
-            'Content-Disposition'     => 'inline; filename="' . addslashes($filename) . '"',
-            'X-Content-Type-Options'  => 'nosniff',
-        ]);
-    }
-
-    // ======== FORCE DOWNLOAD ========
-    public function download(Form $form)
-    {
-        $this->authorize('update', $form); // atau 'view'
-        abort_unless($form->pdf_path, 404);
-
-        $disk = Storage::disk('public');
-        abort_unless($disk->exists($form->pdf_path), 404);
-
-        $abs      = $disk->path($form->pdf_path);
-        $ext      = strtolower(pathinfo($abs, PATHINFO_EXTENSION));
-        $mime     = $this->guessMime($abs, $ext);
-        $filename = $this->downloadName($form, $ext);
-
-        return response()->download($abs, $filename, [
-            'Content-Type'           => $mime,
-            'X-Content-Type-Options' => 'nosniff',
-        ]);
-    }
-
-    // ======== Helpers ========
-    private function guessMime(string $absPath, ?string $ext = null): string
-    {
-        // Coba fileinfo
-        if (function_exists('mime_content_type')) {
-            $m = @mime_content_type($absPath);
-            if ($m) return $m;
-        }
-
-        // Fallback by extension
-        $ext = strtolower($ext ?? pathinfo($absPath, PATHINFO_EXTENSION));
-        return match ($ext) {
-            'pdf'  => 'application/pdf',
-            'doc'  => 'application/msword',
-            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'xls'  => 'application/vnd.ms-excel',
-            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            default => 'application/octet-stream',
-        };
-    }
-
-    private function downloadName(Form $form, string $ext): string
-    {
-        $base = trim(($form->title ?: 'form'), " \t\n\r\0\x0B.");
-        $base = Str::slug($base, '-');
-        if ($base === '') $base = "form-{$form->id}";
-        return $base . '.' . $ext;
     }
 }

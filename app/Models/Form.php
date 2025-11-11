@@ -67,17 +67,31 @@ class Form extends Model
     }
 
     // ===== Relasi =====
-    public function department() { return $this->belongsTo(Department::class); }
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 
-    public function site() { return $this->belongsTo(Site::class, 'site_id'); }
+    public function site()
+    {
+        return $this->belongsTo(Site::class, 'site_id');
+    }
 
-    public function creator() { return $this->belongsTo(User::class, 'created_by'); }
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 
-    public function entries() { return $this->hasMany(FormEntry::class); }
+    public function entries()
+    {
+        return $this->hasMany(FormEntry::class);
+    }
 
     // ===== Scopes =====
     public function scopeActive($q, bool $onlyActive = true)
-    { return $onlyActive ? $q->where('is_active', true) : $q; }
+    {
+        return $onlyActive ? $q->where('is_active', true) : $q;
+    }
 
     public function scopeSearch($q, ?string $term)
     {
@@ -86,13 +100,23 @@ class Form extends Model
 
         return $q->where(function ($w) use ($term) {
             $w->where('title', 'like', "%{$term}%")
-              ->orWhere('description', 'like', "%{$term}%"); // pastikan kolom description ada
+                ->orWhere('description', 'like', "%{$term}%"); // pastikan kolom description ada
         });
     }
 
     public function scopeForSite($q, $siteId)
-    { return $siteId ? $q->where('site_id', $siteId) : $q; }
+    {
+        return $siteId ? $q->where('site_id', $siteId) : $q;
+    }
 
     public function scopeForDepartment($q, $deptId)
-    { return $deptId ? $q->where('department_id', $deptId) : $q; }
+    {
+        return $deptId ? $q->where('department_id', $deptId) : $q;
+    }
+
+    
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
 }
