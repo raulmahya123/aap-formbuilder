@@ -75,7 +75,7 @@ Route::get('/pubfile/{path}', function (string $path) {
     $absolute = $disk->path($path);
     $mime = @mime_content_type($absolute) ?: ($disk->mimeType($path) ?? 'application/octet-stream');
     return response()->file($absolute, ['Content-Type' => $mime, 'X-Content-Type-Options' => 'nosniff']);
-})->where('path','.*')->name('pubfile.stream');
+})->where('path', '.*')->name('pubfile.stream');
 
 // Download (attachment)
 Route::get('/pubfile-dl/{path}', function (string $path) {
@@ -83,7 +83,7 @@ Route::get('/pubfile-dl/{path}', function (string $path) {
     $disk = Storage::disk('public');
     abort_unless($disk->exists($path), 404);
     return response()->download($disk->path($path), basename($path));
-})->where('path','.*')->name('pubfile.download');
+})->where('path', '.*')->name('pubfile.download');
 
 Route::middleware('auth')->group(function () {
 
@@ -230,8 +230,7 @@ Route::middleware('auth')->group(function () {
             Route::delete('site-access', [UserSiteAccessController::class, 'destroySelected'])->name('site_access.destroy_selected');
         });
 
-        // Operasional
-        // Operasional Daily (admin pasti boleh; non-admin bisa kamu longgarkan via Gate kalau perlu)
+        // Operasional Daily (admin)
         Route::get('daily',        [AdminDailyInputController::class, 'index'])
             ->name('daily.index')
             ->middleware('can:is-admin'); // listing hanya admin (opsional)
@@ -244,8 +243,16 @@ Route::middleware('auth')->group(function () {
             ->name('daily.store')
             ->middleware('can:daily.manage'); // StoreDailyRequest juga meng-autorize
 
-        // Rekap
-        Route::get('reports/monthly', [AdminReportController::class, 'report'])->name('reports.monthly');
+        // Rekap utama (pakai aggregate.blade.php)
+        Route::get('reports/monthly', [AdminReportController::class, 'report'])
+            ->name('reports.monthly');
+
+        // ==== Edit / Override Total (khusus super_admin) ====
+        Route::get('reports/totals/edit', [AdminReportController::class, 'editTotal'])
+            ->name('report-totals.edit');   // → admin.report-totals.edit
+
+        Route::post('reports/totals/update', [AdminReportController::class, 'updateTotal'])
+            ->name('report-totals.update'); // → admin.report-totals.update
 
         // ==============================
         // DOCUMENTS

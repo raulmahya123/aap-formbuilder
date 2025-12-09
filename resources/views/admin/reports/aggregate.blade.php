@@ -44,6 +44,15 @@
 @section('content')
 @php
   use Illuminate\Support\Carbon;
+  use Illuminate\Support\Facades\Auth;
+  use Illuminate\Support\Facades\Log;
+
+  // ===== cek khusus super admin =====
+  $u = Auth::user();
+  $isSuperAdmin = $u && (
+      (method_exists($u, 'hasRole') && $u->hasRole('super_admin')) ||
+      (($u->role ?? $u->role_key ?? null) === 'super_admin')
+  );
 
   // ====== SELALU gunakan Asia/Jakarta untuk semua perhitungan tanggal di view ======
   $tz = 'Asia/Jakarta';
@@ -63,6 +72,19 @@
       'year'  => (string)$yearVal,
       default => sprintf('%02d/%d',$monthVal,$yearVal)
   };
+
+  // ============= LOG KONTEKS REKAP =============
+  Log::info('AGG VIEW: load aggregate page', [
+      'user_id'   => optional($u)->id,
+      'scope'     => $scopeNow,
+      'period'    => $periodSafe,
+      'site_id'   => $siteId ?? null,
+      'date'      => request('date'),
+      'week'      => request('week'),
+      'month'     => request('month'),
+      'year'      => request('year'),
+      'groups'    => isset($groups) ? $groups->count() : null,
+  ]);
 @endphp
 
 <h1 class="text-2xl font-bold mb-4 text-maroon-700">Rekap — {{ $periodSafe }}</h1>
@@ -157,6 +179,7 @@ $toFloat = function($raw){
   if (substr_count($s, '.')>1){ $p=strrpos($s,'.'); $s=str_replace('.','',substr($s,0,$p)).substr($s,$p); }
   return is_numeric($s) ? (float)$s : 0.0;
 };
+
 $isLaggingInd = fn($ind)=>
   (bool)($ind->is_lagging ?? false) ||
   strtolower((string)($ind->type ?? $ind->category ?? ''))==='lagging' ||
@@ -175,7 +198,7 @@ $makeThresholdLabel = function($thrRaw, $thrFloat) {
 };
 
 /** ====== Label default per scope ====== */
-$makeScopeLabels = function($scope, $month = null) {
+$makeScopeLabels = function($scope, $month = null) use ($tz) {
   $m = (int)($month ?: now($tz)->month);
   switch ($scope) {
     case 'year':  return range(1,12);
@@ -269,7 +292,7 @@ $series  = $series  ?? null;
             var isMonth  = scopeNow === 'month';
             var rawLabels = @json(array_values($lbls));
 
-            var monthShort = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+            var monthShort = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Des'];
             var weekdayShort = ['Sen','Sel','Rab','Kam','Jum'];
 
             var labels = rawLabels.map(function(v,i){
@@ -624,6 +647,9 @@ $series  = $series  ?? null;
           <th class="px-3 py-2 text-right w-40">Total</th>
           <th class="px-3 py-2 text-right w-28">Threshold</th>
           <th class="px-3 py-2 text-left w-24">Unit</th>
+          @if($isSuperAdmin)
+            <th class="px-3 py-2 text-center w-32">Aksi</th>
+          @endif
         </tr>
       </thead>
       <tbody class="divide-y">
@@ -634,8 +660,23 @@ $series  = $series  ?? null;
             $lateVal=$toFloat($row['late'] ?? 0);
             $totalVal=$toFloat($row['total'] ?? ($onVal+$lateVal));
             $isBaseLocal=$isBase($ind);
-            if($isBaseLocal){ $thrDisp='-'; $isOver=false; }
-            else{
+            $thrNum = null;
+
+            // route param untuk edit total (override) – dipakai di kolom Total & tombol "Edit Total"
+            $editTotalParams = [
+                'indicator_id' => $ind->id,
+                'group_code'   => $g->code,
+                'scope'        => $scopeNow,
+                'date'         => request('date'),
+                'week'         => request('week'),
+                'month'        => request('month'),
+                'year'         => request('year'),
+                'site_id'      => $siteId,
+            ];
+
+            if($isBaseLocal){
+              $thrDisp='-'; $isOver=false;
+            } else {
               $thrRaw=$row['threshold'] ?? null;
               $thrNum=$thrRaw===null ? null : $toFloat($thrRaw);
               $thrDisp=($thrRaw===null || trim((string)$thrRaw)==='')
@@ -643,6 +684,29 @@ $series  = $series  ?? null;
                 : (fmod((float)$thrNum,1.0)==0.0 ? number_format((float)$thrNum,0,',','.') : number_format((float)$thrNum,2,',','.'));
               $isOver=($thrNum !== null) && ($totalVal > $thrNum);
             }
+
+            // ============= LOG PER BARIS =============
+            Log::info('AGG VIEW: row total', [
+                'group_code'      => $g->code,
+                'group_name'      => $g->name,
+                'indicator_id'    => $ind->id,
+                'indicator_code'  => $ind->code ?? null,
+                'indicator_name'  => $ind->name,
+                'scope'           => $scopeNow,
+                'site_id'         => $siteId ?? null,
+                'date'            => request('date'),
+                'week'            => request('week'),
+                'month'           => request('month'),
+                'year'            => request('year'),
+                'on_time'         => $onVal,
+                'late'            => $lateVal,
+                'totalVal'        => $totalVal,
+                'raw_row'         => $row,
+                'threshold_raw'   => $row['threshold'] ?? null,
+                'threshold_num'   => $thrNum,
+                'is_base'         => $isBaseLocal,
+                'is_over_target'  => $isOver ?? null,
+            ]);
           @endphp
           <tr class="hover:bg-gray-50">
             <td class="px-3 py-2">{{ $ind->order_index }}</td>
@@ -652,11 +716,41 @@ $series  = $series  ?? null;
                 <div class="text-xs text-gray-500 font-mono">= {{ $ind->formula }}</div>
               @endif
             </td>
+
+            {{-- TOTAL: kalau super_admin, angka bisa diklik untuk ubah total --}}
             <td class="px-3 py-2 text-right font-bold {{ (!$isBaseLocal && $isOver) ? 'text-rose-600' : '' }}">
-              {{ number_format($totalVal, fmod($totalVal,1.0)==0.0 ? 0 : 2, ',', '.') }}
+              @if($isSuperAdmin)
+                <a href="{{ route('admin.report-totals.edit', $editTotalParams) }}"
+                   class="underline decoration-dotted underline-offset-2 hover:text-maroon-700">
+                  {{ number_format($totalVal, fmod($totalVal,1.0)==0.0 ? 0 : 2, ',', '.') }}
+                </a>
+              @else
+                {{ number_format($totalVal, fmod($totalVal,1.0)==0.0 ? 0 : 2, ',', '.') }}
+              @endif
             </td>
+
             <td class="px-3 py-2 text-right font-mono">{{ $thrDisp }}</td>
             <td class="px-3 py-2">{{ trim((string)($ind->unit ?? '')) ?: '-' }}</td>
+
+            @if($isSuperAdmin)
+              <td class="px-3 py-2 text-center">
+                <div class="flex flex-col items-center gap-1">
+
+                  {{-- Edit definisi indikator --}}
+                  <a href="{{ route('admin.indicators.edit', $ind->id) }}"
+                     class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border border-maroon-500 text-maroon-700 hover:bg-maroon-50">
+                    Edit Indikator
+                  </a>
+
+                  {{-- Edit / override total agregat (link eksplisit) --}}
+                  <a href="{{ route('admin.report-totals.edit', $editTotalParams) }}"
+                     class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50">
+                    Edit Total
+                  </a>
+
+                </div>
+              </td>
+            @endif
           </tr>
         @endforeach
       </tbody>

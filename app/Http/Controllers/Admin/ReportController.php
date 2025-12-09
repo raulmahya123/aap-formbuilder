@@ -3,13 +3,22 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{IndicatorDaily, IndicatorGroup, Site};
+use App\Models\{
+    IndicatorDaily,
+    IndicatorGroup,
+    Site,
+    Indicator,
+    IndicatorValue
+};
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+    /**
+     * Halaman rekap utama.
+     */
     public function report(Request $r)
     {
         $scope  = $r->string('scope')->lower()->value() ?: 'month'; // day|week|month|year
@@ -30,7 +39,18 @@ class ReportController extends Controller
                     ->orderBy('order_index')
                     ->get();
 
-        // ===== Agregasi (TOTAL / ON-TIME / LATE) per indikator =====
+        // ===== Ambil nilai override bulanan dari IndicatorValue (kalau scope=month & site dipilih) =====
+        $manualValues = collect();
+        if ($scope === 'month' && $siteId) {
+            $manualValues = IndicatorValue::query()
+                ->where('year', $year)
+                ->where('month', $month)
+                ->where('site_id', $siteId)
+                ->get()
+                ->keyBy('indicator_id');
+        }
+
+        // ===== Agregasi (TOTAL / ON-TIME / LATE) per indikator dari IndicatorDaily =====
         $agg = IndicatorDaily::query()
             ->select([
                 'indicator_id',
@@ -44,7 +64,7 @@ class ReportController extends Controller
             ->get()
             ->keyBy('indicator_id');
 
-        // ===== Susun payload $data per group + threshold per indikator =====
+        // ===== Susun payload $data per group + threshold per indikator (TERMASUK override) =====
         $data = [];
         foreach ($groups as $g) {
             foreach ($g->indicators as $ind) {
@@ -53,9 +73,16 @@ class ReportController extends Controller
                 $ontime  = (float) ($row->ontime_total ?? 0);
                 $late    = (float) ($row->late_total ?? 0);
 
+                // kalau scope=month & site dipilih & ada IndicatorValue, pakai itu
+                if ($scope === 'month' && $siteId) {
+                    if ($manual = $manualValues->get($ind->id)) {
+                        $total = (float) $manual->value;
+                    }
+                }
+
                 // simpan threshold original (string/angka/null)
                 $thrRaw = $ind->threshold;
-                
+
                 $data[$g->code][] = [
                     'indicator' => $ind,
                     'value'     => $total,
@@ -81,7 +108,7 @@ class ReportController extends Controller
         $totalLate   = (float) ($sum->late_total ?? 0);
         $totalOntime = (float) ($sum->ontime_total ?? 0);
 
-        // ===== Charts per group =====
+        // ===== Charts per group (optional, tetap dari $data) =====
         $charts = [];
         foreach ($groups as $g) {
             $rows   = $data[$g->code] ?? [];
@@ -135,6 +162,9 @@ class ReportController extends Controller
         ));
     }
 
+    /**
+     * Hitung range tanggal berdasarkan scope.
+     */
     private function resolveRange(string $scope, int $year, int $month, int $week, string $date): array
     {
         switch ($scope) {
@@ -159,5 +189,117 @@ class ReportController extends Controller
                 $end   = $start->copy()->endOfMonth()->endOfDay();
                 return [$start->toDateString(), $end->toDateString(), $start->isoFormat('MMMM YYYY')];
         }
+    }
+
+    /**
+     * Form edit / override total agregat (dipanggil dari tombol "Edit Total").
+     * Untuk saat ini: hanya scope=month dan site wajib dipilih.
+     */
+    public function editTotal(Request $request)
+    {
+        $user = $request->user();
+
+        // cek super_admin sama seperti di Blade
+        $isSuperAdmin = $user && (
+            (method_exists($user, 'hasRole') && $user->hasRole('super_admin')) ||
+            (($user->role ?? $user->role_key ?? null) === 'super_admin')
+        );
+
+        abort_unless($isSuperAdmin, 403, 'Hanya super admin yang boleh mengedit total.');
+
+        $scope = $request->string('scope')->lower()->value() ?: 'month';
+        abort_unless($scope === 'month', 404, 'Override total sementara hanya untuk scope bulanan.');
+
+        $now    = now();
+        $year   = (int) $request->input('year',  $now->year);
+        $month  = (int) $request->input('month', $now->month);
+        $date   = $request->input('date', $now->toDateString());
+        $week   = (int) $request->input('week', (int)$now->isoWeek);
+
+        [, , $periodLabel] = $this->resolveRange($scope, $year, $month, $week, $date);
+
+        // context indikator + site
+        $indicatorId = (int) $request->input('indicator_id');
+        $groupCode   = $request->input('group_code');
+        $siteId      = (int) $request->input('site_id');
+
+        abort_unless($siteId, 400, 'Pilih site terlebih dahulu untuk override total.');
+
+        $indicator = $indicatorId ? Indicator::find($indicatorId) : null;
+        $site      = $siteId ? Site::find($siteId) : null;
+
+        // ambil nilai existing dari IndicatorValue
+        $iv = IndicatorValue::where('indicator_id', $indicatorId)
+                ->where('site_id', $siteId)
+                ->where('year', $year)
+                ->where('month', $month)
+                ->first();
+
+        $existingTotal = $iv?->value ?? 0;
+
+        return view('admin.reports.edit_total', [
+            'indicator'      => $indicator,
+            'site'           => $site,
+            'groupCode'      => $groupCode,
+            'scope'          => $scope,
+            'date'           => $date,
+            'week'           => $week,
+            'month'          => $month,
+            'year'           => $year,
+            'siteId'         => $siteId,
+            'periodLabel'    => $periodLabel,
+            'existingTotal'  => $existingTotal,
+        ]);
+    }
+
+    /**
+     * Simpan nilai total override ke IndicatorValue.
+     */
+    public function updateTotal(Request $request)
+    {
+        $user = $request->user();
+
+        $isSuperAdmin = $user && (
+            (method_exists($user, 'hasRole') && $user->hasRole('super_admin')) ||
+            (($user->role ?? $user->role_key ?? null) === 'super_admin')
+        );
+
+        abort_unless($isSuperAdmin, 403, 'Hanya super admin yang boleh mengedit total.');
+
+        $data = $request->validate([
+            'indicator_id' => 'required|integer|exists:indicators,id',
+            'group_code'   => 'required|string',
+            'scope'        => 'required|string|in:month', // sementara hanya month
+            'date'         => 'nullable|date',
+            'week'         => 'nullable|integer',
+            'month'        => 'required|integer|between:1,12',
+            'year'         => 'required|integer',
+            'site_id'      => 'required|integer|exists:sites,id',
+            'total'        => 'required|numeric',
+        ]);
+
+        // Simpan / update ke IndicatorValue
+        $iv = IndicatorValue::updateOrCreate(
+            [
+                'indicator_id' => $data['indicator_id'],
+                'site_id'      => $data['site_id'],
+                'year'         => $data['year'],
+                'month'        => $data['month'],
+            ],
+            [
+                'value'        => $data['total'],
+            ]
+        );
+
+        return redirect()
+            ->route('admin.reports.monthly', [
+                'scope'   => $data['scope'],
+                'date'    => $data['date'],
+                'week'    => $data['week'],
+                'month'   => $data['month'],
+                'year'    => $data['year'],
+                'site_id' => $data['site_id'],
+            ])
+            ->with('status', 'Total indikator berhasil di-override.');
     }
 }

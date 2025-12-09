@@ -8,6 +8,7 @@ use App\Models\Indicator;
 use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 
 class IndicatorDailyController extends Controller
 {
@@ -19,14 +20,17 @@ class IndicatorDailyController extends Controller
     private function allowedSiteIds(?\App\Models\User $user): ?array
     {
         if (!$user) return [];
+
         // Jika punya helper isAdmin() yang mencakup super_admin
         if (method_exists($user, 'isAdmin') && $user->isAdmin()) {
             return null; // semua site
         }
+
         // Ambil dari relasi pivot
         if (method_exists($user, 'sites')) {
             return $user->sites()->pluck('sites.id')->all();
         }
+
         return []; // kalau relasi tidak ada, berarti tidak punya akses
     }
 
@@ -39,6 +43,14 @@ class IndicatorDailyController extends Controller
     {
         $user           = $request->user();
         $allowedSiteIds = $this->allowedSiteIds($user);
+
+        Log::info('DAILY INDEX: listing data', [
+            'user_id'         => optional($user)->id,
+            'allowed_site_ids'=> $allowedSiteIds,
+            'filters'         => $request->only(['site_id', 'indicator_id', 'date']),
+            'url'             => $request->fullUrl(),
+            'ip'              => $request->ip(),
+        ]);
 
         $query = IndicatorDaily::query()
             ->with([
@@ -65,16 +77,29 @@ class IndicatorDailyController extends Controller
         // Daftar site untuk dropdown:
         // - Admin: semua site
         // - User: hanya site yang dia punya akses
-        $sitesQ = Site::query()->orderBy('code')->select(['id','name','code']);
+        $sitesQ = Site::query()
+            ->orderBy('code')
+            ->select(['id', 'name', 'code']);
+
         if (is_array($allowedSiteIds)) {
             $sitesQ->whereIn('id', $allowedSiteIds ?: [-1]); // -1 agar hasil kosong jika tidak ada akses
         }
 
+        $rows = $query->paginate(20)->withQueryString();
+
+        Log::info('DAILY INDEX: result summary', [
+            'user_id'      => optional($user)->id,
+            'rows_count'   => $rows->total(),
+            'current_page' => $rows->currentPage(),
+        ]);
+
         return view('user.daily.index', [
-            'rows'       => $query->paginate(20)->withQueryString(),
+            'rows'       => $rows,
             'sites'      => $sitesQ->get(),
-            'indicators' => Indicator::orderBy('order_index')->orderBy('id')->get(['id','name','code','unit']),
-            'filters'    => $request->only(['site_id','indicator_id','date']),
+            'indicators' => Indicator::orderBy('order_index')
+                ->orderBy('id')
+                ->get(['id', 'name', 'code', 'unit']),
+            'filters'    => $request->only(['site_id', 'indicator_id', 'date']),
         ]);
     }
 
@@ -89,6 +114,14 @@ class IndicatorDailyController extends Controller
             'date'         => ['required', 'date'],
             'value'        => ['required', 'numeric'],
             'note'         => ['nullable', 'string'],
+        ]);
+
+        Log::info('DAILY STORE: incoming request', [
+            'user_id' => optional($request->user())->id,
+            'payload' => $data,
+            'raw'     => $request->all(),
+            'url'     => $request->fullUrl(),
+            'ip'      => $request->ip(),
         ]);
 
         // Otorisasi per-site:
@@ -111,16 +144,38 @@ class IndicatorDailyController extends Controller
             ]
         );
 
+        Log::info('DAILY STORE: row saved/updated', [
+            'row_id'        => $row->id,
+            'site_id'       => $row->site_id,
+            'indicator_id'  => $row->indicator_id,
+            'date'          => $row->date,
+            'value'         => $row->value,
+            'note'          => $row->note,
+        ]);
+
         return redirect()
-            ->route('user.daily.index')
+            ->route('daily.index') // <— sesuai route di web.php
             ->with('ok', "Data harian untuk {$row->indicator->name} tersimpan.");
     }
 
     /**
      * Update data existing.
+     * - Semua user: bisa ubah value + note
+     * - HANYA super_admin: boleh ubah indicator_id
      */
     public function update(Request $request, IndicatorDaily $daily)
     {
+        $user = $request->user();
+
+        Log::info('DAILY UPDATE: called', [
+            'user_id' => optional($user)->id,
+            'daily_id'=> $daily->id,
+            'before'  => $daily->toArray(),
+            'raw'     => $request->all(),
+            'url'     => $request->fullUrl(),
+            'ip'      => $request->ip(),
+        ]);
+
         // Otorisasi per-site (admin lolos; user harus punya akses ke site terkait)
         if (Gate::has('daily.manage')) {
             Gate::authorize('daily.manage', (int) $daily->site_id);
@@ -128,23 +183,61 @@ class IndicatorDailyController extends Controller
             Gate::authorize('site-access',  (int) $daily->site_id);
         }
 
-        $data = $request->validate([
+        // Rules default (untuk semua user)
+        $rules = [
             'value' => ['required', 'numeric'],
             'note'  => ['nullable', 'string'],
+        ];
+
+        // HANYA super_admin yang boleh ganti indicator_id
+        // Sesuaikan cek ini dengan method/role yang kamu pakai di User model
+        $isSuperAdmin = $user && method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin();
+
+        if ($isSuperAdmin) {
+            $rules['indicator_id'] = ['required', 'exists:indicators,id'];
+        }
+
+        $data = $request->validate($rules);
+
+        // Kalau BUKAN super_admin, pastikan indicator_id TIDAK ikut di-update
+        if (!$isSuperAdmin) {
+            unset($data['indicator_id']);
+        }
+
+        Log::info('DAILY UPDATE: payload after validation', [
+            'daily_id'      => $daily->id,
+            'is_super_admin'=> $isSuperAdmin,
+            'update_data'   => $data,
         ]);
 
         $daily->update($data);
+        $daily->refresh();
+
+        Log::info('DAILY UPDATE: after update', [
+            'daily_id' => $daily->id,
+            'after'    => $daily->toArray(),
+        ]);
 
         return redirect()
-            ->route('user.daily.index')
+            ->route('daily.index') // <— sesuai route di web.php
             ->with('ok', "Data harian diperbarui.");
     }
 
     /**
      * Hapus data harian.
      */
-    public function destroy(IndicatorDaily $daily)
+    public function destroy(IndicatorDaily $daily, Request $request)
     {
+        $user = $request->user();
+
+        Log::info('DAILY DESTROY: called', [
+            'user_id'  => optional($user)->id,
+            'daily_id' => $daily->id,
+            'row'      => $daily->toArray(),
+            'url'      => $request->fullUrl(),
+            'ip'       => $request->ip(),
+        ]);
+
         if (Gate::has('daily.manage')) {
             Gate::authorize('daily.manage', (int) $daily->site_id);
         } else {
@@ -153,8 +246,13 @@ class IndicatorDailyController extends Controller
 
         $daily->delete();
 
+        Log::info('DAILY DESTROY: deleted', [
+            'user_id'  => optional($user)->id,
+            'daily_id' => $daily->id,
+        ]);
+
         return redirect()
-            ->route('user.daily.index')
+            ->route('daily.index') // <— sesuai route di web.php
             ->with('ok', "Data harian dihapus.");
     }
 }
