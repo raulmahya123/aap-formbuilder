@@ -2,359 +2,284 @@
 @extends('layouts.app')
 
 @section('content')
-<div
-  x-data="{ dark: (localStorage.getItem('theme') ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark' }"
-  x-init="document.documentElement.classList.toggle('dark', dark)"
-  :class="dark ? 'dark' : ''"
-  class="bg-ivory-100 dark:bg-coal-900 min-h-screen text-coal-800 dark:text-ivory-100">
-  <div class="max-w-6xl mx-auto p-4 sm:p-6">
+<div class="">
 
-    {{-- ====== HEADER + FILTER CHIP (GLOBAL DOC TYPE) ====== --}}
+  <style>
+    .soft-scroll::-webkit-scrollbar {
+      height: 6px
+    }
+
+    .soft-scroll::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px
+    }
+  </style>
+
+  <div class="max-w-7xl mx-auto p-6">
+
     @php
-      $pp            = (int) request('per_page', 10);
-      $activeDoc     = strtoupper(request('doc_type', ''));
-      $activeDept    = request('department_id') ? (string) request('department_id') : null;
-      $activeCompany = request('company_id') ? (string) request('company_id') : null;
-      $activeSite    = request('site_id') ? (string) request('site_id') : null;
+    $pp = (int) request('per_page', 10);
+    $activeDoc = strtoupper(request('doc_type', ''));
+    $activeDept = request('department_id') ? (string) request('department_id') : null;
+    $activeCompany = request('company_id') ? (string) request('company_id') : null;
+    $activeSite = request('site_id') ? (string) request('site_id') : null;
 
-      // Builder untuk link filter atas (global) — pertahankan dept/company/site jika sudah dipilih
-      $makeTop = function (?string $doc) use ($pp, $activeDept, $activeCompany, $activeSite) {
-        return route('admin.forms.index', array_filter([
-          'department_id' => $activeDept ?: null,
-          'company_id'    => $activeCompany ?: null,
-          'site_id'       => $activeSite ?: null,
-          'doc_type'      => $doc ?: null,
-          'per_page'      => $pp,
-        ]));
-      };
+    $makeUrl = function (?string $company = null, ?string $dept = null, ?string $site = null, ?string $doc = null) use ($pp) {
+    return route('admin.forms.index', array_filter([
+    'company_id' => $company ?: null,
+    'department_id' => $dept ?: null,
+    'site_id' => $site ?: null,
+    'doc_type' => $doc ?: null,
+    'per_page' => $pp,
+    ]));
+    };
     @endphp
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
-      <h1 class="text-xl sm:text-2xl font-serif tracking-tight">Form Tersedia</h1>
 
-      <div class="flex items-center gap-2">
-        <a href="{{ $makeTop(null) }}"
-           class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 dark:border-coal-700 hover:bg-slate-100/70 dark:hover:bg-coal-800/60 {{ $activeDoc==='' ? 'ring-2 ring-offset-1 ring-slate-300 dark:ring-slate-500' : '' }}">
-          Semua
-        </a>
-        <a href="{{ $makeTop('SOP') }}"
-           class="text-xs px-3 py-1.5 rounded-lg bg-[color:var(--brand-maroon,#7b1d2e)] text-white hover:brightness-110 {{ $activeDoc==='SOP' ? 'ring-2 ring-offset-1 ring-maroon-300' : '' }}">
+    {{-- HEADER --}}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <span class="w-10 h-10 bg-rose-600 text-white rounded-xl flex items-center justify-center shadow-md">📂</span>
+          Management Form
+        </h1>
+        <p class="text-slate-500 dark:text-slate-400 mt-1">
+          Pilih perusahaan → departemen → site → tipe dokumen
+        </p>
+      </div>
+
+      <div class="flex gap-2 mt-4 sm:mt-0">
+        <a href="{{ $makeUrl($activeCompany,$activeDept,$activeSite,'SOP') }}"
+          class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs hover:brightness-110 shadow">
           SOP
         </a>
-        <a href="{{ $makeTop('IK') }}"
-           class="text-xs px-3 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-500 {{ $activeDoc==='IK' ? 'ring-2 ring-offset-1 ring-amber-300' : '' }}">
+        <a href="{{ $makeUrl($activeCompany,$activeDept,$activeSite,'IK') }}"
+          class="px-4 py-2 rounded-xl bg-amber-500 text-white text-xs hover:brightness-110 shadow">
           IK
         </a>
-        <a href="{{ $makeTop('FORM') }}"
-           class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700 {{ $activeDoc==='FORM' ? 'ring-2 ring-offset-1 ring-slate-300' : '' }}">
+        <a href="{{ $makeUrl($activeCompany,$activeDept,$activeSite,'FORM') }}"
+          class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs hover:brightness-125 shadow">
           FORM
         </a>
 
-        @if(Route::has('admin.forms.create'))
-          @can('create', \App\Models\Form::class)
-            <a href="{{ route('admin.forms.create') }}"
-               class="ml-2 px-3 py-1.5 rounded-lg bg-[color:var(--brand-maroon,#7b1d2e)] text-ivory-50 text-sm hover:brightness-110 transition">
-              + Tambah Form
-            </a>
-          @endcan
-        @endif
+        @can('create', \App\Models\Form::class)
+        <a href="{{ route('admin.forms.create') }}"
+          class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs hover:brightness-110 shadow">
+          + Tambah Form
+        </a>
+        @endcan
       </div>
     </div>
 
-    {{-- ===================================================== --}}
-    {{--  GRID DEPARTEMEN — DITEMPELIN FILTER PERUSAHAAN/SITE  --}}
-    {{-- ===================================================== --}}
-    @isset($departments)
-      @php
-        $pp = (int) request('per_page', 10); // re-ensure
 
-        // Link builder: kombinasi dept + (opsional) company + (opsional) site + (opsional) doc_type
-        $makeDeptCompany = function ($deptId, ?string $companyId, ?string $doc) use ($pp, $activeSite) {
-          return route('admin.forms.index', array_filter([
-            'department_id' => $deptId,
-            'company_id'    => $companyId ?: null,
-            'site_id'       => $activeSite ?: null,
-            'doc_type'      => $doc ?: null,
-            'per_page'      => $pp,
-          ]));
-        };
 
-        // Builder dengan site eksplisit
-        $makeDeptCompanySite = function ($deptId, ?string $companyId, ?string $siteId, ?string $doc) use ($pp) {
-          return route('admin.forms.index', array_filter([
-            'department_id' => $deptId,
-            'company_id'    => $companyId ?: null,
-            'site_id'       => $siteId ?: null,
-            'doc_type'      => $doc ?: null,
-            'per_page'      => $pp,
-          ]));
-        };
 
-        // Map sites by company untuk render chip "Site"
-        /** @var \Illuminate\Support\Collection|\App\Models\Site[] $sites */
-        $sitesByCompany = collect(($sites ?? []))->groupBy(function($s){ return (string)$s->company_id; })->map(function($rows){
-          return $rows->map(fn($s)=>['id'=>(string)$s->id,'name'=>$s->name,'company_id'=>(string)$s->company_id])->values();
-        })->toArray();
+    {{-- STEP 1 - COMPANY --}}
+    @if(isset($companies))
+    <div class="mb-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-8 h-8 bg-rose-600 text-white rounded-xl flex items-center justify-center text-sm shadow">1</span>
+        <h3 class="font-semibold text-lg">Pilih Perusahaan (PT)</h3>
+      </div>
 
-        $colorOf = fn($d) => $d->color ?? '#7b1d2e'; // maroon default
-      @endphp
-
-      <h2 class="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-3">Semua Departemen</h2>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-6">
-        @foreach($departments as $d)
-          @php
-            $isActiveDept = $activeDept === (string) $d->id;
-            $hex          = $colorOf($d);
-          @endphp
-
-          <div class="p-4 rounded-2xl border bg-white dark:bg-coal-900 border-slate-200/70 dark:border-coal-700/70 shadow-sm hover:shadow-md transition">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center gap-3">
-                {{-- Icon bulat berwarna --}}
-                <div class="h-10 w-10 rounded-xl flex items-center justify-center" style="background: {{ $hex }};">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3 3a1 1 0 0 1 1 1v11h12a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm5 4a1 1 0 0 1 1 1v6H7V8a1 1 0 0 1 1-1Zm6-3a1 1 0 0 1 1 1v9h-2V5a1 1 0 0 1 1-1ZM9 10a1 1 0 0 1 1-1h2v5h-2v-4Z"/>
-                  </svg>
-                </div>
-                <div>
-                  <div class="text-xs font-medium text-slate-400">{{ $hex }}</div>
-                  <div class="text-lg font-semibold text-slate-900 dark:text-ivory-100 -mt-0.5">
-                    {{ $d->name }}
-                  </div>
-                  <div class="text-sm text-slate-500">Pilih perusahaan, site & tipe dokumen</div>
-                </div>
-              </div>
-            </div>
-
-            {{-- Baris 1: Filter Perusahaan (chips scrollable) --}}
-            @isset($companies)
-              <div class="mt-3 overflow-x-auto">
-                <div class="flex items-center gap-2 min-w-max">
-                  {{-- Semua Perusahaan di dept ini --}}
-                  <a href="{{ $makeDeptCompany($d->id, null, $activeDoc ?: null) }}"
-                     class="text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-coal-700 hover:bg-slate-100/70 dark:hover:bg-coal-800/60
-                            {{ $isActiveDept && empty($activeCompany) ? 'ring-2 ring-offset-1 ring-slate-300 dark:ring-slate-500' : '' }}">
-                    Semua Perusahaan
-                  </a>
-                  @foreach($companies as $c)
-                    @php
-                      $chosen = $isActiveDept && $activeCompany === (string) $c->id;
-                    @endphp
-                    <a href="{{ $makeDeptCompany($d->id, (string)$c->id, $activeDoc ?: null) }}"
-                       class="text-xs px-2.5 py-1.5 rounded-lg border
-                              {{ $chosen
-                                  ? 'border-[color:var(--brand-maroon,#7b1d2e)] text-[color:var(--brand-maroon,#7b1d2e)] bg-[color:var(--brand-maroon,#7b1d2e)]/10 ring-2 ring-offset-1 ring-maroon-300'
-                                  : 'border-slate-300 dark:border-coal-700 hover:bg-slate-100/70 dark:hover:bg-coal-800/60 text-slate-700 dark:text-slate-300' }}">
-                      @if(!empty($c->logo_url))
-                        <img src="{{ $c->logo_url }}?h=20" class="inline-block h-4 w-4 rounded object-cover mr-1 align-middle" alt="">
-                      @endif
-                      <span class="align-middle">{{ $c->code ?? 'CMP' }}</span>
-                    </a>
-                  @endforeach
-                </div>
-              </div>
-            @endisset
-
-            {{-- Baris 1.5: Filter Site (muncul hanya jika company aktif) --}}
-            @if($isActiveDept && $activeCompany && !empty($sitesByCompany[$activeCompany] ?? []))
-              <div class="mt-2 overflow-x-auto">
-                <div class="flex items-center gap-2 min-w-max">
-                  <a href="{{ $makeDeptCompanySite($d->id, $activeCompany, null, $activeDoc ?: null) }}"
-                     class="text-[11px] px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-coal-700 hover:bg-slate-100/70 dark:hover:bg-coal-800/60
-                            {{ empty($activeSite) ? 'ring-2 ring-offset-1 ring-slate-300 dark:ring-slate-500' : '' }}">
-                    Semua Site
-                  </a>
-                  @foreach(($sitesByCompany[$activeCompany] ?? []) as $s)
-                    @php $siteActive = $activeSite === (string)$s['id']; @endphp
-                    <a href="{{ $makeDeptCompanySite($d->id, $activeCompany, (string)$s['id'], $activeDoc ?: null) }}"
-                       class="text-[11px] px-2.5 py-1.5 rounded-lg border
-                              {{ $siteActive
-                                  ? 'border-emerald-600 text-emerald-700 bg-emerald-50 ring-2 ring-offset-1 ring-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300'
-                                  : 'border-slate-300 dark:border-coal-700 hover:bg-slate-100/70 dark:hover:bg-coal-800/60 text-slate-700 dark:text-slate-300' }}">
-                      {{ $s['name'] }}
-                    </a>
-                  @endforeach
-                </div>
-              </div>
-            @endif
-
-            {{-- Baris 2: Chip SOP/IK/FORM yang mempertahankan pilihan perusahaan & site --}}
-            <div class="mt-2 flex flex-wrap items-center gap-2">
-              <a href="{{ $makeDeptCompanySite($d->id, $activeCompany ?: null, $activeSite ?: null, null) }}"
-                 class="text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-coal-700 hover:bg-slate-100/70 dark:hover:bg-coal-800/60
-                        {{ $isActiveDept && $activeDoc==='' ? 'ring-2 ring-offset-1 ring-slate-300 dark:ring-slate-500' : '' }}">
-                Semua Dokumen
-              </a>
-              <a href="{{ $makeDeptCompanySite($d->id, $activeCompany ?: null, $activeSite ?: null, 'SOP') }}"
-                 class="text-xs px-2.5 py-1.5 rounded-lg bg-[color:var(--brand-maroon,#7b1d2e)] text-white hover:brightness-110
-                        {{ $isActiveDept && $activeDoc==='SOP' ? 'ring-2 ring-offset-1 ring-maroon-300' : '' }}">
-                SOP
-              </a>
-              <a href="{{ $makeDeptCompanySite($d->id, $activeCompany ?: null, $activeSite ?: null, 'IK') }}"
-                 class="text-xs px-2.5 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-500
-                        {{ $isActiveDept && $activeDoc==='IK' ? 'ring-2 ring-offset-1 ring-amber-300' : '' }}">
-                IK
-              </a>
-              <a href="{{ $makeDeptCompanySite($d->id, $activeCompany ?: null, $activeSite ?: null, 'FORM') }}"
-                 class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700
-                        {{ $isActiveDept && $activeDoc==='FORM' ? 'ring-2 ring-offset-1 ring-slate-300' : '' }}">
-                FORM
-              </a>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <a href="{{ $makeUrl(null,null,null,$activeDoc ?: null) }}"
+          class="p-4 rounded-2xl border bg-white dark:bg-coal-900 dark:border-coal-700 shadow-sm hover:shadow-lg transition
+       {{ empty($activeCompany) ? 'ring-2 ring-rose-400' : '' }}">
+          <div class="flex gap-3 items-center">
+            <div class="w-10 h-10 bg-rose-600 text-white rounded-xl flex items-center justify-center shadow">🌐</div>
+            <div>
+              <div class="font-semibold">Semua Perusahaan</div>
+              <div class="text-xs text-slate-500">Tampilkan global</div>
             </div>
           </div>
+        </a>
+
+        @foreach($companies as $c)
+        @php $chosen = $activeCompany === (string)$c->id; @endphp
+        <a href="{{ $makeUrl((string)$c->id,null,null,$activeDoc ?: null) }}"
+          class="p-4 rounded-2xl border bg-white dark:bg-coal-900 dark:border-coal-700 shadow-sm hover:shadow-lg transition
+       {{ $chosen ? 'border-rose-600 ring-2 ring-rose-400 bg-rose-50 dark:bg-rose-900/20' : '' }}">
+          <div class="flex gap-3 items-center">
+            <div class="w-10 h-10 bg-rose-600 text-white rounded-xl flex items-center justify-center shadow">🏢</div>
+            <div>
+              <div class="font-semibold">{{ $c->code ?? 'PT' }}</div>
+              <div class="text-xs text-slate-500">{{ $c->name }}</div>
+            </div>
+          </div>
+        </a>
         @endforeach
       </div>
-    @endisset
+    </div>
+    @endif
 
-    {{-- ===== VISIBILITY GUARD: tampilkan list hanya jika ada salah satu filter ===== --}}
+
+
+
+    {{-- STEP 2 - DEPARTMENT --}}
+    @if($activeCompany && isset($departments))
+    <div class="mb-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-8 h-8 bg-emerald-600 text-white rounded-xl flex items-center justify-center text-sm shadow">2</span>
+        <h3 class="font-semibold text-lg">Pilih Departemen</h3>
+      </div>
+
+      <div class="flex gap-3 overflow-x-auto soft-scroll pb-3 snap-x">
+
+        {{-- ALL --}}
+        <a href="{{ $makeUrl($activeCompany,null,$activeSite,$activeDoc ?: null) }}"
+          class="shrink-0 snap-start inline-flex items-center gap-2 
+          px-8 min-h-[64px] min-w-[200px]
+          rounded-[20px] border-2 bg-white dark:bg-coal-900 dark:border-coal-700
+          shadow hover:shadow-md transition whitespace-nowrap
+         {{ empty($activeDept) ? 'border-emerald-500 border-2 bg-emerald-50 dark:bg-emerald-900/20' : 'border-2 border-slate-200 dark:border-coal-700' }}
+">
+          🧭 Semua Departemen
+        </a>
+
+
+        @foreach($departments as $d)
+        @php $isActiveDept = $activeDept === (string)$d->id; @endphp
+        <a href="{{ $makeUrl($activeCompany,(string)$d->id,$activeSite,$activeDoc ?: null) }}"
+          class="shrink-0 snap-start inline-flex items-center gap-2
+          px-8 min-h-[64px] min-w-[200px]
+          rounded-[20px] bg-white dark:bg-coal-900 shadow hover:shadow-md transition whitespace-nowrap
+          {{ $isActiveDept 
+              ? 'border-emerald-500 border-2 bg-emerald-50 dark:bg-emerald-900/20' 
+              : 'border-2 border-slate-200 dark:border-coal-700' }}">
+          🏷️ {{ $d->name }}
+        </a>
+
+        @endforeach
+
+
+
+      </div>
+    </div>
+    @endif
+
+
+
+
+    {{-- STEP 3 - SITE --}}
+    @if($activeCompany && $activeDept && isset($sites))
     @php
-      $shouldShowList = $activeDept || $activeCompany || $activeSite || in_array($activeDoc, ['SOP','IK','FORM']);
+    $sitesByCompany = collect($sites)->where('company_id',$activeCompany);
     @endphp
 
-    {{-- ===== LIST FORM ===== --}}
+    @if($sitesByCompany->count())
+    <div class="mb-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-8 h-8 bg-sky-600 text-white rounded-xl flex items-center justify-center text-sm shadow">3</span>
+        <h3 class="font-semibold text-lg">Pilih Site</h3>
+      </div>
+
+      <div class="flex gap-3 overflow-x-auto soft-scroll pb-3 snap-x">
+
+        {{-- ALL --}}
+        <a href="{{ $makeUrl($activeCompany,$activeDept,null,$activeDoc ?: null) }}"
+          class="shrink-0 snap-start inline-flex items-center gap-2
+          px-8 min-h-[64px] min-w-[200px]
+          rounded-[20px] bg-white dark:bg-coal-900 shadow hover:shadow-md whitespace-nowrap
+          {{ empty($activeSite) 
+              ? 'border-2 border-sky-500 bg-sky-50 dark:bg-sky-900/20' 
+              : 'border-2 border-slate-200 dark:border-coal-700' }}">
+          🌍 Semua Site
+        </a>
+
+
+        {{-- LIST --}}
+        @foreach($sitesByCompany as $s)
+        @php $siteActive = $activeSite === (string)$s->id; @endphp
+        <a href="{{ $makeUrl($activeCompany,$activeDept,(string)$s->id,$activeDoc ?: null) }}"
+          class="shrink-0 snap-start inline-flex items-center gap-2
+          px-8 min-h-[64px] min-w-[200px]
+          rounded-[20px] bg-white dark:bg-coal-900 shadow hover:shadow-md transition whitespace-nowrap
+          {{ $siteActive 
+              ? 'border-2 border-sky-500 bg-sky-50 dark:bg-sky-900/20' 
+              : 'border-2 border-slate-200 dark:border-coal-700' }}">
+          📌 {{ $s->name }}
+        </a>
+
+        @endforeach
+
+      </div>
+    </div>
+    @endif
+    @endif
+
+
+
+
+    {{-- LIST --}}
+    @php
+    $shouldShowList = $activeCompany || $activeDept || $activeSite || in_array($activeDoc,['SOP','IK','FORM']);
+    @endphp
+
     @if($shouldShowList)
-      <div class="space-y-3">
-        @forelse($forms as $f)
-          @php
-            $isFileType = $f->type === 'pdf';
-            $typeLabel  = $isFileType ? 'File (PDF/Word/Excel)' : 'Builder';
-            $ext        = $isFileType && $f->pdf_path ? strtolower(pathinfo($f->pdf_path, PATHINFO_EXTENSION)) : null;
 
-            $doc      = strtoupper($f->doc_type ?? 'FORM');
-            $docClass = match ($doc) {
-              'SOP' => 'bg-[color:var(--brand-maroon,#7b1d2e)]/10 text-[color:var(--brand-maroon,#7b1d2e)] dark:bg-maroon-900/30',
-              'IK'  => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-              default => 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-            };
+    <div class="space-y-3">
+      @forelse($forms as $f)
+      @php
+      $isFile = $f->type === 'pdf';
+      $doc = strtoupper($f->doc_type ?? 'FORM');
+      $badge = $doc === 'SOP' ? 'bg-rose-600'
+      : ($doc === 'IK' ? 'bg-amber-500'
+      : 'bg-slate-800');
+      @endphp
 
-            $frontUrl = Route::has('front.forms.show') ? route('front.forms.show', $f->slug ?: $f) : '#';
+      <div class="p-4 rounded-2xl border bg-white dark:bg-coal-900 dark:border-coal-700 shadow-sm hover:shadow-xl transition">
+        <div class="flex justify-between items-start gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 text-[10px] text-white rounded-lg {{ $badge }}">{{ $doc }}</span>
+              <span class="font-semibold">{{ $f->title }}</span>
+              @if($f->is_active)
+              <span class="text-[10px] px-2 py-1 rounded-full bg-emerald-600/20 text-emerald-700 dark:text-emerald-300">
+                Aktif
+              </span>
+              @endif
+            </div>
 
-            $no = method_exists($forms, 'firstItem') && $forms->firstItem()
-                  ? $forms->firstItem() + $loop->index
-                  : $loop->iteration;
-          @endphp
-
-          <div class="p-4 rounded-xl border bg-white dark:bg-coal-900 border-slate-200/70 dark:border-coal-800 shadow-sm hover:shadow-md transition">
-            <div class="flex items-start justify-between gap-3">
-              <a class="flex-1" href="{{ $frontUrl }}">
-                <div class="font-medium flex flex-wrap items-center gap-2">
-                  <span class="inline-flex items-center justify-center w-6 h-6 text-xs font-semibold rounded-full
-                               bg-slate-200 text-slate-800 dark:bg-coal-800 dark:text-ivory-200">
-                    {{ $no }}
-                  </span>
-                  {{ $f->title }}
-                  <span class="text-[10px] px-2 py-0.5 rounded-full {{ $docClass }}">{{ $doc }}</span>
-                  @if($f->is_active)
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">Aktif</span>
-                  @else
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">Nonaktif</span>
-                  @endif
-                </div>
-
-                <div class="text-sm text-slate-500 dark:text-coal-400 mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span>{{ $typeLabel }}</span>
-                  <span>— {{ $f->department->name ?? 'Tanpa Departemen' }}</span>
-
-                  @if(isset($f->company) && $f->company)
-                    <span>•</span>
-                    <span class="truncate">Perusahaan: {{ $f->company->code ?? '' }} {{ $f->company->name ?? '' }}</span>
-                  @endif
-
-                  @if(isset($f->site) && $f->site)
-                    <span>•</span>
-                    <span class="truncate">Site: {{ $f->site->name }}</span>
-                  @endif
-
-                  <span>•</span>
-                  <span class="uppercase">{{ $doc }}</span>
-
-                  @if($isFileType && $f->pdf_path)
-                    @php
-                      $fileUrl = Route::has('admin.forms.file')
-                                ? route('admin.forms.file', $f)
-                                : (\Storage::disk('public')->exists($f->pdf_path) ? \Storage::disk('public')->url($f->pdf_path) : null);
-                    @endphp
-                    <span>•</span>
-                    <span class="uppercase">{{ $ext }}</span>
-                    @if($fileUrl)
-                      <span>•</span>
-                      <a class="underline hover:no-underline" target="_blank" href="{{ $fileUrl }}">Lihat file</a>
-                    @else
-                      <span>•</span>
-                      <span class="text-rose-600 dark:text-rose-300">File tidak ditemukan</span>
-                    @endif
-
-                    @if(Route::has('admin.forms.download'))
-                      <span>•</span>
-                      <a class="underline hover:no-underline" href="{{ route('admin.forms.download', $f) }}">Unduh</a>
-                    @endif
-                  @endif
-                </div>
-              </a>
-
-              {{-- ACTIONS --}}
-              <div class="flex items-center gap-2 shrink-0">
-                @if($f->type === 'builder')
-                  @can('update', $f)
-                    @if(Route::has('admin.forms.builder'))
-                      <a href="{{ route('admin.forms.builder', $f) }}"
-                         class="text-xs px-2 py-1 rounded-lg border border-[color:var(--brand-maroon,#7b1d2e)] text-[color:var(--brand-maroon,#7b1d2e)]
-                                hover:bg-[color:var(--brand-maroon,#7b1d2e)]/10 transition">
-                        Builder
-                      </a>
-                    @endif
-                  @endcan
-                @endif
-
-                @can('update', $f)
-                  @if(Route::has('admin.forms.edit'))
-                    <a href="{{ route('admin.forms.edit', $f) }}"
-                       class="text-xs px-2 py-1 rounded-lg border border-slate-300 text-slate-700 dark:text-slate-300 hover:bg-slate-100/60 dark:hover:bg-coal-800/60 transition">
-                      Edit
-                    </a>
-                  @endif
-                @endcan
-
-                @can('delete', $f)
-                  @if(Route::has('admin.forms.destroy'))
-                    <form method="POST" action="{{ route('admin.forms.destroy', $f) }}"
-                          onsubmit="return confirm('Yakin ingin menghapus form & datanya? Tindakan ini tidak bisa dibatalkan.')">
-                      @csrf
-                      @method('DELETE')
-                      <button type="submit"
-                              class="text-xs px-2 py-1 rounded-lg border border-rose-600 text-rose-700 hover:bg-rose-50
-                                     dark:border-rose-500 dark:text-rose-300 dark:hover:bg-rose-900/20 transition">
-                        Delete
-                      </button>
-                    </form>
-                  @endif
-                @endcan
-              </div>
+            <div class="text-sm text-slate-500 dark:text-slate-400 mt-1 flex gap-2 flex-wrap">
+              {{ $isFile ? '📎 File' : '🧩 Builder' }}
+              @if($f->company) • {{ $f->company->code }} @endif
+              @if($f->department) • {{ $f->department->name }} @endif
+              @if($f->site) • {{ $f->site->name }} @endif
             </div>
           </div>
-        @empty
-          <div class="text-slate-500 dark:text-coal-400">Belum ada form.</div>
-        @endforelse
-      </div>
 
-      @if(method_exists($forms, 'links') && $forms->hasPages())
-        <div class="mt-6">
-          {{ $forms->appends(request()->except('page'))->links() }}
-        </div>
-      @endif
-    @else
-      {{-- Petunjuk ketika belum pilih apa-apa --}}
-      <div class="mt-6">
-        <div class="p-4 rounded-xl border bg-white dark:bg-coal-900 border-slate-200/70 dark:border-coal-800">
-          <div class="text-sm text-slate-600 dark:text-slate-300">
-            Pilih <span class="font-semibold">Departemen</span>, lalu tentukan
-            <span class="font-semibold">Perusahaan</span>, <span class="font-semibold">Site</span> (opsional),
-            dan <span class="font-semibold">SOP/IK/FORM</span> dari kartu departemen.
+          <div class="flex gap-2">
+            <a href="{{ route('front.forms.show',$f->slug ?? $f) }}"
+              class="text-xs px-3 py-1 rounded-xl bg-slate-900 text-white hover:brightness-125 shadow">
+              Lihat
+            </a>
+            <a href="{{ route('admin.forms.edit',$f) }}"
+              class="text-xs px-3 py-1 rounded-xl border shadow">
+              Edit
+            </a>
           </div>
         </div>
       </div>
+
+      @empty
+      <div class="text-slate-500 dark:text-slate-400">Tidak ada form.</div>
+      @endforelse
+    </div>
+
+    @if($forms->hasPages())
+    <div class="mt-6">
+      {{ $forms->appends(request()->except('page'))->links() }}
+    </div>
     @endif
+
+    @else
+    <div class="mt-8 p-5 rounded-2xl border bg-white dark:bg-coal-900 dark:border-coal-700 shadow">
+      Pilih <b>PT</b> → <b>Departemen</b> → <b>Site</b> → <b>SOP / IK / FORM</b>.
+    </div>
+    @endif
+
+
 
   </div>
 </div>
