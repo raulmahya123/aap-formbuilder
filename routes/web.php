@@ -78,12 +78,32 @@ Route::get('/pubfile/{path}', function (string $path) {
 })->where('path', '.*')->name('pubfile.stream');
 
 // Download (attachment)
-Route::get('/pubfile-dl/{path}', function (string $path) {
-    $path = ltrim($path, '/');
+Route::get('/pubfile-dl', function (\Illuminate\Http\Request $request) {
+    $path = ltrim($request->query('path'), '/');
+
+    abort_if(
+        !$path || str_contains($path, '..'),
+        404
+    );
+
     $disk = Storage::disk('public');
     abort_unless($disk->exists($path), 404);
-    return response()->download($disk->path($path), basename($path));
-})->where('path', '.*')->name('pubfile.download');
+
+    // ekstensi asli
+    $ext = pathinfo($path, PATHINFO_EXTENSION);
+
+    // nama dari blade
+    $name = $request->query('name', 'file');
+
+    // nama final
+    $filename = \Illuminate\Support\Str::slug($name, '-') . '.' . $ext;
+
+    return response()->download(
+        $disk->path($path),
+        $filename
+    );
+})->name('pubfile.download');
+
 
 Route::middleware('auth')->group(function () {
 

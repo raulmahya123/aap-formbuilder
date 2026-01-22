@@ -165,10 +165,14 @@
           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 dark:hover:bg-coal-800">
           🔎 Buka di Tab Baru
         </a>
-        <a href="{{ $downloadUrl }}" download
+        <a href="{{ route('pubfile.download', [
+    'path' => $path,
+    'name' => $form->slug ?? $form->code ?? $form->name ?? 'form'
+]) }}"
           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
-          ⬇️ Download @if($size)<span class="opacity-80 text-xs">({{ $size }})</span>@endif
+          ⬇️ Download
         </a>
+
         {{-- Opsional tampilkan juga link publik biasa untuk debug --}}
         {{-- <a href="{{ $urlPublic }}" class="text-xs underline" target="_blank">/storage (debug)</a> --}}
       </div>
@@ -185,13 +189,15 @@
             class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 dark:hover:bg-coal-800">
             🔎 Buka di Tab Baru
           </a>
-          <a href="{{ $downloadUrl }}" download
+          <a href="{{ route('pubfile.download', [
+    'path' => $path,
+    'name' => $form->slug ?? $form->code ?? $form->name ?? 'form'
+]) }}"
             class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
             ⬇️ Download
           </a>
         </div>
       </div>
-
       @else
       <div class="rounded-lg border p-3 bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-900/30">
         File tidak ditemukan.
