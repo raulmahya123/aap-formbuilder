@@ -1,36 +1,36 @@
 {{-- resources/views/partials/navigation.blade.php --}}
 @php
-  use App\Models\Site;
-  use Illuminate\Support\Str;
+use App\Models\Site;
+use Illuminate\Support\Str;
 
-  $user    = auth()->user();
-  $isSuper = $user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin();
-  $isAdmin = $isSuper || ($user && method_exists($user,'isAdmin') && $user->isAdmin());
+$user = auth()->user();
+$isSuper = $user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin();
+$isAdmin = $isSuper || ($user && method_exists($user,'isAdmin') && $user->isAdmin());
 
-  $homeUrl = Route::has('admin.dashboard') ? route('admin.dashboard') : url('/');
+$homeUrl = Route::has('admin.dashboard') ? route('admin.dashboard') : url('/');
 
-  $navItemClass = function(bool $active = false){
-    $base = 'flex items-center gap-3 px-3 py-2 rounded-xl transition outline-none';
-    $inactive = 'text-coal-800 border border-transparent hover:bg-ivory-100 focus-visible:ring-2 focus-visible:ring-maroon-700';
-    $activeCls = 'is-active border';
-    return $active ? "$base $activeCls" : "$base $inactive";
-  };
+$navItemClass = function(bool $active = false){
+$base = 'flex items-center gap-3 px-3 py-2 rounded-xl transition outline-none';
+$inactive = 'text-coal-800 border border-transparent hover:bg-ivory-100 focus-visible:ring-2 focus-visible:ring-maroon-700';
+$activeCls = 'is-active border';
+return $active ? "$base $activeCls" : "$base $inactive";
+};
 
-  $sites = collect();
-  if ($user) {
-    if ($isAdmin) {
-      $sites = Site::select('id','code','name')->orderBy('code')->get();
-    } elseif (method_exists($user, 'sites')) {
-      $sites = $user->sites()->select('sites.id','sites.code','sites.name')->orderBy('sites.code')->get();
-    }
-  }
+$sites = collect();
+if ($user) {
+if ($isAdmin) {
+$sites = Site::select('id','code','name')->orderBy('code')->get();
+} elseif (method_exists($user, 'sites')) {
+$sites = $user->sites()->select('sites.id','sites.code','sites.name')->orderBy('sites.code')->get();
+}
+}
 
-  $activeSiteId = session('active_site_id');
-  $activeSite   = $activeSiteId ? $sites->firstWhere('id', $activeSiteId) : null;
+$activeSiteId = session('active_site_id');
+$activeSite = $activeSiteId ? $sites->firstWhere('id', $activeSiteId) : null;
 
-  $userContractsUrl = null;
-  if (Route::has('user.contracts.index')) $userContractsUrl = route('user.contracts.index');
-  elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.index');
+$userContractsUrl = null;
+if (Route::has('user.contracts.index')) $userContractsUrl = route('user.contracts.index');
+elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.index');
 @endphp
 
 
@@ -62,146 +62,168 @@
     {{-- ================= ADMIN ================= --}}
     @if($isAdmin)
 
-      {{-- MENU COLLAPSE --}}
-      <div x-data="{openMenu:true}">
-        <div class="px-3 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
-             @click="openMenu=!openMenu">
-          Menu
-          <span x-text="openMenu ? '−' : '+'"></span>
-        </div>
-
-        <div class="mt-2 grid gap-1" x-show="openMenu" x-transition>
-          <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
-
-          @if(Route::has('admin.departments.index'))
-            <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}">🏷️ Departments</a>
-          @endif
-
-          @if(Route::has('admin.forms.index'))
-            <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}">🧾 Mandala</a>
-          @endif
-
-          @if(Route::has('admin.documents.index'))
-            <a href="{{ route('admin.documents.index') }}" class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}">📄 Documents</a>
-          @endif
-
-          @if(($user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin()) || ($user && $user->department_id))
-            @if(Route::has('admin.document_templates.index'))
-              <a href="{{ route('admin.document_templates.index') }}" class="{{ $navItemClass(request()->routeIs('admin.document_templates.*')) }}">🧩 Doc Templates</a>
-            @endif
-          @endif
-
-          @if(Route::has('admin.entries.index'))
-            <a href="{{ route('admin.entries.index') }}" class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">📥 Entries</a>
-          @endif
-
-          @if(Route::has('admin.qa.index'))
-            <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
-          @endif
-
-          @if(Route::has('admin.contracts.index'))
-            <a href="{{ route('admin.contracts.index') }}" class="{{ $navItemClass(request()->routeIs('admin.contracts.*')) }}">📑 Contracts</a>
-          @endif
-
-          @if($isSuper && Route::has('admin.users.active.index'))
-            <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
-          @endif
-        </div>
+    {{-- MENU COLLAPSE --}}
+    <div x-data="{openMenu:true}">
+      <div class="px-3 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
+        @click="openMenu=!openMenu">
+        Menu
+        <span x-text="openMenu ? '−' : '+'"></span>
       </div>
 
+      <div class="mt-2 grid gap-1" x-show="openMenu" x-transition>
+        <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
 
-      {{-- HSE COLLAPSE --}}
-      <div x-data="{openHse:true}">
-        <div class="px-3 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
-             @click="openHse=!openHse">
-          HSE / KPI
-          <span x-text="openHse ? '−' : '+'"></span>
-        </div>
 
-        <div class="mt-2 grid gap-1" x-show="openHse" x-transition>
+        @if(Route::has('user.hipo.index'))
+        <a href="{{ route('user.hipo.index') }}"
+          class="{{ $navItemClass(request()->routeIs('user.hipo.*')) }}">
+          ⚠️ Laporan HIPO
+        </a>
+        @endif
+        @if(Route::has('admin.departments.index'))
+        <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}">🏷️ Departments</a>
+        @endif
 
-          @if(Route::has('admin.sites.index'))
-            <a href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}">📍 Sites</a>
-          @endif
+        @if(Route::has('admin.forms.index'))
+        <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}">🧾 Mandala</a>
+        @endif
 
-          @if($isSuper && Route::has('admin.companies.index'))
-            <a href="{{ route('admin.companies.index') }}" class="{{ $navItemClass(request()->routeIs('admin.companies.*')) }}">🏢 Companies</a>
-          @endif
+        @if(Route::has('admin.documents.index'))
+        <a href="{{ route('admin.documents.index') }}" class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}">📄 Documents</a>
+        @endif
 
-          @if(Route::has('admin.groups.index'))
-            <a href="{{ route('admin.groups.index') }}" class="{{ $navItemClass(request()->routeIs('admin.groups.*')) }}">🗂️ Indicator Groups</a>
-          @endif
+        @if(($user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin()) || ($user && $user->department_id))
+        @if(Route::has('admin.document_templates.index'))
+        <a href="{{ route('admin.document_templates.index') }}" class="{{ $navItemClass(request()->routeIs('admin.document_templates.*')) }}">🧩 Doc Templates</a>
+        @endif
+        @endif
 
-          @if(Route::has('admin.indicators.index'))
-            <a href="{{ route('admin.indicators.index') }}" class="{{ $navItemClass(request()->routeIs('admin.indicators.*')) }}">📊 Indicators</a>
-          @endif
+        @if(Route::has('admin.entries.index'))
+        <a href="{{ route('admin.entries.index') }}" class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">📥 Entries</a>
+        @endif
 
-          @if(Route::has('admin.daily.create'))
-            <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
-          @endif
+        @if(Route::has('admin.qa.index'))
+        <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+        @endif
 
-          @if(Route::has('user.daily_notes.index'))
-            <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
-          @endif
+        @if(Route::has('admin.contracts.index'))
+        <a href="{{ route('admin.contracts.index') }}" class="{{ $navItemClass(request()->routeIs('admin.contracts.*')) }}">📑 Contracts</a>
+        @endif
 
-          @if(Route::has('admin.reports.monthly'))
-            <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
-          @endif
-
-          @if(Route::has('admin.site_access.index'))
-            <a href="{{ route('admin.site_access.index') }}" class="{{ $navItemClass(request()->routeIs('admin.site_access.*')) }}">🛂 Input Access</a>
-          @endif
-        </div>
+        @if($isSuper && Route::has('admin.users.active.index'))
+        <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
+        @endif
       </div>
+    </div>
+
+
+    {{-- HSE COLLAPSE --}}
+    <div x-data="{openHse:true}">
+      <div class="px-3 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
+        @click="openHse=!openHse">
+        HSE / KPI
+        <span x-text="openHse ? '−' : '+'"></span>
+      </div>
+
+      <div class="mt-2 grid gap-1" x-show="openHse" x-transition>
+
+
+        @if(Route::has('admin.hipo.index'))
+        <a href="{{ route('admin.hipo.index') }}"
+          class="{{ $navItemClass(request()->routeIs('admin.hipo.*')) }}">
+          ⚠️ HIPO / Nearmiss
+        </a>
+        @endif
+
+        @if(Route::has('admin.sites.index'))
+        <a href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}">📍 Sites</a>
+        @endif
+
+        @if($isSuper && Route::has('admin.companies.index'))
+        <a href="{{ route('admin.companies.index') }}" class="{{ $navItemClass(request()->routeIs('admin.companies.*')) }}">🏢 Companies</a>
+        @endif
+
+        @if(Route::has('admin.groups.index'))
+        <a href="{{ route('admin.groups.index') }}" class="{{ $navItemClass(request()->routeIs('admin.groups.*')) }}">🗂️ Indicator Groups</a>
+        @endif
+
+        @if(Route::has('admin.indicators.index'))
+        <a href="{{ route('admin.indicators.index') }}" class="{{ $navItemClass(request()->routeIs('admin.indicators.*')) }}">📊 Indicators</a>
+        @endif
+
+        @if(Route::has('admin.daily.create'))
+        <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
+        @endif
+
+        @if(Route::has('user.daily_notes.index'))
+        <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
+        @endif
+
+        @if(Route::has('admin.reports.monthly'))
+        <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+        @endif
+
+        @if(Route::has('admin.site_access.index'))
+        <a href="{{ route('admin.site_access.index') }}" class="{{ $navItemClass(request()->routeIs('admin.site_access.*')) }}">🛂 Input Access</a>
+        @endif
+      </div>
+    </div>
 
     {{-- ================= NON ADMIN ================= --}}
     @else
 
-      <div x-data="{openMenu:true}">
-        <div class="px-3 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
-             @click="openMenu=!openMenu">
-          Menu
-          <span x-text="openMenu ? '−' : '+'"></span>
-        </div>
-
-        <div class="mt-2 grid gap-1" x-show="openMenu" x-transition>
-          <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
-
-          @if(Route::has('front.forms.index'))
-            <a href="{{ route('front.forms.index') }}" class="{{ $navItemClass(request()->routeIs('front.forms.*')) }}">🧾 FORM</a>
-          @endif
-
-          @if($userContractsUrl)
-            <a href="{{ $userContractsUrl }}" class="{{ $navItemClass(request()->routeIs('user.contracts.*') || request()->routeIs('contracts.*')) }}">📑 Kontrak Saya</a>
-          @endif
-
-          @if(Route::has('admin.qa.index'))
-            <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
-          @endif
-        </div>
+    <div x-data="{openMenu:true}">
+      <div class="px-3 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
+        @click="openMenu=!openMenu">
+        Menu
+        <span x-text="openMenu ? '−' : '+'"></span>
       </div>
 
-      <div x-data="{openHse:true}">
-        <div class="px-3 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
-             @click="openHse=!openHse">
-          HSE / KPI
-          <span x-text="openHse ? '−' : '+'"></span>
-        </div>
+      <div class="mt-2 grid gap-1" x-show="openMenu" x-transition>
+        <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
 
-        <div class="mt-2 grid gap-1" x-show="openHse" x-transition>
-          @if(Route::has('daily.index'))
-            <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>
-          @endif
+        @if(Route::has('front.forms.index'))
+        <a href="{{ route('front.forms.index') }}" class="{{ $navItemClass(request()->routeIs('front.forms.*')) }}">🧾 FORM</a>
+        @endif
 
-          @if(Route::has('user.daily_notes.index'))
-            <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
-          @endif
+        @if($userContractsUrl)
+        <a href="{{ $userContractsUrl }}" class="{{ $navItemClass(request()->routeIs('user.contracts.*') || request()->routeIs('contracts.*')) }}">📑 Kontrak Saya</a>
+        @endif
 
-          @if(Route::has('admin.reports.monthly'))
-            <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
-          @endif
-        </div>
+        @if(Route::has('admin.qa.index'))
+        <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+        @endif
       </div>
+    </div>
+
+    <div x-data="{openHse:true}">
+      <div class="px-3 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
+        @click="openHse=!openHse">
+        HSE / KPI
+        <span x-text="openHse ? '−' : '+'"></span>
+      </div>
+
+      <div class="mt-2 grid gap-1" x-show="openHse" x-transition>
+        @if(Route::has('user.hipo.index'))
+        <a href="{{ route('user.hipo.index') }}"
+          class="{{ $navItemClass(request()->routeIs('user.hipo.*')) }}">
+          ⚠️ Laporan HIPO
+        </a>
+        @endif
+
+        @if(Route::has('daily.index'))
+        <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>
+        @endif
+
+        @if(Route::has('user.daily_notes.index'))
+        <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
+        @endif
+
+        @if(Route::has('admin.reports.monthly'))
+        <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+        @endif
+      </div>
+    </div>
     @endif
   </nav>
 
@@ -215,7 +237,7 @@
       <span class="inline-flex items-center gap-2 px-2 py-1 rounded-lg border border-maroon-700 text-maroon-800 bg-maroon-50/70">
         📍 {{ $activeSite?->code ?? 'ALL' }}
         @if($activeSite && $activeSite->name)
-          <span class="text-xs text-coal-500">— {{ $activeSite->name }}</span>
+        <span class="text-xs text-coal-500">— {{ $activeSite->name }}</span>
         @endif
       </span>
     </div>
@@ -226,7 +248,7 @@
       <select name="site_id" class="border rounded-lg px-3 py-2 bg-white">
         <option value="">ALL SITES</option>
         @foreach($sites as $s)
-          <option value="{{ $s->id }}" @selected($activeSiteId==$s->id)>{{ $s->code }} — {{ $s->name }}</option>
+        <option value="{{ $s->id }}" @selected($activeSiteId==$s->id)>{{ $s->code }} — {{ $s->name }}</option>
         @endforeach
       </select>
       <button class="px-3 py-2 rounded-lg border border-coal-300 hover:bg-ivory-100">
@@ -284,7 +306,7 @@
 
           <div x-data="{openMenu:true}">
             <div class="px-1 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
-                 @click="openMenu=!openMenu">
+              @click="openMenu=!openMenu">
               Menu
               <span x-text="openMenu ? '−' : '+'"></span>
             </div>
@@ -293,27 +315,27 @@
               <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
 
               @if(Route::has('admin.departments.index'))
-                <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}">🏷️ Departments</a>
+              <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}">🏷️ Departments</a>
               @endif
 
               @if(Route::has('admin.forms.index'))
-                <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}">🧾 Mandala</a>
+              <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}">🧾 Mandala</a>
               @endif
 
               @if(Route::has('admin.entries.index'))
-                <a href="{{ route('admin.entries.index') }}" class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">📥 Entries</a>
+              <a href="{{ route('admin.entries.index') }}" class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">📥 Entries</a>
               @endif
 
               @if(Route::has('admin.qa.index'))
-                <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+              <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
               @endif
 
               @if(Route::has('admin.contracts.index'))
-                <a href="{{ route('admin.contracts.index') }}" class="{{ $navItemClass(request()->routeIs('admin.contracts.*')) }}">📑 Contracts</a>
+              <a href="{{ route('admin.contracts.index') }}" class="{{ $navItemClass(request()->routeIs('admin.contracts.*')) }}">📑 Contracts</a>
               @endif
 
               @if($isSuper && Route::has('admin.users.active.index'))
-                <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
+              <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
               @endif
             </div>
           </div>
@@ -321,7 +343,7 @@
 
           <div x-data="{openHse:true}" class="mt-4">
             <div class="px-1 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
-                 @click="openHse=!openHse">
+              @click="openHse=!openHse">
               HSE / KPI
               <span x-text="openHse ? '−' : '+'"></span>
             </div>
@@ -329,35 +351,35 @@
             <div class="mt-2 grid gap-1" x-show="openHse" x-transition>
 
               @if(Route::has('admin.sites.index'))
-                <a href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}">📍 Sites</a>
+              <a href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}">📍 Sites</a>
               @endif
 
               @if($isSuper && Route::has('admin.companies.index'))
-                <a href="{{ route('admin.companies.index') }}" class="{{ $navItemClass(request()->routeIs('admin.companies.*')) }}">🏢 Companies</a>
+              <a href="{{ route('admin.companies.index') }}" class="{{ $navItemClass(request()->routeIs('admin.companies.*')) }}">🏢 Companies</a>
               @endif
 
               @if(Route::has('admin.groups.index'))
-                <a href="{{ route('admin.groups.index') }}" class="{{ $navItemClass(request()->routeIs('admin.groups.*')) }}">🗂️ Indicator Groups</a>
+              <a href="{{ route('admin.groups.index') }}" class="{{ $navItemClass(request()->routeIs('admin.groups.*')) }}">🗂️ Indicator Groups</a>
               @endif
 
               @if(Route::has('admin.indicators.index'))
-                <a href="{{ route('admin.indicators.index') }}" class="{{ $navItemClass(request()->routeIs('admin.indicators.*')) }}">📊 Indicators</a>
+              <a href="{{ route('admin.indicators.index') }}" class="{{ $navItemClass(request()->routeIs('admin.indicators.*')) }}">📊 Indicators</a>
               @endif
 
               @if(Route::has('admin.daily.create'))
-                <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
+              <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
               @endif
 
               @if(Route::has('user.daily_notes.index'))
-                <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
+              <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
               @endif
 
               @if(Route::has('admin.reports.monthly'))
-                <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+              <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
               @endif
 
               @if($isSuper && Route::has('admin.site_access.index'))
-                <a href="{{ route('admin.site_access.index') }}" class="{{ $navItemClass(request()->routeIs('admin.site_access.*')) }}">🛂 Input Access</a>
+              <a href="{{ route('admin.site_access.index') }}" class="{{ $navItemClass(request()->routeIs('admin.site_access.*')) }}">🛂 Input Access</a>
               @endif
             </div>
           </div>
@@ -367,7 +389,7 @@
 
           <div x-data="{openMenu:true}">
             <div class="px-1 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
-                 @click="openMenu=!openMenu">
+              @click="openMenu=!openMenu">
               Menu
               <span x-text="openMenu ? '−' : '+'"></span>
             </div>
@@ -376,15 +398,15 @@
               <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
 
               @if(Route::has('front.forms.index'))
-                <a href="{{ route('front.forms.index') }}" class="{{ $navItemClass(request()->routeIs('front.forms.*')) }}">🧾 FORM</a>
+              <a href="{{ route('front.forms.index') }}" class="{{ $navItemClass(request()->routeIs('front.forms.*')) }}">🧾 FORM</a>
               @endif
 
               @if($userContractsUrl)
-                <a href="{{ $userContractsUrl }}" class="{{ $navItemClass(request()->routeIs('user.contracts.*') || request()->routeIs('contracts.*')) }}">📑 Kontrak Saya</a>
+              <a href="{{ $userContractsUrl }}" class="{{ $navItemClass(request()->routeIs('user.contracts.*') || request()->routeIs('contracts.*')) }}">📑 Kontrak Saya</a>
               @endif
 
               @if(Route::has('admin.qa.index'))
-                <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+              <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
               @endif
             </div>
           </div>
@@ -392,22 +414,29 @@
 
           <div x-data="{openHse:true}" class="mt-4">
             <div class="px-1 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
-                 @click="openHse=!openHse">
+              @click="openHse=!openHse">
               HSE / KPI
               <span x-text="openHse ? '−' : '+'"></span>
             </div>
 
             <div class="mt-2 grid gap-1" x-show="openHse" x-transition>
+              @if(Route::has('admin.hipo.index'))
+              <a href="{{ route('admin.hipo.index') }}"
+                class="{{ $navItemClass(request()->routeIs('admin.hipo.*')) }}">
+                ⚠️ HIPO / Nearmiss
+              </a>
+              @endif
+
               @if(Route::has('daily.index'))
-                <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>
+              <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>
               @endif
 
               @if(Route::has('user.daily_notes.index'))
-                <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
+              <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
               @endif
 
               @if(Route::has('admin.reports.monthly'))
-                <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+              <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
               @endif
             </div>
           </div>
@@ -425,7 +454,7 @@
             <span class="inline-flex items-center gap-2 px-2 py-1 rounded-lg border border-maroon-700 text-maroon-800 bg-maroon-50/70">
               📍 {{ $activeSite?->code ?? 'ALL' }}
               @if($activeSite && $activeSite->name)
-                <span class="text-xs text-coal-500">— {{ $activeSite->name }}</span>
+              <span class="text-xs text-coal-500">— {{ $activeSite->name }}</span>
               @endif
             </span>
           </div>
@@ -436,7 +465,7 @@
             <select name="site_id" class="border rounded-lg px-3 py-2 bg-white">
               <option value="">ALL SITES</option>
               @foreach($sites as $s)
-                <option value="{{ $s->id }}" @selected($activeSiteId==$s->id)>{{ $s->code }} — {{ $s->name }}</option>
+              <option value="{{ $s->id }}" @selected($activeSiteId==$s->id)>{{ $s->code }} — {{ $s->name }}</option>
               @endforeach
             </select>
             <button class="px-3 py-2 rounded-lg border border-coal-300 hover:bg-ivory-100">

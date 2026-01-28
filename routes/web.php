@@ -58,6 +58,8 @@ use App\Http\Controllers\User\ContractController as UserContractController;
 // COMPANIES (Super Admin CRUD)
 // ==============================
 use App\Http\Controllers\Admin\CompanyController as AdminCompanyController;
+use App\Http\Controllers\Admin\HipoReportController as AdminHipoReportController;
+use App\Http\Controllers\User\HipoReportController as UserHipoReportController;
 
 // Redirect root ke dashboard
 Route::get('/', fn() => redirect()->route('admin.dashboard'));
@@ -106,7 +108,11 @@ Route::get('/pubfile-dl', function (\Illuminate\Http\Request $request) {
 
 
 Route::middleware('auth')->group(function () {
-
+Route::prefix('user/hipo')->name('user.hipo.')->group(function () {
+    Route::get('/', [UserHipoReportController::class, 'index'])->name('index');
+    Route::get('/create', [UserHipoReportController::class, 'create'])->name('create');
+    Route::post('/', [UserHipoReportController::class, 'store'])->name('store');
+});
     // ==============================
     // FRONT (user)
     // ==============================
@@ -374,5 +380,19 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{contract}/revoke', [AdminContractController::class, 'revoke'])
                 ->name('revoke')->middleware('can:share,contract')->whereNumber('contract');
         });
+
+        // ==============================
+        // ADMIN — HIPO / Nearmiss
+        // ==============================
+        Route::middleware('can:is-admin')
+            ->prefix('hipo')
+            ->name('hipo.')
+            ->group(function () {
+
+                Route::get('/', [AdminHipoReportController::class, 'index'])->name('index');
+                Route::get('/{hipo}', [AdminHipoReportController::class, 'show'])->name('show');
+                Route::put('/{hipo}', [AdminHipoReportController::class, 'update'])->name('update');
+                Route::delete('/{hipo}', [AdminHipoReportController::class, 'destroy'])->name('destroy');
+            });
     }); // end prefix admin
 }); // end middleware auth
