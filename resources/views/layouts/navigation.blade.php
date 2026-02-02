@@ -127,6 +127,14 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
 
       <div class="mt-2 grid gap-1" x-show="openHse" x-transition>
 
+        @if(Route::has('ccm-reports.index'))
+        <a href="{{ route('ccm-reports.index') }}"
+          class="{{ $navItemClass(request()->routeIs('admin.ccm-reports.*')) }}">
+          🧯 Critical Control Management
+        </a>
+        @endif
+
+
 
         @if(Route::has('admin.hipo.index'))
         <a href="{{ route('admin.hipo.index') }}"
@@ -210,6 +218,14 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
           ⚠️ Laporan HIPO
         </a>
         @endif
+
+        @if(Route::has('admin.ccm-reports.create'))
+        <a href="{{ route('admin.ccm-reports.create') }}"
+          class="{{ $navItemClass(request()->routeIs('admin.ccm-reports.create')) }}">
+          🧯 Input CCM
+        </a>
+        @endif
+
 
         @if(Route::has('daily.index'))
         <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>

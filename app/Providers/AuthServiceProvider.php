@@ -11,7 +11,8 @@ use App\Models\{Form, Department, FormEntry, QaThread, Document,
 use App\Policies\{FormPolicy, DepartmentPolicy, FormEntryPolicy, QaThreadPolicy, DocumentPolicy,
     SitePolicy, IndicatorGroupPolicy, IndicatorPolicy, IndicatorDailyPolicy, IndicatorValuePolicy,
     ContractPolicy, UserSiteAccessPolicy};
-
+use App\Models\CcmReport;
+use App\Policies\CcmReportPolicy;
 class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
@@ -27,6 +28,7 @@ class AuthServiceProvider extends ServiceProvider
         IndicatorValue::class => IndicatorValuePolicy::class,
         Contract::class       => ContractPolicy::class,
         UserSiteAccess::class => UserSiteAccessPolicy::class,
+        CcmReport::class => CcmReportPolicy::class,
     ];
 
     public function boot(): void

@@ -60,6 +60,37 @@ use App\Http\Controllers\User\ContractController as UserContractController;
 use App\Http\Controllers\Admin\CompanyController as AdminCompanyController;
 use App\Http\Controllers\Admin\HipoReportController as AdminHipoReportController;
 use App\Http\Controllers\User\HipoReportController as UserHipoReportController;
+use App\Http\Controllers\Admin\CcmReportController as CcmReportController;
+Route::middleware('can:is-admin')
+    ->prefix('ccm-reports')
+    ->name('ccm-reports.')
+    ->group(function () {
+
+        Route::get('/', [CcmReportController::class, 'index'])
+            ->name('index');
+
+        Route::get('/create', [CcmReportController::class, 'create'])
+            ->name('create');
+
+        Route::post('/', [CcmReportController::class, 'store'])
+            ->name('store');
+
+        Route::get('/{ccm}', [CcmReportController::class, 'show'])
+            ->name('show')
+            ->whereNumber('ccm');
+
+        Route::get('/{ccm}/edit', [CcmReportController::class, 'edit'])
+            ->name('edit')
+            ->whereNumber('ccm');
+
+        Route::put('/{ccm}', [CcmReportController::class, 'update'])
+            ->name('update')
+            ->whereNumber('ccm');
+
+        Route::delete('/{ccm}', [CcmReportController::class, 'destroy'])
+            ->name('destroy')
+            ->whereNumber('ccm');
+    });
 
 // Redirect root ke dashboard
 Route::get('/', fn() => redirect()->route('admin.dashboard'));
