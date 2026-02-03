@@ -219,9 +219,9 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
         </a>
         @endif
 
-        @if(Route::has('admin.ccm-reports.create'))
-        <a href="{{ route('admin.ccm-reports.create') }}"
-          class="{{ $navItemClass(request()->routeIs('admin.ccm-reports.create')) }}">
+        @if(Route::has('ccm-reports.create'))
+        <a href="{{ route('ccm-reports.create') }}"
+          class="{{ $navItemClass(request()->routeIs('.ccm-rebeports.create')) }}">
           🧯 Input CCM
         </a>
         @endif
