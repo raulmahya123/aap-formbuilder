@@ -10,18 +10,18 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {Schema::table('hipo_reports', function (Blueprint $table) {
-    $table->string('pic_engineering');
-    $table->string('pic_administrative');
-    $table->string('pic_work_practice');
-    $table->string('pic_ppe');
+    {
+        Schema::table('hipo_reports', function (Blueprint $table) {
+            $table->string('pic_engineering');
+            $table->string('pic_administrative');
+            $table->string('pic_work_practice');
+            $table->string('pic_ppe');
 
-    $table->string('evidence_engineering');
-    $table->string('evidence_administrative');
-    $table->string('evidence_work_practice');
-    $table->string('evidence_ppe');
-});
-
+            $table->string('evidence_engineering');
+            $table->string('evidence_administrative');
+            $table->string('evidence_work_practice');
+            $table->string('evidence_ppe');
+        });
     }
 
     /**

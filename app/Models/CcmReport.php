@@ -21,10 +21,10 @@ class CcmReport extends Model
         'nama_pelapor',
 
         /* =====================
-         * SECTION 2–4
          * Kendaraan & Alat Berat
          * ===================== */
         'kendaraan_ada_kegiatan',
+        'kendaraan_tidak_ada_alasan',
         'kendaraan_pekerjaan_kritis',
         'kendaraan_prosedur',
         'kendaraan_pelanggaran',
@@ -38,10 +38,10 @@ class CcmReport extends Model
         'kendaraan_apd_evidence',
 
         /* =====================
-         * SECTION 5–7
          * Izin Kerja
          * ===================== */
         'izin_kerja_ada',
+        'izin_kerja_tidak_ada_alasan',
         'izin_kerja_pekerjaan_kritis',
         'izin_kerja_prosedur',
         'izin_kerja_pelanggaran',
@@ -55,10 +55,10 @@ class CcmReport extends Model
         'izin_apd_evidence',
 
         /* =====================
-         * SECTION 8–10
          * Tebing / Disposal
          * ===================== */
         'tebing_ada',
+        'tebing_tidak_ada_alasan',
         'tebing_pekerjaan_kritis',
         'tebing_prosedur',
         'tebing_pelanggaran',
@@ -72,10 +72,10 @@ class CcmReport extends Model
         'tebing_apd_evidence',
 
         /* =====================
-         * SECTION 11–13
          * Air & Lumpur
          * ===================== */
         'air_lumpur_ada',
+        'air_lumpur_tidak_ada_alasan',
         'air_lumpur_pekerjaan_kritis',
         'air_lumpur_prosedur',
         'air_lumpur_pelanggaran',
@@ -87,10 +87,10 @@ class CcmReport extends Model
         'air_lumpur_apd_evidence',
 
         /* =====================
-         * SECTION 14–16
-         * Chainsaw & Land Clearing
+         * Chainsaw
          * ===================== */
         'chainsaw_ada',
+        'chainsaw_tidak_ada_alasan',
         'chainsaw_pekerjaan_kritis',
         'chainsaw_prosedur',
         'chainsaw_pelanggaran',
@@ -104,10 +104,10 @@ class CcmReport extends Model
         'chainsaw_apd_evidence',
 
         /* =====================
-         * SECTION 17–19
-         * LOTO & Ban
+         * LOTO
          * ===================== */
         'loto_ada',
+        'loto_tidak_ada_alasan',
         'loto_pekerjaan_kritis',
         'loto_prosedur',
         'loto_pelanggaran',
@@ -121,10 +121,10 @@ class CcmReport extends Model
         'loto_apd_evidence',
 
         /* =====================
-         * SECTION 20–22
          * Lifting
          * ===================== */
         'lifting_ada',
+        'lifting_tidak_ada_alasan',
         'lifting_pekerjaan_kritis',
         'lifting_prosedur',
         'lifting_pelanggaran',
@@ -136,10 +136,10 @@ class CcmReport extends Model
         'lifting_apd_evidence',
 
         /* =====================
-         * SECTION 23–25
          * Blasting
          * ===================== */
         'blasting_ada',
+        'blasting_tidak_ada_alasan',
         'blasting_pekerjaan_kritis',
         'blasting_prosedur',
         'blasting_pelanggaran',
@@ -153,10 +153,10 @@ class CcmReport extends Model
         'blasting_apd_evidence',
 
         /* =====================
-         * SECTION 26–28
          * Kritis Baru
          * ===================== */
         'kritis_baru_ada',
+        'kritis_baru_tidak_ada_alasan',
         'kritis_baru_pekerjaan',
         'kritis_baru_prosedur',
         'kritis_baru_dipahami',
@@ -175,13 +175,29 @@ class CcmReport extends Model
         'waktu_pelaporan' => 'date',
 
         'kendaraan_ada_kegiatan' => 'boolean',
-        'izin_kerja_ada' => 'boolean',
-        'tebing_ada' => 'boolean',
-        'air_lumpur_ada' => 'boolean',
-        'chainsaw_ada' => 'boolean',
-        'loto_ada' => 'boolean',
-        'lifting_ada' => 'boolean',
-        'blasting_ada' => 'boolean',
-        'kritis_baru_ada' => 'boolean',
+        'izin_kerja_ada'         => 'boolean',
+        'tebing_ada'             => 'boolean',
+        'air_lumpur_ada'         => 'boolean',
+        'chainsaw_ada'           => 'boolean',
+        'loto_ada'               => 'boolean',
+        'lifting_ada'            => 'boolean',
+        'blasting_ada'           => 'boolean',
+        'kritis_baru_ada'        => 'boolean',
     ];
+
+    /* =========================================================
+     * HELPER (OPSIONAL, TAPI SANGAT BERGUNA)
+     * ========================================================= */
+
+    public function hasEvidence(string $field): bool
+    {
+        return !empty($this->{$field . '_evidence'});
+    }
+
+    public function evidenceUrl(string $field): ?string
+    {
+        return $this->{$field . '_evidence'}
+            ? asset('storage/' . $this->{$field . '_evidence'})
+            : null;
+    }
 }
