@@ -97,10 +97,11 @@
 
                     {{-- Aksi --}}
                     <td class="px-4 py-2 text-center">
-                        <a href="{{ route('user.hipo.show', $r->id) }}"
-                           class="text-blue-600 hover:underline text-sm">
-                            Detail
-                        </a>
+                       <a href="{{ route('admin.hipo.show', $r->id) }}"
+   class="text-blue-600 hover:underline text-sm">
+    Detail
+</a>
+
                     </td>
                 </tr>
                 @empty

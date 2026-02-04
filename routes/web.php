@@ -91,6 +91,8 @@ Route::middleware('can:is-admin')
             ->name('destroy')
             ->whereNumber('ccm');
     });
+    // Route [user.hipo.show] not defined.
+
 
 // Redirect root ke dashboard
 Route::get('/', fn() => redirect()->route('admin.dashboard'));
