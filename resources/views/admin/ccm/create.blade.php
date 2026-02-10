@@ -16,7 +16,7 @@
 @csrf
 
 {{-- ================= SECTION 1 : UMUM ================= --}}
-<div class="bg-white p-6 rounded-xl shadow">
+<div class="bg-white p-6 rounded-xl border">
     <h2 class="font-semibold mb-4">1. Informasi Umum</h2>
 
     <div class="grid md:grid-cols-3 gap-4">
@@ -63,15 +63,17 @@ $sections = [
 @endphp
 
 @foreach($sections as $key => $title)
-<div class="bg-white p-6 rounded-xl shadow">
-    <h2 class="font-semibold mb-4">{{ $title }}</h2>
+<div class="bg-white p-6 rounded-xl border space-y-4">
+    <h2 class="font-semibold">{{ $title }}</h2>
 
     <div class="grid md:grid-cols-2 gap-4">
 
         {{-- ADA KEGIATAN --}}
         <div>
-            <label class="text-sm">Ada kegiatan?</label>
-            <select name="{{ $key }}_ada" class="w-full border rounded px-3 py-2">
+            <label class="text-sm">Ada Kegiatan?</label>
+            <select name="{{ $key }}_ada"
+                    class="w-full border rounded px-3 py-2"
+                    required>
                 <option value="">-- pilih --</option>
                 <option value="1">Ada</option>
                 <option value="0">Tidak Ada</option>
@@ -80,40 +82,78 @@ $sections = [
 
         {{-- ALASAN TIDAK ADA --}}
         <div>
-            <label class="text-sm">Alasan jika tidak ada</label>
+            <label class="text-sm">Alasan Jika Tidak Ada</label>
             <input type="text"
                    name="{{ $key }}_tidak_ada_alasan"
                    class="w-full border rounded px-3 py-2"
-                   placeholder="Wajib jika Tidak Ada">
+                   placeholder="Wajib jika Tidak Ada"
+                   required>
         </div>
 
-        <div>
+        {{-- RINGKASAN --}}
+        <div class="md:col-span-2">
+            <label class="text-sm">Ringkasan Kegiatan</label>
+            <textarea name="{{ $key }}_ringkasan"
+                      class="w-full border rounded px-3 py-2"
+                      rows="2"
+                      required></textarea>
+        </div>
+
+        {{-- PEKERJAAN KRITIS --}}
+        <div class="md:col-span-2">
             <label class="text-sm">Pekerjaan Kritis</label>
             <input type="text"
                    name="{{ $key }}_pekerjaan_kritis"
-                   class="w-full border rounded px-3 py-2">
+                   class="w-full border rounded px-3 py-2"
+                   required>
+        </div>
+
+        {{-- PROSEDUR --}}
+        <div class="md:col-span-2">
+            <label class="text-sm">Prosedur Terkait</label>
+            <textarea name="{{ $key }}_prosedur"
+                      class="w-full border rounded px-3 py-2"
+                      rows="2"
+                      required></textarea>
+        </div>
+
+        {{-- PELANGGARAN --}}
+        <div class="md:col-span-2">
+            <label class="text-sm">Pelanggaran Prosedur</label>
+            <textarea name="{{ $key }}_pelanggaran"
+                      class="w-full border rounded px-3 py-2"
+                      rows="2"
+                      required></textarea>
         </div>
 
         {{-- KONTROL RISIKO --}}
         @foreach(['engineering','administratif','praktek_kerja','apd'] as $ctrl)
-        <div>
+        <div class="md:col-span-2">
             <label class="text-sm">{{ ucwords(str_replace('_',' ',$ctrl)) }}</label>
-            <input type="text"
-                   name="{{ $key }}_{{ $ctrl }}"
-                   class="w-full border rounded px-3 py-2">
-        </div>
-
-        <div>
-            <label class="text-sm">Evidence {{ ucwords($ctrl) }}</label>
-            <input type="file"
-                   name="{{ $key }}_{{ $ctrl }}_evidence"
-                   class="w-full border rounded px-3 py-2"
-                   accept="image/*">
+            <textarea name="{{ $key }}_{{ $ctrl }}"
+                      class="w-full border rounded px-3 py-2"
+                      rows="2"
+                      required></textarea>
         </div>
         @endforeach
+
     </div>
 </div>
 @endforeach
+
+{{-- ================= EVIDENCE GLOBAL ================= --}}
+<div class="bg-white p-6 rounded-xl border space-y-2">
+    <h2 class="font-semibold">📷 Evidence Kegiatan CCM</h2>
+    <p class="text-xs text-gray-500">
+        Upload 1 foto yang merepresentasikan seluruh kegiatan CCM hari ini
+    </p>
+
+    <input type="file"
+           name="ccm_evidence"
+           class="w-full border rounded px-3 py-2"
+           accept="image/*"
+           required>
+</div>
 
 {{-- ================= ACTION ================= --}}
 <div class="flex gap-3">

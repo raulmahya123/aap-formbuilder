@@ -39,19 +39,9 @@
 {{-- Nama Pelapor --}}
 <div>
     <label class="text-sm font-medium">Nama Pelapor</label>
-    <input name="reporter_name"
+    <input class="w-full border rounded-lg px-3 py-2 bg-gray-50"
            value="{{ auth()->user()->name }}"
-           class="w-full border rounded-lg px-3 py-2 bg-gray-50"
            readonly>
-</div>
-
-{{-- PIC Umum --}}
-<div>
-    <label class="text-sm font-medium">PIC (Penanggung Jawab Utama)</label>
-    <input name="pic"
-           value="{{ old('pic') }}"
-           class="w-full border rounded-lg px-3 py-2"
-           required>
 </div>
 
 {{-- Waktu --}}
@@ -78,6 +68,7 @@
 <div>
     <label class="text-sm font-medium">Sumber Laporan</label>
     <select name="source" class="w-full border rounded-lg px-3 py-2" required>
+        <option value="">-- Pilih --</option>
         @foreach (['Hazard Report','Safety Inspection','PTO'] as $s)
             <option @selected(old('source')==$s)>{{ $s }}</option>
         @endforeach
@@ -88,6 +79,7 @@
 <div>
     <label class="text-sm font-medium">Kategori</label>
     <select name="category" class="w-full border rounded-lg px-3 py-2" required>
+        <option value="">-- Pilih --</option>
         <option @selected(old('category')=='High Potential Hazard')>
             High Potential Hazard
         </option>
@@ -101,56 +93,57 @@
 <div>
     <label class="text-sm font-medium">Risk Level</label>
     <select name="risk_level" class="w-full border rounded-lg px-3 py-2" required>
+        <option value="">-- Pilih --</option>
         @foreach (['Low','Medium','High','Extreme'] as $r)
             <option @selected(old('risk_level')==$r)>{{ $r }}</option>
         @endforeach
     </select>
 </div>
 
+<hr>
+
+<h2 class="font-semibold text-lg">Rincian Kejadian (WAJIB)</h2>
+
+{{-- Jenis HIPO / Nearmiss --}}
+<div>
+    <label class="text-sm font-medium">Jenis HIPO / Nearmiss</label>
+    <select name="jenis_hipo" class="w-full border rounded-lg px-3 py-2" required>
+        <option value="">-- Pilih --</option>
+        <option @selected(old('jenis_hipo')=='HIPO')>HIPO</option>
+        <option @selected(old('jenis_hipo')=='Nearmiss')>Nearmiss</option>
+    </select>
+</div>
+
+{{-- KTA --}}
+<div>
+    <label class="text-sm font-medium">KTA (Kondisi Tidak Aman)</label>
+    <textarea name="kta"
+              rows="2"
+              class="w-full border rounded-lg px-3 py-2"
+              required>{{ old('kta') }}</textarea>
+</div>
+
+{{-- TTA --}}
+<div>
+    <label class="text-sm font-medium">TTA (Tindakan Tidak Aman)</label>
+    <textarea name="tta"
+              rows="2"
+              class="w-full border rounded-lg px-3 py-2"
+              required>{{ old('tta') }}</textarea>
+</div>
+
 {{-- Deskripsi --}}
 <div>
-    <label class="text-sm font-medium">Rincian Kejadian</label>
+    <label class="text-sm font-medium">Deskripsi Kejadian</label>
     <textarea name="description"
               rows="3"
               class="w-full border rounded-lg px-3 py-2"
               required>{{ old('description') }}</textarea>
 </div>
 
-{{-- Konsekuensi --}}
-<div>
-    <label class="text-sm font-medium">Potensi Konsekuensi</label>
-    <select name="potential_consequence"
-            class="w-full border rounded-lg px-3 py-2"
-            required>
-        @foreach ([
-            'Fatality',
-            'LTI',
-            'Injury Non LTI',
-            'Property Damage',
-            'Environment Accident'
-        ] as $k)
-            <option @selected(old('potential_consequence')==$k)>
-                {{ $k }}
-            </option>
-        @endforeach
-    </select>
-</div>
-
-{{-- Stop Work --}}
-<div>
-    <label class="text-sm font-medium">Stop Work</label>
-    <select name="stop_work" class="w-full border rounded-lg px-3 py-2" required>
-        <option value="1" @selected(old('stop_work')==='1')>Ya</option>
-        <option value="0" @selected(old('stop_work')==='0')>Tidak</option>
-    </select>
-</div>
-
 <hr>
 
-<h2 class="font-semibold text-lg">Kontrol Risiko (WAJIB LENGKAP)</h2>
-<p class="text-xs text-gray-500">
-    Setiap kontrol wajib diisi, ditetapkan PIC, dan dilampirkan foto evidence.
-</p>
+<h2 class="font-semibold text-lg">Kontrol Risiko (WAJIB)</h2>
 
 @foreach ([
     'engineering' => 'Rekayasa Engineering',
@@ -164,14 +157,7 @@
 
     <textarea name="control_{{ $key }}"
               class="w-full border rounded-lg px-3 py-2"
-              placeholder="Uraian kontrol {{ $label }}"
               required>{{ old("control_$key") }}</textarea>
-
-    <input name="pic_{{ $key }}"
-           value="{{ old("pic_$key") }}"
-           class="w-full border rounded-lg px-3 py-2"
-           placeholder="PIC {{ $label }}"
-           required>
 
     <input type="file"
            name="evidence_{{ $key }}"
@@ -181,6 +167,17 @@
 </div>
 
 @endforeach
+
+<hr>
+
+{{-- PIC UMUM --}}
+<div>
+    <label class="text-sm font-medium">PIC (Penanggung Jawab Utama)</label>
+    <input name="pic"
+           value="{{ old('pic') }}"
+           class="w-full border rounded-lg px-3 py-2"
+           required>
+</div>
 
 <div class="pt-4 flex justify-end gap-2">
     <a href="{{ route('user.hipo.index') }}"

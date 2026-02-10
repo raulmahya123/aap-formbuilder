@@ -51,30 +51,46 @@
 
 {{-- INFO --}}
 <div class="grid md:grid-cols-4 gap-4 text-sm">
-    @foreach([
-        'Pelapor' => $hipo->reporter_name,
-        'Jobsite' => $hipo->jobsite,
-        'Waktu' => $hipo->report_time?->format('d M Y H:i'),
-        'Shift' => $hipo->shift,
-        'Sumber' => $hipo->source,
-        'Kategori' => $hipo->category,
-        'Konsekuensi' => $hipo->potential_consequence,
-        'Stop Work' => $hipo->stop_work ? 'YA' : 'TIDAK',
-    ] as $label => $value)
-    <div class="bg-white border rounded-xl p-4">
-        <div class="text-xs">{{ $label }}</div>
-        <div class="font-semibold">{{ $value }}</div>
+@foreach([
+    'Pelapor' => $hipo->reporter_name,
+    'Jobsite' => $hipo->jobsite,
+    'Waktu' => $hipo->report_time?->format('d M Y H:i'),
+    'Shift' => $hipo->shift,
+    'Sumber' => $hipo->source,
+    'Kategori' => $hipo->category,
+    'Jenis' => $hipo->jenis_hipo,
+    'Konsekuensi' => $hipo->potential_consequence,
+    'Stop Work' => $hipo->stop_work ? 'YA' : 'TIDAK',
+    'PIC Utama' => $hipo->pic,
+] as $label => $value)
+<div class="bg-white border rounded-xl p-4">
+    <div class="text-xs">{{ $label }}</div>
+    <div class="font-semibold">{{ $value }}</div>
+</div>
+@endforeach
+</div>
+
+{{-- RINCIAN KEJADIAN --}}
+<div class="bg-white border rounded-xl p-6 space-y-4">
+    <h3 class="font-semibold">📝 Rincian Kejadian</h3>
+
+    <div>
+        <div class="text-xs font-semibold">KTA (Kondisi Tidak Aman)</div>
+        <div class="text-sm whitespace-pre-line">{{ $hipo->kta }}</div>
     </div>
-    @endforeach
+
+    <div>
+        <div class="text-xs font-semibold">TTA (Tindakan Tidak Aman)</div>
+        <div class="text-sm whitespace-pre-line">{{ $hipo->tta }}</div>
+    </div>
+
+    <div>
+        <div class="text-xs font-semibold">Deskripsi Kejadian</div>
+        <div class="text-sm whitespace-pre-line">{{ $hipo->description }}</div>
+    </div>
 </div>
 
-{{-- DESKRIPSI --}}
-<div class="bg-white border rounded-xl p-6">
-    <h3 class="font-semibold mb-2">📝 Rincian Kejadian</h3>
-    <div class="text-sm whitespace-pre-line">{{ $hipo->description }}</div>
-</div>
-
-{{-- KONTROL RISIKO + PIC + EVIDENCE --}}
+{{-- KONTROL RISIKO --}}
 <div class="grid md:grid-cols-2 gap-4">
 @foreach([
     'engineering' => 'Rekayasa Engineering',
@@ -84,10 +100,9 @@
 ] as $key => $label)
 <div class="bg-white border rounded-xl p-4 space-y-2">
     <h4 class="font-semibold">{{ $label }}</h4>
-    <div class="text-sm">{{ $hipo->{"control_$key"} }}</div>
 
-    <div class="text-xs">
-        <strong>PIC:</strong> {{ $hipo->{"pic_$key"} }}
+    <div class="text-sm whitespace-pre-line">
+        {{ $hipo->{"control_$key"} }}
     </div>
 
     @if($hipo->{"evidence_$key"})
@@ -104,7 +119,6 @@
 {{-- ADMIN ACTION --}}
 <form method="POST"
       action="{{ route('admin.hipo.update', $hipo->id) }}"
-      enctype="multipart/form-data"
       class="bg-white border rounded-xl p-6 space-y-4">
 
 @csrf
@@ -115,7 +129,8 @@
 <div class="grid md:grid-cols-2 gap-4">
     <div>
         <label class="text-xs">PIC Utama</label>
-        <input name="pic" value="{{ old('pic',$hipo->pic) }}"
+        <input name="pic"
+               value="{{ old('pic',$hipo->pic) }}"
                class="w-full border rounded-lg px-3 py-2">
     </div>
 

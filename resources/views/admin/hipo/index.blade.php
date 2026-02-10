@@ -10,8 +10,11 @@
                 <tr>
                     <th class="text-left py-2 px-2">Tanggal</th>
                     <th class="text-left py-2 px-2">Jobsite</th>
+                    <th class="text-left py-2 px-2">Jenis</th>
                     <th class="text-left py-2 px-2">Kategori</th>
                     <th class="text-left py-2 px-2">Risk</th>
+                    <th class="text-left py-2 px-2">KTA</th>
+                    <th class="text-left py-2 px-2">TTA</th>
                     <th class="text-left py-2 px-2">Konsekuensi</th>
                     <th class="text-left py-2 px-2">PIC</th>
                     <th class="text-center py-2 px-2">Stop Work</th>
@@ -22,10 +25,10 @@
 
             <tbody>
                 @forelse($reports as $r)
-                <tr class="border-b hover:bg-gray-50">
+                <tr class="border-b hover:bg-gray-50 align-top">
 
                     {{-- Tanggal --}}
-                    <td class="py-2 px-2">
+                    <td class="py-2 px-2 whitespace-nowrap">
                         {{ $r->report_time?->format('d M Y') }}
                     </td>
 
@@ -34,12 +37,22 @@
                         {{ $r->jobsite }}
                     </td>
 
+                    {{-- Jenis --}}
+                    <td class="py-2 px-2">
+                        <span class="px-2 py-1 rounded text-xs font-semibold
+                            {{ $r->jenis_hipo === 'HIPO'
+                                ? 'bg-red-100 text-red-700'
+                                : 'bg-blue-100 text-blue-700' }}">
+                            {{ $r->jenis_hipo }}
+                        </span>
+                    </td>
+
                     {{-- Kategori --}}
                     <td class="py-2 px-2">
                         {{ $r->category }}
                     </td>
 
-                    {{-- Risk Level --}}
+                    {{-- Risk --}}
                     <td class="py-2 px-2">
                         <span class="px-2 py-1 rounded text-xs font-semibold
                             @class([
@@ -50,6 +63,16 @@
                             ])">
                             {{ $r->risk_level }}
                         </span>
+                    </td>
+
+                    {{-- KTA --}}
+                    <td class="py-2 px-2 text-xs text-gray-700">
+                        {{ \Illuminate\Support\Str::limit($r->kta, 40) }}
+                    </td>
+
+                    {{-- TTA --}}
+                    <td class="py-2 px-2 text-xs text-gray-700">
+                        {{ \Illuminate\Support\Str::limit($r->tta, 40) }}
                     </td>
 
                     {{-- Konsekuensi --}}
@@ -89,7 +112,7 @@
                     </td>
 
                     {{-- Aksi --}}
-                    <td class="py-2 px-2 text-center">
+                    <td class="py-2 px-2 text-center whitespace-nowrap">
                         <a href="{{ route('admin.hipo.show', $r->id) }}"
                            class="text-maroon-700 hover:underline font-medium">
                             Detail
@@ -99,8 +122,8 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" class="py-6 text-center text-gray-500">
-                        Belum ada laporan HIPO
+                    <td colspan="12" class="py-6 text-center text-gray-500">
+                        Belum ada laporan HIPO / Nearmiss
                     </td>
                 </tr>
                 @endforelse
