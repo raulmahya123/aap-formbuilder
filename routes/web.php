@@ -59,8 +59,8 @@ use App\Http\Controllers\User\ContractController as UserContractController;
 // ==============================
 use App\Http\Controllers\Admin\CompanyController as AdminCompanyController;
 use App\Http\Controllers\Admin\HipoReportController as AdminHipoReportController;
-use App\Http\Controllers\User\HipoReportController as UserHipoReportController;
 use App\Http\Controllers\Admin\CcmReportController as CcmReportController;
+
 Route::middleware('can:is-admin')
     ->prefix('ccm-reports')
     ->name('ccm-reports.')
@@ -91,7 +91,7 @@ Route::middleware('can:is-admin')
             ->name('destroy')
             ->whereNumber('ccm');
     });
-    // Route [user.hipo.show] not defined.
+// Route [user.hipo.show] not defined.
 
 
 // Redirect root ke dashboard
@@ -141,11 +141,6 @@ Route::get('/pubfile-dl', function (\Illuminate\Http\Request $request) {
 
 
 Route::middleware('auth')->group(function () {
-Route::prefix('user/hipo')->name('user.hipo.')->group(function () {
-    Route::get('/', [UserHipoReportController::class, 'index'])->name('index');
-    Route::get('/create', [UserHipoReportController::class, 'create'])->name('create');
-    Route::post('/', [UserHipoReportController::class, 'store'])->name('store');
-});
     // ==============================
     // FRONT (user)
     // ==============================
@@ -423,6 +418,13 @@ Route::prefix('user/hipo')->name('user.hipo.')->group(function () {
             ->group(function () {
 
                 Route::get('/', [AdminHipoReportController::class, 'index'])->name('index');
+
+                // FORM CREATE
+                Route::get('/create', [AdminHipoReportController::class, 'create'])->name('create');
+
+                // STORE DATA
+                Route::post('/', [AdminHipoReportController::class, 'store'])->name('store');
+
                 Route::get('/{hipo}', [AdminHipoReportController::class, 'show'])->name('show');
                 Route::put('/{hipo}', [AdminHipoReportController::class, 'update'])->name('update');
                 Route::delete('/{hipo}', [AdminHipoReportController::class, 'destroy'])->name('destroy');

@@ -25,14 +25,17 @@ class HipoReport extends Model
         'report_time',
         'shift',
         'source',
+        'jenis_hipo',          // ✅ tambahkan
         'category',
         'description',
         'potential_consequence',
         'risk_level',
+        'kta',                 // ✅ tambahkan
+        'tta',                 // ✅ tambahkan
         'stop_work',
 
         // PIC
-        'pic', // PIC utama
+        'pic',
 
         // KONTROL RISIKO
         'control_engineering',
@@ -46,16 +49,17 @@ class HipoReport extends Model
         'pic_work_practice',
         'pic_ppe',
 
-        // EVIDENCE PER KONTROL
+        // EVIDENCE
         'evidence_engineering',
         'evidence_administrative',
         'evidence_work_practice',
         'evidence_ppe',
 
-        // STATUS & CATATAN
+        // STATUS
         'status',
         'admin_note',
     ];
+
 
     /**
      * ==========================
