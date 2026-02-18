@@ -12,7 +12,6 @@ class CcmReport extends Model
     protected $table = 'ccm_reports';
 
     protected $fillable = [
-
         /* =====================
          * SECTION 1 - UMUM
          * ===================== */
@@ -24,7 +23,6 @@ class CcmReport extends Model
          * Kendaraan & Alat Berat
          * ===================== */
         'kendaraan_ada_kegiatan',
-        'kendaraan_tidak_ada_alasan',
         'kendaraan_pekerjaan_kritis',
         'kendaraan_prosedur',
         'kendaraan_pelanggaran',
@@ -41,7 +39,6 @@ class CcmReport extends Model
          * Izin Kerja
          * ===================== */
         'izin_kerja_ada',
-        'izin_kerja_tidak_ada_alasan',
         'izin_kerja_pekerjaan_kritis',
         'izin_kerja_prosedur',
         'izin_kerja_pelanggaran',
@@ -58,7 +55,6 @@ class CcmReport extends Model
          * Tebing / Disposal
          * ===================== */
         'tebing_ada',
-        'tebing_tidak_ada_alasan',
         'tebing_pekerjaan_kritis',
         'tebing_prosedur',
         'tebing_pelanggaran',
@@ -75,7 +71,6 @@ class CcmReport extends Model
          * Air & Lumpur
          * ===================== */
         'air_lumpur_ada',
-        'air_lumpur_tidak_ada_alasan',
         'air_lumpur_pekerjaan_kritis',
         'air_lumpur_prosedur',
         'air_lumpur_pelanggaran',
@@ -90,7 +85,6 @@ class CcmReport extends Model
          * Chainsaw
          * ===================== */
         'chainsaw_ada',
-        'chainsaw_tidak_ada_alasan',
         'chainsaw_pekerjaan_kritis',
         'chainsaw_prosedur',
         'chainsaw_pelanggaran',
@@ -107,7 +101,6 @@ class CcmReport extends Model
          * LOTO
          * ===================== */
         'loto_ada',
-        'loto_tidak_ada_alasan',
         'loto_pekerjaan_kritis',
         'loto_prosedur',
         'loto_pelanggaran',
@@ -124,7 +117,6 @@ class CcmReport extends Model
          * Lifting
          * ===================== */
         'lifting_ada',
-        'lifting_tidak_ada_alasan',
         'lifting_pekerjaan_kritis',
         'lifting_prosedur',
         'lifting_pelanggaran',
@@ -139,7 +131,6 @@ class CcmReport extends Model
          * Blasting
          * ===================== */
         'blasting_ada',
-        'blasting_tidak_ada_alasan',
         'blasting_pekerjaan_kritis',
         'blasting_prosedur',
         'blasting_pelanggaran',
@@ -156,7 +147,6 @@ class CcmReport extends Model
          * Kritis Baru
          * ===================== */
         'kritis_baru_ada',
-        'kritis_baru_tidak_ada_alasan',
         'kritis_baru_pekerjaan',
         'kritis_baru_prosedur',
         'kritis_baru_dipahami',
@@ -174,6 +164,7 @@ class CcmReport extends Model
     protected $casts = [
         'waktu_pelaporan' => 'date',
 
+        // Casting Boolean Flags
         'kendaraan_ada_kegiatan' => 'boolean',
         'izin_kerja_ada'         => 'boolean',
         'tebing_ada'             => 'boolean',
@@ -186,14 +177,20 @@ class CcmReport extends Model
     ];
 
     /* =========================================================
-     * HELPER (OPSIONAL, TAPI SANGAT BERGUNA)
+     * HELPER FUNCTIONS
      * ========================================================= */
 
+    /**
+     * Mengecek apakah field evidence tertentu memiliki file.
+     */
     public function hasEvidence(string $field): bool
     {
         return !empty($this->{$field . '_evidence'});
     }
 
+    /**
+     * Mendapatkan URL lengkap untuk file evidence.
+     */
     public function evidenceUrl(string $field): ?string
     {
         return $this->{$field . '_evidence'}

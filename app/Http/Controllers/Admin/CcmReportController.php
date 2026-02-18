@@ -6,6 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\CcmReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+// --- IMPORT LIBRARY INTERVENTION IMAGE V3 ---
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver; 
+// ------------------------------------------
 
 class CcmReportController extends Controller
 {
@@ -33,22 +39,18 @@ class CcmReportController extends Controller
      * ========================================================= */
     public function store(Request $request)
     {
-        $validated = $request->validate(
-            array_merge(
-                $this->baseRules(true),
-                $this->conditionalRules($request)
-            )
+        // 1. Validasi gabungan Base + Section Rules
+        $rules = array_merge(
+            $this->baseRules(),
+            $this->getSectionRules($request, true) // true = isCreate (Evidence Wajib)
         );
 
-        // ===============================
-        // HANDLE FILE UPLOAD (CREATE)
-        // ===============================
-        foreach ($request->allFiles() as $field => $file) {
-            if ($file && is_file($file)) {
-                $validated[$field] = $file->store('ccm-evidence', 'public');
-            }
-        }
+        $validated = $request->validate($rules);
 
+        // 2. Handle File Upload (Dengan Kompresi Image V3)
+        $validated = $this->handleFileUploads($request, $validated);
+
+        // 3. Simpan ke Database
         CcmReport::create($validated);
 
         return redirect()
@@ -81,27 +83,15 @@ class CcmReportController extends Controller
     {
         $report = CcmReport::findOrFail($id);
 
-        $validated = $request->validate(
-            array_merge(
-                $this->baseRules(false),
-                $this->conditionalRules($request)
-            )
+        $rules = array_merge(
+            $this->baseRules(),
+            $this->getSectionRules($request, false) // false = isUpdate (Evidence Opsional)
         );
 
-        // ===============================
-        // HANDLE FILE UPLOAD (UPDATE)
-        // ===============================
-        foreach ($request->allFiles() as $field => $file) {
-            if ($file && is_file($file)) {
+        $validated = $request->validate($rules);
 
-                // hapus file lama jika ada
-                if (!empty($report->$field)) {
-                    Storage::disk('public')->delete($report->$field);
-                }
-
-                $validated[$field] = $file->store('ccm-evidence', 'public');
-            }
-        }
+        // Handle File Upload (Ganti file lama jika ada upload baru)
+        $validated = $this->handleFileUploads($request, $validated, $report);
 
         $report->update($validated);
 
@@ -117,10 +107,12 @@ class CcmReportController extends Controller
     {
         $report = CcmReport::findOrFail($id);
 
-        // hapus semua evidence file
+        // Hapus semua file fisik dari storage agar tidak memenuhi server
         foreach ($report->getAttributes() as $field => $value) {
-            if (str_ends_with($field, '_evidence') && $value) {
-                Storage::disk('public')->delete($value);
+            if (str_ends_with($field, '_evidence') && !empty($value)) {
+                if (Storage::disk('public')->exists($value)) {
+                    Storage::disk('public')->delete($value);
+                }
             }
         }
 
@@ -132,65 +124,130 @@ class CcmReportController extends Controller
     }
 
     /* =========================================================
-     * BASE RULES
+     * HELPER: BASE RULES (Sesuai Kolom DB Asli)
      * ========================================================= */
-    private function baseRules(bool $isCreate = true): array
+    private function baseRules(): array
     {
-        $required = $isCreate ? 'required' : 'sometimes';
-
         return [
-            'waktu_pelaporan' => "$required|date",
-            'jobsite'         => "$required|in:AAP-BGG,AAP-SBS,ABN-DBK,ABC-POS",
-            'nama_pelapor'    => "$required|string",
+            'waktu_pelaporan' => 'required|date',
+            'jobsite'         => 'required|in:AAP-BGG,AAP-SBS,ABN-DBK,ABC-POS',
+            'nama_pelapor'    => 'required|string|max:255',
 
-            // FLAG KEGIATAN (HARUS *_ada_kegiatan)
+            // Boolean Flags sesuai migrasi database Anda
             'kendaraan_ada_kegiatan' => 'nullable|boolean',
-            'izin_kerja_ada_kegiatan' => 'nullable|boolean',
-            'tebing_ada_kegiatan' => 'nullable|boolean',
-            'air_lumpur_ada_kegiatan' => 'nullable|boolean',
-            'chainsaw_ada_kegiatan' => 'nullable|boolean',
-            'loto_ada_kegiatan' => 'nullable|boolean',
-            'lifting_ada_kegiatan' => 'nullable|boolean',
-            'blasting_ada_kegiatan' => 'nullable|boolean',
-            'kritis_baru_ada_kegiatan' => 'nullable|boolean',
+            'izin_kerja_ada'         => 'nullable|boolean',
+            'tebing_ada'             => 'nullable|boolean',
+            'air_lumpur_ada'         => 'nullable|boolean',
+            'chainsaw_ada'           => 'nullable|boolean',
+            'loto_ada'               => 'nullable|boolean',
+            'lifting_ada'            => 'nullable|boolean',
+            'blasting_ada'           => 'nullable|boolean',
+            'kritis_baru_ada'        => 'nullable|boolean',
         ];
     }
 
     /* =========================================================
-     * CONDITIONAL RULES (FINAL & FIXED)
+     * HELPER: SECTION RULES (Logika Validasi Dinamis & Sinkron Migrasi)
      * ========================================================= */
-    private function conditionalRules(Request $request): array
+    private function getSectionRules(Request $request, bool $isCreate): array
     {
         $rules = [];
 
+        // Definisi Kontrol sesuai migrasi Anda
         $sections = [
-            'kendaraan'   => ['engineering','administratif','praktek_kerja','apd'],
-            'izin_kerja'  => ['engineering','administratif','praktek_kerja','apd'],
-            'tebing'      => ['engineering','administratif','praktek_kerja','apd'],
-            'air_lumpur'  => ['engineering','administratif','apd'],
-            'chainsaw'    => ['engineering','administratif','praktek_kerja','apd'],
-            'loto'        => ['engineering','administratif','praktek_kerja','apd'],
-            'lifting'     => ['engineering','administratif','apd'],
-            'blasting'    => ['engineering','administratif','praktek_kerja','apd'],
-            'kritis_baru' => ['engineering','administratif','praktek_kerja','apd'],
+            'kendaraan'   => ['engineering', 'administratif', 'praktek_kerja', 'apd'],
+            'izin_kerja'  => ['engineering', 'administratif', 'praktek_kerja', 'apd'],
+            'tebing'      => ['engineering', 'administratif', 'praktek_kerja', 'apd'],
+            'air_lumpur'  => ['engineering', 'administratif', 'apd'], 
+            'chainsaw'    => ['engineering', 'administratif', 'praktek_kerja', 'apd'],
+            'loto'        => ['engineering', 'administratif', 'praktek_kerja', 'apd'],
+            'lifting'     => ['engineering', 'administratif', 'apd'],
+            'blasting'    => ['engineering', 'administratif', 'praktek_kerja', 'apd'],
+            'kritis_baru' => ['engineering', 'administratif', 'praktek_kerja', 'apd'],
         ];
 
-        foreach ($sections as $section => $controls) {
+        foreach ($sections as $prefix => $controls) {
+            
+            // LOGIC NAMA KOLOM FLAG (Kendaraan beda sendiri di DB)
+            $flag = ($prefix === 'kendaraan') ? 'kendaraan_ada_kegiatan' : $prefix . '_ada';
 
-            // ⬇️ FIX UTAMA: PAKAI *_ada_kegiatan
-            if ($request->boolean($section . '_ada_kegiatan')) {
+            if ($request->boolean($flag)) {
+                
+                // 1. Validasi Kolom Deskripsi Teks (Menyesuaikan ENUM di Migrasi)
+                if ($prefix === 'kritis_baru') {
+                    $rules[$prefix . '_pekerjaan']   = 'required|string';
+                    $rules[$prefix . '_prosedur']    = 'required|in:Ada,Tidak Ada'; // Sesuai Migrasi: enum('Ada','Tidak Ada')
+                    $rules[$prefix . '_dipahami']    = 'required|in:Sudah,Belum';   // Sesuai Migrasi: enum('Sudah','Belum')
+                    $rules[$prefix . '_pelanggaran'] = 'required|in:Ada,Tidak Ada'; // Sesuai Migrasi: enum('Ada','Tidak Ada')
+                } else {
+                    $rules[$prefix . '_pekerjaan_kritis'] = 'required|string';
+                    $rules[$prefix . '_prosedur']         = 'required|in:Sudah,Belum';   // Sesuai Migrasi: enum('Sudah','Belum')
+                    $rules[$prefix . '_pelanggaran']      = 'required|in:Ada,Tidak Ada'; // Sesuai Migrasi: enum('Ada','Tidak Ada')
+                }
 
+                // 2. Validasi Kontrol & Evidence
                 foreach ($controls as $ctrl) {
-                    $rules[$section.'_'.$ctrl] = 'required|string';
-                    $rules[$section.'_'.$ctrl.'_evidence']
-                        = 'required|file|image|max:5120';
+                    $rules["{$prefix}_{$ctrl}"] = 'required|string';
+                    
+                    $fileRule = $isCreate ? 'required' : 'nullable';
+                    $rules["{$prefix}_{$ctrl}_evidence"] = "$fileRule|file|image|max:10240"; // Max 10MB
                 }
 
             } else {
-                $rules[$section.'_tidak_ada_alasan'] = 'required|string';
+                // Sesuai logic Anda: Jika tidak ada kegiatan, alasan wajib diisi
+                // Catatan: Pastikan kolom '..._tidak_ada_alasan' ada di Model fillable jika ingin disimpan
+                $rules["{$prefix}_tidak_ada_alasan"] = 'required|string';
             }
         }
 
         return $rules;
+    }
+
+    /* =========================================================
+     * HELPER: HANDLE FILE UPLOADS (KOMPRESI V3)
+     * ========================================================= */
+    private function handleFileUploads(Request $request, array $validatedData, ?CcmReport $existingReport = null): array
+    {
+        $manager = new ImageManager(new Driver());
+
+        foreach ($request->allFiles() as $field => $file) {
+            
+            if ($file && $file->isValid()) {
+                
+                // Hapus file lama jika proses Update
+                if ($existingReport && !empty($existingReport->$field)) {
+                    if (Storage::disk('public')->exists($existingReport->$field)) {
+                        Storage::disk('public')->delete($existingReport->$field);
+                    }
+                }
+
+                // Generate nama unik
+                $filename = 'ccm-evidence/' . Str::random(40) . '.jpg';
+                
+                try {
+                    // Proses Kompresi Image Manager V3
+                    $image = $manager->read($file);
+
+                    // Resize ke lebar 1000px, tinggi otomatis (aspect ratio tetap)
+                    $image->scale(width: 1000);
+
+                    // Encode ke format JPG dengan kualitas 70 (Kompresi Efektif)
+                    $encoded = $image->toJpeg(quality: 70);
+
+                    // Simpan ke storage
+                    Storage::disk('public')->put($filename, (string) $encoded);
+
+                    // Masukkan path ke array data yang akan di-insert/update
+                    $validatedData[$field] = $filename;
+
+                } catch (\Exception $e) {
+                    // Fallback jika library gagal proses: simpan file asli
+                    $path = $file->store('ccm-evidence', 'public');
+                    $validatedData[$field] = $path;
+                }
+            }
+        }
+
+        return $validatedData;
     }
 }
