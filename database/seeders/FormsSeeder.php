@@ -32,7 +32,7 @@ class FormsSeeder extends Seeder
             "SHE-SOP-031 Comisioning.pdf",
             "SHE-SOP-032 Penanganan Penyakit Akibat Kerja (PAK).pdf",
             "SHE-SOP-033 Perancangan dan Rekayasa.pdf",
-            "SHE-SOP-034 Pengelolaan Perubahan ( Management of Change).pdf",
+            "SHE-SOP-034 Pengelolaan Perubahan (Management of Change).pdf",
             "SHE-SOP-035 Kalibrasi Peralatan.pdf",
             "SHE-SOP-036 Pengendalian Dokumen.pdf",
             "SHE-SOP-037 Pengendalian Rekaman.pdf",
@@ -44,24 +44,31 @@ class FormsSeeder extends Seeder
 
         foreach ($files as $file) {
 
-            $title = str_replace('.pdf','',$file);
+            $title = str_replace('.pdf', '', $file);
+            $slug  = Str::slug($title);
 
-            DB::table('forms')->insert([
-                'company_id' => 2,
-                'site_id' => 5,
-                'department_id' => 5,
-                'created_by' => 1,
-                'title' => $title,
-                'slug' => Str::slug($title),
-                'doc_type' => 'SOP',
-                'description' => $title,
-                'type' => 'pdf',
-                'schema' => null,
-                'pdf_path' => 'assets/form/'.$file,
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            DB::table('forms')->updateOrInsert(
+
+                [
+                    'company_id' => 2,
+                    'slug' => $slug
+                ],
+
+                [
+                    'site_id' => 5,
+                    'department_id' => 5,
+                    'created_by' => 1,
+                    'title' => $title,
+                    'doc_type' => 'SOP',
+                    'description' => $title,
+                    'type' => 'pdf',
+                    'schema' => null,
+                    'pdf_path' => 'assets/form/' . $file,
+                    'is_active' => true,
+                    'updated_at' => now(),
+                    'created_at' => now(),
+                ]
+            );
         }
     }
 }
