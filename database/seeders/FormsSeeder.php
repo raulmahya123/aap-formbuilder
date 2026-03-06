@@ -10,8 +10,7 @@ class FormsSeeder extends Seeder
     public function run(): void
     {
         DB::table('forms')->insert([
-            'company_id' => 2,
-            'site_id' => 5,
+            'company_id' => 1,
             'department_id' => 5,
             'created_by' => 1,
             'title' => 'SHE SOP 030 Pengelolaan Keselamatan',
