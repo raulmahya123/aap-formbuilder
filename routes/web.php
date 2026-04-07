@@ -60,6 +60,17 @@ use App\Http\Controllers\User\ContractController as UserContractController;
 use App\Http\Controllers\Admin\CompanyController as AdminCompanyController;
 use App\Http\Controllers\Admin\HipoReportController as AdminHipoReportController;
 use App\Http\Controllers\Admin\CcmReportController as CcmReportController;
+use Illuminate\Support\Facades\Response;
+
+Route::get('/storage/{path}', function ($path) {
+    $fullPath = storage_path('app/public/' . $path);
+
+    if (!file_exists($fullPath)) {
+        abort(404);
+    }
+
+    return response()->file($fullPath);
+})->where('path', '.*');
 
 Route::middleware('can:is-admin')
     ->prefix('ccm-reports')
