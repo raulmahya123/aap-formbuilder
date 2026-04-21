@@ -1,7 +1,7 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-(function () {
+window.addEventListener('DOMContentLoaded', function () {
   // ====== DATA DARI SERVER ======
   const payload      = @json($charts ? (object)$charts : (object){});
   const trendLabels  = @json($trendLabels ?? []);
@@ -96,8 +96,9 @@
   const dominantUnit = Object.entries(unitCount).sort((a,b)=>b[1]-a[1])[0]?.[0] ?? '';
   const top = flat.filter(r=>r.unit===dominantUnit).sort((a,b)=>b.val-a.val).slice(0,10);
 
-  if (document.getElementById('topChart') && top.length) {
-    new Chart(document.getElementById('topChart'), {
+  var topChartEl = document.getElementById('topChart');
+  if (topChartEl && top.length) {
+    new Chart(topChartEl, {
       type:'bar',
       data:{
         labels: top.map(r=>r.label),
@@ -122,8 +123,9 @@
   }
 
   // ========== TREND CHART (pakai data controller, no dummy) ==========
-  if (document.getElementById('trendChart') && trendLabels.length) {
-    const ctx = document.getElementById('trendChart').getContext('2d');
+  var trendChartEl = document.getElementById('trendChart');
+  if (trendChartEl && trendLabels.length) {
+    const ctx = trendChartEl.getContext('2d');
     const lineColor = dynColor(0, 1);
     const grad = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
     grad.addColorStop(0, dynColor(0, .28));
@@ -190,6 +192,6 @@
       });
     });
   }
-})();
+});
 </script>
 @endpush

@@ -140,15 +140,15 @@ Log::info('AGG VIEW: load aggregate page', [
 ]);
 @endphp
 
-<h1 class="text-2xl font-bold mb-4 text-maroon-700">Rekap — {{ $periodSafe }}</h1>
+<h1 class="mb-4 text-2xl font-bold text-maroon-700">Rekap — {{ $periodSafe }}</h1>
 
-<form method="get" class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-3"
+<form method="get" class="grid grid-cols-1 gap-3 mb-4 md:grid-cols-6"
   x-data="{ scope: '{{ $scopeNow }}' }">
 
   <input type="hidden" name="scope" :value="scope">
   <input type="hidden" name="tz" value="{{ $tz }}">
 
-  <select name="site_id" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
+  <select name="site_id" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
     <option value="">Semua Site</option>
     @foreach($sites as $s)
     <option value="{{ $s->id }}" @selected(($siteId ?? null)==$s->id)>
@@ -157,7 +157,7 @@ Log::info('AGG VIEW: load aggregate page', [
     @endforeach
   </select>
 
-  <select x-model="scope" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
+  <select x-model="scope" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
     <option value="day">Harian</option>
     <option value="week">Mingguan</option>
     <option value="month">Bulanan</option>
@@ -166,33 +166,33 @@ Log::info('AGG VIEW: load aggregate page', [
 
   <input type="date" name="date"
     value="{{ $dateObj->setTimezone($tz)->toDateString() }}"
-    class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
+    class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
     x-show="scope==='day'">
 
   <div class="flex gap-2" x-show="scope==='week'">
     <input type="number" name="week" value="{{ $weekVal }}"
-      class="border rounded-lg px-3 py-2 w-24 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
+      class="w-24 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
 
     <input type="number" name="year" value="{{ $yearVal }}"
-      class="border rounded-lg px-3 py-2 w-28 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
+      class="px-3 py-2 border rounded-lg w-28 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
   </div>
 
   <div class="flex gap-2" x-show="scope==='month'">
-    <select name="month" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
+    <select name="month" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
       @for($m=1;$m<=12;$m++)
         <option value="{{ $m }}" @selected($monthVal==$m)>{{ $m }}</option>
         @endfor
     </select>
 
     <input type="number" name="year" value="{{ $yearVal }}"
-      class="border rounded-lg px-3 py-2 w-28 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
+      class="px-3 py-2 border rounded-lg w-28 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
   </div>
 
   <input type="number" name="year" value="{{ $yearVal }}"
-    class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
+    class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
     x-show="scope==='year'">
 
-  <button class="px-4 py-2 bg-maroon-600 hover:bg-maroon-700 text-white rounded-lg md:col-span-1">
+  <button class="px-4 py-2 text-white rounded-lg bg-maroon-600 hover:bg-maroon-700 md:col-span-1">
     Terapkan
   </button>
 </form>
@@ -209,7 +209,7 @@ $grandTotal += $ttl;
 }
 @endphp
 
-<div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
+<div class="grid grid-cols-2 gap-3 mb-6 md:grid-cols-6">
   <div class="stat-card">
     <div class="text-xs">Total Groups</div>
     <div class="text-xl font-bold">{{ $groups->count() }}</div>
@@ -296,7 +296,7 @@ $s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$)) /', '' , $s);
   @php $printedLagHeader=true; @endphp
   @endif
 
-  <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 mb-6">
+  <div class="grid grid-cols-2 gap-3 mb-6 md:grid-cols-4 xl:grid-cols-6">
     @foreach($rows as $r)
     @php
     $ind = $r['indicator'];
@@ -368,181 +368,163 @@ $s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$)) /', '' , $s);
       }
       @endphp
 
-      <div class="chart-wrap chart-card-mini p-2 pb-3 rounded-lg ring-1 ring-slate-200/70 hover:shadow-sm transition-shadow">
+      <div class="p-2 pb-3 transition-shadow rounded-lg chart-wrap chart-card-mini ring-1 ring-slate-200/70 hover:shadow-sm">
         <div class="chart-head">
           <div class="chart-title">{{ $ind->name }}</div>
         </div>
-        <canvas id="{{ $cid }}"></canvas>
+        <canvas 
+          id="{{ $cid }}" 
+          class="chart-mini-bar" 
+          height="170"
+          data-labels='@json(array_values($lbls))'
+          data-vals='@json(array_values($vals))'
+          data-bar-colors='@json($barColors)'
+          data-thr-series='@json($thrSeries)'
+          data-thr-value='@json($thrNum)'
+          data-suggested='@json($chartMax)'
+        ></canvas>
       </div>
 
       @push('scripts')
+      @once
       <script>
-        (function() {
-          var el = document.getElementById(@js($cid));
-          if (!el) return;
-
-          var scopeNow = @json($scopeNow);
-          var isYear = scopeNow === 'year';
-          var isWeek = scopeNow === 'week';
-          var isMonth = scopeNow === 'month';
-          var rawLabels = @json(array_values($lbls));
-
-          var monthShort = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-
-          var weekdayShort = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum'];
-
-          var labels = rawLabels.map(function(v, i) {
-            if (isYear) return monthShort[i] || String(v);
-            if (isWeek) return weekdayShort[i] || String(v);
-            if (isMonth) {
-              var n = parseInt(String(v), 10);
-              if (!isNaN(n) && n >= 1 && n <= 12) return monthShort[n - 1];
-            }
-            return String(v);
-          });
-
-          var vals = @json(array_values($vals));
-          var barColors = @json($barColors);
-          var thrSeries = @json($thrSeries);
-          var thrValue = @json($thrNum);
-          var suggested = @json($chartMax);
-
-          var thresholdLabel = {
-            id: 'thresholdLabel',
-            afterDatasetsDraw(chart) {
-              if (thrValue == null) return;
-              var y = chart.scales.y.getPixelForValue(thrValue);
-              var left = chart.chartArea.left;
-              var ctx = chart.ctx;
-              ctx.save();
-              ctx.fillStyle = '#f59e0b';
-              ctx.font = '600 10px system-ui,-apple-system,Segoe UI,Roboto,Arial';
-              ctx.textAlign = 'left';
-              ctx.textBaseline = 'middle';
-              var txt = new Intl.NumberFormat('id-ID').format(thrValue);
-              ctx.fillText('Target: ' + txt, left + 2, y);
-              ctx.restore();
-            }
-          };
-
-          var valueLabels = {
-            id: 'valueLabels',
-            afterDatasetsDraw(chart) {
-              var {
-                ctx,
-                chartArea: {
-                  top
-                }
-              } = chart;
-              ctx.save();
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'bottom';
-              ctx.font = '600 10px system-ui,-apple-system,Segoe UI,Roboto,Arial';
-              ctx.fillStyle = '#111827';
-              var meta = chart.getDatasetMeta(0);
-              meta.data.forEach(function(elm, i) {
-                var v = chart.data.datasets[0].data[i];
-                if (v == null || Number(v) === 0) return;
-                var txt = new Intl.NumberFormat('id-ID').format(v);
-                var x = elm.x,
-                  y = elm.y - 4;
-                if (y < top + 8) y = top + 8;
-                ctx.fillText(txt, x, y);
-              });
-              ctx.restore();
-            }
-          };
-
-          new Chart(el, {
-            type: 'bar',
-            data: {
-              labels: labels,
-              datasets: [{
-                  label: 'Total',
-                  data: vals,
-                  backgroundColor: barColors,
-                  borderWidth: 0,
-                  borderRadius: 6,
-                  categoryPercentage: .6,
-                  barPercentage: .8,
-                  maxBarThickness: 18
-                },
-                (thrSeries ? {
-                  type: 'line',
-                  label: 'Target',
-                  data: thrSeries,
-                  borderColor: '#f59e0b',
-                  borderWidth: 1.5,
-                  borderDash: [4, 4],
-                  pointRadius: 0,
-                  fill: false,
-                  tension: 0
-                } : null)
-              ].filter(Boolean)
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              layout: {
-                padding: {
-                  top: 4,
-                  right: 8,
-                  bottom: 22,
-                  left: 8
-                }
+        window.addEventListener('DOMContentLoaded', function() {
+          document.querySelectorAll('.chart-mini-bar').forEach(function(el) {
+            var labels = JSON.parse(el.dataset.labels || '[]');
+            var vals = JSON.parse(el.dataset.vals || '[]');
+            var barColors = JSON.parse(el.dataset.barColors || '[]');
+            var thrSeries = JSON.parse(el.dataset.thrSeries || 'null');
+            var thrValue = JSON.parse(el.dataset.thrValue || 'null');
+            var suggested = Number(el.dataset.suggested) || 1;
+            if (!Array.isArray(vals) || vals.length === 0 || vals.every(v => !v || v === 0)) return;
+            var thresholdLabel = {
+              id: 'thresholdLabel',
+              afterDatasetsDraw(chart) {
+                if (thrValue == null) return;
+                var y = chart.scales.y.getPixelForValue(thrValue);
+                var left = chart.chartArea.left;
+                var ctx = chart.ctx;
+                ctx.save();
+                ctx.fillStyle = '#f59e0b';
+                ctx.font = '600 10px system-ui,-apple-system,Segoe UI,Roboto,Arial';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                var txt = new Intl.NumberFormat('id-ID').format(thrValue);
+                ctx.fillText('Target: ' + txt, left + 2, y);
+                ctx.restore();
+              }
+            };
+            var valueLabels = {
+              id: 'valueLabels',
+              afterDatasetsDraw(chart) {
+                var { ctx, chartArea: { top } } = chart;
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.font = '600 10px system-ui,-apple-system,Segoe UI,Roboto,Arial';
+                ctx.fillStyle = '#111827';
+                var meta = chart.getDatasetMeta(0);
+                meta.data.forEach(function(elm, i) {
+                  var v = chart.data.datasets[0].data[i];
+                  if (v == null || Number(v) === 0) return;
+                  var txt = new Intl.NumberFormat('id-ID').format(v);
+                  var x = elm.x, y = elm.y - 4;
+                  if (y < top + 8) y = top + 8;
+                  ctx.fillText(txt, x, y);
+                });
+                ctx.restore();
+              }
+            };
+            new Chart(el, {
+              type: 'bar',
+              data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total',
+                    data: vals,
+                    backgroundColor: barColors,
+                    borderWidth: 0,
+                    borderRadius: 6,
+                    categoryPercentage: .6,
+                    barPercentage: .8,
+                    maxBarThickness: 18
+                  },
+                  (thrSeries ? {
+                    type: 'line',
+                    label: 'Target',
+                    data: thrSeries,
+                    borderColor: '#f59e0b',
+                    borderWidth: 1.5,
+                    borderDash: [4, 4],
+                    pointRadius: 0,
+                    fill: false,
+                    tension: 0
+                  } : null)
+                ].filter(Boolean)
               },
-              plugins: {
-                legend: {
-                  display: false
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                  padding: {
+                    top: 4,
+                    right: 8,
+                    bottom: 22,
+                    left: 8
+                  }
                 },
-                tooltip: {
-                  mode: 'index',
-                  intersect: false,
-                  callbacks: {
-                    label: function(c) {
-                      var val = c.parsed.y ?? c.parsed;
-                      var base = c.dataset.label + ': ' + new Intl.NumberFormat('id-ID').format(val);
-                      if (c.datasetIndex === 0 && thrValue != null) {
-                        base += ' (Target: ' + new Intl.NumberFormat('id-ID').format(thrValue) + ')';
+                plugins: {
+                  legend: {
+                    display: false
+                  },
+                  tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                      label: function(c) {
+                        var val = c.parsed.y ?? c.parsed;
+                        var base = c.dataset.label + ': ' + new Intl.NumberFormat('id-ID').format(val);
+                        if (c.datasetIndex === 0 && thrValue != null) {
+                          base += ' (Target: ' + new Intl.NumberFormat('id-ID').format(thrValue) + ')';
+                        }
+                        return base;
                       }
-                      return base;
                     }
                   }
+                },
+                scales: {
+                  x: {
+                    grid: {
+                      display: false
+                    },
+                    ticks: {
+                      display: true,
+                      maxRotation: 0,
+                      minRotation: 0,
+                      font: {
+                        size: 10
+                      },
+                      padding: 2
+                    }
+                  },
+                  y: {
+                    grid: {
+                      display: false
+                    },
+                    ticks: {
+                      display: false
+                    },
+                    beginAtZero: true,
+                    suggestedMax: suggested
+                  }
                 }
               },
-              scales: {
-                x: {
-                  grid: {
-                    display: false
-                  },
-                  ticks: {
-                    display: true,
-                    autoSkip: !(isYear || isWeek || isMonth),
-                    maxRotation: 0,
-                    minRotation: 0,
-                    font: {
-                      size: 10
-                    },
-                    padding: 2,
-                    maxTicksLimit: (isYear ? 12 : (isWeek ? 5 : 1))
-                  }
-                },
-                y: {
-                  grid: {
-                    display: false
-                  },
-                  ticks: {
-                    display: false
-                  },
-                  beginAtZero: true,
-                  suggestedMax: suggested
-                }
-              }
-            },
-            plugins: [valueLabels, thresholdLabel]
+              plugins: [valueLabels, thresholdLabel]
+            });
           });
-        })();
+        });
       </script>
+      @endonce
       @endpush
       @endforeach
   </div>
@@ -566,7 +548,7 @@ $s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$)) /', '' , $s);
 
   @if($isBaseGroup)
   {{-- ========== BASE METRICS → DONUT ========== --}}
-  <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 mb-8">
+  <div class="grid grid-cols-2 gap-3 mb-8 md:grid-cols-4 xl:grid-cols-6">
     @foreach($leadRows as $r)
     @php
     $ind = $r['indicator'];
@@ -587,7 +569,7 @@ $s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$)) /', '' , $s);
     $did = 'donut_base_'.$g->code.'_'.$ind->code;
     @endphp
 
-    <div class="chart-wrap chart-card-donut p-3 pb-4 rounded-lg ring-1 ring-slate-200/70 hover:shadow-sm transition-shadow">
+    <div class="p-3 pb-4 transition-shadow rounded-lg chart-wrap chart-card-donut ring-1 ring-slate-200/70 hover:shadow-sm">
       <div class="chart-head">
         <div class="chart-title">{{ $ind->name }}</div>
       </div>
@@ -757,7 +739,7 @@ $s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$)) /', '' , $s);
   </script>
   @endpush
 
-  <div class="chart-wrap chart-card-bar p-4 mb-8">
+  <div class="p-4 mb-8 chart-wrap chart-card-bar">
     <canvas id="{{ $cid }}"></canvas>
   </div>
 
@@ -897,18 +879,18 @@ $s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$)) /', '' , $s);
 
   {{-- ========================= BAGIAN 3 — DETAIL TABEL (Total saja) ========================= --}}
   @foreach($groups as $g)
-  <div class="mb-6 chart-wrap overflow-hidden">
-    <div class="px-3 py-2 font-semibold bg-maroon-700 text-white">{{ $g->name }}</div>
+  <div class="mb-6 overflow-hidden chart-wrap">
+    <div class="px-3 py-2 font-semibold text-white bg-maroon-700">{{ $g->name }}</div>
     <table class="min-w-full">
-      <thead class="bg-maroon-700 text-white">
+      <thead class="text-white bg-maroon-700">
         <tr>
-          <th class="px-3 py-2 text-left w-10">#</th>
+          <th class="w-10 px-3 py-2 text-left">#</th>
           <th class="px-3 py-2 text-left">Indicator</th>
-          <th class="px-3 py-2 text-right w-40">Total</th>
+          <th class="w-40 px-3 py-2 text-right">Total</th>
           <th class="px-3 py-2 text-right w-28">Threshold</th>
-          <th class="px-3 py-2 text-left w-24">Unit</th>
+          <th class="w-24 px-3 py-2 text-left">Unit</th>
           @if($isSuperAdmin)
-          <th class="px-3 py-2 text-center w-32">Aksi</th>
+          <th class="w-32 px-3 py-2 text-center">Aksi</th>
           @endif
         </tr>
       </thead>
@@ -991,7 +973,7 @@ $s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$)) /', '' , $s);
           <td class="px-3 py-2">
             <div class="font-medium">{{ $ind->name }}</div>
             @if($ind->is_derived)
-            <div class="text-xs text-gray-500 font-mono">= {{ $ind->formula }}</div>
+            <div class="font-mono text-xs text-gray-500">= {{ $ind->formula }}</div>
             @endif
           </td>
 
@@ -1007,7 +989,7 @@ $s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$)) /', '' , $s);
             @endif
           </td>
 
-          <td class="px-3 py-2 text-right font-mono">{{ $thrDisp }}</td>
+          <td class="px-3 py-2 font-mono text-right">{{ $thrDisp }}</td>
           <td class="px-3 py-2">{{ trim((string)($ind->unit ?? '')) ?: '-' }}</td>
 
           @if($isSuperAdmin)
