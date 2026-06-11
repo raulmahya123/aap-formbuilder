@@ -83,7 +83,7 @@
       <label class="block text-sm font-medium text-[#1D1C1A]">Nama Template</label>
       <input type="text" name="name" required
              x-model="meta.name"
-             class="mt-1 w-full rounded-xl px-3 py-2 border-2 border-gray-400 focus:border-[#7A2C2F] focus:ring-0 focus:outline-none"
+             class="mt-1 w-full rounded-xl px-3 py-2 border-2 border-gray-400 focus:border-[#bb9974] focus:ring-0 focus:outline-none"
              placeholder="Contoh: Template Surat Jalan">
       @error('name') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
     </div>
@@ -586,7 +586,7 @@
 
     <div class="px-4 py-3 border-top flex items-center justify-end gap-3">
       <a href="{{ route('admin.document_templates.index') }}" class="px-4 py-2 rounded-xl border text-[#1D1C1A]">Batal</a>
-      <button class="px-4 py-2 rounded-xl bg-[#7A2C2F] text-white hover:opacity-90">Update</button>
+      <button class="px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">Update</button>
     </div>
   </form>
 
@@ -610,7 +610,7 @@
         </div>
         <div class="flex items-center justify-end gap-3">
           <button type="button" class="px-4 py-2 rounded border" @click="closePad()">Batal</button>
-          <button type="button" class="px-4 py-2 rounded bg-[#7A2C2F] text-white" @click="padSave()">Simpan ke Blok</button>
+          <button type="button" class="px-4 py-2 rounded bg-[#bb9974] text-white" @click="padSave()">Simpan ke Blok</button>
         </div>
       </div>
     </div>

@@ -66,6 +66,7 @@ class ReportController extends Controller
 
         // ===== Susun payload $data per group + threshold per indikator (TERMASUK override) =====
         $data = [];
+        $valuesByCode = [];
         foreach ($groups as $g) {
             foreach ($g->indicators as $ind) {
                 $row     = $agg->get($ind->id);
@@ -80,17 +81,31 @@ class ReportController extends Controller
                     }
                 }
 
-                // simpan threshold original (string/angka/null)
-                $thrRaw = $ind->threshold;
-
-                $data[$g->code][] = [
+                $entry = [
                     'indicator' => $ind,
                     'value'     => $total,
                     'total'     => $total,
                     'on_time'   => $ontime,
                     'late'      => $late,
-                    'threshold' => $thrRaw, // jgn dipaksa float
+                    'threshold' => $ind->threshold,
                 ];
+
+                $data[$g->code][] = $entry;
+                $valuesByCode[$ind->code] = $total;
+            }
+        }
+
+        foreach ($groups as $g) {
+            foreach (($data[$g->code] ?? []) as $idx => $row) {
+                $ind = $row['indicator'];
+                if (! $ind->is_derived || ! $ind->formula) {
+                    continue;
+                }
+
+                $derivedTotal = $this->evaluateFormula((string) $ind->formula, $valuesByCode);
+                $data[$g->code][$idx]['value'] = $derivedTotal;
+                $data[$g->code][$idx]['total'] = $derivedTotal;
+                $valuesByCode[$ind->code] = $derivedTotal;
             }
         }
 
@@ -124,18 +139,7 @@ class ReportController extends Controller
                 $values[]  = (float) $rrow['total'];
                 $units[]   = $ind->unit ?? '-';
 
-                // parse threshold ke float hanya kalau numeric murni
-                $thrRaw = $rrow['threshold'];
-                $thrNum = null;
-                if (is_numeric($thrRaw)) {
-                    $thrNum = (float) $thrRaw;
-                } elseif (is_string($thrRaw)) {
-                    $s = trim($thrRaw);
-                    $s = preg_replace('/[^0-9,.\-]/', '', $s);
-                    $s = str_replace([','], ['.'], $s);
-                    if (is_numeric($s)) $thrNum = (float) $s;
-                }
-                $thrArr[] = $thrNum;
+                $thrArr[] = $this->parseThreshold($rrow['threshold']);
 
                 if (($ind->data_type ?? 'int') !== 'int') $allInt = false;
             }
@@ -189,6 +193,51 @@ class ReportController extends Controller
                 $end   = $start->copy()->endOfMonth()->endOfDay();
                 return [$start->toDateString(), $end->toDateString(), $start->isoFormat('MMMM YYYY')];
         }
+    }
+
+    private function parseThreshold(mixed $raw): ?float
+    {
+        if ($raw === null) return null;
+
+        $value = trim((string) $raw);
+        if ($value === '' || $value === '-') return null;
+
+        $value = preg_replace('/[^0-9,.\-]/', '', $value);
+        if ($value === '' || $value === '-' || $value === null) return null;
+
+        if (preg_match('/^-?\d{1,3}([.,]\d{3})+$/', $value)) {
+            $value = str_replace(['.', ','], '', $value);
+        } elseif (str_contains($value, ',') && str_contains($value, '.')) {
+            $lastComma = strrpos($value, ',');
+            $lastDot = strrpos($value, '.');
+            $decimal = $lastComma > $lastDot ? ',' : '.';
+            $thousand = $decimal === ',' ? '.' : ',';
+            $value = str_replace($thousand, '', $value);
+            $value = str_replace($decimal, '.', $value);
+        } elseif (str_contains($value, ',')) {
+            $value = str_replace(',', '.', $value);
+        }
+
+        return is_numeric($value) ? (float) $value : null;
+    }
+
+    private function evaluateFormula(string $formula, array $valuesByCode): float
+    {
+        $expression = preg_replace_callback('/\b[A-Z][A-Z0-9_]*\b/', function ($match) use ($valuesByCode) {
+            return (string) ((float) ($valuesByCode[$match[0]] ?? 0));
+        }, strtoupper($formula));
+
+        if (! is_string($expression) || ! preg_match('/^[0-9+\-*\/().\s]+$/', $expression)) {
+            return 0.0;
+        }
+
+        try {
+            $result = eval("return {$expression};");
+        } catch (\Throwable) {
+            return 0.0;
+        }
+
+        return is_numeric($result) && is_finite((float) $result) ? (float) $result : 0.0;
     }
 
     /**

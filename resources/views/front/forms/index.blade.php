@@ -47,7 +47,7 @@
       ['name'=>'Keuangan','color'=>'#0ea5e9'],
       ['name'=>'IT','color'=>'#059669'],
       ['name'=>'Legal','color'=>'#f59e0b'],
-      ['name'=>'Marketing','color'=>'#ef4444'],
+      ['name'=>'Marketing','color'=>'#bb9974'],
       ['name'=>'Sales','color'=>'#8b5cf6'],
       ['name'=>'Procurement','color'=>'#14b8a6'],
       ['name'=>'HSE','color'=>'#16a34a'],

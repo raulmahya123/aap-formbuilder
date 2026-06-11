@@ -9,7 +9,7 @@
   <div class="flex items-center justify-between">
     <h1 class="text-xl font-semibold text-[#1D1C1A]">Document Templates</h1>
     <a href="{{ route('admin.document_templates.create') }}"
-       class="px-4 py-2 rounded-xl bg-[#7A2C2F] text-white hover:opacity-90">+ Template</a>
+       class="px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">+ Template</a>
   </div>
 
   {{-- LIST --}}
@@ -73,7 +73,7 @@
           }
         @endphp
 
-        <tr class="border-b hover:bg-[#7A2C2F]/5">
+        <tr class="border-b hover:bg-[#bb9974]/5">
           <td class="p-3 align-middle">{{ $tpl->id }}</td>
 
           {{-- FOTO --}}
@@ -111,7 +111,7 @@
                 Preview
               </a>
               <a href="{{ route('admin.document_templates.edit', $tpl) }}"
-                 class="px-3 py-1.5 rounded-lg border border-[#7A2C2F] text-[#7A2C2F] hover:bg-[#7A2C2F] hover:text-white">
+                 class="px-3 py-1.5 rounded-lg border border-[#bb9974] text-[#bb9974] hover:bg-[#bb9974] hover:text-white">
                 Edit
               </a>
               <form method="POST" action="{{ route('admin.document_templates.destroy', $tpl) }}"

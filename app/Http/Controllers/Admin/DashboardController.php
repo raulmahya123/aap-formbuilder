@@ -11,6 +11,8 @@ use App\Models\{Form, FormEntry, Department, Document, DocumentTemplate, Documen
 
 class DashboardController extends Controller
 {
+    private const DASHBOARD_CACHE_TTL = 60;
+
     public function index(Request $r)
     {
         // Filter opsional: department_id, form_id, date_from, date_to
@@ -50,14 +52,16 @@ public function summary(Request $r)
         'recentDays'=>$recentDays, 'recentFrom'=>$recentFrom->toDateTimeString(), 'recentTo'=>$recentTo->toDateTimeString(),
     ]));
 
-    $data = Cache::remember($cacheKey, 60, function() use ($from,$to,$deptId,$formId,$recentFrom,$recentTo){
+    $data = $this->rememberDashboard($cacheKey, function() use ($from,$to,$deptId,$formId,$recentFrom,$recentTo){
         // Base queries
         $formQuery  = Form::query();
         $entryQuery = FormEntry::query();
 
         if ($deptId) {
             $formQuery->where('department_id', $deptId);
-            $entryQuery->whereHas('form', fn($q) => $q->where('department_id', $deptId));
+            $entryQuery->whereIn('form_id', Form::query()
+                ->select('id')
+                ->where('department_id', $deptId));
         }
         if ($formId) {
             $formQuery->where('id', $formId);
@@ -92,7 +96,9 @@ public function summary(Request $r)
             ->when($deptId, function($q) use ($deptId) {
                 $q->where(function($qq) use ($deptId) {
                     $qq->where('department_id', $deptId)
-                       ->orWhereIn('document_id', Document::where('department_id', $deptId)->pluck('id'));
+                       ->orWhereIn('document_id', Document::query()
+                           ->select('id')
+                           ->where('department_id', $deptId));
                 });
             })
             ->whereBetween('created_at', [$recentFrom, $recentTo]);
@@ -122,9 +128,11 @@ public function summary(Request $r)
         }
 
         $cacheKey = 'dash_entries_by_day:'.md5(json_encode([$from,$to,$deptId,$formId]));
-        $data = Cache::remember($cacheKey, 60, function() use ($from,$to,$deptId,$formId){
+        $data = $this->rememberDashboard($cacheKey, function() use ($from,$to,$deptId,$formId){
             $q = FormEntry::selectRaw('DATE(created_at) as d, COUNT(*) as c')
-                ->when($deptId, fn($qq) => $qq->whereHas('form', fn($f) => $f->where('department_id', $deptId)))
+                ->when($deptId, fn($qq) => $qq->whereIn('form_id', Form::query()
+                    ->select('id')
+                    ->where('department_id', $deptId)))
                 ->when($formId, fn($qq) => $qq->where('form_id', $formId))
                 ->when($from,   fn($qq) => $qq->where('created_at', '>=', (clone $from)->startOfDay()))
                 ->when($to,     fn($qq) => $qq->where('created_at', '<=', (clone $to)->endOfDay()))
@@ -158,22 +166,27 @@ public function summary(Request $r)
     public function topForms(Request $r)
     {
         [$from, $to, $deptId, $formId] = $this->extractFilters($r);
-        $cacheKey = 'dash_top_forms:'.md5(json_encode([$from,$to,$deptId,$formId]));
+        $topN = max(3, min(20, (int) ($r->integer('topN') ?: 10)));
+        $cacheKey = 'dash_top_forms:'.md5(json_encode([$from,$to,$deptId,$formId,$topN]));
 
-        $data = Cache::remember($cacheKey, 60, function() use ($from,$to,$deptId,$formId){
-            $rows = FormEntry::select('form_id', DB::raw('COUNT(*) as c'))
-                ->when($deptId, fn($qq) => $qq->whereHas('form', fn($f) => $f->where('department_id', $deptId)))
-                ->when($formId, fn($qq) => $qq->where('form_id', $formId))
-                ->when($from,   fn($qq) => $qq->where('created_at', '>=', (clone $from)->startOfDay()))
-                ->when($to,     fn($qq) => $qq->where('created_at', '<=', (clone $to)->endOfDay()))
-                ->groupBy('form_id')
-                ->orderByDesc('c')
-                ->limit(10)
+        $data = $this->rememberDashboard($cacheKey, function() use ($from,$to,$deptId,$formId,$topN){
+            $rows = DB::table('form_entries')
+                ->join('forms', 'forms.id', '=', 'form_entries.form_id')
+                ->when($deptId, fn($q) => $q->where('forms.department_id', $deptId))
+                ->when($formId, fn($q) => $q->where('form_entries.form_id', $formId))
+                ->when($from,   fn($q) => $q->where('form_entries.created_at', '>=', (clone $from)->startOfDay()))
+                ->when($to,     fn($q) => $q->where('form_entries.created_at', '<=', (clone $to)->endOfDay()))
+                ->groupBy('form_entries.form_id', 'forms.title')
+                ->orderByDesc(DB::raw('COUNT(*)'))
+                ->limit($topN)
+                ->select([
+                    'form_entries.form_id',
+                    'forms.title',
+                    DB::raw('COUNT(*) as c'),
+                ])
                 ->get();
 
-            $formTitles = Form::whereIn('id', $rows->pluck('form_id'))->pluck('title','id');
-
-            $labels = $rows->map(fn($r) => $formTitles->get($r->form_id, 'Form #'.$r->form_id));
+            $labels = $rows->map(fn($r) => $r->title ?: 'Form #'.$r->form_id);
             $series = $rows->pluck('c')->map(fn($v) => (int) $v);
 
             return ['labels' => $labels->values(), 'series' => $series->values()];
@@ -188,7 +201,7 @@ public function summary(Request $r)
         [$from, $to, $deptId, $formId] = $this->extractFilters($r);
         $cacheKey = 'dash_by_dept:'.md5(json_encode([$from,$to,$deptId,$formId]));
 
-        $data = Cache::remember($cacheKey, 60, function() use ($from,$to,$deptId,$formId){
+        $data = $this->rememberDashboard($cacheKey, function() use ($from,$to,$deptId,$formId){
             // forms per dept (aktif & total)
             $forms = Form::select(
                     'department_id',
@@ -252,18 +265,22 @@ public function summary(Request $r)
     $group = $r->string('group', 'department');
     $cacheKey = 'dash_by_agg:'.md5(json_encode([$group, $from?->toDateString(), $to?->toDateString(), $deptId, $formId]));
 
-    $payload = Cache::remember($cacheKey, 60, function() use ($group, $from, $to, $deptId, $formId) {
+    $payload = $this->rememberDashboard($cacheKey, function() use ($group, $from, $to, $deptId, $formId) {
 
         if ($group === 'form') {
             // Rows per Form dengan total entries pada rentang & status aktif
             $rows = DB::table('forms')
-                ->leftJoin('form_entries', function($j){
+                ->leftJoin('form_entries', function($j) use ($from, $to) {
                     $j->on('form_entries.form_id','=','forms.id');
+                    if ($from) {
+                        $j->where('form_entries.created_at', '>=', (clone $from)->startOfDay());
+                    }
+                    if ($to) {
+                        $j->where('form_entries.created_at', '<=', (clone $to)->endOfDay());
+                    }
                 })
                 ->when($deptId, fn($q) => $q->where('forms.department_id', $deptId))
                 ->when($formId, fn($q) => $q->where('forms.id', $formId))
-                ->when($from,   fn($q) => $q->where('form_entries.created_at', '>=', (clone $from)->startOfDay()))
-                ->when($to,     fn($q) => $q->where('form_entries.created_at', '<=', (clone $to)->endOfDay()))
                 ->groupBy('forms.id','forms.title','forms.is_active','forms.department_id')
                 ->select([
                     'forms.id',
@@ -303,9 +320,9 @@ public function summary(Request $r)
                 ->when($deptId, fn($q) => $q->where('documents.department_id', $deptId))
                 ->when($from,   fn($q) => $q->where('documents.created_at', '>=', (clone $from)->startOfDay()))
                 ->when($to,     fn($q) => $q->where('documents.created_at', '<=', (clone $to)->endOfDay()))
-                ->groupBy('documents.document_template_id')
+                ->groupBy('documents.template_id')
                 ->select([
-                    'documents.document_template_id as template_id',
+                    'documents.template_id as template_id',
                     DB::raw('COUNT(*) as total_documents'),
                 ])
                 ->orderByDesc(DB::raw('COUNT(*)'))
@@ -381,4 +398,8 @@ public function summary(Request $r)
     return response()->json($payload);
 }
 
+    private function rememberDashboard(string $key, callable $callback): mixed
+    {
+        return Cache::store('file')->remember($key, self::DASHBOARD_CACHE_TTL, $callback);
+    }
 }

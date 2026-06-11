@@ -28,7 +28,7 @@
       @if($pdfRoute)
         <a href="{{ $pdfRoute }}" class="px-4 py-2 rounded-xl border text-[#1D1C1A]" target="_blank" rel="noopener">Unduh PDF</a>
       @endif
-      <button type="button" onclick="window.print()" class="px-4 py-2 rounded-xl bg-[#7A2C2F] text-white hover:opacity-90">Cetak</button>
+      <button type="button" onclick="window.print()" class="px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">Cetak</button>
     </div>
   </div>
 

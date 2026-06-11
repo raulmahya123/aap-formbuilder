@@ -189,7 +189,7 @@
     </div>
 
     <div class="mt-6 flex items-center gap-3">
-      <button class="px-5 py-2.5 rounded-xl bg-[color:var(--brand-maroon,#7b1d2e)] text-white hover:brightness-105">
+      <button class="px-5 py-2.5 rounded-xl bg-[color:var(--brand-maroon,#bb9974)] text-white hover:brightness-105">
         Simpan Perubahan
       </button>
     </div>

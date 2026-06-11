@@ -15,6 +15,18 @@ class SampleFormSeeder extends Seeder
         );
 
         $super = \App\Models\User::where('email','super@aap.test')->first();
+        $company = \App\Models\Company::firstOrCreate(
+            ['code' => 'AAP'],
+            [
+                'name' => 'Andalan Group',
+                'legal_name' => 'Andalan Group',
+                'slug' => 'andalan-group',
+                'industry' => 'Mining',
+                'status' => 'active',
+                'created_by' => $super?->id,
+                'updated_by' => $super?->id,
+            ]
+        );
 
         // Skema contoh
         $schema = [
@@ -38,11 +50,13 @@ class SampleFormSeeder extends Seeder
 
         // Buat form builder
         \App\Models\Form::firstOrCreate(
-            ['slug' => 'form-pengajuan-operator'],
+            ['company_id' => $company->id, 'slug' => 'form-pengajuan-operator'],
             [
+                'company_id'    => $company->id,
                 'department_id' => $dept->id,
                 'created_by'    => $super?->id ?? \App\Models\User::first()->id,
                 'title'         => 'Form Pengajuan Operator',
+                'doc_type'      => 'FORM',
                 'type'          => 'builder',
                 'schema'        => $schema,
                 'pdf_path'      => null,
@@ -52,11 +66,13 @@ class SampleFormSeeder extends Seeder
 
         // (Opsional) Tambah 1 form tipe PDF (tanpa file upload awal)
         \App\Models\Form::firstOrCreate(
-            ['slug' => 'panduan-k3-operasional'],
+            ['company_id' => $company->id, 'slug' => 'panduan-k3-operasional'],
             [
+                'company_id'    => $company->id,
                 'department_id' => $dept->id,
                 'created_by'    => $super?->id ?? \App\Models\User::first()->id,
                 'title'         => 'Panduan K3 (PDF)',
+                'doc_type'      => 'SOP',
                 'type'          => 'pdf',
                 'schema'        => null,
                 'pdf_path'      => null, // upload nanti via Admin → Edit Form

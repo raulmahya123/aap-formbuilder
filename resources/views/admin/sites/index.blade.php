@@ -4,9 +4,9 @@
 
 @section('content')
 <div class="flex items-center justify-between mb-6">
-  <h1 class="text-2xl font-bold text-[color:var(--brand-maroon,#7b1d2e)]">Sites</h1>
+  <h1 class="text-2xl font-bold text-[color:var(--brand-maroon,#bb9974)]">Sites</h1>
   <a href="{{ route('admin.sites.create') }}"
-     class="px-4 py-2 rounded-xl bg-[color:var(--brand-maroon,#7b1d2e)] hover:brightness-105 text-white shadow">
+     class="px-4 py-2 rounded-xl bg-[color:var(--brand-maroon,#bb9974)] hover:brightness-105 text-white shadow">
      + Tambah
   </a>
 </div>
@@ -15,12 +15,12 @@
 <form class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-2"
       method="GET" action="{{ route('admin.sites.index') }}">
   <input
-    class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#7b1d2e)] focus:border-[color:var(--brand-maroon,#7b1d2e)]"
+    class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#bb9974)] focus:border-[color:var(--brand-maroon,#bb9974)]"
     type="text" name="q" value="{{ $q }}" placeholder="Cari name/code/deskripsi...">
 
   {{-- Filter perusahaan (opsional: kirimkan $companies dari controller) --}}
   <select name="company_id"
-          class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#7b1d2e)] focus:border-[color:var(--brand-maroon,#7b1d2e)]">
+          class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#bb9974)] focus:border-[color:var(--brand-maroon,#bb9974)]">
     <option value="">— Semua Perusahaan —</option>
     @foreach(($companies ?? []) as $c)
       <option value="{{ $c->id }}" @selected(request('company_id') == $c->id)>
@@ -30,7 +30,7 @@
   </select>
 
   <div class="flex gap-2">
-    <button class="px-4 py-2 rounded-lg bg-[color:var(--brand-maroon,#7b1d2e)] hover:brightness-105 text-white w-full md:w-auto">
+    <button class="px-4 py-2 rounded-lg bg-[color:var(--brand-maroon,#bb9974)] hover:brightness-105 text-white w-full md:w-auto">
       Terapkan
     </button>
     <a href="{{ route('admin.sites.index') }}"
@@ -58,7 +58,7 @@
 
 <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm bg-white">
   <table class="w-full text-left text-sm">
-    <thead class="bg-[color:var(--brand-maroon,#7b1d2e)] text-white">
+    <thead class="bg-[color:var(--brand-maroon,#bb9974)] text-white">
       <tr>
         <th class="p-3 border-b">#</th>
         <th class="p-3 border-b">Code</th>
@@ -93,7 +93,7 @@
             <div class="flex flex-wrap gap-2">
               {{-- Tombol Edit --}}
               <a href="{{ route('admin.sites.edit',$s) }}"
-                 class="px-3 py-1 rounded-lg bg-[color:var(--brand-maroon,#7b1d2e)] text-white hover:brightness-105 shadow-sm">
+                 class="px-3 py-1 rounded-lg bg-[color:var(--brand-maroon,#bb9974)] text-white hover:brightness-105 shadow-sm">
                  Edit
               </a>
 

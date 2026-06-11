@@ -15,24 +15,24 @@
 @endif
 
 <form method="post" action="{{ route('admin.contracts.store') }}" enctype="multipart/form-data"
-      class="space-y-4 max-w-xl bg-white p-6 rounded shadow border-t-4 border-[#7A2C2F]">
+      class="space-y-4 max-w-xl bg-white p-6 rounded shadow border-t-4 border-[#bb9974]">
   @csrf
   <div>
-    <label class="block mb-1 font-medium text-[#7A2C2F]">Judul</label>
+    <label class="block mb-1 font-medium text-[#bb9974]">Judul</label>
     <input type="text" name="title" value="{{ old('title') }}"
-           class="w-full border rounded p-2 focus:border-[#7A2C2F] focus:ring-0" required>
+           class="w-full border rounded p-2 focus:border-[#bb9974] focus:ring-0" required>
   </div>
 
   <div>
-    <label class="block mb-1 font-medium text-[#7A2C2F]">File PDF</label>
+    <label class="block mb-1 font-medium text-[#bb9974]">File PDF</label>
     <input type="file" name="file" accept="application/pdf"
-           class="w-full border rounded p-2 focus:border-[#7A2C2F] focus:ring-0" required>
+           class="w-full border rounded p-2 focus:border-[#bb9974] focus:ring-0" required>
   </div>
 
   <div>
-    <label class="block mb-1 font-medium text-[#7A2C2F]">Viewer (User Terdaftar)</label>
+    <label class="block mb-1 font-medium text-[#bb9974]">Viewer (User Terdaftar)</label>
     <select name="emails[]" multiple size="8"
-            class="w-full border rounded p-2 focus:border-[#7A2C2F] focus:ring-0">
+            class="w-full border rounded p-2 focus:border-[#bb9974] focus:ring-0">
       @foreach($users as $u)
         <option value="{{ $u->email }}"
           @if(collect(old('emails'))->contains($u->email)) selected @endif>
@@ -46,7 +46,7 @@
   </div>
 
   <div class="pt-2">
-    <button class="px-4 py-2 bg-[#7A2C2F] text-white rounded hover:bg-[#651E20]">
+    <button class="px-4 py-2 bg-[#bb9974] text-white rounded hover:brightness-95">
       Simpan
     </button>
   </div>

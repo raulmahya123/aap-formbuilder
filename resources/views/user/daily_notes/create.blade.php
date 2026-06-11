@@ -10,7 +10,7 @@
     ->toArray();
 
   // Pakai maroon sesuai swatch (#610E1C) sebagai fallback
-  $brandMaroon = 'var(--brand-maroon,#610e1c)';
+  $brandMaroon = 'var(--brand-maroon,#bb9974)';
 @endphp
 
 <style>
@@ -87,7 +87,7 @@
   }
 </style>
 
-<div class="max-w-4xl mx-auto space-y-6" style="--brand-maroon:#610e1c;">
+<div class="max-w-4xl mx-auto space-y-6" style="--brand-maroon:#bb9974;">
   {{-- Hero header --}}
   <div class="card p-5">
     <div class="flex items-start justify-between gap-4">

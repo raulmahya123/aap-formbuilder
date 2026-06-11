@@ -4,21 +4,60 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class FormsSeeder extends Seeder
 {
     public function run(): void
     {
+        $userId = DB::table('users')->where('email', 'super@aap.test')->value('id');
+        if (! $userId) {
+            DB::table('users')->insert([
+                'name' => 'Super Admin',
+                'email' => 'super@aap.test',
+                'password' => Hash::make('password'),
+                'role' => 'super_admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            $userId = DB::table('users')->where('email', 'super@aap.test')->value('id');
+        }
+
+        DB::table('companies')->updateOrInsert(
+            ['code' => 'AAP'],
+            [
+                'name' => 'Andalan Group',
+                'legal_name' => 'Andalan Group',
+                'slug' => 'andalan-group',
+                'industry' => 'Mining',
+                'status' => 'active',
+                'created_by' => $userId,
+                'updated_by' => $userId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+        $companyId = DB::table('companies')->where('code', 'AAP')->value('id');
+
+        DB::table('departments')->updateOrInsert(
+            ['slug' => 'hse'],
+            [
+                'name' => 'HSE',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+        $departmentId = DB::table('departments')->where('slug', 'hse')->value('id');
 
         // SOP 014
         $title = "SHE-SOP-014 Inspeksi Terencana Area Kerja";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -34,11 +73,11 @@ class FormsSeeder extends Seeder
         // SOP 015
         $title = "SHE-SOP-015 Akuntabilitas KPL";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -54,11 +93,11 @@ class FormsSeeder extends Seeder
         // SOP 016
         $title = "SHE-SOP-016 Inspeksi Tidak Terencana dan Golden Rule";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -74,11 +113,11 @@ class FormsSeeder extends Seeder
         // SOP 017
         $title = "SHE-SOP-017 Inspeksi Peralatan";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -94,11 +133,11 @@ class FormsSeeder extends Seeder
         // SOP 018
         $title = "SHE-SOP-018 Izin Kerja Khusus";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -114,11 +153,11 @@ class FormsSeeder extends Seeder
         // SOP 019
         $title = "SHE-SOP-019 Pemantauan Penyalahgunaan Pemakaian Alkohol dan Obat-obatan Terlarang";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -134,11 +173,11 @@ class FormsSeeder extends Seeder
         // SOP 020
         $title = "SHE-SOP-020 Pelaporan Investigasi Incident";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -154,11 +193,11 @@ class FormsSeeder extends Seeder
         // SOP 021
         $title = "SHE-SOP-021 Kesiapan Bekerja";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -174,11 +213,11 @@ class FormsSeeder extends Seeder
         // SOP 022
         $title = "SHE-SOP-022 Alat Pelindung Diri (APD)";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -194,11 +233,11 @@ class FormsSeeder extends Seeder
         // SOP 023
         $title = "SHE-SOP-023 Pengelolaan Kesehatan Kerja";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -214,11 +253,11 @@ class FormsSeeder extends Seeder
         // SOP 024
         $title = "SHE-SOP-024 Pertolongan Pertama pada Kecelakaan (P3K)";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -234,11 +273,11 @@ class FormsSeeder extends Seeder
         // SOP 025
         $title = "SHE-SOP-025 Pengelolaan Keadaan Darurat";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -254,11 +293,11 @@ class FormsSeeder extends Seeder
         // SOP 026
         $title = "SHE-SOP-026 Pemantauan & Pengukuran Lingkungan Kerja dan Lingkungan Hidup";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -274,11 +313,11 @@ class FormsSeeder extends Seeder
         // SOP 027
         $title = "SHE-SOP-027 Fatigue Management";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -294,11 +333,11 @@ class FormsSeeder extends Seeder
         // SOP 029
         $title = "SHE-SOP-029 Pengelolaan Ergonomi";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -314,11 +353,11 @@ class FormsSeeder extends Seeder
         // SOP 030
         $title = "SHE-SOP--030 Pengelolaan Keselamatan Operational";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -334,11 +373,11 @@ class FormsSeeder extends Seeder
         // SOP 031
         $title = "SHE-SOP-031 Comisioning";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -354,11 +393,11 @@ class FormsSeeder extends Seeder
         // SOP 032
         $title = "SHE-SOP-032 Penanganan Penyakit Akibat Kerja (PAK)";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -374,11 +413,11 @@ class FormsSeeder extends Seeder
         // SOP 033
         $title = "SHE-SOP-033 Perancangan dan Rekayasa";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -394,11 +433,11 @@ class FormsSeeder extends Seeder
         // SOP 034
         $title = "SHE-SOP-034 Pengelolaan Perubahan (Management of Change)";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -414,11 +453,11 @@ class FormsSeeder extends Seeder
         // SOP 035
         $title = "SHE-SOP-035 Kalibrasi Peralatan";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -434,11 +473,11 @@ class FormsSeeder extends Seeder
         // SOP 036
         $title = "SHE-SOP-036 Pengendalian Dokumen";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -454,11 +493,11 @@ class FormsSeeder extends Seeder
         // SOP 037
         $title = "SHE-SOP-037 Pengendalian Rekaman";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -474,11 +513,11 @@ class FormsSeeder extends Seeder
         // SOP 038
         $title = "SHE-SOP-038 Audit System Terintegrasi";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -494,11 +533,11 @@ class FormsSeeder extends Seeder
         // SOP 039
         $title = "SHE-SOP-039 Rencana Perbaikan dan Tindak Lanjut Ketidaksesuaian";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -514,11 +553,11 @@ class FormsSeeder extends Seeder
         // SOP 040
         $title = "SHE-SOP-040 Keselamatan di luar pekerjaan";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -534,11 +573,11 @@ class FormsSeeder extends Seeder
         // SOP 041
         $title = "SHE-SOP-041 Tinjauan Management";
         DB::table('forms')->updateOrInsert(
-            ['company_id' => 1, 'slug' => Str::slug($title)],
+            ['company_id' => $companyId, 'slug' => Str::slug($title)],
             [
                 
-                'department_id' => 5,
-                'created_by' => 1,
+                'department_id' => $departmentId,
+                'created_by' => $userId,
                 'title' => $title,
                 'doc_type' => 'SOP',
                 'description' => $title,
@@ -552,3 +591,5 @@ class FormsSeeder extends Seeder
         );
     }
 }
+
+

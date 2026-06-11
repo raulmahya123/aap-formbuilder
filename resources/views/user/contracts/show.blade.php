@@ -44,7 +44,7 @@
 
   {{-- Info Card --}}
   <div class="rounded-2xl border shadow-sm overflow-hidden">
-    <div class="px-4 py-3 bg-[#7A2C2F] text-white">
+    <div class="px-4 py-3 bg-[#bb9974] text-white">
       <div class="font-semibold">Informasi Kontrak</div>
     </div>
     <div class="p-4 grid sm:grid-cols-2 gap-4 text-sm">

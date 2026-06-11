@@ -14,12 +14,12 @@ class DemoDepartmentSeeder extends Seeder
         // ====== Definisi 10 departemen (slug, name, color) ======
         $departmentsData = [
             ['slug' => 'operasional', 'name' => 'Operasional',           'color' => '#e61caf'],
-            ['slug' => 'hrga',        'name' => 'HRGA',                  'color' => '#ff3b30'],
+            ['slug' => 'hrga',        'name' => 'HRGA',                  'color' => '#bb9974'],
             ['slug' => 'finance',     'name' => 'Finance',               'color' => '#34c759'],
             ['slug' => 'it',          'name' => 'IT',                    'color' => '#0ea5e9'],
             ['slug' => 'hse',         'name' => 'HSE',                   'color' => '#f59e0b'],
             ['slug' => 'scm',         'name' => 'SCM/Procurement',       'color' => '#8b5cf6'],
-            ['slug' => 'engineering', 'name' => 'Engineering',           'color' => '#ef4444'],
+            ['slug' => 'engineering', 'name' => 'Engineering',           'color' => '#bb9974'],
             ['slug' => 'marketing',   'name' => 'Marketing',             'color' => '#14b8a6'],
             ['slug' => 'sales',       'name' => 'Sales',                 'color' => '#f97316'],
             ['slug' => 'admin',       'name' => 'Admin',                 'color' => '#64748b'],

@@ -42,12 +42,12 @@
     {{-- Left: Info Card --}}
     <div class="lg:col-span-1">
       <div class="rounded-2xl border shadow-sm overflow-hidden">
-        <div class="px-4 py-3 bg-[#7A2C2F] text-white">
+        <div class="px-4 py-3 bg-[#bb9974] text-white">
           <div class="font-semibold">Informasi Kontrak</div>
         </div>
         <div class="p-4 space-y-4">
           <div class="flex items-start gap-3">
-            <div class="shrink-0 w-10 h-10 rounded-full bg-[#7A2C2F] text-white flex items-center justify-center">
+            <div class="shrink-0 w-10 h-10 rounded-full bg-[#bb9974] text-white flex items-center justify-center">
               {{ strtoupper(Str::of($contract->owner->name)->explode(' ')->map(fn($s)=>Str::substr($s,0,1))->take(2)->implode('')) }}
             </div>
             <div class="min-w-0">
@@ -82,7 +82,7 @@
     {{-- Right: ACL Card --}}
     <div class="lg:col-span-2">
       <div class="rounded-2xl border shadow-sm overflow-hidden">
-        <div class="px-4 py-3 bg-[#7A2C2F] text-white flex items-center justify-between">
+        <div class="px-4 py-3 bg-[#bb9974] text-white flex items-center justify-between">
           <div class="font-semibold">Akses Viewer</div>
           <span class="text-xs bg-white/20 px-2 py-1 rounded-md">{{ $contract->viewers->count() }} user</span>
         </div>
@@ -95,7 +95,7 @@
               @csrf
               @isset($users)
                 <select name="emails[]" multiple size="6"
-                        class="flex-1 border rounded-xl px-3 py-2 focus:outline-none focus:border-[#7A2C2F]">
+                        class="flex-1 border rounded-xl px-3 py-2 focus:outline-none focus:border-[#bb9974]">
                   @foreach($users as $u)
                     <option value="{{ $u->email }}">{{ $u->name }} — {{ $u->email }}</option>
                   @endforeach
@@ -103,9 +103,9 @@
               @else
                 <input type="text" name="emails"
                        placeholder="email1@contoh.com, email2@contoh.com"
-                       class="flex-1 border rounded-xl px-3 py-2 focus:outline-none focus:border-[#7A2C2F]" required>
+                       class="flex-1 border rounded-xl px-3 py-2 focus:outline-none focus:border-[#bb9974]" required>
               @endisset
-              <button class="shrink-0 px-4 py-2 rounded-xl bg-[#7A2C2F] text-white hover:opacity-90">
+              <button class="shrink-0 px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">
                 Tambah Akses
               </button>
             </form>
@@ -124,7 +124,7 @@
               <div class="flex items-center justify-between gap-3 px-4 py-3 border-b last:border-b-0">
                 <div class="flex items-center gap-3 min-w-0">
                   <div class="w-9 h-9 rounded-full bg-maroon-700 text-ivory-50 flex items-center justify-center text-xs font-semibold"
-                       style="background:#7A2C2F">
+                       style="background:#bb9974">
                     {{ strtoupper(Str::of($u->name)->explode(' ')->map(fn($s)=>Str::substr($s,0,1))->take(2)->implode('')) }}
                   </div>
                   <div class="min-w-0">
@@ -153,7 +153,7 @@
   </div>
   {{-- Preview PDF --}}
   <div class="rounded-2xl border shadow-sm overflow-hidden">
-    <div class="px-4 py-3 bg-[#7A2C2F] text-white">
+    <div class="px-4 py-3 bg-[#bb9974] text-white">
       <div class="font-semibold">Preview Dokumen</div>
     </div>
     <div class="p-4">

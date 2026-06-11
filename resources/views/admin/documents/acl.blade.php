@@ -115,8 +115,8 @@
               :disabled="selectedIds.length===0 || (!userId && !departmentId)"
               class="px-4 py-2 rounded-xl text-white disabled:opacity-50"
               :class="selectedIds.length>0 && (userId || departmentId)
-                      ? 'bg-[#7A2C2F] hover:opacity-90'
-                      : 'bg-[#7A2C2F]'">
+                      ? 'bg-[#bb9974] hover:opacity-90'
+                      : 'bg-[#bb9974]'">
         Tambah Akses
       </button>
       <button type="button" @click="clearSelection()" class="px-3 py-2 rounded-xl border hover:bg-gray-50">

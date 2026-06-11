@@ -9,17 +9,18 @@
   data-url-summary="{{ route('admin.dashboard.data.summary') }}"
   data-url-entries="{{ route('admin.dashboard.data.entries_by_day') }}"
   data-url-top="{{ route('admin.dashboard.data.top_forms') }}"
-  data-url-group="{{ route('admin.dashboard.data.by_aggregate') }}"  {{-- NEW --}}
+  data-url-group="{{ route('admin.dashboard.data.by_aggregate') }}"
 >
   <!-- HEADER -->
-  <div class="max-w-7xl mx-auto p-4 sm:p-6">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4 sm:mb-6">
+  <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+    <div class="flex flex-col gap-4 p-5 mb-4 bg-white border shadow-soft rounded-lg border-coal-100 sm:p-6 sm:mb-6 lg:flex-row lg:items-center lg:justify-between">
       <div>
-        <h1 class="text-2xl md:text-3xl font-serif tracking-tight">Dashboard</h1>
-        <p class="text-coal-500 text-sm">Ringkasan aktivitas formulir &amp; entri.</p>
+        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-maroon-700">Operational Overview</p>
+        <h1 class="mt-1 text-2xl md:text-3xl font-serif tracking-tight">Dashboard</h1>
+        <p class="mt-1 text-coal-500 text-sm">Pantau aktivitas formulir, dokumen, dan rekap operasional dalam satu alur.</p>
       </div>
       <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-        <a class="px-3 py-2 rounded-lg border border-maroon-600 text-maroon-700 hover:bg-maroon-50/60 transition text-center"
+        <a class="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-maroon-600 text-maroon-700 hover:bg-maroon-50/60 transition text-center text-sm font-medium"
            :href="exportHref()">
           ⬇️ Export CSV
         </a>
@@ -28,7 +29,11 @@
 
     <!-- FILTERS TOOLBAR -->
     <form @submit.prevent="reloadAll()"
-          class="rounded-2xl border bg-ivory-50 p-4 sm:p-5 shadow-soft mb-4 sm:mb-6">
+          class="rounded-lg border bg-white p-4 sm:p-5 shadow-soft">
+      <div class="flex flex-col gap-1 mb-4">
+        <h2 class="text-base font-semibold text-coal-900">Filter Data</h2>
+        <p class="text-sm text-coal-500">Atur scope dulu, lalu dashboard memuat ulang KPI, grafik, dan tabel.</p>
+      </div>
       <div class="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-6">
         <div class="lg:col-span-2">
           <label class="text-xs font-medium text-coal-600">Department</label>
@@ -75,7 +80,7 @@
       </div>
 
       <div class="mt-4 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
-        <button class="w-full sm:w-auto px-4 py-2 bg-maroon-700 text-ivory-50 rounded-lg hover:bg-maroon-600 transition">
+        <button class="w-full sm:w-auto px-4 py-2 bg-maroon-700 text-ivory-50 rounded-lg hover:bg-maroon-600 transition font-medium">
           Terapkan
         </button>
         <button type="button" @click="resetFilters()"
@@ -87,7 +92,11 @@
     </form>
 
     <!-- PENGATURAN GRAFIK (custom) -->
-    <div class="rounded-2xl border bg-ivory-50 p-4 sm:p-5 shadow-soft mb-4 sm:mb-6">
+    <div class="rounded-lg border bg-white p-4 sm:p-5 shadow-soft">
+      <div class="flex flex-col gap-1 mb-4">
+        <h2 class="text-base font-semibold text-coal-900">Tampilan Grafik</h2>
+        <p class="text-sm text-coal-500">Sesuaikan cara membaca tren dan ranking tanpa mengubah data sumber.</p>
+      </div>
       <div class="grid gap-4 sm:gap-5 grid-cols-1 md:grid-cols-3 lg:grid-cols-6">
         <div>
           <label class="text-xs font-medium text-coal-600">Tipe Tren</label>
@@ -141,7 +150,7 @@
         </div>
       </div>
 
-      <div class="mt-4 flex gap-2">
+      <div class="mt-4 flex flex-col sm:flex-row gap-2">
         <button type="button" @click="exportChart('chartLine','entries-30hari')"
                 class="px-3 py-2 rounded-lg border hover:bg-ivory-50">📤 Export Tren (PNG)</button>
         <button type="button" @click="exportChart('chartBar','top-forms')"
@@ -150,9 +159,9 @@
     </div>
 
     <!-- KPI CARDS -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 mb-4 sm:mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-3 sm:gap-4">
       <template x-for="card in kpiCards" :key="card.key">
-        <div class="p-4 bg-ivory-50 border rounded-2xl shadow-soft">
+        <div class="p-4 bg-white border rounded-lg shadow-soft border-coal-100">
           <div class="flex items-start justify-between">
             <div>
               <div class="text-xs uppercase tracking-wider text-coal-600" x-text="card.label"></div>
@@ -161,7 +170,7 @@
                 <div class="text-2xl font-semibold" x-show="!loading" x-text="formatNumber(summary[card.key] ?? 0)"></div>
               </div>
             </div>
-            <div class="p-2 rounded-lg bg-maroon-50 text-maroon-700">
+            <div class="p-2 rounded-lg bg-maroon-50 text-maroon-700 shrink-0">
               <span x-html="card.icon"></span>
             </div>
           </div>
@@ -172,7 +181,7 @@
     <!-- CHARTS -->
     <div class="grid lg:grid-cols-3 gap-4 sm:gap-6">
       <!-- Line -->
-      <div class="bg-ivory-50 border rounded-2xl p-4 lg:col-span-2 shadow-soft min-w-0">
+      <div class="bg-white border rounded-lg p-4 lg:col-span-2 shadow-soft min-w-0 border-coal-100">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-semibold">Entries — 30 Hari</h2>
           <div class="text-xs text-coal-500" x-text="entriesByDay.labels?.length ? entriesByDay.labels[0] + ' — ' + entriesByDay.labels[entriesByDay.labels.length-1] : ''"></div>
@@ -186,7 +195,7 @@
       </div>
 
       <!-- Bar -->
-      <div class="bg-ivory-50 border rounded-2xl p-4 shadow-soft min-w-0">
+      <div class="bg-white border rounded-lg p-4 shadow-soft min-w-0 border-coal-100">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-semibold">Top Forms</h2>
           <span class="text-xs text-coal-500" x-show="!loading" x-text="top.labels?.length + ' item'"></span>
@@ -201,7 +210,7 @@
     </div>
 
     <!-- TABEL REKAP -->
-    <div class="bg-ivory-50 border rounded-2xl p-4 sm:p-5 mt-4 sm:mt-6 shadow-soft overflow-x-auto nice-scroll">
+    <div class="bg-white border rounded-lg p-4 sm:p-5 shadow-soft overflow-x-auto nice-scroll border-coal-100">
       <div class="flex items-center justify-between mb-3">
         <h2 class="font-semibold">Rekap <span x-text="groupByLabel()"></span></h2>
         <div class="text-xs text-coal-500" x-show="!loading" x-text="rows.length + ' baris'"></div>
@@ -233,7 +242,7 @@
               <tr class="border-t hover:bg-ivory-100">
                 <template x-for="col in columns" :key="col.key">
                   <td class="p-3" :class="col.align==='right' ? 'text-right' : 'text-left'">
-                    <span x-text="col.format ? col.format(row[col.key]) : row[col.key]"></span>
+                    <span x-text="formatCell(row[col.key], col)"></span>
                   </td>
                 </template>
               </tr>
@@ -259,7 +268,7 @@
             sans: ['Inter','ui-sans-serif','system-ui','sans-serif']
           },
           colors: {
-            maroon: {50:'#fdf4f5',100:'#fae9ea',200:'#f2cfd2',300:'#e7a8ad',400:'#d6737b',500:'#ba202e',600:'#991a25',700:'#7b1e2b',800:'#551219',900:'#320a0f',950:'#1b0508'},
+            maroon: {50:'#bb9974',100:'#bb9974',200:'#bb9974',300:'#bb9974',400:'#bb9974',500:'#bb9974',600:'#bb9974',700:'#bb9974',800:'#bb9974',900:'#bb9974',950:'#bb9974'},
             coal:   {50:'#f5f5f6',100:'#e7e7e9',200:'#cfcfd3',300:'#a8a8ad',400:'#73737b',500:'#3a3a40',600:'#2f2f34',700:'#252529',800:'#1b1b1f',900:'#121214',950:'#0a0a0b'},
             ivory:  {50:'#ffffff',100:'#fefefe',200:'#f9f9f7',300:'#f2f2ef',400:'#e8e8e2',500:'#deded3'}
           },
@@ -323,7 +332,8 @@ function dash(){
       return `{{ route('admin.entries.export') }}?${p.toString()}`;
     },
     formatNumber(n){ return new Intl.NumberFormat('id-ID').format(n ?? 0); },
-    chartPalette(){ return { line:'rgba(153,26,37,0.95)', fill:'rgba(186,32,46,0.10)', bar:'rgba(123,30,43,0.85)', grid:'rgba(58,58,64,0.15)', ticks:'#3a3a40' }; },
+    formatCell(value, col){ return col?.format === 'number' ? this.formatNumber(value) : (value ?? '-'); },
+    chartPalette(){ return { line:'rgba(187,153,116,0.95)', fill:'rgba(187,153,116,0.10)', bar:'rgba(187,153,116,0.85)', grid:'rgba(58,58,64,0.15)', ticks:'#3a3a40' }; },
     groupByLabel(){ return this.groupBy==='department' ? 'per Department' : (this.groupBy==='form' ? 'per Form' : 'per Document (Template)'); },
 
     async init(){
@@ -402,7 +412,7 @@ function dash(){
     _optsTrend(){ const pal=this.chartPalette(); const {type}=this._trendType(); const showVals=!!this.chartOpts.showValues; return { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{mode:'index',intersect:false}, datalabels:{ display:showVals, anchor:type==='bar'?'end':'top', align:type==='bar'?'end':'top', formatter:(v)=>this.formatNumber(v), clamp:true, clip:false }}, scales:{ x:{ grid:{color:pal.grid}, ticks:{color:pal.ticks}, stacked:this.chartOpts.stacked && type==='bar' }, y:{ grid:{color:pal.grid}, ticks:{color:pal.ticks}, stacked:this.chartOpts.stacked && type==='bar' } } }; },
     _topConfig(){ const cType=this.chartOpts.topType==='doughnut'?'doughnut':'bar'; const horizontal=(this.chartOpts.topType==='hbar'); const pal=this.chartPalette(); const data={ labels:pure(this.top.labels), datasets:[{ label:'Entries', data:pure(this.top.series), borderWidth:0, borderRadius:cType==='bar'?8:0, backgroundColor:cType==='doughnut'?this._doughnutColors(this.top.series.length):pal.bar }]}; const options=this._optsTop(horizontal, cType==='doughnut'); return { cType, cfg:{data, options} }; },
     _optsTop(horizontal=false, isDoughnut=false){ const pal=this.chartPalette(); const showVals=!!this.chartOpts.showValues; if(isDoughnut){ return { responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'}, tooltip:{mode:'index',intersect:false}, datalabels:{ display:showVals, formatter:(v,ctx)=>{ const total=(ctx.dataset.data||[]).reduce((a,b)=>a+(+b||0),0)||1; const pct=(v*100/total).toFixed(1); return `${this.formatNumber(v)} (${pct}%)`; } } } }; } return { indexAxis: horizontal ? 'y' : 'x', responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{mode:'index',intersect:false}, datalabels:{ display:showVals, anchor:'end', align:horizontal?'right':'top', formatter:(v)=>this.formatNumber(v), clamp:true, clip:false }}, scales:{ x:{ grid:{display:!horizontal,color:pal.grid}, ticks:{color:pal.ticks} }, y:{ grid:{display:horizontal,color:pal.grid}, ticks:{color:pal.ticks} } } }; },
-    _doughnutColors(n){ const base=[186,32,46]; const arr=[]; for(let i=0;i<n;i++){ const f=0.35+0.6*(i/Math.max(1,n-1)); arr.push(`rgba(${base[0]},${base[1]},${base[2]},${f.toFixed(2)})`);} return arr; },
+    _doughnutColors(n){ const base=[187,153,116]; const arr=[]; for(let i=0;i<n;i++){ const f=0.35+0.6*(i/Math.max(1,n-1)); arr.push(`rgba(${base[0]},${base[1]},${base[2]},${f.toFixed(2)})`);} return arr; },
 
     initCharts(){ const cvL=document.getElementById('chartLine'); const cvB=document.getElementById('chartBar'); Chart.getChart(cvL)?.destroy(); Chart.getChart(cvB)?.destroy(); const {type,fillArea}=this._trendType(); this.chartLine = Alpine.raw(new Chart(cvL.getContext('2d'), { type, data:this._trendData(fillArea), options:this._optsTrend() })); const {cType,cfg}=this._topConfig(); this.chartBar = Alpine.raw(new Chart(cvB.getContext('2d'), { type:cType, data:cfg.data, options:cfg.options })); },
     updateCharts(){ if(this.chartLine){ const {type,fillArea}=this._trendType(); if(this.chartLine.config.type!==type){ this.rebuildLineIfNeeded(); } else { const pal=this.chartPalette(); this.chartLine.data.labels=pure(this.entriesByDay.labels); const ds=this.chartLine.data.datasets[0]; ds.data=pure(this.entriesByDay.series); ds.fill=(type==='line'&&fillArea); ds.borderWidth=type==='line'?2:0; ds.borderColor=pal.line; ds.backgroundColor=type==='line'?(fillArea?pal.fill:pal.line):pal.bar; ds.tension=this.chartOpts.smoothing; ds.pointRadius=type==='line'?2:0; ds.pointHoverRadius=type==='line'?4:0; ds.borderRadius=type==='bar'?8:0; this.chartLine.options=this._optsTrend(); this.chartLine.update(); } } if(this.chartBar){ const {cType}=this._topConfig(); if(this.chartBar.config.type!==cType){ this.rebuildBarIfNeeded(); } else { this.chartBar.data.labels=pure(this.top.labels); this.chartBar.data.datasets[0].data=pure(this.top.series); this.chartBar.options=this._optsTop(this.chartOpts.topType==='hbar', this.chartOpts.topType==='doughnut'); this.chartBar.update(); } } },

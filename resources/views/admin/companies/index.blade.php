@@ -6,7 +6,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto p-4 md:p-6">
   <div class="flex items-center justify-between gap-3 mb-4">
-    <h1 class="text-xl font-semibold text-[color:var(--brand-maroon,#7b1d2e)]">Companies</h1>
+    <h1 class="text-xl font-semibold text-[color:var(--brand-maroon,#bb9974)]">Companies</h1>
     <div class="flex items-center gap-2">
       <form method="GET" action="{{ route('admin.companies.index') }}" class="hidden md:flex items-center gap-2">
         <input
@@ -14,17 +14,17 @@
           name="q"
           value="{{ request('q') }}"
           placeholder="Cari nama/kode…"
-          class="rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-maroon,#7b1d2e)]"
+          class="rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-maroon,#bb9974)]"
         >
         <button
-          class="px-3 py-2 rounded-xl border border-[color:var(--brand-maroon,#7b1d2e)]
-                     text-[color:var(--brand-maroon,#7b1d2e)] hover:bg-[color:var(--brand-maroon,#7b1d2e)]/10">
+          class="px-3 py-2 rounded-xl border border-[color:var(--brand-maroon,#bb9974)]
+                     text-[color:var(--brand-maroon,#bb9974)] hover:bg-[color:var(--brand-maroon,#bb9974)]/10">
           Cari
         </button>
       </form>
       <a href="{{ route('admin.companies.create') }}"
          class="px-4 py-2 rounded-xl text-white
-                bg-[color:var(--brand-maroon,#7b1d2e)] hover:brightness-105">
+                bg-[color:var(--brand-maroon,#bb9974)] hover:brightness-105">
         + Tambah
       </a>
     </div>
@@ -38,11 +38,11 @@
         name="q"
         value="{{ request('q') }}"
         placeholder="Cari nama/kode…"
-        class="flex-1 rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-maroon,#7b1d2e)]"
+        class="min-w-0 flex-1 rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-maroon,#bb9974)]"
       >
       <button
-        class="px-3 py-2 rounded-xl border border-[color:var(--brand-maroon,#7b1d2e)]
-                   text-[color:var(--brand-maroon,#7b1d2e)] hover:bg-[color:var(--brand-maroon,#7b1d2e)]/10">
+        class="shrink-0 px-3 py-2 rounded-xl border border-[color:var(--brand-maroon,#bb9974)]
+                   text-[color:var(--brand-maroon,#bb9974)] hover:bg-[color:var(--brand-maroon,#bb9974)]/10">
         Cari
       </button>
     </div>
@@ -51,7 +51,7 @@
   <div class="rounded-2xl border bg-white overflow-hidden">
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm">
-        <thead class="text-coal-700 bg-[color:var(--brand-maroon,#7b1d2e)]/5">
+        <thead class="text-coal-700 bg-[color:var(--brand-maroon,#bb9974)]/5">
           <tr>
             <th class="text-left px-4 py-3 w-14">Logo</th>
             <th class="text-left px-4 py-3">Kode</th>
@@ -70,7 +70,7 @@
                 @if(!empty($company?->logo_url))
                   <img src="{{ $company->logo_url }}?h=80" alt="logo" class="h-10 w-10 rounded object-cover">
                 @else
-                  <div class="h-10 w-10 rounded bg-[color:var(--brand-maroon,#7b1d2e)]/10 grid place-items-center text-[color:var(--brand-maroon,#7b1d2e)]">—</div>
+                  <div class="h-10 w-10 rounded bg-[color:var(--brand-maroon,#bb9974)]/10 grid place-items-center text-[color:var(--brand-maroon,#bb9974)]">—</div>
                 @endif
               </td>
               <td class="px-4 py-3 font-medium">{{ $company->code }}</td>
@@ -96,21 +96,21 @@
               <td class="px-4 py-3">
                 <div class="flex justify-end gap-2">
                   <a href="{{ route('admin.companies.show', $company) }}"
-                     class="px-3 py-1.5 rounded-lg border border-[color:var(--brand-maroon,#7b1d2e)]
-                            text-[color:var(--brand-maroon,#7b1d2e)] hover:bg-[color:var(--brand-maroon,#7b1d2e)]/10">
+                     class="px-3 py-1.5 rounded-lg border border-[color:var(--brand-maroon,#bb9974)]
+                            text-[color:var(--brand-maroon,#bb9974)] hover:bg-[color:var(--brand-maroon,#bb9974)]/10">
                     Detail
                   </a>
                   <a href="{{ route('admin.companies.edit', $company) }}"
-                     class="px-3 py-1.5 rounded-lg border border-[color:var(--brand-maroon,#7b1d2e)]
-                            text-[color:var(--brand-maroon,#7b1d2e)] hover:bg-[color:var(--brand-maroon,#7b1d2e)]/10">
+                     class="px-3 py-1.5 rounded-lg border border-[color:var(--brand-maroon,#bb9974)]
+                            text-[color:var(--brand-maroon,#bb9974)] hover:bg-[color:var(--brand-maroon,#bb9974)]/10">
                     Edit
                   </a>
                   <form action="{{ route('admin.companies.destroy', $company) }}" method="POST" onsubmit="return confirm('Hapus perusahaan ini?');">
                     @csrf @method('DELETE')
                     <button
                       class="px-3 py-1.5 rounded-lg border
-                             border-[color:var(--brand-maroon,#7b1d2e)]/60 text-[color:var(--brand-maroon,#7b1d2e)]
-                             hover:bg-[color:var(--brand-maroon,#7b1d2e)]/10">
+                             border-[color:var(--brand-maroon,#bb9974)]/60 text-[color:var(--brand-maroon,#bb9974)]
+                             hover:bg-[color:var(--brand-maroon,#bb9974)]/10">
                       Hapus
                     </button>
                   </form>

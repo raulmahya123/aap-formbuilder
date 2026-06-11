@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6">
+<div class="p-4 sm:p-6">
 
     {{-- HEADER --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
@@ -10,14 +10,14 @@
             <p class="text-sm text-gray-500">Daftar laporan HIPO & Nearmiss</p>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
 
             {{-- Search --}}
-            <form method="GET" action="" class="relative">
+            <form method="GET" action="" class="relative w-full sm:w-auto">
                 <input type="text"
                        name="search"
                        placeholder="Cari jobsite / PIC..."
-                       class="pl-4 pr-10 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none w-64">
+                       class="w-full pl-4 pr-10 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none sm:w-64">
                 <svg class="w-4 h-4 absolute right-3 top-3 text-gray-400"
                      fill="none" stroke="currentColor" stroke-width="2"
                      viewBox="0 0 24 24">
@@ -28,7 +28,7 @@
 
             {{-- CREATE BUTTON --}}
             <a href="{{ route('admin.hipo.create') }}"
-               class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition duration-200">
+               class="inline-flex justify-center bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition duration-200">
                 + Tambah HIPO
             </a>
         </div>
@@ -38,7 +38,7 @@
     <div class="bg-white rounded-2xl shadow-md border overflow-hidden">
 
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full min-w-[760px] text-sm">
                 <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
                     <tr>
                         <th class="text-left py-3 px-3">Tanggal</th>

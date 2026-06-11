@@ -18,7 +18,7 @@
     @if($isSuper)
       <div class="flex items-center gap-2">
         <a href="{{ route('admin.contracts.create') }}"
-           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#7A2C2F] text-white hover:opacity-90">
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
           Upload Baru
         </a>
@@ -38,7 +38,7 @@
   <form method="get" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
     <div class="relative flex-1">
       <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari judul kontrak…"
-             class="w-full border rounded-xl px-3 py-2 pr-9 focus:outline-none focus:border-[#7A2C2F]">
+             class="w-full border rounded-xl px-3 py-2 pr-9 focus:outline-none focus:border-[#bb9974]">
       <span class="absolute right-3 top-2.5 text-coal-400">🔎</span>
     </div>
     <button class="px-4 py-2 rounded-xl border border-coal-300 hover:bg-ivory-100">Filter</button>
@@ -78,7 +78,7 @@
               </td>
               <td class="p-3 align-top">
                 <div class="flex items-center gap-2 min-w-0">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#7A2C2F">
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#bb9974">
                     {{ strtoupper(\Illuminate\Support\Str::of(optional($c->owner)->name)->explode(' ')->map(fn($s)=>\Illuminate\Support\Str::substr($s,0,1))->take(2)->implode('')) ?: 'U' }}
                   </div>
                   <div class="min-w-0">
@@ -90,7 +90,7 @@
               <td class="p-3 align-top text-center">
                 @php $vc = method_exists($c,'viewers') ? $c->viewers->count() : ($c->viewers_count ?? 0); @endphp
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs border"
-                      style="border-color:#7A2C2F;color:#7A2C2F">
+                      style="border-color:#bb9974;color:#bb9974">
                   {{ $vc }} user
                 </span>
               </td>
@@ -125,7 +125,7 @@
               <td colspan="6" class="p-6 text-center text-coal-500">
                 Belum ada kontrak.
                 @if($isSuper)
-                  <a href="{{ route('admin.contracts.create') }}" class="text-[#7A2C2F] underline">Upload sekarang</a>.
+                  <a href="{{ route('admin.contracts.create') }}" class="text-[#bb9974] underline">Upload sekarang</a>.
                 @endif
               </td>
             </tr>
@@ -149,13 +149,13 @@
             <div class="text-xs text-coal-500 mt-0.5">{{ optional($c->created_at)->format('d M Y H:i') }}</div>
           </div>
           <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs border"
-                style="border-color:#7A2C2F;color:#7A2C2F">
+                style="border-color:#bb9974;color:#bb9974">
             {{ method_exists($c,'viewers') ? $c->viewers->count() : ($c->viewers_count ?? 0) }} user
           </span>
         </div>
 
         <div class="mt-3 flex items-center gap-2">
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#7A2C2F">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#bb9974">
             {{ strtoupper(\Illuminate\Support\Str::of(optional($c->owner)->name)->explode(' ')->map(fn($s)=>\Illuminate\Support\Str::substr($s,0,1))->take(2)->implode('')) ?: 'U' }}
           </div>
           <div class="min-w-0">
@@ -190,7 +190,7 @@
       <div class="rounded-2xl border p-6 text-center text-coal-500">
         Belum ada kontrak.
         @if($isSuper)
-          <a href="{{ route('admin.contracts.create') }}" class="text-[#7A2C2F] underline">Upload sekarang</a>.
+          <a href="{{ route('admin.contracts.create') }}" class="text-[#bb9974] underline">Upload sekarang</a>.
         @endif
       </div>
     @endforelse

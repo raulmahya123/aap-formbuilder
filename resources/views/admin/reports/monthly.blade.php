@@ -16,6 +16,7 @@ window.addEventListener('DOMContentLoaded', function () {
   Chart.defaults.color = textCol;
   Chart.defaults.font.family = "Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial";
   Chart.defaults.borderColor = gridCol;
+  const destroyExistingChart = (el) => Chart.getChart(el)?.destroy();
 
   // Generator warna algoritmis (golden-angle)
   const hueAt = (i)=> (i*137.508) % 360;
@@ -98,6 +99,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
   var topChartEl = document.getElementById('topChart');
   if (topChartEl && top.length) {
+    destroyExistingChart(topChartEl);
     new Chart(topChartEl, {
       type:'bar',
       data:{
@@ -125,6 +127,7 @@ window.addEventListener('DOMContentLoaded', function () {
   // ========== TREND CHART (pakai data controller, no dummy) ==========
   var trendChartEl = document.getElementById('trendChart');
   if (trendChartEl && trendLabels.length) {
+    destroyExistingChart(trendChartEl);
     const ctx = trendChartEl.getContext('2d');
     const lineColor = dynColor(0, 1);
     const grad = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
@@ -166,6 +169,7 @@ window.addEventListener('DOMContentLoaded', function () {
       const units = cfg.units || [];
       const allInt = cfg.all_int === true;
 
+      destroyExistingChart(el);
       new Chart(el, {
         type:'bar',
         data:{

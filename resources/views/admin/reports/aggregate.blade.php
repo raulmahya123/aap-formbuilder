@@ -1,1020 +1,399 @@
 {{-- resources/views/admin/reports/aggregate.blade.php --}}
 @extends('layouts.app')
-@section('title','Rekap')
+@section('title', 'Rekap')
 
 @push('styles')
 <style>
-  /* ===== Grid & kartu ringkas ===== */
-  .cards-grid {
-    display: grid;
-    gap: .75rem
-  }
-
-  @media (min-width:768px) {
-    .cards-grid {
-      grid-template-columns: repeat(6, minmax(0, 1fr))
-    }
-  }
-
-  .stat-card {
-    padding: 1rem;
-    border: 1px solid #e5e7eb;
-    border-radius: .75rem;
-    background: #fff
-  }
-
-  .chart-wrap {
-    border: 1px solid #e5e7eb;
-    border-radius: .75rem;
+  .report-card {
     background: #fff;
-    overflow: hidden
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .05);
   }
 
-  /* ===== Tinggi chart ===== */
-  .chart-card-bar {
-    height: 360px
+  .report-chart {
+    position: relative;
+    height: 320px;
   }
 
-  .chart-card-mini {
-    height: 170px
+  .indicator-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+    padding: 14px;
+    transition: border-color .15s ease, box-shadow .15s ease;
   }
 
-  .chart-card-donut {
-    height: auto
+  .indicator-card:hover {
+    border-color: #cbb291;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .07);
   }
 
-  .chart-card-bar canvas,
-  .chart-card-mini canvas {
-    width: 100% !important;
-    height: 100% !important;
-    display: block
+  .kpi-meter {
+    position: relative;
+    height: 12px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    overflow: visible;
   }
 
-  .chart-card-donut .chart-canvas {
-    height: 200px
+  .kpi-meter__bar {
+    height: 100%;
+    min-width: 4px;
+    border-radius: inherit;
+    background: #bb9974;
   }
 
-  .chart-card-donut .chart-canvas canvas {
-    width: 100% !important;
-    height: 100% !important;
-    display: block
+  .kpi-meter__bar.is-over {
+    background: #dc2626;
   }
 
-  .chart-wrap.chart-card-mini,
-  .chart-wrap.chart-card_donut {
-    overflow: visible
+  .kpi-meter__threshold {
+    position: absolute;
+    top: -7px;
+    bottom: -7px;
+    width: 2px;
+    border-radius: 999px;
+    background: #f59e0b;
+    transform: translateX(-1px);
   }
 
-  .chart-card-mini .chart-head,
-  .chart-card-donut .chart-head {
-    display: flex;
-    align-items: center;
-    gap: .375rem;
-    margin-bottom: .25rem;
-    line-height: 1.1
+  .kpi-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
 
-  .chart-card-mini .chart-title,
-  .chart-card-donut .chart-title {
-    font-weight: 600;
-    font-size: 11px;
-    color: #111827;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden
-  }
-
-  .dark .stat-card,
-  .dark .chart-wrap {
-    background: #0f141a;
-    border-color: #263241
+  .kpi-meta > div {
+    min-width: 0;
+    border-radius: 8px;
+    background: #f8fafc;
+    padding: 8px 10px;
   }
 </style>
-@endpush
-
-@push('scripts')
-@once
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-@endonce
 @endpush
 
 @section('content')
 @php
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 $u = Auth::user();
 $isSuperAdmin = $u && (
-(method_exists($u, 'hasRole') && $u->hasRole('super_admin')) ||
-(($u->role ?? $u->role_key ?? null) === 'super_admin')
+    (method_exists($u, 'hasRole') && $u->hasRole('super_admin')) ||
+    (($u->role ?? $u->role_key ?? null) === 'super_admin')
 );
 
 $tz = 'Asia/Jakarta';
-
 $scopeNow = $scope ?? 'month';
 $today = now($tz);
 $dateObj = isset($date) && $date ? Carbon::parse($date, $tz) : $today->copy();
-$yearVal = isset($year) && $year ? (int)$year : (int)$today->year;
-$weekVal = isset($week) && $week ? (int)$week : (int)$today->isoWeek;
-$monthVal = isset($month) && $month ? (int)$month : (int)$today->month;
+$yearVal = isset($year) && $year ? (int) $year : (int) $today->year;
+$weekVal = isset($week) && $week ? (int) $week : (int) $today->isoWeek;
+$monthVal = isset($month) && $month ? (int) $month : (int) $today->month;
+$selectedSite = $siteId ? $sites->firstWhere('id', (int) $siteId) : null;
 
-$periodSafe = $period ?? match($scopeNow){
-'day' => $dateObj->toDateString(),
-'week' => "Minggu {$weekVal}, {$yearVal}",
-'year' => (string)$yearVal,
-default => sprintf('%02d/%d',$monthVal,$yearVal)
+$periodSafe = $period ?? match($scopeNow) {
+    'day' => $dateObj->toDateString(),
+    'week' => "Minggu {$weekVal}, {$yearVal}",
+    'year' => (string) $yearVal,
+    default => sprintf('%02d/%d', $monthVal, $yearVal),
 };
 
-Log::info('AGG VIEW: load aggregate page', [
-'user_id' => optional($u)->id,
-'scope' => $scopeNow,
-'period' => $periodSafe,
-'site_id' => $siteId ?? null,
-'date' => request('date'),
-'week' => request('week'),
-'month' => request('month'),
-'year' => request('year'),
-'groups' => isset($groups) ? $groups->count() : null,
-]);
-@endphp
+$parseThreshold = function ($raw) {
+    if ($raw === null) return null;
+    $value = trim((string) $raw);
+    if ($value === '' || $value === '-') return null;
+    $value = preg_replace('/[^0-9,.\-]/', '', $value);
+    if ($value === '' || $value === '-' || $value === null) return null;
 
-<h1 class="mb-4 text-2xl font-bold text-maroon-700">Rekap — {{ $periodSafe }}</h1>
+    if (preg_match('/^-?\d{1,3}([.,]\d{3})+$/', $value)) {
+        $value = str_replace(['.', ','], '', $value);
+    } elseif (str_contains($value, ',') && str_contains($value, '.')) {
+        $lastComma = strrpos($value, ',');
+        $lastDot = strrpos($value, '.');
+        $decimal = $lastComma > $lastDot ? ',' : '.';
+        $thousand = $decimal === ',' ? '.' : ',';
+        $value = str_replace($thousand, '', $value);
+        $value = str_replace($decimal, '.', $value);
+    } elseif (str_contains($value, ',')) {
+        $value = str_replace(',', '.', $value);
+    }
 
-<form method="get" class="grid grid-cols-1 gap-3 mb-4 md:grid-cols-6"
-  x-data="{ scope: '{{ $scopeNow }}' }">
+    return is_numeric($value) ? (float) $value : null;
+};
 
-  <input type="hidden" name="scope" :value="scope">
-  <input type="hidden" name="tz" value="{{ $tz }}">
+$fmt = fn($value) => number_format((float) $value, fmod((float) $value, 1.0) === 0.0 ? 0 : 2, ',', '.');
+$fmtThreshold = function ($raw) use ($parseThreshold, $fmt) {
+    $num = $parseThreshold($raw);
+    if ($num === null) return '-';
+    $rawText = trim((string) $raw);
+    if ($rawText !== '' && preg_match('/[%$]|(?:\bRp\b)|(?:\bIDR\b)/i', $rawText)) return $rawText;
+    return $fmt($num);
+};
 
-  <select name="site_id" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
-    <option value="">Semua Site</option>
-    @foreach($sites as $s)
-    <option value="{{ $s->id }}" @selected(($siteId ?? null)==$s->id)>
-      {{ $s->code }} — {{ $s->name }}
-    </option>
-    @endforeach
-  </select>
-
-  <select x-model="scope" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
-    <option value="day">Harian</option>
-    <option value="week">Mingguan</option>
-    <option value="month">Bulanan</option>
-    <option value="year">Tahunan</option>
-  </select>
-
-  <input type="date" name="date"
-    value="{{ $dateObj->setTimezone($tz)->toDateString() }}"
-    class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
-    x-show="scope==='day'">
-
-  <div class="flex gap-2" x-show="scope==='week'">
-    <input type="number" name="week" value="{{ $weekVal }}"
-      class="w-24 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
-
-    <input type="number" name="year" value="{{ $yearVal }}"
-      class="px-3 py-2 border rounded-lg w-28 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
-  </div>
-
-  <div class="flex gap-2" x-show="scope==='month'">
-    <select name="month" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
-      @for($m=1;$m<=12;$m++)
-        <option value="{{ $m }}" @selected($monthVal==$m)>{{ $m }}</option>
-        @endfor
-    </select>
-
-    <input type="number" name="year" value="{{ $yearVal }}"
-      class="px-3 py-2 border rounded-lg w-28 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400">
-  </div>
-
-  <input type="number" name="year" value="{{ $yearVal }}"
-    class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400"
-    x-show="scope==='year'">
-
-  <button class="px-4 py-2 text-white rounded-lg bg-maroon-600 hover:bg-maroon-700 md:col-span-1">
-    Terapkan
-  </button>
-</form>
-
-@php
+$groupPayload = [];
+$indicatorPayload = [];
 $grandTotal = 0;
+$totalIndicators = 0;
+$overTargetCount = 0;
+
 foreach ($groups as $g) {
-foreach (($data[$g->code] ?? []) as $r) {
-$on = (float)($r['on_time'] ?? 0);
-$lt = (float)($r['late'] ?? 0);
-$ttl = (float)($r['total'] ?? ($on + $lt));
-$grandTotal += $ttl;
-}
-}
-@endphp
+    $rows = collect($data[$g->code] ?? []);
+    $labels = [];
+    $values = [];
+    $thresholds = [];
+    $units = [];
+    $colors = [];
 
-<div class="grid grid-cols-2 gap-3 mb-6 md:grid-cols-6">
-  <div class="stat-card">
-    <div class="text-xs">Total Groups</div>
-    <div class="text-xl font-bold">{{ $groups->count() }}</div>
-  </div>
-  <div class="stat-card">
-    <div class="text-xs">Indicators</div>
-    <div class="text-xl font-bold">{{ collect($groups)->flatMap(fn($g)=>$g->indicators)->count() }}</div>
-  </div>
-  <div class="stat-card">
-    <div class="text-xs">Scope</div>
-    <div class="text-xl font-bold uppercase">{{ $scopeNow }}</div>
-  </div>
-  <div class="stat-card">
-    <div class="text-xs">Periode</div>
-    <div class="text-sm font-semibold">{{ $periodSafe }}</div>
-  </div>
-  <div class="stat-card">
-    <div class="text-xs">Grand Total</div>
-    <div class="text-xl font-bold">{{ number_format($grandTotal, 0, ',', '.') }}</div>
-  </div>
-  <div class="stat-card">
-    <div class="text-xs">Site</div>
-    <div class="text-sm font-semibold">
-      {{ optional($sites->firstWhere('id',(int)$siteId))->code ?? 'Semua' }}
-    </div>
-  </div>
-</div>
+    foreach ($rows as $row) {
+        $ind = $row['indicator'];
+        $value = (float) ($row['total'] ?? $row['value'] ?? 0);
+        $threshold = $parseThreshold($row['threshold'] ?? null);
+        $isOver = $threshold !== null && $value > $threshold;
 
-@php
-/* ===== Helpers ===== */
-$toFloat = function($raw){
-if ($raw === null) return 0.0;
-$s = trim((string)$raw);
-if ($s === '' || $s === '-') return 0.0;
-$s = preg_replace('/[^0-9,.\-]/', '', $s);
-$s = preg_replace('/(?<=\d)[,.](?=\d{3}(\D|$)) /', '' , $s);
-  if (str_contains($s, ',' ) && !str_contains($s, '.' )) $s=str_replace(',', '.' , $s);
-  if (substr_count($s, '.' )>1){ $p=strrpos($s,'.'); $s=str_replace('.','',substr($s,0,$p)).substr($s,$p); }
-  return is_numeric($s) ? (float)$s : 0.0;
-  };
-
-  $isLaggingInd = fn($ind)=>
-  (bool)($ind->is_lagging ?? false) ||
-  strtolower((string)($ind->type ?? $ind->category ?? ''))==='lagging' ||
-  str_contains(strtolower((string)($ind->slug ?? $ind->code ?? '')),'lag');
-  $isLaggingGroup = fn($g)=> str_contains(strtolower((string)($g->name ?? '').' '.(string)($g->code ?? '')), 'lag');
-  $isBase = fn($ind)=>
-  str_contains(strtolower((string)($ind->name ?? '')), 'deskripsi') ||
-  str_contains(strtolower((string)($ind->name ?? '')), 'base') ||
-  in_array(strtolower((string)($ind->type ?? $ind->category ?? '')), ['base','description','deskripsi']);
-  $makeThresholdLabel = function($thrRaw, $thrFloat) {
-  if ($thrRaw === null || trim((string)$thrRaw) === '') return '0';
-  if (is_string($thrRaw) && preg_match('/[%$]|(?:\bRp\b)|(?:\bIDR\b)|[A-Za-z]/', $thrRaw)) return trim($thrRaw);
-  return fmod((float)$thrFloat,1.0)==0.0
-  ? number_format((float)$thrFloat,0,',','.')
-  : number_format((float)$thrFloat,2,',','.');
-  };
-
-  /** ====== Label default per scope ====== */
-  $makeScopeLabels = function($scope, $month = null) use ($tz) {
-  $m = (int)($month ?: now($tz)->month);
-  switch ($scope) {
-  case 'year': return range(1,12);
-  case 'month': return [$m];
-  case 'week': return [1,2,3,4,5];
-  default: return ['Total'];
-  }
-  };
-  $buckets = $buckets ?? null;
-  $series = $series ?? null;
-  @endphp
-
-  {{-- ========================= BAGIAN 1 — LAGGING (mini bar) ========================= --}}
-  @php $printedLagHeader=false; @endphp
-  @foreach($groups as $g)
-  @php
-  $rowsAll = collect($data[$g->code] ?? []);
-  $rows = $isLaggingGroup($g) ? $rowsAll : $rowsAll->filter(fn($r)=>$isLaggingInd($r['indicator']));
-  @endphp
-
-  @if($rows->isNotEmpty())
-  @if(!$printedLagHeader)
-  <div class="mb-2 text-sm font-semibold text-maroon-700">Lagging Indicators</div>
-  @php $printedLagHeader=true; @endphp
-  @endif
-
-  <div class="grid grid-cols-2 gap-3 mb-6 md:grid-cols-4 xl:grid-cols-6">
-    @foreach($rows as $r)
-    @php
-    $ind = $r['indicator'];
-    $onVal = $toFloat($r['on_time'] ?? 0);
-    $lateVal = $toFloat($r['late'] ?? 0);
-    if ($ind->is_derived && $ind->formula) {
-
-    $expr = $ind->formula;
-
-    preg_match_all('/[A-Z0-9_]+/', $expr, $matches);
-    $codes = $matches[0];
-
-    foreach ($codes as $c) {
-    $val = $data[$g->code][$c]['total'] ?? 0;
-    $expr = str_replace($c, $val ?: 0, $expr);
-    }
-
-    try {
-    $total = eval("return {$expr};");
-    } catch (\Throwable $e) {
-    $total = 0;
-    }
-
-    } else {
-    $total = $toFloat($r['total'] ?? ($onVal + $lateVal));
-    }
-
-    $cid = 'lagmini_'.$g->code.'_'.$ind->code;
-
-    $currScope = $scopeNow;
-    $lbls = $buckets ?: $makeScopeLabels($currScope, $monthVal);
-    $lenLabels = count($lbls);
-
-    $vals = $series[$g->code][$ind->code] ?? null;
-    if (!is_array($vals) || empty($vals)) {
-    if ($currScope === 'year') {
-    $vals = array_fill(0, 12, 0);
-    $anchor = max(0, min(11, (int)$monthVal - 1));
-    $vals[$anchor] = $total;
-    $lenLabels = 12; $lbls = range(1,12);
-    } elseif ($currScope === 'week') {
-    $vals = array_fill(0, 5, 0); $vals[4] = $total;
-    $lenLabels = 5; $lbls = [1,2,3,4,5];
-    } elseif ($currScope === 'month') {
-    $vals = [ $total ];
-    $lenLabels = 1; $lbls = [$monthVal];
-    } else {
-    $vals = [ $total ];
-    $lenLabels = 1;
-    }
-    } else {
-    $vals = array_values($vals);
-    if (count($vals) < $lenLabels) $vals=array_pad($vals, $lenLabels, 0);
-      if (count($vals)> $lenLabels) $vals = array_slice($vals, 0, $lenLabels);
-      }
-
-      $thrRaw = $r['threshold'] ?? null;
-      $thrNum = ($thrRaw===null) ? null : $toFloat($thrRaw);
-      $thrSeries = is_numeric($thrNum) ? array_fill(0, $lenLabels, (float)$thrNum) : null;
-
-      $maxData = max(array_map(fn($v)=> (is_numeric($v)? (float)$v : 0), $vals ?: [0]));
-      $chartMax = max($maxData, (float)($thrNum ?? 0), 1) * 1.15;
-
-      $palette = ['#0ea5e9','#10b981','#8b5cf6','#f59e0b','#14b8a6','#22c55e'];
-      $barColors = [];
-      foreach ($vals as $i => $v) {
-      $vv = is_numeric($v) ? (float)$v : 0;
-      $barColors[] = (is_numeric($thrNum) && $vv > (float)$thrNum) ? '#ef4444' : $palette[$i % count($palette)];
-      }
-      @endphp
-
-      <div class="p-2 pb-3 transition-shadow rounded-lg chart-wrap chart-card-mini ring-1 ring-slate-200/70 hover:shadow-sm">
-        <div class="chart-head">
-          <div class="chart-title">{{ $ind->name }}</div>
-        </div>
-        <canvas 
-          id="{{ $cid }}" 
-          class="chart-mini-bar" 
-          height="170"
-          data-labels='@json(array_values($lbls))'
-          data-vals='@json(array_values($vals))'
-          data-bar-colors='@json($barColors)'
-          data-thr-series='@json($thrSeries)'
-          data-thr-value='@json($thrNum)'
-          data-suggested='@json($chartMax)'
-        ></canvas>
-      </div>
-
-      @push('scripts')
-      @once
-      <script>
-        window.addEventListener('DOMContentLoaded', function() {
-          document.querySelectorAll('.chart-mini-bar').forEach(function(el) {
-            var labels = JSON.parse(el.dataset.labels || '[]');
-            var vals = JSON.parse(el.dataset.vals || '[]');
-            var barColors = JSON.parse(el.dataset.barColors || '[]');
-            var thrSeries = JSON.parse(el.dataset.thrSeries || 'null');
-            var thrValue = JSON.parse(el.dataset.thrValue || 'null');
-            var suggested = Number(el.dataset.suggested) || 1;
-            if (!Array.isArray(vals) || vals.length === 0 || vals.every(v => !v || v === 0)) return;
-            var thresholdLabel = {
-              id: 'thresholdLabel',
-              afterDatasetsDraw(chart) {
-                if (thrValue == null) return;
-                var y = chart.scales.y.getPixelForValue(thrValue);
-                var left = chart.chartArea.left;
-                var ctx = chart.ctx;
-                ctx.save();
-                ctx.fillStyle = '#f59e0b';
-                ctx.font = '600 10px system-ui,-apple-system,Segoe UI,Roboto,Arial';
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'middle';
-                var txt = new Intl.NumberFormat('id-ID').format(thrValue);
-                ctx.fillText('Target: ' + txt, left + 2, y);
-                ctx.restore();
-              }
-            };
-            var valueLabels = {
-              id: 'valueLabels',
-              afterDatasetsDraw(chart) {
-                var { ctx, chartArea: { top } } = chart;
-                ctx.save();
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                ctx.font = '600 10px system-ui,-apple-system,Segoe UI,Roboto,Arial';
-                ctx.fillStyle = '#111827';
-                var meta = chart.getDatasetMeta(0);
-                meta.data.forEach(function(elm, i) {
-                  var v = chart.data.datasets[0].data[i];
-                  if (v == null || Number(v) === 0) return;
-                  var txt = new Intl.NumberFormat('id-ID').format(v);
-                  var x = elm.x, y = elm.y - 4;
-                  if (y < top + 8) y = top + 8;
-                  ctx.fillText(txt, x, y);
-                });
-                ctx.restore();
-              }
-            };
-            new Chart(el, {
-              type: 'bar',
-              data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Total',
-                    data: vals,
-                    backgroundColor: barColors,
-                    borderWidth: 0,
-                    borderRadius: 6,
-                    categoryPercentage: .6,
-                    barPercentage: .8,
-                    maxBarThickness: 18
-                  },
-                  (thrSeries ? {
-                    type: 'line',
-                    label: 'Target',
-                    data: thrSeries,
-                    borderColor: '#f59e0b',
-                    borderWidth: 1.5,
-                    borderDash: [4, 4],
-                    pointRadius: 0,
-                    fill: false,
-                    tension: 0
-                  } : null)
-                ].filter(Boolean)
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                  padding: {
-                    top: 4,
-                    right: 8,
-                    bottom: 22,
-                    left: 8
-                  }
-                },
-                plugins: {
-                  legend: {
-                    display: false
-                  },
-                  tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    callbacks: {
-                      label: function(c) {
-                        var val = c.parsed.y ?? c.parsed;
-                        var base = c.dataset.label + ': ' + new Intl.NumberFormat('id-ID').format(val);
-                        if (c.datasetIndex === 0 && thrValue != null) {
-                          base += ' (Target: ' + new Intl.NumberFormat('id-ID').format(thrValue) + ')';
-                        }
-                        return base;
-                      }
-                    }
-                  }
-                },
-                scales: {
-                  x: {
-                    grid: {
-                      display: false
-                    },
-                    ticks: {
-                      display: true,
-                      maxRotation: 0,
-                      minRotation: 0,
-                      font: {
-                        size: 10
-                      },
-                      padding: 2
-                    }
-                  },
-                  y: {
-                    grid: {
-                      display: false
-                    },
-                    ticks: {
-                      display: false
-                    },
-                    beginAtZero: true,
-                    suggestedMax: suggested
-                  }
-                }
-              },
-              plugins: [valueLabels, thresholdLabel]
-            });
-          });
-        });
-      </script>
-      @endonce
-      @endpush
-      @endforeach
-  </div>
-  @endif
-  @endforeach
-
-  {{-- ========================= BAGIAN 2 — OPERATIONAL / LEADING ========================= --}}
-  @foreach($groups as $g)
-  @continue($isLaggingGroup($g))
-  @php
-  $rows = collect($data[$g->code] ?? []);
-  $leadRows = $rows->reject(fn($r)=>$isLaggingInd($r['indicator']));
-  $isBaseGroup = str_contains(strtolower($g->code.$g->name),'base') || str_contains(strtolower($g->name),'deskripsi');
-  @endphp
-
-  @if($leadRows->isNotEmpty())
-  <div class="mb-2 text-sm font-semibold text-maroon-700">
-    Operational / Leading — {{ $g->name }}
-    @if($isBaseGroup) <span class="opacity-70">(Base Metrics)</span> @endif
-  </div>
-
-  @if($isBaseGroup)
-  {{-- ========== BASE METRICS → DONUT ========== --}}
-  <div class="grid grid-cols-2 gap-3 mb-8 md:grid-cols-4 xl:grid-cols-6">
-    @foreach($leadRows as $r)
-    @php
-    $ind = $r['indicator'];
-    $onVal = $toFloat($r['on_time'] ?? 0);
-    $lateVal = $toFloat($r['late'] ?? 0);
-    $total = $toFloat($r['total'] ?? ($onVal + $lateVal));
-
-    $thrRaw = $r['threshold'] ?? null;
-    $thrNum = $thrRaw===null ? null : $toFloat($thrRaw);
-    $hasThr = is_numeric($thrNum) && $thrNum > 0;
-
-    $achieved = $hasThr ? min($total, $thrNum) : $total;
-    $remain = $hasThr ? max($thrNum - $total, 0) : 0;
-    $pct = $hasThr ? max(0, min(100, ($total/$thrNum)*100)) : null;
-
-    $thrDisp = $hasThr ? (fmod((float)$thrNum,1.0)==0.0 ? number_format((float)$thrNum,0,',','.') : number_format((float)$thrNum,2,',','.')) : '-';
-
-    $did = 'donut_base_'.$g->code.'_'.$ind->code;
-    @endphp
-
-    <div class="p-3 pb-4 transition-shadow rounded-lg chart-wrap chart-card-donut ring-1 ring-slate-200/70 hover:shadow-sm">
-      <div class="chart-head">
-        <div class="chart-title">{{ $ind->name }}</div>
-      </div>
-      <div class="chart-canvas"><canvas id="{{ $did }}"></canvas></div>
-      <div class="mt-1 text-[10px] text-slate-500">Target: {{ $thrDisp }}</div>
-    </div>
-
-    @push('scripts')
-    <script>
-      (function() {
-        var el = document.getElementById('{{ $did }}');
-        if (!el) return;
-        var ctx = el.getContext('2d');
-
-        var gradYes = ctx.createLinearGradient(0, 0, 0, el.height);
-        gradYes.addColorStop(0, '#10b981');
-        gradYes.addColorStop(1, '#059669');
-
-        var centerText = {
-          id: 'centerText_{{ $did }}',
-          beforeDraw: function(chart) {
-            var area = chart.chartArea;
-            if (!area) return;
-            var ctx = chart.ctx,
-              cx = (area.left + area.right) / 2,
-              cy = (area.top + area.bottom) / 2;
-            ctx.save();
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.font = '700 14px system-ui, -apple-system, Segoe UI, Roboto, Arial';
-            ctx.fillStyle = '#111827';
-            ctx.fillText('{{ number_format($total,0,', ','.
-              ') }}', cx, cy - 4);
-            @if($hasThr)
-            ctx.font = '600 11px system-ui, -apple-system, Segoe UI, Roboto, Arial';
-            ctx.fillStyle = '#6b7280';
-            ctx.fillText('{{ number_format($pct,0,', ','.
-              ') }}%', cx, cy + 12);
-            @endif
-            ctx.restore();
-          }
-        };
-
-        new Chart(el, {
-          type: 'doughnut',
-          data: {
-            labels: [@if($hasThr)
-              'Tercapai', 'Sisa Target'
-              @else 'Total'
-              @endif
-            ],
-            datasets: [{
-              data: @json([$achieved, $remain]),
-              backgroundColor: [gradYes, '#e5e7eb'],
-              borderWidth: 0
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '68%',
-            plugins: {
-              legend: {
-                display: false
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(c) {
-                    var v = c.raw ?? 0;
-                    return c.label + ': ' + new Intl.NumberFormat('id-ID').format(v);
-                  }
-                }
-              }
-            }
-          },
-          plugins: [centerText]
-        });
-      })();
-    </script>
-    @endpush
-    @endforeach
-  </div>
-  @else
-  @php
-  $cid = 'grp_'.$g->code;
-  $labels = $leadRows->map(fn($r)=>$r['indicator']->name)->values();
-
-  $totals = $leadRows->map(function($r) use ($toFloat){
-  $on = $toFloat($r['on_time'] ?? 0);
-  $lt = $toFloat($r['late'] ?? 0);
-  return $toFloat($r['total'] ?? ($on + $lt));
-  })->values();
-
-  $thrLines = $leadRows->map(function($r) use ($toFloat){
-  $raw = $r['threshold'] ?? null;
-  if ($raw===null) return null;
-  $num = $toFloat($raw);
-  return is_numeric($num) ? (float)$num : null;
-  })->values();
-
-  $palette = ['#0ea5e9','#10b981','#8b5cf6','#f59e0b','#14b8a6','#22c55e'];
-  $barColors = [];
-  foreach ($totals as $i=>$v) {
-  $thr = $thrLines[$i] ?? null;
-  $barColors[] = ($thr !== null && $v > $thr) ? '#ef4444' : $palette[$i % count($palette)];
-  }
-  @endphp
-
-  @push('scripts')
-  <script>
-    (function() {
-      var el = document.getElementById('{{ $cid }}');
-      if (!el) return;
-
-      var vals = @json($totals);
-      var thr = @json($thrLines);
-      var colors = @json($barColors);
-      var labels = @json($labels);
-
-      var maxData = Math.max(...vals.map(v => v ?? 0));
-      var maxThr = Math.max(...thr.map(v => v ?? 0));
-      var suggested = Math.max(maxData, maxThr, 1) * 1.15;
-
-      new Chart(el, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-              label: 'Total',
-              data: vals,
-              backgroundColor: colors,
-              borderRadius: 6
-            },
-            {
-              type: 'line',
-              label: 'Target',
-              data: thr,
-              borderColor: '#f59e0b',
-              borderWidth: 2,
-              borderDash: [5, 5],
-              pointRadius: 0
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom'
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              suggestedMax: suggested
-            },
-            x: {
-              grid: {
-                display: false
-              }
-            }
-          }
-        }
-      });
-    })();
-  </script>
-  @endpush
-
-  <div class="p-4 mb-8 chart-wrap chart-card-bar">
-    <canvas id="{{ $cid }}"></canvas>
-  </div>
-
-  @push('scripts')
-  <script>
-    (function() {
-      var el = document.getElementById('{{ $cid }}');
-      if (!el) return;
-
-      var vals = @json($totals);
-      var thr = @json($thrLines);
-      var colors = @json($barColors);
-
-      var maxData = Math.max.apply(null, vals.map(function(v) {
-        return (v == null ? 0 : v);
-      }));
-      var maxThr = Math.max.apply(null, thr.map(function(v) {
-        return (v == null ? 0 : v);
-      }));
-      var suggested = Math.max(maxData, maxThr, 1) * 1.15;
-
-      var valueLabels = {
-        id: 'valueLabels',
-        afterDatasetsDraw(chart) {
-          var {
-            ctx,
-            chartArea: {
-              top
-            }
-          } = chart;
-          ctx.save();
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          ctx.font = '600 12px system-ui,-apple-system,Segoe UI,Roboto,Arial';
-          ctx.fillStyle = '#111827';
-          var meta = chart.getDatasetMeta(0);
-          meta.data.forEach(function(elm, i) {
-            var v = chart.data.datasets[0].data[i];
-            if (v == null || Number(v) === 0) return;
-            var txt = new Intl.NumberFormat('id-ID').format(v);
-            var x = elm.x,
-              y = elm.y - 6;
-            if (y < top + 10) y = top + 10;
-            ctx.fillText(txt, x, y);
-          });
-          ctx.restore();
-        }
-      };
-
-      var thresholdLabel = {
-        id: 'thresholdLabel',
-        afterDatasetsDraw(chart) {
-          if (!thr.some(function(v) {
-              return v != null;
-            })) return;
-          var arr = thr.filter(function(v) {
-            return v != null;
-          });
-          var avg = arr.reduce(function(a, b) {
-            return a + b;
-          }, 0) / arr.length;
-          var y = chart.scales.y.getPixelForValue(avg);
-          var left = chart.chartArea.left;
-          var ctx = chart.ctx;
-          ctx.save();
-          ctx.fillStyle = '#f59e0b';
-          ctx.font = '600 10px system-ui,-apple-system,Segoe UI,Roboto,Arial';
-          ctx.textAlign = 'left';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('Target', left + 2, y);
-          ctx.restore();
-        }
-      };
-
-      new Chart(el, {
-        type: 'bar',
-        data: {
-          labels: @json($labels),
-          datasets: [{
-              label: 'Total',
-              data: vals,
-              backgroundColor: colors,
-              borderWidth: 0,
-              borderRadius: 6
-            },
-            {
-              type: 'line',
-              label: 'Target',
-              data: thr,
-              borderColor: '#f59e0b',
-              borderWidth: 2,
-              borderDash: [5, 5],
-              pointRadius: 0,
-              fill: false,
-              tension: 0
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom'
-            },
-            tooltip: {
-              mode: 'index',
-              intersect: false,
-              callbacks: {
-                label: function(c) {
-                  var v = c.parsed.y ?? c.parsed;
-                  return c.dataset.label + ': ' + new Intl.NumberFormat('id-ID').format(v);
-                }
-              }
-            }
-          },
-          scales: {
-            x: {
-              grid: {
-                display: false
-              }
-            },
-            y: {
-              beginAtZero: true,
-              suggestedMax: suggested
-            }
-          }
-        },
-        plugins: [valueLabels, thresholdLabel]
-      });
-    })();
-  </script>
-  @endpush
-  @endif
-  @endif
-  @endforeach
-
-  {{-- ========================= BAGIAN 3 — DETAIL TABEL (Total saja) ========================= --}}
-  @foreach($groups as $g)
-  <div class="mb-6 overflow-hidden chart-wrap">
-    <div class="px-3 py-2 font-semibold text-white bg-maroon-700">{{ $g->name }}</div>
-    <table class="min-w-full">
-      <thead class="text-white bg-maroon-700">
-        <tr>
-          <th class="w-10 px-3 py-2 text-left">#</th>
-          <th class="px-3 py-2 text-left">Indicator</th>
-          <th class="w-40 px-3 py-2 text-right">Total</th>
-          <th class="px-3 py-2 text-right w-28">Threshold</th>
-          <th class="w-24 px-3 py-2 text-left">Unit</th>
-          @if($isSuperAdmin)
-          <th class="w-32 px-3 py-2 text-center">Aksi</th>
-          @endif
-        </tr>
-      </thead>
-      <tbody class="divide-y">
-        @foreach(($data[$g->code] ?? []) as $row)
-        @php
-        $ind=$row['indicator'];
-        $onVal=$toFloat($row['on_time'] ?? 0);
-        $lateVal=$toFloat($row['late'] ?? 0);
-        // ===== TOTAL FINAL (SUPPORT DERIVED) =====
-        if($ind->is_derived && $ind->formula){
-        $expr = $ind->formula;
-        // Ambil semua kode indikator yang dipakai dalam formula
-        preg_match_all('/[A-Z0-9_]+/', $expr, $matches);
-        $codes = $matches[0];
-        foreach($codes as $c){
-        // AMBIL DARI DATA YANG SAMA GROUP
-        $val = collect($data[$g->code] ?? [])
-        ->firstWhere('indicator.code', $c)['total'] ?? 0;
-        $expr = str_replace($c, ($val ?: 0), $expr);
-        }
-        try{
-        $totalVal = eval("return {$expr};");
-        }catch(\Throwable $e){
-        $totalVal = 0;
-        }
-        }else{
-        $totalVal=$toFloat($row['total'] ?? ($onVal+$lateVal));
-        }
-        $isBaseLocal=$isBase($ind);
-        $thrNum = null;
-        // route param untuk edit total (override) – dipakai di kolom Total & tombol "Edit Total"
-        $editTotalParams = [
-        'indicator_id' => $ind->id,
-        'group_code' => $g->code,
-        'scope' => $scopeNow,
-        'date' => request('date'),
-        'week' => request('week'),
-        'month' => request('month'),
-        'year' => request('year'),
-        'site_id' => $siteId,
+        $labels[] = $ind->name;
+        $values[] = $value;
+        $thresholds[] = $threshold;
+        $units[] = trim((string) ($ind->unit ?? '')) ?: '';
+        $colors[] = $isOver ? '#dc2626' : '#bb9974';
+        $indicatorPayload['indicator_'.$ind->id] = [
+            'name' => $ind->name,
+            'value' => $value,
+            'threshold' => $threshold,
+            'thresholdLabel' => $fmtThreshold($row['threshold'] ?? null),
+            'unit' => trim((string) ($ind->unit ?? '')) ?: '',
+            'color' => $isOver ? '#dc2626' : '#bb9974',
         ];
 
-        if($isBaseLocal){
-        $thrDisp='-'; $isOver=false;
-        } else {
-        $thrRaw=$row['threshold'] ?? null;
-        $thrNum=$thrRaw===null ? null : $toFloat($thrRaw);
-        $thrDisp=($thrRaw===null || trim((string)$thrRaw)==='')
-        ? '0'
-        : (fmod((float)$thrNum,1.0)==0.0 ? number_format((float)$thrNum,0,',','.') : number_format((float)$thrNum,2,',','.'));
-        $isOver=($thrNum !== null) && ($totalVal > $thrNum);
-        }
+        $grandTotal += $value;
+        $totalIndicators++;
+        if ($isOver) $overTargetCount++;
+    }
 
-        // ============= LOG PER BARIS =============
-        Log::info('AGG VIEW: row total', [
-        'group_code' => $g->code,
-        'group_name' => $g->name,
-        'indicator_id' => $ind->id,
-        'indicator_code' => $ind->code ?? null,
-        'indicator_name' => $ind->name,
-        'scope' => $scopeNow,
-        'site_id' => $siteId ?? null,
-        'date' => request('date'),
-        'week' => request('week'),
-        'month' => request('month'),
-        'year' => request('year'),
-        'on_time' => $onVal,
-        'late' => $lateVal,
-        'totalVal' => $totalVal,
-        'raw_row' => $row,
-        'threshold_raw' => $row['threshold'] ?? null,
-        'threshold_num' => $thrNum,
-        'is_base' => $isBaseLocal,
-        'is_over_target' => $isOver ?? null,
-        ]);
-        @endphp
-        <tr class="hover:bg-gray-50">
-          <td class="px-3 py-2">{{ $ind->order_index }}</td>
-          <td class="px-3 py-2">
-            <div class="font-medium">{{ $ind->name }}</div>
-            @if($ind->is_derived)
-            <div class="font-mono text-xs text-gray-500">= {{ $ind->formula }}</div>
-            @endif
-          </td>
+    $groupPayload[$g->code] = [
+        'name' => $g->name,
+        'labels' => $labels,
+        'values' => $values,
+        'thresholds' => $thresholds,
+        'units' => $units,
+        'colors' => $colors,
+    ];
+}
+@endphp
 
-          {{-- TOTAL: kalau super_admin, angka bisa diklik untuk ubah total --}}
-          <td class="px-3 py-2 text-right font-bold {{ (!$isBaseLocal && $isOver) ? 'text-rose-600' : '' }}">
-            @if($isSuperAdmin)
-            <a href="{{ route('admin.report-totals.edit', $editTotalParams) }}"
-              class="underline decoration-dotted underline-offset-2 hover:text-maroon-700">
-              {{ number_format($totalVal, fmod($totalVal,1.0)==0.0 ? 0 : 2, ',', '.') }}
-            </a>
-            @else
-            {{ number_format($totalVal, fmod($totalVal,1.0)==0.0 ? 0 : 2, ',', '.') }}
-            @endif
-          </td>
+<div class="space-y-5">
+  <div class="report-card p-5">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-maroon-700">HSE / KPI Report</p>
+        <h1 class="mt-1 text-2xl font-serif font-semibold text-coal-900">Rekap {{ $periodSafe }}</h1>
+        <p class="mt-1 text-sm text-coal-500">Rumus derived dihitung otomatis dari kode indikator, dan threshold dipakai konsisten di grafik serta tabel.</p>
+      </div>
 
-          <td class="px-3 py-2 font-mono text-right">{{ $thrDisp }}</td>
-          <td class="px-3 py-2">{{ trim((string)($ind->unit ?? '')) ?: '-' }}</td>
+      <form method="get" class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6" x-data="{ scope: '{{ $scopeNow }}' }">
+        <input type="hidden" name="scope" :value="scope">
+        <select name="site_id" class="px-3 py-2 border rounded-lg bg-white">
+          <option value="">Semua Site</option>
+          @foreach($sites as $s)
+            <option value="{{ $s->id }}" @selected(($siteId ?? null) == $s->id)>{{ $s->code }} - {{ $s->name }}</option>
+          @endforeach
+        </select>
 
-          @if($isSuperAdmin)
-          <td class="px-3 py-2 text-center">
-            <div class="flex flex-col items-center gap-1">
+        <select x-model="scope" class="px-3 py-2 border rounded-lg bg-white">
+          <option value="day">Harian</option>
+          <option value="week">Mingguan</option>
+          <option value="month">Bulanan</option>
+          <option value="year">Tahunan</option>
+        </select>
 
-              {{-- Edit definisi indikator --}}
-              <a href="{{ route('admin.indicators.edit', $ind->id) }}"
-                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border border-maroon-500 text-maroon-700 hover:bg-maroon-50">
-                Edit Indikator
-              </a>
+        <input type="date" name="date" value="{{ $dateObj->toDateString() }}" class="px-3 py-2 border rounded-lg" x-show="scope === 'day'">
 
-              {{-- Edit / override total agregat (link eksplisit) --}}
-              <a href="{{ route('admin.report-totals.edit', $editTotalParams) }}"
-                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50">
-                Edit Total
-              </a>
+        <div class="flex gap-2" x-show="scope === 'week'">
+          <input type="number" name="week" value="{{ $weekVal }}" class="w-20 px-3 py-2 border rounded-lg">
+          <input type="number" name="year" value="{{ $yearVal }}" class="w-24 px-3 py-2 border rounded-lg">
+        </div>
 
-            </div>
-          </td>
-          @endif
-        </tr>
-        @endforeach
-      </tbody>
-    </table>
+        <div class="flex gap-2" x-show="scope === 'month'">
+          <select name="month" class="px-3 py-2 border rounded-lg bg-white">
+            @for($m = 1; $m <= 12; $m++)
+              <option value="{{ $m }}" @selected($monthVal == $m)>{{ $m }}</option>
+            @endfor
+          </select>
+          <input type="number" name="year" value="{{ $yearVal }}" class="w-24 px-3 py-2 border rounded-lg">
+        </div>
+
+        <input type="number" name="year" value="{{ $yearVal }}" class="px-3 py-2 border rounded-lg" x-show="scope === 'year'">
+
+        <button class="px-4 py-2 font-semibold text-white rounded-lg bg-maroon-700 hover:bg-maroon-800">Terapkan</button>
+      </form>
+    </div>
   </div>
+
+  <div class="grid grid-cols-2 gap-3 md:grid-cols-5">
+    <div class="report-card p-4">
+      <div class="text-xs text-coal-500">Groups</div>
+      <div class="mt-1 text-2xl font-bold">{{ $groups->count() }}</div>
+    </div>
+    <div class="report-card p-4">
+      <div class="text-xs text-coal-500">Indicators</div>
+      <div class="mt-1 text-2xl font-bold">{{ $totalIndicators }}</div>
+    </div>
+    <div class="report-card p-4">
+      <div class="text-xs text-coal-500">Over Threshold</div>
+      <div class="mt-1 text-2xl font-bold {{ $overTargetCount ? 'text-rose-600' : 'text-emerald-600' }}">{{ $overTargetCount }}</div>
+    </div>
+    <div class="report-card p-4">
+      <div class="text-xs text-coal-500">Grand Total</div>
+      <div class="mt-1 text-2xl font-bold">{{ number_format($grandTotal, 0, ',', '.') }}</div>
+    </div>
+    <div class="report-card p-4">
+      <div class="text-xs text-coal-500">Site</div>
+      <div class="mt-1 text-sm font-semibold">{{ $selectedSite ? $selectedSite->code.' - '.$selectedSite->name : 'Semua Site' }}</div>
+    </div>
+  </div>
+
+  @foreach($groups as $g)
+    @php $rows = collect($data[$g->code] ?? []); @endphp
+    @continue($rows->isEmpty())
+
+    <section class="report-card overflow-hidden">
+      <div class="flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="font-semibold text-coal-900">{{ $g->name }}</h2>
+          <p class="text-xs text-coal-500">{{ $rows->count() }} indikator</p>
+        </div>
+        <div class="flex items-center gap-3 text-xs">
+          <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-[#bb9974]"></span>Normal</span>
+          <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-rose-600"></span>Lewat threshold</span>
+          <span class="inline-flex items-center gap-1"><span class="h-0.5 w-5 bg-amber-500"></span>Threshold</span>
+        </div>
+      </div>
+
+      <div class="grid gap-4 p-4">
+        <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          @foreach($rows as $row)
+            @php
+              $ind = $row['indicator'];
+              $value = (float) ($row['total'] ?? $row['value'] ?? 0);
+              $threshold = $parseThreshold($row['threshold'] ?? null);
+              $isOver = $threshold !== null && $value > $threshold;
+              $meterMax = max(1, $value, $threshold ?? 0);
+              $valuePct = min(100, max(0, ($value / $meterMax) * 100));
+              $thresholdPct = $threshold === null ? null : min(100, max(0, ($threshold / $meterMax) * 100));
+              $unitText = trim((string) ($ind->unit ?? ''));
+            @endphp
+            <div class="indicator-card">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="truncate text-[15px] font-semibold text-coal-900" title="{{ $ind->name }}">{{ $ind->name }}</div>
+                  @if($ind->is_derived && $ind->formula)
+                    <div class="mt-0.5 truncate font-mono text-[11px] text-coal-500" title="{{ $ind->formula }}">= {{ $ind->formula }}</div>
+                  @endif
+                </div>
+                <span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $isOver ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700' }}">
+                  {{ $threshold === null ? 'No target' : ($isOver ? 'Lewat' : 'Aman') }}
+                </span>
+              </div>
+              <div class="kpi-meta mt-3 text-xs">
+                <div>
+                  <div class="text-coal-500">Total</div>
+                  <div class="mt-0.5 truncate text-lg font-bold leading-none {{ $isOver ? 'text-rose-600' : 'text-coal-900' }}">
+                    {{ $fmt($value) }}@if($unitText) <span class="text-xs font-semibold text-coal-500">{{ $unitText }}</span>@endif
+                  </div>
+                </div>
+                <div>
+                  <div class="text-coal-500">Threshold</div>
+                  <div class="mt-0.5 truncate text-lg font-bold leading-none text-coal-900">{{ $fmtThreshold($row['threshold'] ?? null) }}</div>
+                </div>
+              </div>
+
+              <div class="mt-4 py-1">
+                <div class="kpi-meter" aria-label="Total {{ $fmt($value) }} threshold {{ $fmtThreshold($row['threshold'] ?? null) }}">
+                  <div class="kpi-meter__bar {{ $isOver ? 'is-over' : '' }}" style="width: {{ $valuePct }}%"></div>
+                  @if($thresholdPct !== null)
+                    <span class="kpi-meter__threshold" style="left: {{ $thresholdPct }}%" data-label="{{ $fmtThreshold($row['threshold'] ?? null) }}"></span>
+                  @endif
+                </div>
+              </div>
+            </div>
+          @endforeach
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-50 text-xs uppercase text-coal-500">
+              <tr>
+                <th class="px-3 py-2 text-left">Indicator</th>
+                <th class="px-3 py-2 text-right">Total</th>
+                <th class="px-3 py-2 text-right">Threshold</th>
+                <th class="px-3 py-2 text-left">Unit</th>
+                <th class="px-3 py-2 text-left">Status</th>
+                @if($isSuperAdmin)
+                  <th class="px-3 py-2 text-center">Aksi</th>
+                @endif
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              @foreach($rows as $row)
+                @php
+                  $ind = $row['indicator'];
+                  $value = (float) ($row['total'] ?? $row['value'] ?? 0);
+                  $threshold = $parseThreshold($row['threshold'] ?? null);
+                  $isOver = $threshold !== null && $value > $threshold;
+                  $editTotalParams = [
+                    'indicator_id' => $ind->id,
+                    'group_code' => $g->code,
+                    'scope' => $scopeNow,
+                    'date' => request('date'),
+                    'week' => request('week'),
+                    'month' => request('month'),
+                    'year' => request('year'),
+                    'site_id' => $siteId,
+                  ];
+                @endphp
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 py-2">
+                    <div class="font-medium text-coal-900">{{ $ind->name }}</div>
+                    @if($ind->is_derived && $ind->formula)
+                      <div class="mt-0.5 font-mono text-xs text-coal-500">= {{ $ind->formula }}</div>
+                    @endif
+                  </td>
+                  <td class="px-3 py-2 text-right font-bold {{ $isOver ? 'text-rose-600' : 'text-coal-900' }}">
+                    @if($isSuperAdmin && $siteId)
+                      <a href="{{ route('admin.report-totals.edit', $editTotalParams) }}" class="underline decoration-dotted underline-offset-2 hover:text-maroon-700">{{ $fmt($value) }}</a>
+                    @else
+                      {{ $fmt($value) }}
+                    @endif
+                  </td>
+                  <td class="px-3 py-2 text-right font-mono">{{ $fmtThreshold($row['threshold'] ?? null) }}</td>
+                  <td class="px-3 py-2">{{ trim((string) ($ind->unit ?? '')) ?: '-' }}</td>
+                  <td class="px-3 py-2">
+                    @if($threshold === null)
+                      <span class="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-600">Tanpa threshold</span>
+                    @elseif($isOver)
+                      <span class="rounded-full bg-rose-50 px-2 py-1 text-xs font-semibold text-rose-700">Lewat</span>
+                    @else
+                      <span class="rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">Aman</span>
+                    @endif
+                  </td>
+                  @if($isSuperAdmin)
+                    <td class="px-3 py-2 text-center">
+                      <div class="flex flex-col items-center gap-1">
+                        <a href="{{ route('admin.indicators.edit', $ind->id) }}" class="rounded-md border border-maroon-500 px-2.5 py-1 text-xs font-semibold text-maroon-700 hover:bg-maroon-50">Edit Indikator</a>
+                        @if($siteId)
+                          <a href="{{ route('admin.report-totals.edit', $editTotalParams) }}" class="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50">Edit Total</a>
+                        @endif
+                      </div>
+                    </td>
+                  @endif
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   @endforeach
-  @endsection
+</div>
+@endsection

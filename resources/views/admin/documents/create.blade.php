@@ -5,7 +5,7 @@
 <div x-data="docBuilder()" x-init="init()" class="max-w-7xl mx-auto p-6 space-y-6">
   <div class="flex items-center justify-between">
     <h1 class="text-xl font-semibold text-[#1D1C1A]">Buat Dokumen</h1>
-    <button form="docForm" class="px-4 py-2 rounded-2xl bg-[#7A2C2F] text-white hover:opacity-90">Simpan</button>
+    <button form="docForm" class="px-4 py-2 rounded-2xl bg-[#bb9974] text-white hover:opacity-90">Simpan</button>
   </div>
 
   {{-- Inject daftar templates sebagai JSON murni untuk Alpine --}}
@@ -231,7 +231,7 @@
         <div class="pt-2">
           <div class="flex items-center justify-between">
             <h2 class="font-semibold text-[#1D1C1A]">Sections</h2>
-            <button type="button" @click="addSection()" class="text-[#7A2C2F]">+ Tambah</button>
+            <button type="button" @click="addSection()" class="text-[#bb9974]">+ Tambah</button>
           </div>
 
           <template x-for="(s,i) in sections" :key="s.key">

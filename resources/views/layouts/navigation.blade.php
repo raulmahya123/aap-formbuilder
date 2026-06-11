@@ -35,7 +35,9 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
 
 
 {{-- ===== SIDEBAR (DESKTOP) ===== --}}
-<aside class="nice-scroll fixed inset-y-0 left-0 z-50 w-72 -translate-x-full transition-transform duration-200
+<aside
+  :class="{ 'translate-x-0': sidebarOpen }"
+  class="nice-scroll fixed inset-y-0 left-0 z-50 w-72 -translate-x-full transition-transform duration-200
                lg:static lg:translate-x-0 lg:w-auto lg:block overflow-y-auto
                bg-ivory-50 border-r border-coal-200
                flex flex-col">

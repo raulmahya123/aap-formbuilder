@@ -15,7 +15,7 @@
     }
   </style>
 
-  <div class="max-w-7xl mx-auto p-6">
+  <div class="max-w-7xl mx-auto p-4 sm:p-6 min-w-0">
 
     @php
     $pp = (int) request('per_page', 10);
@@ -40,7 +40,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
       <div>
         <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3">
-          <span class="w-10 h-10 bg-rose-600 text-white rounded-xl flex items-center justify-center shadow-md">📂</span>
+          <span class="w-10 h-10 bg-maroon-700 text-white rounded-xl flex items-center justify-center shadow-md">📂</span>
           Management Form
         </h1>
         <p class="text-slate-500 dark:text-slate-400 mt-1">
@@ -48,23 +48,23 @@
         </p>
       </div>
 
-      <div class="flex gap-2 mt-4 sm:mt-0">
+      <div class="flex flex-wrap gap-2 mt-4 sm:mt-0">
         <a href="{{ $makeUrl($activeCompany,$activeDept,$activeSite,'SOP') }}"
-          class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs hover:brightness-110 shadow">
+          class="px-4 py-2 rounded-xl bg-maroon-700 text-white text-xs text-center hover:brightness-110 shadow">
           SOP
         </a>
         <a href="{{ $makeUrl($activeCompany,$activeDept,$activeSite,'IK') }}"
-          class="px-4 py-2 rounded-xl bg-amber-500 text-white text-xs hover:brightness-110 shadow">
+          class="px-4 py-2 rounded-xl bg-amber-500 text-white text-xs text-center hover:brightness-110 shadow">
           IK
         </a>
         <a href="{{ $makeUrl($activeCompany,$activeDept,$activeSite,'FORM') }}"
-          class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs hover:brightness-125 shadow">
+          class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs text-center hover:brightness-125 shadow">
           FORM
         </a>
 
         @can('create', \App\Models\Form::class)
         <a href="{{ route('admin.forms.create') }}"
-          class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs hover:brightness-110 shadow">
+          class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs text-center hover:brightness-110 shadow">
           + Tambah Form
         </a>
         @endcan
@@ -78,16 +78,16 @@
     @if(isset($companies))
     <div class="mb-6">
       <div class="flex items-center gap-2 mb-3">
-        <span class="w-8 h-8 bg-rose-600 text-white rounded-xl flex items-center justify-center text-sm shadow">1</span>
+        <span class="w-8 h-8 bg-maroon-700 text-white rounded-xl flex items-center justify-center text-sm shadow">1</span>
         <h3 class="font-semibold text-lg">Pilih Perusahaan (PT)</h3>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <a href="{{ $makeUrl(null,null,null,$activeDoc ?: null) }}"
           class="p-4 rounded-2xl border bg-white dark:bg-coal-900 dark:border-coal-700 shadow-sm hover:shadow-lg transition
-       {{ empty($activeCompany) ? 'ring-2 ring-rose-400' : '' }}">
+       {{ empty($activeCompany) ? 'ring-2 ring-maroon-400' : '' }}">
           <div class="flex gap-3 items-center">
-            <div class="w-10 h-10 bg-rose-600 text-white rounded-xl flex items-center justify-center shadow">🌐</div>
+            <div class="w-10 h-10 bg-maroon-700 text-white rounded-xl flex items-center justify-center shadow">🌐</div>
             <div>
               <div class="font-semibold">Semua Perusahaan</div>
               <div class="text-xs text-slate-500">Tampilkan global</div>
@@ -99,9 +99,9 @@
         @php $chosen = $activeCompany === (string)$c->id; @endphp
         <a href="{{ $makeUrl((string)$c->id,null,null,$activeDoc ?: null) }}"
           class="p-4 rounded-2xl border bg-white dark:bg-coal-900 dark:border-coal-700 shadow-sm hover:shadow-lg transition
-       {{ $chosen ? 'border-rose-600 ring-2 ring-rose-400 bg-rose-50 dark:bg-rose-900/20' : '' }}">
+       {{ $chosen ? 'border-maroon-600 ring-2 ring-maroon-400 bg-maroon-50 dark:bg-maroon-900/20' : '' }}">
           <div class="flex gap-3 items-center">
-            <div class="w-10 h-10 bg-rose-600 text-white rounded-xl flex items-center justify-center shadow">🏢</div>
+            <div class="w-10 h-10 bg-maroon-700 text-white rounded-xl flex items-center justify-center shadow">🏢</div>
             <div>
               <div class="font-semibold">{{ $c->code ?? 'PT' }}</div>
               <div class="text-xs text-slate-500">{{ $c->name }}</div>
@@ -223,7 +223,7 @@
       @php
       $isFile = $f->type === 'pdf';
       $doc = strtoupper($f->doc_type ?? 'FORM');
-      $badge = $doc === 'SOP' ? 'bg-rose-600'
+      $badge = $doc === 'SOP' ? 'bg-maroon-700'
       : ($doc === 'IK' ? 'bg-amber-500'
       : 'bg-slate-800');
       @endphp

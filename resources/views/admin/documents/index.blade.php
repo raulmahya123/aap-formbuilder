@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto p-6">
-  <div class="flex items-center justify-between mb-5">
+<div class="max-w-7xl mx-auto p-4 sm:p-6 min-w-0">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
     <h1 class="text-xl font-semibold text-[#1D1C1A]">Documents</h1>
     <a href="{{ route('admin.documents.create') }}"
-       class="px-4 py-2 rounded-xl bg-[#7A2C2F] text-white hover:opacity-90">Buat Dokumen</a>
+       class="inline-flex justify-center px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">Buat Dokumen</a>
   </div>
 
-  <div class="bg-white border rounded-xl overflow-x-auto">
+  <div class="max-w-full bg-white border rounded-xl overflow-x-auto">
     <table class="w-full text-sm min-w-[980px]">
       <thead class="bg-[#1D1C1A] text-white">
         <tr>
@@ -29,7 +29,7 @@
 
       <tbody>
       @forelse($docs as $d)
-        <tr class="border-b hover:bg-[#7A2C2F]/5">
+        <tr class="border-b hover:bg-[#bb9974]/5">
           {{-- Template --}}
           <td class="p-3">
             @php
@@ -92,7 +92,7 @@
           {{-- Actions --}}
           <td class="p-3 text-right">
             <div class="inline-flex items-center gap-2">
-              <a class="text-[#7A2C2F] hover:underline" href="{{ route('admin.documents.show',$d) }}">Lihat</a>
+              <a class="text-[#bb9974] hover:underline" href="{{ route('admin.documents.show',$d) }}">Lihat</a>
               <span class="text-gray-300">|</span>
               <a class="text-[#1D1C1A] hover:underline" href="{{ route('admin.documents.edit',$d) }}">Edit</a>
               <span class="text-gray-300">|</span>

@@ -10,7 +10,7 @@
     <h1 class="text-xl font-semibold text-[#1D1C1A]">Edit Dokumen</h1>
     <div class="flex items-center gap-3">
       <a href="{{ route('admin.documents.index') }}" class="px-4 py-2 rounded-xl border text-[#1D1C1A]">← Kembali</a>
-      <button form="docForm" class="px-4 py-2 rounded-xl bg-[#7A2C2F] text-white hover:opacity-90">Update</button>
+      <button form="docForm" class="px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">Update</button>
     </div>
   </div>
 
@@ -261,7 +261,7 @@
         <div class="pt-2">
           <div class="flex items-center justify-between">
             <h2 class="font-semibold text-[#1D1C1A]">Sections</h2>
-            <button type="button" @click="addSection()" class="text-[#7A2C2F]">+ Tambah</button>
+            <button type="button" @click="addSection()" class="text-[#bb9974]">+ Tambah</button>
           </div>
 
           <template x-for="(s,i) in sections" :key="s.key">
@@ -354,7 +354,7 @@
 
         <div class="pt-2 flex items-center justify-end gap-3">
           <a href="{{ route('admin.documents.index') }}" class="px-4 py-2 rounded-xl border text-[#1D1C1A]">Batal</a>
-          <button class="px-4 py-2 rounded-xl bg-[#7A2C2F] text-white hover:opacity-90">Update</button>
+          <button class="px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">Update</button>
         </div>
       </div>
       {{-- /KANAN --}}

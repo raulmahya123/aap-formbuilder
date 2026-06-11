@@ -17,7 +17,7 @@
 <style>
   :root{
     /* Maroon lebih gelap (fallback jika --brand-maroon tidak diset secara global) */
-    --maroon: var(--brand-maroon, #5a0d1a);
+    --maroon: var(--brand-maroon, #bb9974);
   }
   .btn {
     border-radius: 12px;
@@ -73,19 +73,19 @@
       </p>
     </div>
 
-    <div class="flex items-center gap-2">
-      <form method="get" class="flex flex-wrap items-center gap-2">
+    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+      <form method="get" class="grid w-full grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center">
         {{-- Tanggal --}}
         <input type="date" name="date"
                value="{{ $targetDate ?? now('Asia/Jakarta')->format('Y-m-d') }}"
-               class="input">
+               class="input w-full sm:w-auto">
 
         {{-- Pencarian --}}
         <input type="text" name="q" value="{{ $query ?? '' }}" placeholder="Cari judul / isi…"
-               class="input" />
+               class="input w-full sm:w-auto" />
 
         {{-- Perusahaan --}}
-        <select name="company_id" id="company_id" class="input">
+        <select name="company_id" id="company_id" class="input w-full sm:w-auto">
           <option value="">Semua Perusahaan</option>
           @foreach(($companies ?? []) as $c)
             <option value="{{ $c->id }}" @selected((string)$selectedCompany === (string)$c->id)>
@@ -95,7 +95,7 @@
         </select>
 
         {{-- Site (auto-filter by company) --}}
-        <select name="site_id" id="site_id" class="input" {{ $selectedCompany ? '' : 'disabled' }}>
+        <select name="site_id" id="site_id" class="input w-full sm:w-auto" {{ $selectedCompany ? '' : 'disabled' }}>
           <option value="">Semua Site</option>
           @if($selectedCompany !== '' && !empty($sitesByCompany[(string)$selectedCompany]))
             @foreach($sitesByCompany[(string)$selectedCompany] as $s)
@@ -105,14 +105,14 @@
         </select>
 
         {{-- perPage --}}
-        <select name="perPage" class="input">
+        <select name="perPage" class="input w-full sm:w-auto">
           <option value="all" {{ ($perPage ?? '') === 'all' ? 'selected' : '' }}>Semua</option>
           @foreach([10,25,50,100] as $opt)
             <option value="{{ $opt }}" {{ ($perPage ?? 10) == $opt ? 'selected' : '' }}>{{ $opt }}/hal</option>
           @endforeach
         </select>
 
-        <button class="btn">Filter</button>
+        <button class="btn w-full sm:w-auto">Filter</button>
 
         @if(request()->hasAny(['date','q','perPage','company_id','site_id']))
           <a href="{{ route('user.daily_notes.index') }}" class="text-sm underline">Reset</a>
@@ -121,7 +121,7 @@
 
       @if(Route::has('user.daily_notes.create'))
         <a href="{{ route('user.daily_notes.create') }}"
-           class="btn"
+           class="btn text-center"
            style="border-color:var(--maroon); color:var(--maroon);
                   background: color-mix(in oklab, var(--maroon) 10%, white);">
           ➕ Catatan Baru
@@ -162,7 +162,7 @@
       class="space-y-3">
 
     {{-- Kontrol ukuran teks deskripsi --}}
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
       <span class="text-sm text-gray-600">
         Ukuran teks Deskripsi: <span class="font-medium" x-text="descSize + 'px'"></span>
       </span>
@@ -171,7 +171,7 @@
         class="btn" aria-label="Perkecil">−</button>
 
       <input type="range" min="10" max="24" step="1" x-model.number="descSize" @input="save()"
-        class="w-40" style="accent-color: var(--maroon);" aria-label="Geser ukuran deskripsi" />
+        class="w-32 sm:w-40" style="accent-color: var(--maroon);" aria-label="Geser ukuran deskripsi" />
 
       <button @click="descSize = Math.min(24, descSize + 1); save()"
         class="btn" aria-label="Perbesar">+</button>
@@ -180,8 +180,8 @@
     </div>
 
     {{-- Tabel --}}
-    <div class="overflow-hidden card">
-      <table class="min-w-full divide-y divide-gray-200">
+    <div class="overflow-x-auto card">
+      <table class="min-w-[760px] divide-y divide-gray-200">
         <thead style="background: color-mix(in oklab, var(--maroon) 14%, white);">
           <tr class="text-left text-sm">
             <th class="px-4 py-3 font-semibold">Judul</th>

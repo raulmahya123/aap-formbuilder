@@ -49,12 +49,12 @@ class DashboardDemoSeeder extends Seeder
             // ====== 10 Departments (dengan optional color) ======
             $deptDefs = [
                 ['name'=>'Operasional',           'slug'=>'operasional', 'color'=>'#e61caf'],
-                ['name'=>'HRGA',                  'slug'=>'hrga',        'color'=>'#ff3b30'],
+                ['name'=>'HRGA',                  'slug'=>'hrga',        'color'=>'#bb9974'],
                 ['name'=>'Finance',               'slug'=>'finance',     'color'=>'#34c759'],
                 ['name'=>'IT',                    'slug'=>'it',          'color'=>'#0ea5e9'],
                 ['name'=>'HSE',                   'slug'=>'hse',         'color'=>'#f59e0b'],
                 ['name'=>'SCM/Procurement',       'slug'=>'scm',         'color'=>'#8b5cf6'],
-                ['name'=>'Engineering',           'slug'=>'engineering', 'color'=>'#ef4444'],
+                ['name'=>'Engineering',           'slug'=>'engineering', 'color'=>'#bb9974'],
                 ['name'=>'Marketing',             'slug'=>'marketing',   'color'=>'#14b8a6'],
                 ['name'=>'Sales',                 'slug'=>'sales',       'color'=>'#f97316'],
                 ['name'=>'Admin',                 'slug'=>'admin',       'color'=>'#64748b'],
@@ -71,7 +71,7 @@ class DashboardDemoSeeder extends Seeder
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
-                if (Schema::hasColumn('departments','slug'))  $row['slug']  = $def['slug'].'-'.$id;
+                if (Schema::hasColumn('departments','slug'))  $row['slug']  = $def['slug'];
                 if ($hasColor)                                 $row['color'] = $def['color'];
                 $this->fillAudit('departments', $row, $defaultUserId);
 
@@ -183,12 +183,12 @@ class DashboardDemoSeeder extends Seeder
                         $createdAt = $d->copy()->addMinutes(random_int(0, 1439));
 
                         $row = [
-                            'id'                   => $docId,
-                            'department_id'        => $deptId,
-                            'document_template_id' => $tplId,
-                            'title'                => $title,
-                            'created_at'           => $createdAt,
-                            'updated_at'           => $createdAt,
+                            'id'            => $docId,
+                            'department_id' => $deptId,
+                            'template_id'   => $tplId,
+                            'title'         => $title,
+                            'created_at'    => $createdAt,
+                            'updated_at'    => $createdAt,
                         ];
                         if (Schema::hasColumn('documents','slug')) {
                             $row['slug'] = Str::slug("doc-{$tplId}-".$d->toDateString()."-".$deptId).'-'.$docId;
@@ -201,7 +201,7 @@ class DashboardDemoSeeder extends Seeder
                             'document_id'  => $docId,
                             'user_id'      => $userId,
                             'department_id'=> $deptId,
-                            'permission'   => 'read',
+                            'perm'         => 'read',
                             'created_at'   => $createdAt,
                             'updated_at'   => $createdAt,
                         ];

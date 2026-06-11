@@ -71,7 +71,7 @@
     </div>
 
     <div class="pt-2">
-      <button class="px-4 py-2 bg-[#7A2C2F] text-white rounded">Tambah</button>
+      <button class="px-4 py-2 bg-[#bb9974] text-white rounded">Tambah</button>
     </div>
   </form>
 

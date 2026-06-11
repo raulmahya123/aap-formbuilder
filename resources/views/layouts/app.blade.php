@@ -37,7 +37,10 @@
   </script>
 
   <style>
-    :root { --font-sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans'; }
+    :root {
+      --font-sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans';
+      --brand-maroon: #bb9974;
+    }
     body  { font-family: var(--font-sans); }
 
     /* Scrollbar halus */
@@ -45,11 +48,11 @@
     .nice-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
     .nice-scroll::-webkit-scrollbar-track { background: transparent; }
 
-    /* Active state menu (maroon) */
+    /* Active state menu */
     aside nav a.is-active {
-      background-color: #7b1c1c !important;
+      background-color: #bb9974 !important;
       color: #fff !important;
-      border-color: #7b1c1c !important;
+      border-color: #bb9974 !important;
     }
     aside nav a:is(:active, :focus):not(.is-active) {
       color: inherit !important;
@@ -88,7 +91,7 @@
     @include('layouts.navigation')
 
     {{-- ===== Konten ===== --}}
-    <div class="min-h-screen flex flex-col">
+    <div class="min-h-screen min-w-0 flex flex-col">
 
       {{-- Header (breadcrumbs + actions) --}}
       <header class="px-4 lg:px-8 pt-6">

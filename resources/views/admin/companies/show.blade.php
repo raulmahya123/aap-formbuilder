@@ -10,7 +10,7 @@
   <div class="mb-6 flex items-center justify-between gap-3">
     <div>
       <a href="{{ route('admin.companies.index') }}"
-         class="text-sm underline underline-offset-4 text-[color:var(--brand-maroon,#7b1d2e)]">← Kembali</a>
+         class="text-sm underline underline-offset-4 text-[color:var(--brand-maroon,#bb9974)]">← Kembali</a>
 
       @php
         // Pastikan logo aman tampil walau logo_path kadang punya prefix salah
@@ -27,7 +27,7 @@
         @if($logoShow)
           <img src="{{ $logoShow }}" class="h-12 w-12 rounded object-cover ring-1 ring-black/5" alt="logo">
         @else
-          <div class="h-12 w-12 rounded bg-[color:var(--brand-maroon,#7b1d2e)]/10 grid place-items-center text-[color:var(--brand-maroon,#7b1d2e)]">—</div>
+          <div class="h-12 w-12 rounded bg-[color:var(--brand-maroon,#bb9974)]/10 grid place-items-center text-[color:var(--brand-maroon,#bb9974)]">—</div>
         @endif
 
         <div>
@@ -52,16 +52,16 @@
 
     <div class="flex items-center gap-2">
       <a href="{{ route('admin.companies.edit', $company) }}"
-         class="rounded-xl px-4 py-2 border border-[color:var(--brand-maroon,#7b1d2e)]
-                text-[color:var(--brand-maroon,#7b1d2e)] hover:bg-[color:var(--brand-maroon,#7b1d2e)]/10">
+         class="rounded-xl px-4 py-2 border border-[color:var(--brand-maroon,#bb9974)]
+                text-[color:var(--brand-maroon,#bb9974)] hover:bg-[color:var(--brand-maroon,#bb9974)]/10">
         Edit
       </a>
       <form action="{{ route('admin.companies.destroy', $company) }}" method="POST"
             onsubmit="return confirm('Hapus perusahaan ini?');">
         @csrf @method('DELETE')
         <button
-          class="rounded-xl px-4 py-2 border border-[color:var(--brand-maroon,#7b1d2e)]/60
-                 text-[color:var(--brand-maroon,#7b1d2e)] hover:bg-[color:var(--brand-maroon,#7b1d2e)]/10">
+          class="rounded-xl px-4 py-2 border border-[color:var(--brand-maroon,#bb9974)]/60
+                 text-[color:var(--brand-maroon,#bb9974)] hover:bg-[color:var(--brand-maroon,#bb9974)]/10">
           Hapus
         </button>
       </form>
@@ -74,7 +74,7 @@
     <div class="md:col-span-2 space-y-4">
       {{-- Profil --}}
       <div class="rounded-2xl border bg-white p-4 md:p-5">
-        <h2 class="font-semibold mb-3 text-[color:var(--brand-maroon,#7b1d2e)]">Profil</h2>
+        <h2 class="font-semibold mb-3 text-[color:var(--brand-maroon,#bb9974)]">Profil</h2>
         <dl class="grid grid-cols-3 gap-2 text-sm">
           <dt class="text-coal-500">Nama</dt>
           <dd class="col-span-2">{{ $company->name }}</dd>
@@ -98,7 +98,7 @@
 
       {{-- Kontak & Situs --}}
       <div class="rounded-2xl border bg-white p-4 md:p-5">
-        <h2 class="font-semibold mb-3 text-[color:var(--brand-maroon,#7b1d2e)]">Kontak & Situs</h2>
+        <h2 class="font-semibold mb-3 text-[color:var(--brand-maroon,#bb9974)]">Kontak & Situs</h2>
         <dl class="grid grid-cols-3 gap-2 text-sm">
           <dt class="text-coal-500">Email</dt>
           <dd class="col-span-2">{{ $company->email ?: '—' }}</dd>
@@ -111,7 +111,7 @@
             @if($company->website)
               <a href="{{ \Illuminate\Support\Str::startsWith($company->website, ['http://','https://']) ? $company->website : 'https://'.$company->website }}"
                  target="_blank"
-                 class="text-[color:var(--brand-maroon,#7b1d2e)] underline underline-offset-4">
+                 class="text-[color:var(--brand-maroon,#bb9974)] underline underline-offset-4">
                 {{ $company->website }}
               </a>
             @else
@@ -123,7 +123,7 @@
 
       {{-- Alamat --}}
       <div class="rounded-2xl border bg-white p-4 md:p-5">
-        <h2 class="font-semibold mb-3 text-[color:var(--brand-maroon,#7b1d2e)]">Alamat</h2>
+        <h2 class="font-semibold mb-3 text-[color:var(--brand-maroon,#bb9974)]">Alamat</h2>
         <dl class="grid grid-cols-3 gap-2 text-sm">
           <dt class="text-coal-500">Alamat</dt>
           <dd class="col-span-2 whitespace-pre-line">{{ $company->hq_address ?: '—' }}</dd>
@@ -146,7 +146,7 @@
     {{-- Kolom kanan (meta) --}}
     <div class="space-y-4">
       <div class="rounded-2xl border bg-white p-4 md:p-5">
-        <h2 class="font-semibold mb-3 text-[color:var(--brand-maroon,#7b1d2e)]">Pengaturan</h2>
+        <h2 class="font-semibold mb-3 text-[color:var(--brand-maroon,#bb9974)]">Pengaturan</h2>
         <dl class="grid grid-cols-3 gap-2 text-sm">
           <dt class="text-coal-500">Zona Waktu</dt>
           <dd class="col-span-2">{{ $company->timezone ?: 'Asia/Jakarta' }}</dd>
@@ -157,7 +157,7 @@
       </div>
 
       <div class="rounded-2xl border bg-white p-4 md:p-5">
-        <h2 class="font-semibold mb-3 text-[color:var(--brand-maroon,#7b1d2e)]">Metadata</h2>
+        <h2 class="font-semibold mb-3 text-[color:var(--brand-maroon,#bb9974)]">Metadata</h2>
         <dl class="grid grid-cols-3 gap-2 text-sm">
           <dt class="text-coal-500">Dibuat</dt>
           <dd class="col-span-2">{{ optional($company->created_at)->format('d M Y H:i') ?? '—' }}</dd>
