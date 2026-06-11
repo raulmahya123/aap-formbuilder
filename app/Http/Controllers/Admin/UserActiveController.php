@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Password;
 
 class UserActiveController extends Controller
 {
@@ -48,6 +49,28 @@ class UserActiveController extends Controller
         $user->save();
 
         return back()->with('success', 'Status user berhasil diperbarui.');
+    }
+
+    /**
+     * Reset password user dari halaman Super Admin.
+     */
+    public function resetPassword(Request $request, User $user)
+    {
+        if ($user->id !== Auth::id() && method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) {
+            return back()->with('error', 'Tidak bisa reset password Super Admin lain.');
+        }
+
+        $validated = $request->validate([
+            'password' => ['required', 'confirmed', Password::defaults()],
+        ], [
+            'password.confirmed' => 'Konfirmasi password tidak sama.',
+        ]);
+
+        $user->forceFill([
+            'password' => $validated['password'],
+        ])->save();
+
+        return back()->with('success', "Password {$user->name} berhasil direset.");
     }
 
     /**

@@ -256,6 +256,8 @@ Route::middleware('auth')->group(function () {
             ->name('users.active.index');
         Route::patch('/users/{user}/toggle', [UserActiveController::class, 'toggle'])
             ->name('users.active.toggle');
+        Route::patch('/users/{user}/password', [UserActiveController::class, 'resetPassword'])
+            ->name('users.active.password');
         Route::put('/users/{user}/active', [UserActiveController::class, 'update'])
             ->name('users.active.update');
 
