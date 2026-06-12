@@ -85,9 +85,10 @@
 <body class="grid min-h-screen font-sans md:grid-cols-12 bg-gradient-to-t from-maroon-900 via-maroon-600 to-maroon-300 text-ivory-100">
 
   <!-- LEFT BRANDING + EFFORT -->
-  <div class="relative hidden overflow-hidden md:block md:col-span-7 login-brand-panel">
+  <div class="relative hidden overflow-hidden shadow-2xl md:block md:col-span-7 login-brand-panel ring-1 ring-black/10">
     <!-- Foto tambang -->
     <div class="absolute inset-0 bg-center bg-cover" style="background-image:url('assets/images/foto1.png')"></div>
+    <div class="absolute inset-0 shadow-[inset_-32px_0_60px_rgba(0,0,0,.35),inset_0_0_80px_rgba(0,0,0,.25)]"></div>
 
     <!-- Overlay gradasi maroon -->
 

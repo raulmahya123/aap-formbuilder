@@ -43,6 +43,7 @@ class IndicatorController extends Controller
             'is_derived'         => 'sometimes|boolean',
             'formula'            => 'nullable|string',
             'threshold'          => 'nullable|string|max:100',
+            'weight'             => 'nullable|numeric|min:0|max:100',
         ]);
 
         // Normalisasi & default
@@ -50,6 +51,7 @@ class IndicatorController extends Controller
         $data['is_derived']  = $r->boolean('is_derived');           // pastikan boolean
         $data['order_index'] = (int)($data['order_index'] ?? 0);    // default 0
         $data['threshold']   = isset($data['threshold']) ? trim($data['threshold']) : null;
+        $data['weight']      = $data['weight'] ?? null;
 
         Indicator::create($data);
 
@@ -77,6 +79,7 @@ class IndicatorController extends Controller
             'is_derived'         => 'sometimes|boolean',
             'formula'            => 'nullable|string',
             'threshold'          => 'nullable|string|max:100',
+            'weight'             => 'nullable|numeric|min:0|max:100',
         ]);
 
         // Normalisasi & default
@@ -84,6 +87,7 @@ class IndicatorController extends Controller
         $data['is_derived']  = $r->boolean('is_derived');           // pastikan boolean
         $data['order_index'] = (int)($data['order_index'] ?? 0);
         $data['threshold']   = isset($data['threshold']) ? trim($data['threshold']) : null;
+        $data['weight']      = $data['weight'] ?? null;
 
         $indicator->update($data);
 

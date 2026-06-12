@@ -2,326 +2,137 @@
 
 namespace Database\Seeders;
 
+use App\Models\Indicator;
+use App\Models\IndicatorDaily;
+use App\Models\IndicatorGroup;
+use App\Models\IndicatorValue;
+use App\Models\Site;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\Models\{
-    IndicatorGroup,
-    Indicator,
-    IndicatorDaily,
-    IndicatorValue,
-    Site
-};
 
 class IndicatorSeeder extends Seeder
 {
     public function run(): void
     {
         DB::transaction(function () {
-            // 1) Minimal 1 site agar FK valid
             $site = Site::firstOrCreate(['code' => 'HO'], ['name' => 'Head Office']);
 
-            // 2) Groups
             $groups = [
-                ['name' => 'Lagging Indicators',           'code' => 'LAG',  'order_index' => 1, 'is_active' => 1],
-                ['name' => 'Leading Indicators',           'code' => 'LEAD', 'order_index' => 2, 'is_active' => 1],
-                ['name' => 'Deskripsi (Base Metrics)',     'code' => 'BASE', 'order_index' => 3, 'is_active' => 1],
+                ['name' => 'Fatality & LTI Indicator', 'code' => 'FATAL_LTI', 'order_index' => 1, 'is_active' => true],
+                ['name' => 'Lag Indicator', 'code' => 'LAG', 'order_index' => 2, 'is_active' => true],
+                ['name' => 'Lead Indicator', 'code' => 'LEAD', 'order_index' => 3, 'is_active' => true],
+                ['name' => 'Deskripsi (Base Metrics)', 'code' => 'BASE', 'order_index' => 4, 'is_active' => true],
             ];
-            foreach ($groups as $g) {
-                IndicatorGroup::updateOrCreate(['code' => $g['code']], $g);
+
+            foreach ($groups as $group) {
+                IndicatorGroup::updateOrCreate(['code' => $group['code']], $group);
             }
 
-            $gLag  = IndicatorGroup::where('code', 'LAG')->first();
-            $gLead = IndicatorGroup::where('code', 'LEAD')->first();
-            $gBase = IndicatorGroup::where('code', 'BASE')->first();
+            $groupIds = IndicatorGroup::whereIn('code', collect($groups)->pluck('code'))
+                ->pluck('id', 'code');
 
-            // 3) Indicators (dengan threshold campuran)
             $indicators = [
-                // ===== BASE / DESKRIPSI =====
-                [
-                    'indicator_group_id' => $gBase->id,
-                    'name'        => 'Man Power',
-                    'code' => 'MAN_POWER',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'orang',
-                    'order_index' => 1,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 100, // angka polos
-                ],
-                [
-                    'indicator_group_id' => $gBase->id,
-                    'name'        => 'Man Hours',
-                    'code' => 'MAN_HOURS',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'jam',
-                    'order_index' => 2,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => null, // kosong
-                ],
-                [
-                    'indicator_group_id' => $gBase->id,
-                    'name'        => 'Lost Days',
-                    'code' => 'LOST_DAYS',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'hari',
-                    'order_index' => 3,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 5,
-                ],
+                // Base metrics for formulas.
+                ['BASE', 'Man Hours', 'MAN_HOURS', 'int', 'jam', 1, false, null, null, null],
+                ['BASE', 'Lost Days', 'LOST_DAYS', 'int', 'hari', 2, false, null, null, null],
+                ['BASE', 'Jumlah Karyawan', 'MAN_POWER', 'int', 'orang', 3, false, null, null, null],
+                ['BASE', 'Total Hari Kerja', 'WORK_DAYS', 'int', 'hari', 4, false, null, null, null],
 
-                // ===== LAGGING =====
-                [
-                    'indicator_group_id' => $gLag->id,
-                    'name'        => 'Fatality',
-                    'code' => 'FATALITY',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'kasus',
-                    'order_index' => 1,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 0, // target 0
-                ],
-                [
-                    'indicator_group_id' => $gLag->id,
-                    'name'        => 'LTI (Lost Time Injury)',
-                    'code' => 'LTI',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'kasus',
-                    'order_index' => 2,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => '2%', // persen string
-                ],
-                // SR umumnya = (Lost Days / Man Hours) * 1e6
-                [
-                    'indicator_group_id' => $gLag->id,
-                    'name'        => 'LTI SR (Severity Rate)',
-                    'code' => 'LTI_SR',
-                    'data_type'   => 'rate',
-                    'agg' => 'sum',
-                    'unit' => null,
-                    'order_index' => 3,
-                    'is_derived' => 1,
-                    'formula'     => 'LOST_DAYS / MAN_HOURS * 1e6',
-                    'is_active' => 1,
-                    'threshold'   => '10%', // persen string
-                ],
-                [
-                    'indicator_group_id' => $gLag->id,
-                    'name'        => 'Injury Non LTI',
-                    'code' => 'INJURY_NON_LTI',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'kasus',
-                    'order_index' => 4,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 3,
-                ],
-                // FR = Frequency Rate
-                [
-                    'indicator_group_id' => $gLag->id,
-                    'name'        => 'Injury Non LTI FR',
-                    'code' => 'INJURY_NON_LTI_FR',
-                    'data_type'   => 'rate',
-                    'agg' => 'sum',
-                    'unit' => null,
-                    'order_index' => 5,
-                    'is_derived' => 1,
-                    'formula'     => 'INJURY_NON_LTI / MAN_HOURS * 1e6',
-                    'is_active' => 1,
-                    'threshold'   => 1.5, // angka desimal
-                ],
-                [
-                    'indicator_group_id' => $gLag->id,
-                    'name'        => 'PD (Property Damage)',
-                    'code' => 'PD',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'kasus',
-                    'order_index' => 6,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 1,
-                ],
-                [
-                    'indicator_group_id' => $gLag->id,
-                    'name'        => 'PDFR (Property Damage Frequency Rate)',
-                    'code' => 'PDFR',
-                    'data_type'   => 'rate',
-                    'agg' => 'sum',
-                    'unit' => null,
-                    'order_index' => 7,
-                    'is_derived' => 1,
-                    'formula'     => 'PD / MAN_HOURS * 1e6',
-                    'is_active' => 1,
-                    'threshold'   => 0.8,
-                ],
-                [
-                    'indicator_group_id' => $gLag->id,
-                    'name'        => 'PD Cost',
-                    'code' => 'PD_COST',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'rupiah',
-                    'order_index' => 8,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 'Rp 1.500.000', // mata uang IDR
-                ],
-                [
-                    'indicator_group_id' => $gLag->id,
-                    'name'        => 'PAK (Penyakit Akibat Kerja)',
-                    'code' => 'PAK',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'kasus',
-                    'order_index' => 9,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 0,
-                ],
-                [
-                    'indicator_group_id' => $gLag->id,
-                    'name'        => 'KAPTK (Kejadian Akibat Penyakit Tenaga Kerja)',
-                    'code' => 'KAPTK',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'kasus',
-                    'order_index' => 10,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 0,
-                ],
-                [
-                    'indicator_group_id' => $gLag->id,
-                    'name'        => 'Enviro Accident',
-                    'code' => 'ENV_ACCIDENT',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'kasus',
-                    'order_index' => 11,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 2,
-                ],
-                [
-                    'indicator_group_id' => $gLag->id,
-                    'name'        => 'Near Miss',
-                    'code' => 'NEAR_MISS',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'kasus',
-                    'order_index' => 12,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 10,
-                ],
+                // Fatality & LTI Indicator.
+                ['FATAL_LTI', 'Fatality', 'FATALITY', 'int', 'kasus', 1, false, null, '0', 33],
+                ['FATAL_LTI', 'LTI', 'LTI', 'int', 'kasus', 2, false, null, '0', 33],
+                ['FATAL_LTI', 'LTI SR', 'LTI_SR', 'rate', null, 3, true, 'LOST_DAYS / MAN_HOURS * 1e6', '0', 33],
 
-                // ===== LEADING =====
-                [
-                    'indicator_group_id' => $gLead->id,
-                    'name'        => 'Safety Accountability Program (SAP)',
-                    'code' => 'SAP',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'kegiatan',
-                    'order_index' => 1,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 'IDR 10.000', // contoh format IDR lain
-                ],
-                [
-                    'indicator_group_id' => $gLead->id,
-                    'name'        => 'KTA',
-                    'code' => 'KTA',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'kegiatan',
-                    'order_index' => 2,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 75,
-                ],
-                [
-                    'indicator_group_id' => $gLead->id,
-                    'name'        => 'TTA',
-                    'code' => 'TTA',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'kegiatan',
-                    'order_index' => 3,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 80,
-                ],
-                [
-                    'indicator_group_id' => $gLead->id,
-                    'name'        => 'Inspeksi',
-                    'code' => 'INSPEKSI',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'temuan',
-                    'order_index' => 4,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => '$100', // dolar
-                ],
-                [
-                    'indicator_group_id' => $gLead->id,
-                    'name'        => 'Planned Task Observation (PTO)',
-                    'code' => 'PTO',
-                    'data_type'   => 'int',
-                    'agg' => 'sum',
-                    'unit' => 'observasi',
-                    'order_index' => 5,
-                    'is_derived' => 0,
-                    'formula' => null,
-                    'is_active' => 1,
-                    'threshold'   => 50,
-                ],
+                // Lag Indicator.
+                ['LAG', 'Injury Non LTI FR', 'INJURY_NON_LTI_FR', 'rate', null, 1, true, 'INJURY_NON_LTI / MAN_HOURS * 1e6', '1.11', 20],
+                ['LAG', 'PDFR', 'PDFR', 'rate', null, 2, true, 'PD / MAN_HOURS * 1e6', '6.91', 20],
+                ['LAG', 'PD Cost', 'PD_COST', 'currency', 'Rp', 3, false, null, '$ 5,000', 10],
+                ['LAG', 'PAK', 'PAK', 'int', 'kasus', 4, false, null, '0', 10],
+                ['LAG', 'KAPTK', 'KAPTK', 'int', 'kasus', 5, false, null, '0', 10],
+                ['LAG', 'Rasio Kelaikan Kerja (RKK)', 'RKK', 'rate', '%', 6, true, 'FIT_TO_WORK / MAN_POWER * 100', '100%', 10],
+                ['LAG', 'Absence Severity Rate (ASR)', 'ASR', 'rate', null, 7, true, 'ABSENCE_DAYS / MAN_HOURS * 1e6', '300', 5],
+                ['LAG', 'Morbidity Frequency Rate (MFR)', 'MFR', 'rate', null, 8, true, 'MORBIDITY_CASE / MAN_HOURS * 1e6', '400', 5],
+                ['LAG', 'Enviro Accident', 'ENV_ACCIDENT', 'int', 'kasus', 9, false, null, '0', 10],
+
+                // Inputs for derived indicators.
+                ['BASE', 'Injury Non LTI', 'INJURY_NON_LTI', 'int', 'kasus', 5, false, null, null, null],
+                ['BASE', 'Property Damage', 'PD', 'int', 'kasus', 6, false, null, null, null],
+                ['BASE', 'Fit To Work', 'FIT_TO_WORK', 'int', 'orang', 7, false, null, null, null],
+                ['BASE', 'Absence Days', 'ABSENCE_DAYS', 'int', 'hari', 8, false, null, null, null],
+                ['BASE', 'Morbidity Case', 'MORBIDITY_CASE', 'int', 'kasus', 9, false, null, null, null],
+
+                // Lead Indicator.
+                ['LEAD', 'SHE Accountability Program', 'SHE_ACCOUNTABILITY_PROGRAM', 'rate', '%', 1, false, null, '100%', 20],
+                ['LEAD', 'Hazard Report', 'HAZARD_REPORT', 'rate', '%', 2, false, null, '100%', 20],
+                ['LEAD', 'Tindak Lanjut PICA', 'TINDAK_LANJUT_PICA', 'rate', '%', 3, false, null, '100%', 15],
+                ['LEAD', 'Legal Compliance', 'LEGAL_COMPLIANCE', 'rate', '%', 4, false, null, '100%', 5],
+                ['LEAD', 'Implementasi Program', 'IMPLEMENTASI_PROGRAM', 'rate', '%', 5, false, null, '100%', 10],
+                ['LEAD', 'Training SHE', 'TRAINING_SHE', 'rate', '%', 6, false, null, '100%', 10],
+                ['LEAD', 'Audit SMKP Score', 'AUDIT_SMKP_SCORE', 'rate', '%', 7, false, null, '65%', 20],
             ];
 
-            foreach ($indicators as $i) {
-                Indicator::updateOrCreate(['code' => $i['code']], $i);
-            }
-
-            // 4) Contoh seed harian (opsional)
-            if ($obs = Indicator::where('code', 'INSPEKSI')->first()) {
-                IndicatorDaily::updateOrCreate(
-                    ['site_id' => $site->id, 'indicator_id' => $obs->id, 'date' => now()->toDateString()],
-                    ['value' => 3, 'note' => 'Inspeksi rutin harian']
+            foreach ($indicators as [$groupCode, $name, $code, $dataType, $unit, $order, $isDerived, $formula, $threshold, $weight]) {
+                Indicator::updateOrCreate(
+                    ['code' => $code],
+                    [
+                        'indicator_group_id' => $groupIds[$groupCode],
+                        'name' => $name,
+                        'data_type' => $dataType,
+                        'agg' => 'sum',
+                        'unit' => $unit,
+                        'order_index' => $order,
+                        'is_derived' => $isDerived,
+                        'formula' => $formula,
+                        'is_active' => true,
+                        'threshold' => $threshold,
+                        'weight' => $weight,
+                    ]
                 );
             }
 
-            // 5) Contoh seed bulanan (opsional)
-            if ($train = Indicator::where('code', 'PTO')->first()) {
+            Indicator::whereIn('indicator_group_id', $groupIds->values())
+                ->whereNotIn('code', collect($indicators)->pluck(2)->all())
+                ->delete();
+
+            $dailyDefaults = [
+                'MAN_HOURS' => 100000,
+                'LOST_DAYS' => 0,
+                'MAN_POWER' => 100,
+                'WORK_DAYS' => 26,
+                'FATALITY' => 0,
+                'LTI' => 0,
+                'INJURY_NON_LTI' => 0,
+                'PD' => 0,
+                'PD_COST' => 0,
+                'PAK' => 0,
+                'KAPTK' => 0,
+                'FIT_TO_WORK' => 100,
+                'ABSENCE_DAYS' => 0,
+                'MORBIDITY_CASE' => 0,
+                'ENV_ACCIDENT' => 0,
+                'SHE_ACCOUNTABILITY_PROGRAM' => 100,
+                'HAZARD_REPORT' => 100,
+                'TINDAK_LANJUT_PICA' => 100,
+                'LEGAL_COMPLIANCE' => 100,
+                'IMPLEMENTASI_PROGRAM' => 100,
+                'TRAINING_SHE' => 100,
+                'AUDIT_SMKP_SCORE' => 65,
+            ];
+
+            foreach ($dailyDefaults as $code => $value) {
+                $indicator = Indicator::where('code', $code)->first();
+                if (! $indicator) {
+                    continue;
+                }
+
+                IndicatorDaily::updateOrCreate(
+                    ['site_id' => $site->id, 'indicator_id' => $indicator->id, 'date' => now()->toDateString()],
+                    ['value' => $value, 'note' => 'Seed Index Kinerja K3L']
+                );
+
                 IndicatorValue::updateOrCreate(
-                    ['site_id' => $site->id, 'indicator_id' => $train->id, 'year' => now()->year, 'month' => now()->month],
-                    ['value' => 25]
+                    ['site_id' => $site->id, 'indicator_id' => $indicator->id, 'year' => now()->year, 'month' => now()->month],
+                    ['value' => $value]
                 );
             }
         });

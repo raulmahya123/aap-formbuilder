@@ -44,9 +44,10 @@
 <body class="grid min-h-screen md:grid-cols-12 bg-gradient-to-t from-maroon-900 via-maroon-600 to-maroon-300 text-ivory-100">
 
   <!-- LEFT: IMAGE + OVERLAY -->
-  <div class="relative hidden md:block md:col-span-7">
+  <div class="relative hidden overflow-hidden shadow-2xl md:block md:col-span-7 ring-1 ring-black/10">
     <!-- Background -->
     <div class="absolute inset-0 bg-cover bg-center bg-[url('{{ asset('assets/images/foto2.png') }}')]"></div>
+    <div class="absolute inset-0 shadow-[inset_-32px_0_60px_rgba(0,0,0,.35),inset_0_0_80px_rgba(0,0,0,.25)]"></div>
     <div class="absolute inset-0 bg-gradient-to-tr from-maroon-900/95 via-maroon-800/75 to-maroon-900/10"></div>
 
     <!-- Branding + Visi Misi -->

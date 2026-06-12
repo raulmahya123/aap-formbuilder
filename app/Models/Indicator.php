@@ -8,7 +8,7 @@ class Indicator extends Model
 {
     protected $fillable = [
         'indicator_group_id','name','code','data_type','agg',
-        'unit','order_index','is_derived','formula','is_active','threshold'
+        'unit','order_index','is_derived','formula','is_active','threshold','weight'
     ];
 
     public function group()  { return $this->belongsTo(IndicatorGroup::class, 'indicator_group_id'); }

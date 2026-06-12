@@ -25,6 +25,7 @@
             <th class="px-3 py-3 text-left text-sm font-semibold">Unit</th>
             <th class="px-3 py-3 text-left text-sm font-semibold">Derived</th>
             <th class="px-3 py-3 text-left text-sm font-semibold">Threshold</th>
+            <th class="px-3 py-3 text-left text-sm font-semibold">Bobot</th>
             <th class="px-3 py-3"></th>
           </tr>
         </thead>
@@ -53,6 +54,11 @@
                   {{ $i->threshold !== null && $i->threshold !== '' ? $i->threshold : 0 }}
                 </span>
               </td>
+              <td class="px-3 py-2">
+                <span class="font-mono text-gray-700">
+                  {{ $i->weight !== null ? rtrim(rtrim(number_format((float) $i->weight, 2, '.', ''), '0'), '.') . '%' : '-' }}
+                </span>
+              </td>
 
               <td class="px-3 py-2 text-right space-x-2">
                 <a href="{{ route('admin.indicators.edit',$i) }}"
@@ -70,7 +76,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="9" class="px-6 py-6 text-center text-gray-500">No indicators yet.</td>
+              <td colspan="10" class="px-6 py-6 text-center text-gray-500">No indicators yet.</td>
             </tr>
           @endforelse
         </tbody>
