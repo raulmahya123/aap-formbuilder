@@ -99,6 +99,13 @@ class FormController extends Controller
 
         try {
             return DB::transaction(function () use ($r, $validated) {
+                $creatorId = $this->resolveCreatorId($r);
+                if (!$creatorId) {
+                    return back()
+                        ->withErrors(['general' => 'Form belum bisa dibuat karena user pembuat tidak ditemukan. Jalankan seeder user/admin dulu.'])
+                        ->withInput();
+                }
+
                 // ===== FILE HANDLING =====
                 $filePath = null;
                 if ($validated['type'] === 'pdf' && $r->hasFile('pdf')) {
@@ -149,7 +156,7 @@ class FormController extends Controller
                     'company_id'    => (int) $validated['company_id'],
                     'site_id'       => !empty($validated['site_id']) ? (int) $validated['site_id'] : null,
                     'department_id' => (int) $validated['department_id'],
-                    'created_by'    => optional($r->user())->id,
+                    'created_by'    => $creatorId,
                     'title'         => $validated['title'],
                     'doc_type'      => strtoupper($validated['doc_type']),
                     'type'          => $validated['type'],
@@ -373,6 +380,17 @@ class FormController extends Controller
     // =======================
     // HELPERS
     // =======================
+    private function resolveCreatorId(Request $request): ?int
+    {
+        $userId = $request->user()?->getAuthIdentifier();
+        if ($userId && DB::table('users')->where('id', $userId)->exists()) {
+            return (int) $userId;
+        }
+
+        $fallbackId = DB::table('users')->orderBy('id')->value('id');
+        return $fallbackId ? (int) $fallbackId : null;
+    }
+
     private function compressPdf(string $inPath, string $outPath): bool
     {
         if (!function_exists('shell_exec')) {
