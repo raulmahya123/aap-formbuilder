@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 class UserActiveController extends Controller
@@ -63,11 +64,13 @@ class UserActiveController extends Controller
         $validated = $request->validate([
             'password' => ['required', 'confirmed', Password::defaults()],
         ], [
+            'password.required' => 'Password baru wajib diisi.',
             'password.confirmed' => 'Konfirmasi password tidak sama.',
+            'password.min' => 'Password minimal :min karakter.',
         ]);
 
         $user->forceFill([
-            'password' => $validated['password'],
+            'password' => Hash::make($validated['password']),
         ])->save();
 
         return back()->with('success', "Password {$user->name} berhasil direset.");

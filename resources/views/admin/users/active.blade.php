@@ -3,10 +3,7 @@
   @section('content')
   <div
     x-data="{
-      dark: (localStorage.getItem('theme') ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark',
-      resetUser: null,
-      openReset(user) { this.resetUser = user },
-      closeReset() { this.resetUser = null }
+      dark: (localStorage.getItem('theme') ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark'
     }"
     x-init="document.documentElement.classList.toggle('dark', dark)"
     :class="dark ? 'dark' : ''"
@@ -33,7 +30,7 @@
               <th class="px-3 py-2 text-left">Nama</th>
               <th class="px-3 py-2 text-left">Email</th>
               <th class="px-3 py-2 text-left">Status</th>
-              <th class="px-3 py-2 text-left w-72">Aksi</th>
+              <th class="px-3 py-2 text-left w-[28rem]">Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -69,15 +66,28 @@
                       </button>
                     </form>
 
-                    <button type="button"
-                            @click="openReset({
-                              name: @js($user->name),
-                              email: @js($user->email),
-                              action: @js(route('admin.users.active.password', $user))
-                            })"
-                            class="px-3 py-1.5 rounded-full border border-slate-300 text-[12px] font-medium text-coal-700 hover:bg-white dark:text-ivory-100 dark:border-coal-700 dark:hover:bg-coal-800 transition">
-                      Reset Password
-                    </button>
+                    <details class="w-full rounded-lg border border-slate-200 bg-white p-2 dark:border-coal-700 dark:bg-coal-900">
+                      <summary class="cursor-pointer text-[12px] font-semibold text-coal-700 dark:text-ivory-100">
+                        Reset Password
+                      </summary>
+
+                      <form action="{{ route('admin.users.active.password', $user) }}" method="POST" class="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                        @csrf
+                        @method('PATCH')
+
+                        <input name="password" type="password" required autocomplete="new-password"
+                               placeholder="Password baru"
+                               class="rounded-lg border border-coal-200 px-3 py-2 text-sm text-coal-900 focus:border-maroon-500 focus:ring-maroon-500">
+
+                        <input name="password_confirmation" type="password" required autocomplete="new-password"
+                               placeholder="Konfirmasi"
+                               class="rounded-lg border border-coal-200 px-3 py-2 text-sm text-coal-900 focus:border-maroon-500 focus:ring-maroon-500">
+
+                        <button type="submit" class="rounded-lg bg-maroon-700 px-4 py-2 text-sm font-semibold text-white hover:bg-maroon-800">
+                          Simpan
+                        </button>
+                      </form>
+                    </details>
                   </div>
                 </td>
               </tr>
@@ -92,41 +102,5 @@
       </div>
     </div>
 
-    <div x-cloak x-show="resetUser" class="fixed inset-0 z-[80] flex items-center justify-center bg-coal-900/45 px-4">
-      <div class="w-full max-w-md rounded-xl bg-white p-5 shadow-xl dark:bg-coal-900 dark:border dark:border-coal-700" @click.outside="closeReset()">
-        <div class="flex items-start justify-between gap-4">
-          <div>
-            <h2 class="text-lg font-semibold text-coal-900 dark:text-ivory-50">Reset Password</h2>
-            <p class="mt-1 text-sm text-coal-500 dark:text-coal-300">
-              <span x-text="resetUser?.name"></span>
-              <span class="block text-xs" x-text="resetUser?.email"></span>
-            </p>
-          </div>
-          <button type="button" @click="closeReset()" class="rounded-full px-2 py-1 text-coal-500 hover:bg-coal-100 dark:hover:bg-coal-800">x</button>
-        </div>
-
-        <form :action="resetUser?.action" method="POST" class="mt-5 space-y-4">
-          @csrf
-          @method('PATCH')
-
-          <div>
-            <label for="password" class="mb-1 block text-sm font-medium">Password baru</label>
-            <input id="password" name="password" type="password" required autocomplete="new-password"
-                   class="w-full rounded-lg border border-coal-200 px-3 py-2 text-coal-900 focus:border-maroon-500 focus:ring-maroon-500">
-          </div>
-
-          <div>
-            <label for="password_confirmation" class="mb-1 block text-sm font-medium">Konfirmasi password</label>
-            <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password"
-                   class="w-full rounded-lg border border-coal-200 px-3 py-2 text-coal-900 focus:border-maroon-500 focus:ring-maroon-500">
-          </div>
-
-          <div class="flex justify-end gap-2 pt-2">
-            <button type="button" @click="closeReset()" class="rounded-lg border border-coal-200 px-4 py-2 text-sm font-semibold text-coal-700 hover:bg-coal-50">Batal</button>
-            <button type="submit" class="rounded-lg bg-maroon-700 px-4 py-2 text-sm font-semibold text-white hover:bg-maroon-800">Simpan Password</button>
-          </div>
-        </form>
-      </div>
-    </div>
   </div>
   @endsection
