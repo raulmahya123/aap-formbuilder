@@ -57,10 +57,6 @@ class UserActiveController extends Controller
      */
     public function resetPassword(Request $request, User $user)
     {
-        if ($user->id !== Auth::id() && method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) {
-            return back()->with('error', 'Tidak bisa reset password Super Admin lain.');
-        }
-
         $validated = $request->validate([
             'password' => ['required', 'string', 'min:4', 'confirmed'],
         ], [
