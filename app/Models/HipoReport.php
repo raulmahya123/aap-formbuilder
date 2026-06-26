@@ -15,6 +15,7 @@ class HipoReport extends Model
         'jobsite',
         'reporter_name',
         'report_time',
+        'jenis_hipo',
         'shift',
         'source',
         'category',

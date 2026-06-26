@@ -38,8 +38,10 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Jobsite</label>
                     <select name="jobsite" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
                         <option value="">-- Pilih Jobsite --</option>
-                        @foreach(['AAP-BGG', 'AAP-SBS', 'ABN-DBK', 'ABC-POS'] as $site)
-                            <option value="{{ $site }}" {{ old('jobsite') == $site ? 'selected' : '' }}>{{ $site }}</option>
+                        @foreach(($jobsites ?? []) as $jobsite)
+                            <option value="{{ $jobsite['value'] }}" {{ old('jobsite') == $jobsite['value'] ? 'selected' : '' }}>
+                                {{ $jobsite['label'] }}
+                            </option>
                         @endforeach
                     </select>
                     @error('jobsite') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror

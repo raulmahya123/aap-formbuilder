@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\HipoReport;
+use App\Models\Site;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class HipoReportController extends Controller
@@ -24,7 +26,9 @@ class HipoReportController extends Controller
     // ==============================
     public function create()
     {
-        return view('admin.hipo.create');
+        $sites = $this->siteOptions();
+
+        return view('admin.hipo.create', compact('sites'));
     }
 
     // ==============================
@@ -34,7 +38,7 @@ class HipoReportController extends Controller
     {
         $validated = $request->validate([
             'report_time' => 'required|date',
-            'jobsite' => 'required|string|max:255',
+            'site_id' => 'required|integer|exists:sites,id',
             'shift' => 'required|string|max:100',
             'source' => 'required|string|max:100',
             'category' => 'required|string|max:100',
@@ -68,7 +72,10 @@ class HipoReportController extends Controller
         $validated['user_id'] = auth()->id();
         $validated['reporter_name'] = auth()->user()->name;
         $validated['stop_work'] = $request->boolean('stop_work');
-        $validated['site_id'] = session('active_site_id');
+        $validated['jobsite'] = $this->jobsiteLabel(Site::with('company:id,code,name')->findOrFail($validated['site_id']));
+        if (Schema::hasColumn('hipo_reports', 'jenis_hipo')) {
+            $validated['jenis_hipo'] = $validated['category'] === 'Nearmiss' ? 'Nearmiss' : 'HIPO';
+        }
 
         // ================= HANDLE FILE UPLOAD =================
         foreach (['engineering', 'administrative', 'work_practice', 'ppe'] as $key) {
@@ -158,5 +165,27 @@ class HipoReportController extends Controller
         $hipo->delete();
 
         return back()->with('success', 'Data HIPO berhasil dihapus');
+    }
+
+    private function siteOptions()
+    {
+        return Site::with('company:id,code,name')
+            ->orderBy('name')
+            ->get(['id', 'code', 'name', 'company_id'])
+            ->map(function (Site $site) {
+                return [
+                    'id' => $site->id,
+                    'label' => $this->jobsiteLabel($site),
+                ];
+            })
+            ->values();
+    }
+
+    private function jobsiteLabel(Site $site): string
+    {
+        $company = $site->company?->code ?: $site->company?->name;
+        $siteName = $site->code ?: $site->name;
+
+        return $company ? "{$company}-{$siteName}" : $siteName;
     }
 }

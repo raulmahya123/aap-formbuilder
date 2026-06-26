@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CcmReport;
+use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 // --- IMPORT LIBRARY INTERVENTION IMAGE V3 ---
 use Intervention\Image\ImageManager;
@@ -31,7 +33,9 @@ class CcmReportController extends Controller
      * ========================================================= */
     public function create()
     {
-        return view('admin.ccm.create');
+        $jobsites = $this->jobsiteOptions();
+
+        return view('admin.ccm.create', compact('jobsites'));
     }
 
     /* =========================================================
@@ -130,7 +134,7 @@ class CcmReportController extends Controller
     {
         return [
             'waktu_pelaporan' => 'required|date',
-            'jobsite'         => 'required|in:AAP-BGG,AAP-SBS,ABN-DBK,ABC-POS',
+            'jobsite'         => ['required', 'string', 'max:255', Rule::in($this->jobsiteOptions()->pluck('value')->all())],
             'nama_pelapor'    => 'required|string|max:255',
 
             // Boolean Flags sesuai migrasi database Anda
@@ -249,5 +253,29 @@ class CcmReportController extends Controller
         }
 
         return $validatedData;
+    }
+
+    private function jobsiteOptions()
+    {
+        return Site::with('company:id,code,name')
+            ->orderBy('name')
+            ->get(['id', 'code', 'name', 'company_id'])
+            ->map(function (Site $site) {
+                $value = $this->jobsiteLabel($site);
+
+                return [
+                    'value' => $value,
+                    'label' => $value,
+                ];
+            })
+            ->values();
+    }
+
+    private function jobsiteLabel(Site $site): string
+    {
+        $company = $site->company?->code ?: $site->company?->name;
+        $siteName = $site->code ?: $site->name;
+
+        return $company ? "{$company}-{$siteName}" : $siteName;
     }
 }

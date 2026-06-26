@@ -79,10 +79,14 @@ class FormController extends Controller
             'doc_type'      => ['required', Rule::in(self::DOC_TYPES)],
             'type'          => ['required', Rule::in(self::FORM_TYPES)],
             'schema'        => ['nullable'], // validasi JSON manual di bawah (boleh array/string)
-            'pdf'           => ['required_if:type,pdf', 'file', 'mimes:pdf,doc,docx,xls,xlsx', 'max:30720'],
+            'pdf'           => ['required_if:type,pdf', 'file', 'mimes:pdf,doc,docx,xls,xlsx', 'max:4096'],
             'is_active'     => ['nullable', 'boolean'],
         ], [
             'pdf.required_if' => 'Saat memilih tipe File, harap unggah file referensi.',
+            'pdf.uploaded'    => 'File gagal diunggah. Pastikan ukuran file tidak melewati batas server dan coba unggah ulang.',
+            'pdf.file'        => 'File yang diunggah tidak valid.',
+            'pdf.mimes'       => 'Format file harus PDF, DOC, DOCX, XLS, atau XLSX.',
+            'pdf.max'         => 'Ukuran file maksimal 4 MB.',
         ]);
 
         // Validasi relasi: jika site_id diisi, harus milik company_id yg sama
@@ -231,8 +235,13 @@ class FormController extends Controller
             'doc_type'      => ['required', Rule::in(self::DOC_TYPES)],
             'type'          => ['required', Rule::in(self::FORM_TYPES)],
             'schema'        => ['nullable'],
-            'pdf'           => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx', 'max:30720'],
+            'pdf'           => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx', 'max:4096'],
             'is_active'     => ['nullable', 'boolean'],
+        ], [
+            'pdf.uploaded' => 'File gagal diunggah. Pastikan ukuran file tidak melewati batas server dan coba unggah ulang.',
+            'pdf.file'     => 'File yang diunggah tidak valid.',
+            'pdf.mimes'    => 'Format file harus PDF, DOC, DOCX, XLS, atau XLSX.',
+            'pdf.max'      => 'Ukuran file maksimal 4 MB.',
         ]);
 
         // Validasi relasi site-company saat update

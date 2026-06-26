@@ -163,7 +163,7 @@
                       file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700
                       hover:file:bg-emerald-100">
         <p class="text-xs text-slate-500 mt-1">
-          Format: PDF, DOC/DOCX, XLS/XLSX — maks 30 MB. File akan dikompresi otomatis saat disimpan.
+          Format: PDF, DOC/DOCX, XLS/XLSX — maks 4 MB. File akan dikompresi otomatis saat disimpan.
         </p>
 
         @if($form->pdf_path)

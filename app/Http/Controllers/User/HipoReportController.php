@@ -4,8 +4,10 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\HipoReport;
+use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class HipoReportController extends Controller
@@ -21,15 +23,16 @@ class HipoReportController extends Controller
 
     public function create()
     {
-        return view('user.hipo.create');
+        $sites = $this->siteOptions();
+
+        return view('user.hipo.create', compact('sites'));
     }
 
     public function store(Request $request)
     {
         // VALIDASI SESUAI FORM BARU
         $data = $request->validate([
-            'jobsite' => 'required|string',
-            'reporter_name' => 'required|string',
+            'site_id' => 'required|integer|exists:sites,id',
             'pic' => 'required|string',
 
             'report_time' => 'required|date',
@@ -40,19 +43,13 @@ class HipoReportController extends Controller
 
             'description' => 'required|string',
             'potential_consequence' => 'required|string',
-            'stop_work' => 'required|boolean',
+            'stop_work' => 'nullable|boolean',
 
             // 4 KONTROL RISIKO (WAJIB)
             'control_engineering' => 'required|string',
             'control_administrative' => 'required|string',
             'control_work_practice' => 'required|string',
             'control_ppe' => 'required|string',
-
-            // PIC PER KONTROL (WAJIB)
-            'pic_engineering' => 'required|string',
-            'pic_administrative' => 'required|string',
-            'pic_work_practice' => 'required|string',
-            'pic_ppe' => 'required|string',
 
             // EVIDENCE PER KONTROL (WAJIB)
             'evidence_engineering' => 'required|image|mimes:jpg,jpeg,png|max:5120',
@@ -71,11 +68,44 @@ class HipoReportController extends Controller
         // DATA TAMBAHAN SYSTEM
         $data['user_id'] = Auth::id();
         $data['status'] = 'Open';
+        $data['reporter_name'] = Auth::user()->name;
+        $data['stop_work'] = $request->boolean('stop_work');
+        $data['jobsite'] = $this->jobsiteLabel(Site::with('company:id,code,name')->findOrFail($data['site_id']));
+        if (Schema::hasColumn('hipo_reports', 'jenis_hipo')) {
+            $data['jenis_hipo'] = $data['category'] === 'Nearmiss' ? 'Nearmiss' : 'HIPO';
+        }
+
+        foreach (['engineering', 'administrative', 'work_practice', 'ppe'] as $key) {
+            $data["pic_$key"] = $data['pic'];
+        }
+        unset($data['pic']);
 
         HipoReport::create($data);
 
         return redirect()
             ->route('user.hipo.index')
             ->with('success', 'Laporan HIPO berhasil dikirim');
+    }
+
+    private function siteOptions()
+    {
+        return Site::with('company:id,code,name')
+            ->orderBy('name')
+            ->get(['id', 'code', 'name', 'company_id'])
+            ->map(function (Site $site) {
+                return [
+                    'id' => $site->id,
+                    'label' => $this->jobsiteLabel($site),
+                ];
+            })
+            ->values();
+    }
+
+    private function jobsiteLabel(Site $site): string
+    {
+        $company = $site->company?->code ?: $site->company?->name;
+        $siteName = $site->code ?: $site->name;
+
+        return $company ? "{$company}-{$siteName}" : $siteName;
     }
 }

@@ -58,22 +58,16 @@
                 {{-- JOBSITE --}}
                 <div>
                     <label class="text-xs">Jobsite</label>
-                    <input type="text"
-                        name="jobsite"
-                        value="{{ old('jobsite') }}"
+                    <select
+                        name="site_id"
                         required
                         class="w-full border rounded-lg px-3 py-2">
-                </div>
-
-                {{-- JENIS HIPO --}}
-                <div>
-                    <label class="text-xs">Jenis HIPO</label>
-                    <select name="jenis_hipo"
-                        required
-                        class="w-full border rounded-lg px-3 py-2">
-                        <option value="">-- Pilih Jenis --</option>
-                        <option value="HIPO" {{ old('jenis_hipo') == 'HIPO' ? 'selected' : '' }}>HIPO</option>
-                        <option value="Nearmiss" {{ old('jenis_hipo') == 'Nearmiss' ? 'selected' : '' }}>Nearmiss</option>
+                        <option value="">-- Pilih Jobsite --</option>
+                        @foreach(($sites ?? []) as $site)
+                            <option value="{{ $site['id'] }}" {{ old('site_id') == $site['id'] ? 'selected' : '' }}>
+                                {{ $site['label'] }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 

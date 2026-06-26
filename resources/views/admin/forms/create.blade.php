@@ -134,7 +134,7 @@
         class="border rounded w-full p-2"
       >
       @error('pdf')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
-      <p class="text-sm text-slate-500 mt-1">Format: PDF, DOC/DOCX, XLS/XLSX — maks 30&nbsp;MB. File akan dikompresi otomatis saat disimpan.</p>
+      <p class="text-sm text-slate-500 mt-1">Format: PDF, DOC/DOCX, XLS/XLSX — maks 4&nbsp;MB. File akan dikompresi otomatis saat disimpan.</p>
     </div>
 
     {{-- Aktif --}}

@@ -26,11 +26,11 @@
 {{-- Jobsite --}}
 <div>
     <label class="text-sm font-medium">Jobsite</label>
-    <select name="jobsite" class="w-full border rounded-lg px-3 py-2" required>
+    <select name="site_id" class="w-full border rounded-lg px-3 py-2" required>
         <option value="">-- Pilih Jobsite --</option>
-        @foreach (['AAP-BGG','AAP-SBS','ABN-DBK','ABC-POS'] as $j)
-            <option value="{{ $j }}" @selected(old('jobsite')==$j)>
-                {{ $j }}
+        @foreach (($sites ?? []) as $site)
+            <option value="{{ $site['id'] }}" @selected(old('site_id')==$site['id'])>
+                {{ $site['label'] }}
             </option>
         @endforeach
     </select>
@@ -100,19 +100,18 @@
     </select>
 </div>
 
+{{-- Stop Work --}}
+<div class="flex items-center gap-2">
+    <input type="checkbox"
+           name="stop_work"
+           value="1"
+           @checked(old('stop_work'))>
+    <label class="text-sm font-medium">Stop Work</label>
+</div>
+
 <hr>
 
 <h2 class="font-semibold text-lg">Rincian Kejadian (WAJIB)</h2>
-
-{{-- Jenis HIPO / Nearmiss --}}
-<div>
-    <label class="text-sm font-medium">Jenis HIPO / Nearmiss</label>
-    <select name="jenis_hipo" class="w-full border rounded-lg px-3 py-2" required>
-        <option value="">-- Pilih --</option>
-        <option @selected(old('jenis_hipo')=='HIPO')>HIPO</option>
-        <option @selected(old('jenis_hipo')=='Nearmiss')>Nearmiss</option>
-    </select>
-</div>
 
 {{-- KTA --}}
 <div>
@@ -139,6 +138,17 @@
               rows="3"
               class="w-full border rounded-lg px-3 py-2"
               required>{{ old('description') }}</textarea>
+</div>
+
+{{-- Konsekuensi Potensial --}}
+<div>
+    <label class="text-sm font-medium">Konsekuensi Potensial</label>
+    <select name="potential_consequence" class="w-full border rounded-lg px-3 py-2" required>
+        <option value="">-- Pilih --</option>
+        @foreach (['Fatality','LTI','Injury Non LTI','Property Damage','Environment Accident'] as $consequence)
+            <option @selected(old('potential_consequence')==$consequence)>{{ $consequence }}</option>
+        @endforeach
+    </select>
 </div>
 
 <hr>
