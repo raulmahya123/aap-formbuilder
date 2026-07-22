@@ -170,7 +170,7 @@
           <p class="text-xs text-slate-600 mt-1">
             File sekarang:
             <a class="underline" target="_blank"
-               href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($form->pdf_path) }}">
+               href="{{ route('pubfile.stream', ['path' => $form->pdf_path]) }}">
               {{ basename($form->pdf_path) }}
             </a>
             <span class="text-slate-400">({{ $form->pdf_path }})</span>

@@ -29,8 +29,18 @@ class DocumentTemplate extends Model
      */
     public function getPhotoUrlAttribute(): ?string
     {
-        return $this->photo_path
-            ? asset('storage/' . $this->photo_path)
-            : null;
+        if (!$this->photo_path) return null;
+
+        if (\Illuminate\Support\Facades\Storage::disk('mandala_uploads')->exists($this->photo_path)) {
+            return \Illuminate\Support\Facades\Route::has('pubfile.stream')
+                ? route('pubfile.stream', ['path' => $this->photo_path])
+                : asset('storage/' . $this->photo_path);
+        }
+
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($this->photo_path)) {
+            return asset('storage/' . $this->photo_path);
+        }
+
+        return null;
     }
 }

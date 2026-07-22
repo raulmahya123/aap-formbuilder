@@ -62,7 +62,7 @@ class HipoReportController extends Controller
         foreach (['engineering', 'administrative', 'work_practice', 'ppe'] as $key) {
             $data["evidence_$key"] = $request
                 ->file("evidence_$key")
-                ->store("hipo/$key", 'public');
+                ->store("hipo/$key", 'mandala_uploads');
         }
 
         // DATA TAMBAHAN SYSTEM

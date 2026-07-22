@@ -106,7 +106,7 @@
     </div>
 
     @if($hipo->{"evidence_$key"})
-        <a href="{{ asset('storage/'.$hipo->{"evidence_$key"}) }}"
+        <a href="{{ route('pubfile.stream', ['path' => $hipo->{"evidence_$key"}]) }}"
            target="_blank"
            class="text-sm text-blue-600 underline">
             📎 Lihat Evidence

@@ -81,12 +81,14 @@ class FormEntryController extends Controller
 
         // Hapus file PDF output kalau ada
         if ($entry->pdf_output_path) {
+            Storage::disk('mandala_uploads')->delete($entry->pdf_output_path);
             Storage::disk('public')->delete($entry->pdf_output_path);
         }
 
         // Hapus lampiran yang tersimpan
         foreach ($entry->files as $f) {
             if ($f->path) {
+                Storage::disk('mandala_uploads')->delete($f->path);
                 Storage::disk('public')->delete($f->path);
             }
         }
@@ -147,9 +149,11 @@ class FormEntryController extends Controller
 
         $path = $entry->pdf_output_path;
 
-        abort_unless($path && Storage::disk('public')->exists($path), 404);
+        $disk = Storage::disk('mandala_uploads')->exists($path) ? 'mandala_uploads' : 'public';
+        abort_unless($path && Storage::disk($disk)->exists($path), 404);
 
-        return response()->download(storage_path('app/public/' . $path));
+        $absolute = Storage::disk($disk)->path($path);
+        return response()->download($absolute);
     }
 
 
@@ -218,18 +222,22 @@ class FormEntryController extends Controller
         $zip->addFromString('history/approvals.json', json_encode($approvals, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
         // 2.d. PDF (jika ada)
-        if ($entry->pdf_output_path && Storage::disk('public')->exists($entry->pdf_output_path)) {
-            $zip->addFile(
-                storage_path('app/public/' . $entry->pdf_output_path),
-                'pdf/' . basename($entry->pdf_output_path)
-            );
+        if ($entry->pdf_output_path) {
+            $pdfDisk = Storage::disk('mandala_uploads')->exists($entry->pdf_output_path) ? 'mandala_uploads' : 'public';
+            if (Storage::disk($pdfDisk)->exists($entry->pdf_output_path)) {
+                $zip->addFile(
+                    Storage::disk($pdfDisk)->path($entry->pdf_output_path),
+                    'pdf/' . basename($entry->pdf_output_path)
+                );
+            }
         }
 
         // 2.e. Semua lampiran
         // Struktur: attachments/{field_name}/{original_name}
         foreach ($entry->files as $f) {
             if (!$f->path) continue;
-            if (!Storage::disk('public')->exists($f->path)) continue;
+            $fDisk = Storage::disk('mandala_uploads')->exists($f->path) ? 'mandala_uploads' : 'public';
+            if (!Storage::disk($fDisk)->exists($f->path)) continue;
 
             $fieldDir = $f->field_name ?: 'unknown';
             // fallback nama file
@@ -238,7 +246,7 @@ class FormEntryController extends Controller
             // hindari karakter aneh di nama
             $safeName = Str::of($niceName)->replace(['\\', '/', ':', '*', '?', '"', '<', '>', '|'], '-');
             $zip->addFile(
-                storage_path('app/public/' . $f->path),
+                Storage::disk($fDisk)->path($f->path),
                 "attachments/{$fieldDir}/{$safeName}"
             );
         }
@@ -313,7 +321,11 @@ class FormEntryController extends Controller
             if (Str::startsWith($p, ['/', '\\']) || preg_match('/^[A-Za-z]:\\\\/', $p)) {
                 return is_file($p) ? $p : null;
             }
-            // storage/app/public
+            // mandala_uploads (NAS)
+            if (Storage::disk('mandala_uploads')->exists($p)) {
+                return Storage::disk('mandala_uploads')->path($p);
+            }
+            // storage/app/public (local fallback)
             $p1 = storage_path('app/public/' . $p);
             if (is_file($p1)) return $p1;
             // storage/app
@@ -371,11 +383,12 @@ class FormEntryController extends Controller
                 // === attachments
                 foreach ($e->files as $f) {
                     if (!$f->path) continue;
-                    if (!Storage::disk('public')->exists($f->path)) continue;
+                    $fDisk = Storage::disk('mandala_uploads')->exists($f->path) ? 'mandala_uploads' : 'public';
+                    if (!Storage::disk($fDisk)->exists($f->path)) continue;
                     $field = $f->field_name ?: 'unknown';
                     $nice  = $f->original_name ?: basename($f->path);
                     $safe  = Str::of($nice)->replace(['\\', '/', ':', '*', '?', '"', '<', '>', '|'], '-');
-                    $zip->addFile(storage_path('app/public/' . $f->path), "$slug/attachments/{$field}/{$safe}");
+                    $zip->addFile(Storage::disk($fDisk)->path($f->path), "$slug/attachments/{$field}/{$safe}");
                 }
 
                 $added++;

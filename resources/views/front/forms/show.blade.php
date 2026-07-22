@@ -52,6 +52,7 @@
     use Illuminate\Support\Facades\Storage;
 
     /** ================== FILE HANDLING (normalisasi + fallback) ================== */
+    $fileDisks = ['mandala_uploads', 'public'];
     $hasFile = !empty($form->pdf_path);
     $rawPath = $hasFile ? trim((string) $form->pdf_path, '/') : null;
 
@@ -78,23 +79,38 @@
 
     // cari kandidat yang benar-benar ada
     $resolvedPath = null;
+    $resolvedDisk = null;
     foreach ($candidates as $cand) {
-    if (Storage::disk('public')->exists($cand)) { $resolvedPath = $cand; break; }
+    foreach ($fileDisks as $diskName) {
+    if (Storage::disk($diskName)->exists($cand)) {
+    $resolvedPath = $cand;
+    $resolvedDisk = $diskName;
+    break 2;
+    }
+    }
     }
 
     // fallback terakhir: kalau hanya ada 1 PDF di forms/files, pakai itu
     if (!$resolvedPath) {
-    $all = collect(Storage::disk('public')->files('forms/files'))
-    ->filter(fn($p) => Str::lower(pathinfo($p, PATHINFO_EXTENSION)) === 'pdf')
+    $all = collect();
+    foreach ($fileDisks as $diskName) {
+    try {
+    $all = $all->merge(
+    collect(Storage::disk($diskName)->files('forms/files'))->map(fn($p) => [$diskName, $p])
+    );
+    } catch (\Throwable $e) {}
+    }
+    $all = $all
+    ->filter(fn($row) => Str::lower(pathinfo($row[1], PATHINFO_EXTENSION)) === 'pdf')
     ->values();
-    if ($all->count() === 1) { $resolvedPath = $all->first(); }
+    if ($all->count() === 1) { [$resolvedDisk, $resolvedPath] = $all->first(); }
     }
 
     $path = $resolvedPath; // final (bisa null)
-    $fileExists = $path ? Storage::disk('public')->exists($path) : false;
+    $fileExists = $path && $resolvedDisk ? Storage::disk($resolvedDisk)->exists($path) : false;
 
     // URL publik biasa (kalau symlink /storage sehat) — tidak dipakai untuk iframe
-    $urlPublic = $fileExists ? Storage::url($path) : null;
+    $urlPublic = $fileExists && $resolvedDisk === 'public' ? Storage::url($path) : null;
 
     // URL streaming (bypass symlink /storage)
     $streamUrl = $fileExists ? route('pubfile.stream', ['path' => $path]) : null;
@@ -108,7 +124,7 @@
     $size = null;
     if ($fileExists) {
     try {
-    $bytes = Storage::disk('public')->size($path);
+    $bytes = Storage::disk($resolvedDisk)->size($path);
     $units = ['B','KB','MB','GB'];
     $pow = $bytes > 0 ? floor(log($bytes, 1024)) : 0;
     $pow = min($pow, count($units)-1);
@@ -206,8 +222,8 @@
           Dicari dari: <code>{{ $rawPath }}</code> → kandidat: <code>{{ implode(', ', $candidates) }}</code>
         </div>
         @endif
-        Pastikan file ada di <code>storage/app/public/...</code>, symlink <code>public/storage</code> aktif,
-        atau gunakan route streaming <code>pubfile.*</code> (sudah dipakai di halaman ini).
+        Pastikan file ada di NAS <code>UPLOAD_DIR</code> atau legacy <code>storage/app/public/...</code>.
+        Route streaming <code>pubfile.*</code> sudah mencari ke NAS terlebih dulu.
       </div>
       @endif
     </div>

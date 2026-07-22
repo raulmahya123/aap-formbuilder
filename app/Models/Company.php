@@ -99,9 +99,15 @@ class Company extends Model
         // Normalisasi prefix salah
         $p = ltrim(preg_replace('#^(public/|storage/)#', '', $p), '/');
 
-        // Pastikan filenya exist di disk 'public'
+        // Cek mandala_uploads (NAS) dulu
+        if (Storage::disk('mandala_uploads')->exists($p)) {
+            return \Illuminate\Support\Facades\Route::has('pubfile.stream')
+                ? route('pubfile.stream', ['path' => $p])
+                : asset('storage/' . $p);
+        }
+
+        // Fallback ke public disk (legacy)
         if (Storage::disk('public')->exists($p)) {
-            // gunakan asset('storage/...') agar aman di dev/prod
             return asset('storage/' . $p);
         }
 

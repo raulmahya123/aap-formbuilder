@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\{Form, Department, Company, Site};
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\{DB, Storage, Log, Schema};
 use Illuminate\Validation\Rule;
 use Throwable;
@@ -14,6 +15,10 @@ class FormController extends Controller
     /** Allowed values */
     private const DOC_TYPES  = ['SOP', 'IK', 'FORM'];
     private const FORM_TYPES = ['builder', 'pdf'];
+    private const MANDALA_FILE_DISK = 'mandala_uploads';
+    private const LEGACY_FILE_DISK = 'public';
+    private const FORM_FILE_DIR = 'forms/files';
+    private const FORM_TMP_DIR = 'forms/tmp';
 
     // =======================
     // INDEX / LIST
@@ -113,29 +118,7 @@ class FormController extends Controller
                 // ===== FILE HANDLING =====
                 $filePath = null;
                 if ($validated['type'] === 'pdf' && $r->hasFile('pdf')) {
-                    $uploaded   = $r->file('pdf');
-                    $storedTemp = $uploaded->store('forms/tmp', 'public');
-
-                    $ext    = strtolower($uploaded->getClientOriginalExtension());
-                    $outRel = 'forms/files/' . uniqid('form_') . '.' . $ext;
-                    $outAbs = Storage::disk('public')->path($outRel);
-
-                    Storage::disk('public')->makeDirectory('forms/files');
-
-                    $ok = false;
-                    if ($ext === 'pdf') {
-                        $ok = $this->compressPdf(Storage::disk('public')->path($storedTemp), $outAbs);
-                    } elseif (in_array($ext, ['docx','xlsx'], true)) {
-                        $ok = $this->recompressOfficeZip(Storage::disk('public')->path($storedTemp), $outAbs);
-                    }
-
-                    if (!$ok) {
-                        // fallback: simpan apa adanya
-                        $outRel = $uploaded->store('forms/files', 'public');
-                    }
-
-                    Storage::disk('public')->delete($storedTemp);
-                    $filePath = $outRel;
+                    $filePath = $this->storeMandalaUpload($r->file('pdf'));
                 }
 
                 // ===== SCHEMA HANDLING =====
@@ -264,35 +247,13 @@ class FormController extends Controller
 
                 // ganti file jika type=pdf dan ada file baru
                 if ($validated['type'] === 'pdf' && $r->hasFile('pdf')) {
-                    if ($filePath) Storage::disk('public')->delete($filePath);
-
-                    $uploaded   = $r->file('pdf');
-                    $storedTemp = $uploaded->store('forms/tmp', 'public');
-
-                    $ext    = strtolower($uploaded->getClientOriginalExtension());
-                    $outRel = 'forms/files/' . uniqid('form_') . '.' . $ext;
-                    $outAbs = Storage::disk('public')->path($outRel);
-
-                    Storage::disk('public')->makeDirectory('forms/files');
-
-                    $ok = false;
-                    if ($ext === 'pdf') {
-                        $ok = $this->compressPdf(Storage::disk('public')->path($storedTemp), $outAbs);
-                    } elseif (in_array($ext, ['docx','xlsx'], true)) {
-                        $ok = $this->recompressOfficeZip(Storage::disk('public')->path($storedTemp), $outAbs);
-                    }
-
-                    if (!$ok) {
-                        $outRel = $uploaded->store('forms/files', 'public');
-                    }
-
-                    Storage::disk('public')->delete($storedTemp);
-                    $filePath = $outRel;
+                    $this->deleteMandalaFile($filePath);
+                    $filePath = $this->storeMandalaUpload($r->file('pdf'));
                 }
 
                 // jika pindah dari pdf -> builder, hapus file lama
                 if ($validated['type'] === 'builder' && $form->type === 'pdf' && $form->pdf_path) {
-                    Storage::disk('public')->delete($form->pdf_path);
+                    $this->deleteMandalaFile($form->pdf_path);
                     $filePath = null;
                 }
 
@@ -349,7 +310,7 @@ class FormController extends Controller
     {
         try {
             if ($form->pdf_path) {
-                Storage::disk('public')->delete($form->pdf_path);
+                $this->deleteMandalaFile($form->pdf_path);
             }
             $form->delete();
             return redirect()->route('admin.forms.index')->with('ok', 'Form dihapus');
@@ -386,6 +347,16 @@ class FormController extends Controller
         return redirect()->route('admin.forms.edit', $form)->with('ok', 'Schema tersimpan');
     }
 
+    public function file(Form $form)
+    {
+        return $this->serveMandalaFile($form, false);
+    }
+
+    public function download(Form $form)
+    {
+        return $this->serveMandalaFile($form, true);
+    }
+
     // =======================
     // HELPERS
     // =======================
@@ -398,6 +369,95 @@ class FormController extends Controller
 
         $fallbackId = DB::table('users')->orderBy('id')->value('id');
         return $fallbackId ? (int) $fallbackId : null;
+    }
+
+    private function storeMandalaUpload(\Illuminate\Http\UploadedFile $uploaded): string
+    {
+        $disk = Storage::disk(self::MANDALA_FILE_DISK);
+        $disk->makeDirectory(self::FORM_TMP_DIR);
+        $disk->makeDirectory(self::FORM_FILE_DIR);
+
+        $ext = strtolower($uploaded->getClientOriginalExtension() ?: $uploaded->extension() ?: 'bin');
+        $tempRel = self::FORM_TMP_DIR . '/' . uniqid('tmp_', true) . '.' . $ext;
+        $outRel = self::FORM_FILE_DIR . '/' . uniqid('form_', true) . '.' . $ext;
+
+        $disk->put($tempRel, file_get_contents($uploaded->getRealPath()));
+
+        $ok = false;
+        if ($ext === 'pdf') {
+            $ok = $this->compressPdf($disk->path($tempRel), $disk->path($outRel));
+        } elseif (in_array($ext, ['docx', 'xlsx'], true)) {
+            $ok = $this->recompressOfficeZip($disk->path($tempRel), $disk->path($outRel));
+        }
+
+        if (!$ok) {
+            $disk->copy($tempRel, $outRel);
+        }
+
+        $disk->delete($tempRel);
+
+        if (!$disk->exists($outRel)) {
+            throw new \RuntimeException('File Mandala gagal disimpan ke folder upload.');
+        }
+
+        return $outRel;
+    }
+
+    private function deleteMandalaFile(?string $path): void
+    {
+        if (!$this->isSafeRelativePath($path)) {
+            return;
+        }
+
+        foreach ([self::MANDALA_FILE_DISK, self::LEGACY_FILE_DISK] as $diskName) {
+            $disk = Storage::disk($diskName);
+            if ($disk->exists($path)) {
+                $disk->delete($path);
+            }
+        }
+    }
+
+    private function serveMandalaFile(Form $form, bool $download)
+    {
+        abort_unless($this->isSafeRelativePath($form->pdf_path), 404);
+
+        $resolved = $this->resolveMandalaFile($form->pdf_path);
+        abort_unless($resolved, 404);
+
+        [$diskName, $path] = $resolved;
+        $disk = Storage::disk($diskName);
+        $absolute = $disk->path($path);
+        $mime = @mime_content_type($absolute) ?: ($disk->mimeType($path) ?? 'application/octet-stream');
+        $ext = pathinfo($path, PATHINFO_EXTENSION);
+        $filename = Str::slug($form->title ?: 'mandala-form') . ($ext ? ".{$ext}" : '');
+        $headers = [
+            'Content-Type' => $mime,
+            'X-Content-Type-Options' => 'nosniff',
+        ];
+
+        return $download
+            ? response()->download($absolute, $filename, $headers)
+            : response()->file($absolute, $headers);
+    }
+
+    private function resolveMandalaFile(string $path): ?array
+    {
+        foreach ([self::MANDALA_FILE_DISK, self::LEGACY_FILE_DISK] as $diskName) {
+            if (Storage::disk($diskName)->exists($path)) {
+                return [$diskName, $path];
+            }
+        }
+
+        return null;
+    }
+
+    private function isSafeRelativePath(?string $path): bool
+    {
+        return filled($path)
+            && !Str::contains($path, ['..', "\0"])
+            && !preg_match('/^[a-zA-Z]:[\\\\\\/]/', $path)
+            && !str_starts_with($path, '\\\\')
+            && !str_starts_with($path, '/');
     }
 
     private function compressPdf(string $inPath, string $outPath): bool

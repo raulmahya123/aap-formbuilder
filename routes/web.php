@@ -60,6 +60,7 @@ use App\Http\Controllers\User\ContractController as UserContractController;
 use App\Http\Controllers\Admin\CompanyController as AdminCompanyController;
 use App\Http\Controllers\Admin\HipoReportController as AdminHipoReportController;
 use App\Http\Controllers\Admin\CcmReportController as CcmReportController;
+use App\Http\Controllers\Api\Admin\OperationalDataController as AdminOperationalDataApiController;
 use Illuminate\Support\Facades\Response;
 
 Route::get('/storage/{path}', function ($path) {
@@ -116,8 +117,17 @@ require __DIR__ . '/auth.php';
 Route::get('/pubfile/{path}', function (string $path) {
     $path = ltrim($path, '/');
     if (Str::contains($path, ['..', "\0"])) abort(404);
-    $disk = Storage::disk('public');
-    abort_unless($disk->exists($path), 404);
+
+    $disk = null;
+    foreach (['mandala_uploads', 'public'] as $diskName) {
+        $candidate = Storage::disk($diskName);
+        if ($candidate->exists($path)) {
+            $disk = $candidate;
+            break;
+        }
+    }
+    abort_unless($disk, 404);
+
     $absolute = $disk->path($path);
     $mime = @mime_content_type($absolute) ?: ($disk->mimeType($path) ?? 'application/octet-stream');
     return response()->file($absolute, ['Content-Type' => $mime, 'X-Content-Type-Options' => 'nosniff']);
@@ -132,8 +142,15 @@ Route::get('/pubfile-dl', function (\Illuminate\Http\Request $request) {
         404
     );
 
-    $disk = Storage::disk('public');
-    abort_unless($disk->exists($path), 404);
+    $disk = null;
+    foreach (['mandala_uploads', 'public'] as $diskName) {
+        $candidate = Storage::disk($diskName);
+        if ($candidate->exists($path)) {
+            $disk = $candidate;
+            break;
+        }
+    }
+    abort_unless($disk, 404);
 
     // ekstensi asli
     $ext = pathinfo($path, PATHINFO_EXTENSION);
@@ -152,6 +169,35 @@ Route::get('/pubfile-dl', function (\Illuminate\Http\Request $request) {
 
 
 Route::middleware('auth')->group(function () {
+    Route::prefix('api/admin')
+        ->name('api.admin.')
+        ->group(function () {
+            Route::middleware('can:is-admin')->group(function () {
+                Route::get('hipo', [AdminOperationalDataApiController::class, 'hipoReports'])->name('hipo.index');
+                Route::get('hipo/{hipo}', [AdminOperationalDataApiController::class, 'hipoReport'])->name('hipo.show')->whereNumber('hipo');
+
+                Route::get('ccm-reports', [AdminOperationalDataApiController::class, 'ccmReports'])->name('ccm_reports.index');
+                Route::get('ccm-reports/{ccmReport}', [AdminOperationalDataApiController::class, 'ccmReport'])->name('ccm_reports.show')->whereNumber('ccmReport');
+
+                Route::get('forms', [AdminOperationalDataApiController::class, 'forms'])->name('forms.index');
+                Route::get('forms/{form:slug}', [AdminOperationalDataApiController::class, 'form'])->name('forms.show');
+
+                Route::get('groups', [AdminOperationalDataApiController::class, 'indicatorGroups'])->name('groups.index');
+                Route::get('groups/{group}', [AdminOperationalDataApiController::class, 'indicatorGroup'])->name('groups.show')->whereNumber('group');
+
+                Route::get('indicators', [AdminOperationalDataApiController::class, 'indicators'])->name('indicators.index');
+                Route::get('indicators/{indicator}', [AdminOperationalDataApiController::class, 'indicator'])->name('indicators.show')->whereNumber('indicator');
+            });
+
+            Route::get('daily/create', [AdminOperationalDataApiController::class, 'dailyCreate'])
+                ->name('daily.create')
+                ->middleware('can:daily.manage');
+
+            Route::get('daily', [AdminOperationalDataApiController::class, 'dailyRows'])
+                ->name('daily.index')
+                ->middleware('can:daily.manage');
+        });
+
     // ==============================
     // FRONT (user)
     // ==============================

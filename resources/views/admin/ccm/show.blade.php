@@ -49,7 +49,7 @@
         if (!$path) return "";
 
         // 🔥 FIX UTAMA (ANTI ERROR NIAGAHOSTER)
-        $url = url('storage/'.$path);
+        $url = route('pubfile.stream', ['path' => $path]);
 
         return "
         <div class='grid grid-cols-3 gap-4 py-3 border-b border-gray-100'>

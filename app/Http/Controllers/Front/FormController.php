@@ -103,7 +103,7 @@ class FormController extends Controller
                 if ($type === 'file') {
                     if ($r->hasFile($name)) {
                         $uploaded = $r->file($name);
-                        $path = $uploaded->store('form-entries/files', 'public');
+                        $path = $uploaded->store('form-entries/files', 'mandala_uploads');
                         $answers[$name] = [
                             'stored_path' => $path,
                             'original'    => $uploaded->getClientOriginalName(),

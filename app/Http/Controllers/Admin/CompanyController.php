@@ -110,7 +110,7 @@ class CompanyController extends Controller
 
         // Handle logo (opsional) → simpan ke disk 'public'
         if ($request->hasFile('logo')) {
-            $data['logo_path'] = $request->file('logo')->store('logos/companies', 'public'); // ex: logos/companies/abc.png
+            $data['logo_path'] = $request->file('logo')->store('logos/companies', 'mandala_uploads');
         }
 
         $data['created_by'] = auth()->id();
@@ -193,18 +193,18 @@ class CompanyController extends Controller
 
         // Handle logo: hapus jika diminta
         if ($request->boolean('remove_logo')) {
-            if ($company->logo_path && Storage::disk('public')->exists($company->logo_path)) {
-                Storage::disk('public')->delete($company->logo_path);
+            if ($company->logo_path && Storage::disk('mandala_uploads')->exists($company->logo_path)) {
+                Storage::disk('mandala_uploads')->delete($company->logo_path);
             }
             $data['logo_path'] = null;
         }
 
         // Ganti logo jika upload baru
         if ($request->hasFile('logo')) {
-            if ($company->logo_path && Storage::disk('public')->exists($company->logo_path)) {
-                Storage::disk('public')->delete($company->logo_path);
+            if ($company->logo_path && Storage::disk('mandala_uploads')->exists($company->logo_path)) {
+                Storage::disk('mandala_uploads')->delete($company->logo_path);
             }
-            $data['logo_path'] = $request->file('logo')->store('logos/companies', 'public');
+            $data['logo_path'] = $request->file('logo')->store('logos/companies', 'mandala_uploads');
         }
 
         $data['updated_by'] = auth()->id();
@@ -220,8 +220,8 @@ class CompanyController extends Controller
      */
     public function destroy(Company $company)
     {
-        if ($company->logo_path && Storage::disk('public')->exists($company->logo_path)) {
-            Storage::disk('public')->delete($company->logo_path);
+        if ($company->logo_path && Storage::disk('mandala_uploads')->exists($company->logo_path)) {
+            Storage::disk('mandala_uploads')->delete($company->logo_path);
         }
 
         $company->delete(); // SoftDeletes aktif di model

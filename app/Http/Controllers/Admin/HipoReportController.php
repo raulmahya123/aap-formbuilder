@@ -84,7 +84,7 @@ class HipoReportController extends Controller
 
                 $validated["evidence_$key"] =
                     $request->file("evidence_$key")
-                        ->store("hipo/$key", 'public');
+                        ->store("hipo/$key", 'mandala_uploads');
             }
         }
 
@@ -136,12 +136,12 @@ class HipoReportController extends Controller
             if ($request->hasFile("evidence_$key")) {
 
                 if ($hipo->{"evidence_$key"}) {
-                    Storage::disk('public')->delete($hipo->{"evidence_$key"});
+                    Storage::disk('mandala_uploads')->delete($hipo->{"evidence_$key"});
                 }
 
                 $validated["evidence_$key"] =
                     $request->file("evidence_$key")
-                        ->store("hipo/$key", 'public');
+                        ->store("hipo/$key", 'mandala_uploads');
             }
         }
 
@@ -158,7 +158,7 @@ class HipoReportController extends Controller
         foreach (['engineering', 'administrative', 'work_practice', 'ppe'] as $key) {
 
             if ($hipo->{"evidence_$key"}) {
-                Storage::disk('public')->delete($hipo->{"evidence_$key"});
+                Storage::disk('mandala_uploads')->delete($hipo->{"evidence_$key"});
             }
         }
 

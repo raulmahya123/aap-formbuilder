@@ -17,7 +17,9 @@
         $logoShow = $company->logo_url ?? null;
         if(!$logoShow && !empty($company->logo_path)){
             $p = ltrim(preg_replace('#^(public/|storage/)#','',$company->logo_path),'/');
-            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($p)) {
+            if (\Illuminate\Support\Facades\Storage::disk('mandala_uploads')->exists($p)) {
+                $logoShow = route('pubfile.stream', ['path' => $p]);
+            } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists($p)) {
                 $logoShow = asset('storage/'.$p);
             }
         }

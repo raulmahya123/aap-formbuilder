@@ -58,7 +58,7 @@ class FormEntryController extends Controller
                 if (!$upload || !$upload->isValid()) continue;
 
                 $dir  = 'form-entry-files/'.date('Y/m/d');
-                $path = $upload->store($dir, 'public');
+                $path = $upload->store($dir, 'mandala_uploads');
 
                 $entry->files()->create([
                     'path'          => $path,
@@ -83,7 +83,13 @@ class FormEntryController extends Controller
             abort(403);
         }
 
-        $disk = $fileRow->disk ?? 'public';
+        $disk = $fileRow->disk ?? 'mandala_uploads';
+        if (!Storage::disk($disk)->exists($fileRow->path)) {
+            $fallback = $disk === 'mandala_uploads' ? 'public' : 'mandala_uploads';
+            if (Storage::disk($fallback)->exists($fileRow->path)) {
+                $disk = $fallback;
+            }
+        }
         abort_unless(Storage::disk($disk)->exists($fileRow->path), 404);
 
         $name = $fileRow->original_name ?: basename($fileRow->path);

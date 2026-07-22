@@ -114,8 +114,8 @@ class CcmReportController extends Controller
         // Hapus semua file fisik dari storage agar tidak memenuhi server
         foreach ($report->getAttributes() as $field => $value) {
             if (str_ends_with($field, '_evidence') && !empty($value)) {
-                if (Storage::disk('public')->exists($value)) {
-                    Storage::disk('public')->delete($value);
+                if (Storage::disk('mandala_uploads')->exists($value)) {
+                    Storage::disk('mandala_uploads')->delete($value);
                 }
             }
         }
@@ -220,8 +220,8 @@ class CcmReportController extends Controller
                 
                 // Hapus file lama jika proses Update
                 if ($existingReport && !empty($existingReport->$field)) {
-                    if (Storage::disk('public')->exists($existingReport->$field)) {
-                        Storage::disk('public')->delete($existingReport->$field);
+                    if (Storage::disk('mandala_uploads')->exists($existingReport->$field)) {
+                        Storage::disk('mandala_uploads')->delete($existingReport->$field);
                     }
                 }
 
@@ -239,14 +239,14 @@ class CcmReportController extends Controller
                     $encoded = $image->toJpeg(quality: 70);
 
                     // Simpan ke storage
-                    Storage::disk('public')->put($filename, (string) $encoded);
+                    Storage::disk('mandala_uploads')->put($filename, (string) $encoded);
 
                     // Masukkan path ke array data yang akan di-insert/update
                     $validatedData[$field] = $filename;
 
                 } catch (\Exception $e) {
                     // Fallback jika library gagal proses: simpan file asli
-                    $path = $file->store('ccm-evidence', 'public');
+                    $path = $file->store('ccm-evidence', 'mandala_uploads');
                     $validatedData[$field] = $path;
                 }
             }

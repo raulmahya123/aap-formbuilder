@@ -20,11 +20,12 @@
   {{-- Preview / Download referensi untuk tipe "file" (value tetap 'pdf') --}}
   @if($form->type === 'pdf' && $form->pdf_path)
     @php
-      $url  = Storage::disk('public')->url($form->pdf_path);
+      $formDisk = Storage::disk('mandala_uploads')->exists($form->pdf_path) ? 'mandala_uploads' : 'public';
+      $url  = route('pubfile.stream', ['path' => $form->pdf_path]);
       $ext  = strtolower(pathinfo($form->pdf_path, PATHINFO_EXTENSION));
       $size = null;
       try {
-        $bytes = Storage::disk('public')->size($form->pdf_path);
+        $bytes = Storage::disk($formDisk)->size($form->pdf_path);
         $units = ['B','KB','MB','GB'];
         $pow   = $bytes > 0 ? floor(log($bytes, 1024)) : 0;
         $pow   = min($pow, count($units)-1);

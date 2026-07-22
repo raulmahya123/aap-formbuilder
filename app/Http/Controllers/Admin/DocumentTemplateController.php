@@ -39,8 +39,9 @@ class DocumentTemplateController extends Controller
             'file' => ['required','image','max:4096'],
         ]);
 
-        $path = $request->file('file')->store('templates/photos', 'public');
-        $url  = Storage::disk('public')->url($path);
+        $path = $request->file('file')->store('templates/photos', 'mandala_uploads');
+        $disk = Storage::disk('mandala_uploads');
+        $url  = $disk->exists($path) ? route('pubfile.stream', ['path' => $path]) : asset('storage/'.$path);
 
         return response()->json([
             'ok'   => true,
@@ -64,7 +65,7 @@ class DocumentTemplateController extends Controller
         // Foto template (opsional)
         $photoPath = null;
         if ($r->hasFile('photo_path')) {
-            $photoPath = $r->file('photo_path')->store('templates/photos', 'public');
+            $photoPath = $r->file('photo_path')->store('templates/photos', 'mandala_uploads');
         }
 
         // Ambil & normalisasi payload
@@ -117,16 +118,16 @@ class DocumentTemplateController extends Controller
 
         // Hapus foto existing bila diminta
         if ($r->boolean('remove_photo') && $template->photo_path) {
-            Storage::disk('public')->delete($template->photo_path);
+            Storage::disk('mandala_uploads')->delete($template->photo_path);
             $payload['photo_path'] = null;
         }
 
         // Ganti foto jika ada upload baru
         if ($r->hasFile('photo_path')) {
             if ($template->photo_path) {
-                Storage::disk('public')->delete($template->photo_path);
+                Storage::disk('mandala_uploads')->delete($template->photo_path);
             }
-            $payload['photo_path'] = $r->file('photo_path')->store('templates/photos', 'public');
+            $payload['photo_path'] = $r->file('photo_path')->store('templates/photos', 'mandala_uploads');
         }
 
         // Konfigurasi opsional
@@ -159,7 +160,7 @@ class DocumentTemplateController extends Controller
     public function destroy(DocumentTemplate $template)
     {
         if ($template->photo_path) {
-            Storage::disk('public')->delete($template->photo_path);
+            Storage::disk('mandala_uploads')->delete($template->photo_path);
         }
         $template->delete();
         return redirect()->route('admin.document_templates.index')->with('success', 'Template dihapus');
@@ -210,9 +211,9 @@ class DocumentTemplateController extends Controller
         $filename = Str::random(40) . '.' . $ext;
         $path = trim($dir, '/').'/'.$filename;
 
-        Storage::disk('public')->put($path, $bytes);
+        Storage::disk('mandala_uploads')->put($path, $bytes);
 
-        return Storage::url($path);
+        return route('pubfile.stream', ['path' => $path]);
     }
 
     /** Bersihkan & persist gambar di blocks (image.src & signature.src) */

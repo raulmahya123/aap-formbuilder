@@ -567,7 +567,7 @@ class DocumentController extends Controller
 
         $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
         $path = "documents/{$doc->id}/meta.json";
-        Storage::disk('public')->put($path, $json);
+        Storage::disk('mandala_uploads')->put($path, $json);
         // hasil URL bisa diakses di: Storage::url($path) => "/storage/documents/{id}/meta.json"
     }
 }

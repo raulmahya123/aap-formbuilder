@@ -30,6 +30,14 @@ return [
             'throw' => false,
         ],
 
+        // === upload Mandala/FormBuilder ke NAS ===
+        'mandala_uploads' => [
+            'driver' => 'local',
+            'root' => env('UPLOAD_DIR', storage_path('app/public')),
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+
         // === AWS S3 (opsional) ===
         's3' => [
             'driver' => 's3',

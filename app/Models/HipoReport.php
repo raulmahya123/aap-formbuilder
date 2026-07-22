@@ -49,4 +49,14 @@ class HipoReport extends Model
         'report_time' => 'datetime',
         'stop_work' => 'boolean',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function site()
+    {
+        return $this->belongsTo(Site::class);
+    }
 }

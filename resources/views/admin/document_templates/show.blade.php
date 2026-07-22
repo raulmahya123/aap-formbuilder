@@ -16,10 +16,12 @@
   $raw = $template->photo_path ?? null;
   $photoUrl = null;
   if ($raw) {
-    if (Str::startsWith($raw, ['http://','https://','/storage/'])) {
+    if (Str::startsWith($raw, ['http://','https://'])) {
       $photoUrl = $raw;
-    } else {
-      $photoUrl = Storage::url(ltrim($raw, '/')); // "/storage/xxx"
+    } elseif (Storage::disk('mandala_uploads')->exists(ltrim($raw, '/'))) {
+      $photoUrl = route('pubfile.stream', ['path' => ltrim($raw, '/')]);
+    } elseif (Storage::disk('public')->exists(ltrim($raw, '/'))) {
+      $photoUrl = Storage::url(ltrim($raw, '/'));
     }
   }
 
