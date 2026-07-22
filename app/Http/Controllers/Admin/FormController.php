@@ -383,14 +383,18 @@ class FormController extends Controller
 
         $disk->put($tempRel, file_get_contents($uploaded->getRealPath()));
 
-        $ok = false;
-        if ($ext === 'pdf') {
-            $ok = $this->compressPdf($disk->path($tempRel), $disk->path($outRel));
-        } elseif (in_array($ext, ['docx', 'xlsx'], true)) {
-            $ok = $this->recompressOfficeZip($disk->path($tempRel), $disk->path($outRel));
-        }
-
-        if (!$ok) {
+        $driver = config("filesystems.disks." . self::MANDALA_FILE_DISK . ".driver", 'local');
+        if ($driver === 'local') {
+            $ok = false;
+            if ($ext === 'pdf') {
+                $ok = $this->compressPdf($disk->path($tempRel), $disk->path($outRel));
+            } elseif (in_array($ext, ['docx', 'xlsx'], true)) {
+                $ok = $this->recompressOfficeZip($disk->path($tempRel), $disk->path($outRel));
+            }
+            if (!$ok) {
+                $disk->copy($tempRel, $outRel);
+            }
+        } else {
             $disk->copy($tempRel, $outRel);
         }
 
@@ -426,8 +430,8 @@ class FormController extends Controller
 
         [$diskName, $path] = $resolved;
         $disk = Storage::disk($diskName);
-        $absolute = $disk->path($path);
-        $mime = @mime_content_type($absolute) ?: ($disk->mimeType($path) ?? 'application/octet-stream');
+        $driver = config("filesystems.disks.{$diskName}.driver", 'local');
+        $mime = $disk->mimeType($path) ?? 'application/octet-stream';
         $ext = pathinfo($path, PATHINFO_EXTENSION);
         $filename = Str::slug($form->title ?: 'mandala-form') . ($ext ? ".{$ext}" : '');
         $headers = [
@@ -435,9 +439,22 @@ class FormController extends Controller
             'X-Content-Type-Options' => 'nosniff',
         ];
 
-        return $download
-            ? response()->download($absolute, $filename, $headers)
-            : response()->file($absolute, $headers);
+        if ($driver === 'local') {
+            $absolute = $disk->path($path);
+            $mime = @mime_content_type($absolute) ?: $mime;
+            $headers['Content-Type'] = $mime;
+            return $download
+                ? response()->download($absolute, $filename, $headers)
+                : response()->file($absolute, $headers);
+        }
+
+        $contents = $disk->get($path);
+        if ($download) {
+            return response($contents, 200, array_merge($headers, [
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]));
+        }
+        return response($contents, 200, $headers);
     }
 
     private function resolveMandalaFile(string $path): ?array

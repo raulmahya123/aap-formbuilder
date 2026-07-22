@@ -30,8 +30,23 @@ return [
             'throw' => false,
         ],
 
-        // === upload Mandala/FormBuilder ke NAS ===
+        // === upload Mandala/FormBuilder ke NAS via FTP ===
         'mandala_uploads' => [
+            'driver' => env('MANDALA_DISK_DRIVER', 'local'),
+            'host' => env('NAS_FTP_HOST', '160.19.165.217'),
+            'port' => (int) env('NAS_FTP_PORT', 21),
+            'username' => env('NAS_FTP_USER', 'artha'),
+            'password' => env('NAS_FTP_PASS', 'OT6gfpTp'),
+            'root' => env('NAS_FTP_ROOT', '/uploads'),
+            'visibility' => 'private',
+            'timeout' => 30,
+            'passive' => true,
+            'ssl' => false,
+            'throw' => false,
+        ],
+
+        // === local fallback (for dev / offline) ===
+        'mandala_local' => [
             'driver' => 'local',
             'root' => env('UPLOAD_DIR', storage_path('app/public')),
             'visibility' => 'private',

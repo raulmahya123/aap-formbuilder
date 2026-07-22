@@ -152,8 +152,14 @@ class FormEntryController extends Controller
         $disk = Storage::disk('mandala_uploads')->exists($path) ? 'mandala_uploads' : 'public';
         abort_unless($path && Storage::disk($disk)->exists($path), 404);
 
-        $absolute = Storage::disk($disk)->path($path);
-        return response()->download($absolute);
+        $driver = config("filesystems.disks.{$disk}.driver", 'local');
+        if ($driver === 'local') {
+            return response()->download(Storage::disk($disk)->path($path));
+        }
+        return response(Storage::disk($disk)->get($path), 200, [
+            'Content-Type' => Storage::disk($disk)->mimeType($path) ?? 'application/octet-stream',
+            'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
+        ]);
     }
 
 
@@ -225,9 +231,9 @@ class FormEntryController extends Controller
         if ($entry->pdf_output_path) {
             $pdfDisk = Storage::disk('mandala_uploads')->exists($entry->pdf_output_path) ? 'mandala_uploads' : 'public';
             if (Storage::disk($pdfDisk)->exists($entry->pdf_output_path)) {
-                $zip->addFile(
-                    Storage::disk($pdfDisk)->path($entry->pdf_output_path),
-                    'pdf/' . basename($entry->pdf_output_path)
+                $zip->addFromString(
+                    'pdf/' . basename($entry->pdf_output_path),
+                    Storage::disk($pdfDisk)->get($entry->pdf_output_path)
                 );
             }
         }
@@ -245,9 +251,9 @@ class FormEntryController extends Controller
 
             // hindari karakter aneh di nama
             $safeName = Str::of($niceName)->replace(['\\', '/', ':', '*', '?', '"', '<', '>', '|'], '-');
-            $zip->addFile(
-                Storage::disk($fDisk)->path($f->path),
-                "attachments/{$fieldDir}/{$safeName}"
+            $zip->addFromString(
+                "attachments/{$fieldDir}/{$safeName}",
+                Storage::disk($fDisk)->get($f->path)
             );
         }
 
@@ -314,31 +320,7 @@ class FormEntryController extends Controller
 
         $added = 0;
 
-        // helper normalisasi path pdf_output_path
-        $resolvePublicPath = function (?string $p): ?string {
-            if (!$p) return null;
-            // absolut
-            if (Str::startsWith($p, ['/', '\\']) || preg_match('/^[A-Za-z]:\\\\/', $p)) {
-                return is_file($p) ? $p : null;
-            }
-            // mandala_uploads (NAS)
-            if (Storage::disk('mandala_uploads')->exists($p)) {
-                return Storage::disk('mandala_uploads')->path($p);
-            }
-            // storage/app/public (local fallback)
-            $p1 = storage_path('app/public/' . $p);
-            if (is_file($p1)) return $p1;
-            // storage/app
-            $p2 = storage_path('app/' . $p);
-            if (is_file($p2)) return $p2;
-            // base
-            $p3 = base_path(trim($p, '/'));
-            if (is_file($p3)) return $p3;
-
-            return null;
-        };
-
-        $q->chunk(250, function ($chunk) use (&$zip, &$added, $resolvePublicPath) {
+        $q->chunk(250, function ($chunk) use (&$zip, &$added) {
             foreach ($chunk as $e) {
                 $form = Str::slug(optional($e->form)->title ?? 'form', '-');
                 $user = Str::slug(optional($e->user)->name ?? 'user', '-');
@@ -370,10 +352,17 @@ class FormEntryController extends Controller
                 $zip->addFromString("$slug/entry.csv", stream_get_contents($csvTmp));
                 fclose($csvTmp);
 
-                // === PDF: pakai yang ada, kalau tak ada render on-the-fly
+                // === PDF
                 $pdfName = "$slug.pdf";
-                if ($path = $resolvePublicPath($e->pdf_output_path)) {
-                    $zip->addFile($path, "$slug/pdf/$pdfName");
+                if ($e->pdf_output_path) {
+                    $pdfDisk = Storage::disk('mandala_uploads')->exists($e->pdf_output_path) ? 'mandala_uploads' : 'public';
+                    if (Storage::disk($pdfDisk)->exists($e->pdf_output_path)) {
+                        $zip->addFromString("$slug/pdf/$pdfName", Storage::disk($pdfDisk)->get($e->pdf_output_path));
+                    } else {
+                        $pdfBinary = Pdf::loadView('admin.entries.pdf_data', ['entry' => $e])
+                            ->setPaper('a4', 'portrait')->output();
+                        $zip->addFromString("$slug/pdf/$pdfName", $pdfBinary);
+                    }
                 } else {
                     $pdfBinary = Pdf::loadView('admin.entries.pdf_data', ['entry' => $e])
                         ->setPaper('a4', 'portrait')->output();
@@ -388,7 +377,7 @@ class FormEntryController extends Controller
                     $field = $f->field_name ?: 'unknown';
                     $nice  = $f->original_name ?: basename($f->path);
                     $safe  = Str::of($nice)->replace(['\\', '/', ':', '*', '?', '"', '<', '>', '|'], '-');
-                    $zip->addFile(Storage::disk($fDisk)->path($f->path), "$slug/attachments/{$field}/{$safe}");
+                    $zip->addFromString("$slug/attachments/{$field}/{$safe}", Storage::disk($fDisk)->get($f->path));
                 }
 
                 $added++;

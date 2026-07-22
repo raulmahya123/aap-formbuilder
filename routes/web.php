@@ -119,18 +119,33 @@ Route::get('/pubfile/{path}', function (string $path) {
     if (Str::contains($path, ['..', "\0"])) abort(404);
 
     $disk = null;
+    $diskDriver = null;
     foreach (['mandala_uploads', 'public'] as $diskName) {
         $candidate = Storage::disk($diskName);
         if ($candidate->exists($path)) {
             $disk = $candidate;
+            $diskDriver = config("filesystems.disks.{$diskName}.driver", 'local');
             break;
         }
     }
     abort_unless($disk, 404);
 
-    $absolute = $disk->path($path);
-    $mime = @mime_content_type($absolute) ?: ($disk->mimeType($path) ?? 'application/octet-stream');
-    return response()->file($absolute, ['Content-Type' => $mime, 'X-Content-Type-Options' => 'nosniff']);
+    $mime = $disk->mimeType($path) ?? 'application/octet-stream';
+
+    if ($diskDriver === 'local') {
+        $absolute = $disk->path($path);
+        if (is_file($absolute)) {
+            $mime = @mime_content_type($absolute) ?: $mime;
+            return response()->file($absolute, ['Content-Type' => $mime, 'X-Content-Type-Options' => 'nosniff']);
+        }
+    }
+
+    $contents = $disk->get($path);
+    return response($contents, 200, [
+        'Content-Type' => $mime,
+        'X-Content-Type-Options' => 'nosniff',
+        'Cache-Control' => 'public, max-age=86400',
+    ]);
 })->where('path', '.*')->name('pubfile.stream');
 
 // Download (attachment)
@@ -143,28 +158,33 @@ Route::get('/pubfile-dl', function (\Illuminate\Http\Request $request) {
     );
 
     $disk = null;
+    $diskDriver = null;
     foreach (['mandala_uploads', 'public'] as $diskName) {
         $candidate = Storage::disk($diskName);
         if ($candidate->exists($path)) {
             $disk = $candidate;
+            $diskDriver = config("filesystems.disks.{$diskName}.driver", 'local');
             break;
         }
     }
     abort_unless($disk, 404);
 
-    // ekstensi asli
     $ext = pathinfo($path, PATHINFO_EXTENSION);
-
-    // nama dari blade
     $name = $request->query('name', 'file');
-
-    // nama final
     $filename = \Illuminate\Support\Str::slug($name, '-') . '.' . $ext;
 
-    return response()->download(
-        $disk->path($path),
-        $filename
-    );
+    if ($diskDriver === 'local') {
+        $absolute = $disk->path($path);
+        if (is_file($absolute)) {
+            return response()->download($absolute, $filename);
+        }
+    }
+
+    $contents = $disk->get($path);
+    return response($contents, 200, [
+        'Content-Type' => $disk->mimeType($path) ?? 'application/octet-stream',
+        'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+    ]);
 })->name('pubfile.download');
 
 
