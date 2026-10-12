@@ -1,0 +1,190 @@
+{
+  "info": {
+    "name": "Mandala Public API v1",
+    "description": "Public API dengan Basic Auth (mandala:mandala2025)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "basic",
+    "basic": [
+      { "key": "username", "value": "mandala", "type": "string" },
+      { "key": "password", "value": "mandala2025", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://160.19.165.216:8081" }
+  ],
+  "item": [
+    {
+      "name": "Companies",
+      "item": [
+        {
+          "name": "List Companies",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/companies?per_page=25",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "companies"],
+              "query": [{ "key": "per_page", "value": "25" }]
+            }
+          }
+        },
+        {
+          "name": "Get Company",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/companies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "companies", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Indicator Groups",
+      "item": [
+        {
+          "name": "List Groups",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/indicator-groups?per_page=25&include_indicators=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "indicator-groups"],
+              "query": [
+                { "key": "per_page", "value": "25" },
+                { "key": "include_indicators", "value": "true" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Group",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/indicator-groups/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "indicator-groups", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Indicators",
+      "item": [
+        {
+          "name": "List Indicators",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/indicators?per_page=25",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "indicators"],
+              "query": [{ "key": "per_page", "value": "25" }]
+            }
+          }
+        },
+        {
+          "name": "Get Indicator",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/indicators/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "indicators", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CCM Reports",
+      "item": [
+        {
+          "name": "List CCM Reports",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ccm-reports?per_page=25",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "ccm-reports"],
+              "query": [{ "key": "per_page", "value": "25" }]
+            }
+          }
+        },
+        {
+          "name": "Get CCM Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ccm-reports/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "ccm-reports", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "HIPO Reports",
+      "item": [
+        {
+          "name": "List HIPO Reports",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hipo-reports?per_page=25",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "hipo-reports"],
+              "query": [{ "key": "per_page", "value": "25" }]
+            }
+          }
+        },
+        {
+          "name": "Get HIPO Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hipo-reports/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "hipo-reports", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Forms",
+      "item": [
+        {
+          "name": "List Forms",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/forms?per_page=25",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "forms"],
+              "query": [{ "key": "per_page", "value": "25" }]
+            }
+          }
+        },
+        {
+          "name": "Get Form",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/forms/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "forms", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

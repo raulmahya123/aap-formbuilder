@@ -553,4 +553,121 @@ class FormController extends Controller
 
         return is_file($outPath) && filesize($outPath) > 0;
     }
+
+    // =======================
+    // IMPORT / EXPORT SCHEMA (CSV)
+    // =======================
+
+    /**
+     * Download template CSV untuk import soal + opsi.
+     */
+    public function importTemplate()
+    {
+        $rows = [
+            ['no','pertanyaan','tipe','wajib','opsi_value','opsi_label','placeholder','rules'],
+            [1,'Contoh soal text','text','ya','','','Masukkan nama','string|max:100'],
+            [2,'Pilih warna favorit','radio','ya','merah','Merah','',''],
+            [2,'Pilih warna favorit','radio','ya','biru','Biru','',''],
+            [2,'Pilih warna favorit','radio','ya','hijau','Hijau','',''],
+            [3,'Pilih semua yang benar','checkbox','tidak','a','Jawaban A','',''],
+            [3,'Pilih semua yang benar','checkbox','tidak','b','Jawaban B','',''],
+            [4,'Pilih departemen','select','ya','hrd','HRD','',''],
+            [4,'Pilih departemen','select','ya','finance','Finance','',''],
+            [5,'Isikan komentar','textarea','tidak','','','Tulis komentar di sini','max:500'],
+            [6,'Upload lampiran','file','tidak','','','','mimes:pdf,jpg|max:4096'],
+        ];
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'import_template_');
+        $fp = fopen($tmpFile, 'w');
+        foreach ($rows as $row) {
+            fputcsv($fp, $row);
+        }
+        fclose($fp);
+
+        return response()->download($tmpFile, 'template-import-soal.csv', [
+            'Content-Type' => 'text/csv',
+        ])->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Import soal dari CSV ke schema builder form.
+     *
+     * Format CSV:
+     *   no, pertanyaan, tipe, wajib, opsi_value, opsi_label, placeholder, rules
+     *
+     * - Baris dengan nomor soal sama = 1 soal dengan banyak opsi (radio/checkbox/select)
+     * - Baris dengan opsi_value kosong = soal tanpa opsi (text/number/date/textarea/file/email)
+     */
+    public function importSchema(Request $r, Form $form)
+    {
+        $r->validate([
+            'csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:4096'],
+        ]);
+
+        $file = $r->file('csv_file');
+        $handle = fopen($file->getRealPath(), 'r');
+        if (!$handle) {
+            return back()->withErrors(['csv_file' => 'Gagal membaca file CSV.']);
+        }
+
+        // skip header
+        fgetcsv($handle);
+
+        $grouped = [];
+        while (($row = fgetcsv($handle)) !== false) {
+            if (count($row) < 5) continue;
+
+            [$no, $question, $type, $required, $optVal, $optLabel, $placeholder, $rules] = array_pad($row, 8, '');
+
+            $no = (int) $no;
+            if ($no <= 0 || blank($question)) continue;
+
+            if (!isset($grouped[$no])) {
+                $grouped[$no] = [
+                    'type'        => strtolower(trim($type ?: 'text')),
+                    'label'       => trim($question),
+                    'name'        => Str::slug(trim($question), '_'),
+                    'required'    => in_array(strtolower(trim($required)), ['ya', 'yes', '1', 'true', 'wajib'], true),
+                    'placeholder' => trim($placeholder),
+                    'rules'       => trim($rules),
+                    'options'     => [],
+                ];
+            }
+
+            // tambah opsi jika ada
+            if (filled($optVal)) {
+                $grouped[$no]['options'][] = [trim($optVal), trim($optLabel ?: $optVal)];
+            }
+        }
+        fclose($handle);
+
+        if (empty($grouped)) {
+            return back()->withErrors(['csv_file' => 'Tidak ada data soal ditemukan di CSV.']);
+        }
+
+        // pastikan name unik
+        $usedNames = [];
+        foreach ($grouped as &$field) {
+            $base = $field['name'];
+            $i = 1;
+            while (in_array($field['name'], $usedNames, true)) {
+                $field['name'] = $base . '_' . $i;
+                $i++;
+            }
+            $usedNames[] = $field['name'];
+
+            // bersihkan field kosong
+            if (blank($field['placeholder'])) unset($field['placeholder']);
+            if (blank($field['rules'])) unset($field['rules']);
+            if (empty($field['options'])) unset($field['options']);
+        }
+        unset($field);
+
+        ksort($grouped);
+        $schema = ['fields' => array_values($grouped)];
+
+        $form->update(['schema' => $schema]);
+
+        return back()->with('ok', count($schema['fields']) . ' soal berhasil diimport ke schema form.');
+    }
 }
