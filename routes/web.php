@@ -42,6 +42,8 @@ use App\Http\Controllers\Admin\ReportController as AdminReportController;
 // ==============================
 use App\Http\Controllers\User\IndicatorDailyController;
 use App\Http\Controllers\User\DailyNoteController;
+use App\Http\Controllers\WellnessController;
+use App\Http\Controllers\Admin\WellnessController as AdminWellnessController;
 
 // ==============================
 // Admin kelola akses user↔site (baru)
@@ -111,6 +113,10 @@ Route::get('/', fn() => redirect()->route('admin.dashboard'));
 Route::get('/dashboard', fn() => redirect()->route('admin.dashboard'))
     ->middleware('auth')
     ->name('dashboard');
+
+// Form wellness publik: tidak membutuhkan login.
+Route::get('/wellness', [WellnessController::class, 'create'])->name('wellness.create');
+Route::post('/wellness', [WellnessController::class, 'store'])->name('wellness.store');
 
 require __DIR__ . '/auth.php';
 
@@ -303,6 +309,10 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard/data/by-department', [DashboardController::class, 'byDepartment'])->name('dashboard.data.by_department');
         Route::get('dashboard/data/by-aggregate', [DashboardController::class, 'byAggregate'])->name('dashboard.data.by_aggregate');
 
+        Route::middleware('can:is-admin')->group(function () {
+            Route::get('wellness', [AdminWellnessController::class, 'index'])->name('wellness.index');
+        });
+
         // ==== COMPANIES (CRUD only; Super Admin) ====
         Route::middleware('can:is-admin')->prefix('companies')->name('companies.')->group(function () {
             Route::get('/',               [AdminCompanyController::class, 'index'])->name('index');
@@ -339,6 +349,8 @@ Route::middleware('auth')->group(function () {
         // Lihat file (inline) dan unduh file — tidak bergantung ke /public/storage
         Route::get('forms/{form}/file', [AdminFormController::class, 'file'])->name('forms.file');
         Route::get('forms/{form}/download', [AdminFormController::class, 'download'])->name('forms.download');
+        Route::get('forms/import-template', [AdminFormController::class, 'importTemplate'])->name('forms.import-template');
+        Route::post('forms/{form}/import-schema', [AdminFormController::class, 'importSchema'])->name('forms.import-schema');
         /* ⇧⇧ Tambahkan ini ⇧⇧ */
 
         // Kelola anggota & role per department

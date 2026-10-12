@@ -152,6 +152,26 @@
         <p class="text-xs text-slate-500 mt-1">
           Isi dengan objek JSON berisi key <code>fields</code> (array).
         </p>
+
+        {{-- Import CSV --}}
+        <div class="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+          <p class="text-sm font-medium text-slate-700 mb-2">Import Soal dari CSV</p>
+          <div class="flex items-center gap-3">
+            <a href="{{ route('admin.forms.import-template') }}"
+               class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              Download Template
+            </a>
+            <form action="{{ route('admin.forms.import-schema', $form) }}" method="POST" enctype="multipart/form-data" class="flex items-center gap-2">
+              @csrf
+              <input type="file" name="csv_file" accept=".csv,.txt" class="text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300">
+              <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-emerald-600 rounded hover:bg-emerald-700">
+                Import
+              </button>
+            </form>
+          </div>
+          <p class="text-xs text-slate-400 mt-1.5">Format: no, pertanyaan, tipe (text/radio/checkbox/select/textarea/number/date/email/file), wajib (ya/tidak), opsi_value, opsi_label, placeholder, rules</p>
+        </div>
       </div>
 
       {{-- File (PDF/Word/Excel) --}}
