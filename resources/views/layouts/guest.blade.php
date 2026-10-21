@@ -118,9 +118,7 @@
           </div>
 
           <!-- Bottom placeholder for balanced vertical spacing -->
-          <div class="hidden lg:block text-[11px] text-[#94A3B8]">
-            Verifikasi dua faktor dan enkripsi standar korporat diaktifkan.
-          </div>
+          <div class="hidden lg:block"></div>
         </div>
 
     </div>
