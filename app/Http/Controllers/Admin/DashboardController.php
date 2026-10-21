@@ -33,9 +33,9 @@ class DashboardController extends Controller
 
         $metrics = [
             'wellness' => $this->wellnessQuery($selectedSite, $allowed)->count(),
-            'hipo' => $siteFilterSelected($siteFilter(HipoReport::query))->count(),
-            'kpi' => $siteFilterSelected($siteFilter(IndicatorDaily::query))->count(),
-            'notes' => $siteFilterSelected($siteFilter(DailyNote::query))->count(),
+            'hipo' => $siteFilterSelected($siteFilter(HipoReport::query()))->count(),
+            'kpi' => $siteFilterSelected($siteFilter(IndicatorDaily::query()))->count(),
+            'notes' => $siteFilterSelected($siteFilter(DailyNote::query()))->count(),
             'ccm' => $this->ccmCount($selectedSite, $allowed),
         ];
 
