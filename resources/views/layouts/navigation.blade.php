@@ -39,7 +39,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
   :class="{ 'translate-x-0': sidebarOpen }"
   class="nice-scroll fixed inset-y-0 left-0 z-50 w-72 -translate-x-full transition-transform duration-200
                lg:static lg:translate-x-0 lg:w-auto lg:block overflow-y-auto
-               bg-ivory-50 border-r border-coal-200
+               bg-ivory-50 border-r border-coal-100/70 shadow-[6px_0_18px_-18px_rgba(51,42,36,0.45)]
                flex flex-col">
 
   {{-- Icon rail ketika sidebar diciutkan --}}
@@ -62,13 +62,10 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
   <div x-show="!sidebarCollapsed" x-cloak class="flex min-h-0 flex-1 flex-col">
 
   {{-- BRAND --}}
-  <div class="flex items-center justify-between border-b border-coal-200 bg-ivory-50/70 px-4 py-4">
-    <a href="{{ $homeUrl }}" class="inline-flex items-center" aria-label="Mandala">
-      <img src="{{ asset('assets/images/logomandala.png') }}" alt="Mandala" class="h-10 w-auto max-w-[9rem] object-contain">
+  <div class="flex items-center justify-center border-b border-coal-100/80 bg-ivory-50/80 px-4 py-5">
+    <a href="{{ $homeUrl }}" class="inline-flex items-center justify-center" aria-label="Mandala">
+      <img src="{{ asset('assets/images/logomandala.png') }}" alt="Mandala" class="h-12 w-auto max-w-[11rem] object-contain">
     </a>
-    <button type="button" @click="toggleSidebarCollapse()" class="hidden h-9 w-9 items-center justify-center rounded-xl border border-coal-200 bg-white text-coal-600 hover:bg-ivory-100 lg:inline-flex" title="Ciutkan sidebar" aria-label="Ciutkan sidebar">
-      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5l-7 7 7 7M4 12h16"/></svg>
-    </button>
   </div>
 
 
