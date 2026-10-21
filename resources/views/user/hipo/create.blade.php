@@ -3,7 +3,7 @@
 @section('content')
 <div class="p-6 max-w-4xl mx-auto">
 
-<h1 class="text-xl font-semibold mb-4">⚠️ Form Laporan HIPO / Nearmiss</h1>
+<h1 class="flex items-center gap-2 text-xl font-semibold mb-4"><x-ui-icon name="warning" class="h-5 w-5 text-[#603813]" /> Form Laporan HIPO / Nearmiss</h1>
 
 {{-- ERROR MESSAGE --}}
 @if ($errors->any())

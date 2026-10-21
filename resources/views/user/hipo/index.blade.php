@@ -4,7 +4,7 @@
 <div class="p-6 max-w-6xl mx-auto">
 
     <div class="flex items-center justify-between mb-4">
-        <h1 class="text-xl font-semibold">⚠️ Laporan HIPO / Nearmiss</h1>
+        <h1 class="flex items-center gap-2 text-xl font-semibold"><x-ui-icon name="warning" class="h-5 w-5 text-[#603813]" /> Laporan HIPO / Nearmiss</h1>
 
         <a href="{{ route('user.hipo.create') }}"
            class="px-4 py-2 rounded-lg bg-maroon-700 text-white text-sm hover:bg-maroon-800">

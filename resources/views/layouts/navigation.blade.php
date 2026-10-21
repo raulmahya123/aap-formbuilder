@@ -10,9 +10,9 @@ $isAdmin = $isSuper || ($user && method_exists($user,'isAdmin') && $user->isAdmi
 $homeUrl = Route::has('admin.dashboard') ? route('admin.dashboard') : url('/');
 
 $navItemClass = function(bool $active = false){
-$base = 'flex items-center gap-3 px-3 py-2 rounded-xl transition outline-none';
-$inactive = 'text-coal-800 border border-transparent hover:bg-ivory-100 focus-visible:ring-2 focus-visible:ring-maroon-700';
-$activeCls = 'is-active border';
+$base = 'flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition outline-none';
+$inactive = 'border-transparent text-[#111111] hover:border-[#C5C5C5] hover:bg-[#F5F5F5] focus-visible:ring-2 focus-visible:ring-[#0057D9]';
+$activeCls = 'is-active border-[#603813] bg-[#603813] text-white';
 return $active ? "$base $activeCls" : "$base $inactive";
 };
 
@@ -39,7 +39,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
   :class="{ 'translate-x-0': sidebarOpen }"
   class="nice-scroll fixed inset-y-0 left-0 z-50 w-72 -translate-x-full transition-transform duration-200
                lg:static lg:translate-x-0 lg:w-auto lg:block overflow-y-auto
-               bg-ivory-50 border-r border-coal-100/70 shadow-[6px_0_18px_-18px_rgba(51,42,36,0.45)]
+               bg-white border-r border-[#C5C5C5]
                flex flex-col">
 
   {{-- Icon rail ketika sidebar diciutkan --}}
@@ -62,7 +62,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
   <div x-show="!sidebarCollapsed" x-cloak class="flex min-h-0 flex-1 flex-col">
 
   {{-- BRAND --}}
-  <div class="flex items-center justify-center border-b border-coal-100/80 bg-ivory-50/80 px-4 py-5">
+  <div class="flex items-center justify-center border-b border-[#C5C5C5] bg-white px-4 py-5">
     <a href="{{ $homeUrl }}" class="inline-flex items-center justify-center" aria-label="Mandala">
       <img src="{{ asset('assets/images/logomandala.png') }}" alt="Mandala" class="h-12 w-auto max-w-[11rem] object-contain">
     </a>
@@ -77,7 +77,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
 
     {{-- MENU COLLAPSE --}}
     <div x-data="{openMenu:true}">
-      <div class="px-3 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
+      <div class="flex cursor-pointer justify-between px-3 text-[11px] font-semibold uppercase tracking-[.12em] text-[#525252]"
         @click="openMenu=!openMenu">
         Menu
         <span x-text="openMenu ? '−' : '+'"></span>
@@ -115,7 +115,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
 
     {{-- HSE COLLAPSE --}}
     <div x-data="{openHse:true}">
-      <div class="px-3 text-xs uppercase tracking-wider text-coal-500 flex justify-between cursor-pointer"
+      <div class="flex cursor-pointer justify-between px-3 text-[11px] font-semibold uppercase tracking-[.12em] text-[#525252]"
         @click="openHse=!openHse">
         HSE / KPI
         <span x-text="openHse ? '−' : '+'"></span>
@@ -247,7 +247,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
   <div x-show="sidebarOpen" class="fixed inset-y-0 left-0 w-72 z-50">
     <div class="h-full shadow-2xl" @click.outside="sidebarOpen=false">
 
-      <aside class="h-full bg-ivory-50 border-r border-coal-200 p-0 flex flex-col">
+              <aside class="h-full border-r border-[#C5C5C5] bg-white p-0 flex flex-col">
 
         @auth
         <div class="px-4 py-4 border-b border-coal-200">

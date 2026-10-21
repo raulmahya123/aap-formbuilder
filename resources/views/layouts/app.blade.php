@@ -10,6 +10,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="theme-color" content="#603813">
   <link rel="icon" type="image/png" href="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}">
   <link rel="apple-touch-icon" href="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}">
   <title>@yield('title', config('app.name', 'AAP FormBuilder'))</title>
@@ -48,7 +49,7 @@
   <style>
     :root {
       --font-sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans';
-      --brand-maroon: #bb9974;
+      --brand-maroon: #603813;
     }
     body  { font-family: var(--font-sans); }
 
@@ -59,9 +60,9 @@
 
     /* Active state menu */
     aside nav a.is-active {
-      background-color: #bb9974 !important;
+      background-color: #603813 !important;
       color: #fff !important;
-      border-color: #bb9974 !important;
+      border-color: #603813 !important;
     }
     aside nav a:is(:active, :focus):not(.is-active) {
       color: inherit !important;
@@ -72,8 +73,8 @@
     }
 
     .table-header {
-      background: #f4eee7;
-      color: #51453d;
+      background: #ffffff;
+      color: #111111;
       font-size: .72rem;
       font-weight: 700;
       letter-spacing: .06em;
@@ -81,8 +82,8 @@
       white-space: nowrap;
     }
     main table thead th {
-      background: #f4eee7;
-      color: #51453d;
+      background: #ffffff;
+      color: #111111;
       font-size: .72rem;
       font-weight: 700;
       letter-spacing: .06em;
@@ -97,21 +98,21 @@
       height: 2rem;
       border-radius: .65rem;
       border: 1px solid #e7ddd4;
-      color: #66564b;
+      color: #303030;
       background: #fff;
       transition: .15s ease;
     }
-    .action-icon:hover { background: #f4eee7; color: #4f3d31; transform: translateY(-1px); }
+    .action-icon:hover { background: #f5f5f5; color: #111111; transform: translateY(-1px); }
     .action-icon.danger { color: #be123c; border-color: #fecdd3; }
     .action-icon.danger:hover { background: #fff1f2; }
     .pagination { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
-    .pagination > * { display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 .55rem; border: 1px solid #e7ddd4; border-radius: .55rem; background: #fff; font-size: .8rem; }
-    .pagination .active { background: #bb9974; color: #fff; border-color: #bb9974; }
-    .pagination .disabled { color: #b8aaa0; background: #faf8f6; }
+    .pagination > * { display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 .55rem; border: 1px solid #c5c5c5; border-radius: .5rem; background: #fff; font-size: .8rem; }
+    .pagination .active { background: #0057d9; color: #fff; border-color: #0057d9; }
+    .pagination .disabled { color: #777; background: #f5f5f5; }
   </style>
 </head>
 
-<body class="min-h-screen bg-ivory-100 text-coal-900">
+<body class="min-h-screen bg-white text-coal-900">
 
   {{-- ===== Mobile hamburger (tanpa topbar) ===== --}}
   <div class="lg:hidden fixed top-3 left-3 z-[60]">
@@ -120,9 +121,9 @@
       @click="toggleSidebar()"
       aria-label="Open menu"
       :aria-expanded="sidebarOpen"
-      class="inline-flex h-10 w-10 items-center justify-center rounded-xl border
-             border-coal-200 bg-white/80 backdrop-blur shadow-sm text-coal-700
-             hover:bg-ivory-100 transition"
+      class="inline-flex h-10 w-10 items-center justify-center rounded-lg border
+             border-[#C5C5C5] bg-white text-[#111111]
+             hover:bg-[#F5F5F5] transition"
     >
       <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -152,15 +153,15 @@
       @endphp
 
       {{-- Navbar --}}
-      <header class="sticky top-0 z-30 border-b border-coal-200 bg-ivory-50/95 px-4 py-3 backdrop-blur lg:px-8">
+      <header class="sticky top-0 z-30 border-b border-[#C5C5C5] bg-white px-4 py-3 lg:px-8">
         <div class="flex min-h-10 items-center justify-between gap-4">
           <div class="flex min-w-0 items-center gap-3">
             <button type="button" @click="toggleSidebarCollapse()" class="hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-coal-200 bg-white text-coal-700 hover:bg-ivory-100 lg:inline-flex" title="Buka/tutup sidebar" aria-label="Buka/tutup sidebar">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
-            <div class="hidden text-sm font-semibold text-maroon-800 sm:block">AAP Form Builder</div>
-            <div class="h-5 w-px bg-coal-200"></div>
-            <div class="min-w-0 truncate text-sm text-coal-600">
+            <div class="hidden text-sm font-semibold text-[#603813] sm:block">AAP Form Builder</div>
+            <div class="h-5 w-px bg-[#C5C5C5]"></div>
+            <div class="min-w-0 truncate text-sm font-medium text-[#303030]">
             @hasSection('breadcrumbs')
               @yield('breadcrumbs')
             @else
@@ -172,13 +173,13 @@
           <div class="flex items-center gap-2 sm:gap-3">
             @if($navbarUser && $navbarUser->isAdmin() && $navbarSites->count() > 0 && Route::has('admin.sites.switch'))
               <div x-data="{open:false}" class="relative hidden md:block">
-                <button type="button" @click="open=!open" @click.outside="open=false" class="inline-flex max-w-[15rem] items-center gap-2 rounded-xl border border-coal-200 bg-white px-3 py-2 text-left text-sm hover:bg-ivory-100" aria-label="Pilih site">
-                  <svg class="h-4 w-4 shrink-0 text-maroon-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
+                <button type="button" @click="open=!open" @click.outside="open=false" class="inline-flex max-w-[15rem] items-center gap-2 rounded-lg border border-[#C5C5C5] bg-white px-3 py-2 text-left text-sm text-[#111111] hover:bg-[#F5F5F5]" aria-label="Pilih site">
+                  <svg class="h-4 w-4 shrink-0 text-[#603813]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
                   <span class="truncate font-medium">{{ $navbarActiveSite?->code ?? 'ALL SITES' }}</span>
                   <svg class="h-4 w-4 text-coal-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
                 </button>
-                <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-72 rounded-2xl border border-coal-200 bg-white p-2 shadow-xl">
-                  <div class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-coal-400">Active Site</div>
+                <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-72 rounded-xl border border-[#C5C5C5] bg-white p-2 shadow-soft">
+                  <div class="px-3 py-2 text-[11px] font-semibold uppercase tracking-[.12em] text-[#525252]">Active Site</div>
                   <form method="POST" action="{{ route('admin.sites.switch') }}" class="grid gap-1">
                     @csrf
                     <button name="site_id" value="" class="flex items-center justify-between rounded-xl px-3 py-2 text-left text-sm hover:bg-ivory-100"><span>ALL SITES</span>@if(!$navbarActiveSite)<span class="text-maroon-700">✓</span>@endif</button>
@@ -196,7 +197,7 @@
 
             @if($navbarUser)
               <div x-data="{open:false}" class="relative">
-                <button type="button" @click="open=!open" @click.outside="open=false" class="inline-flex items-center gap-2 rounded-xl border border-coal-200 bg-white px-2 py-1.5 text-left hover:bg-ivory-100" aria-label="Buka profil akun">
+                <button type="button" @click="open=!open" @click.outside="open=false" class="inline-flex items-center gap-2 rounded-lg border border-[#C5C5C5] bg-white px-2 py-1.5 text-left text-[#111111] hover:bg-[#F5F5F5]" aria-label="Buka profil akun">
                   @if($navbarUser->avatar_path)
                     <img src="{{ asset('storage/'.$navbarUser->avatar_path) }}" alt="" class="h-8 w-8 rounded-lg object-cover">
                   @else
@@ -205,7 +206,7 @@
                   <span class="hidden max-w-[10rem] truncate text-sm font-medium sm:block">{{ $navbarUser->name }}</span>
                   <svg class="hidden h-4 w-4 text-coal-400 sm:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
                 </button>
-                <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-80 rounded-2xl border border-coal-200 bg-white p-4 shadow-xl">
+                <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-80 rounded-xl border border-[#C5C5C5] bg-white p-4 shadow-soft">
                   <div class="flex items-center gap-3 border-b border-coal-100 pb-4">
                     @if($navbarUser->avatar_path)
                       <img src="{{ asset('storage/'.$navbarUser->avatar_path) }}" alt="Foto {{ $navbarUser->name }}" class="h-14 w-14 rounded-2xl object-cover">
@@ -239,12 +240,12 @@
   </div>
 
   @if(session('ok') || session('success') || session('error') || $errors->any())
-    <div x-data="{show:true}" x-show="show" x-transition class="fixed right-4 top-4 z-[100] w-[min(92vw,26rem)] rounded-2xl border bg-white p-4 shadow-xl" role="status" aria-live="polite">
+    <div x-data="{show:true}" x-show="show" x-transition class="toast fixed right-4 top-4 z-[100] w-[min(92vw,26rem)] {{ session('error') || $errors->any() ? 'toast-error' : 'toast-success' }}" role="status" aria-live="polite">
       <div class="flex items-start gap-3">
-        <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ session('error') || $errors->any() ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' }}">
+        <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-current text-sm font-bold">
           @if(session('error') || $errors->any()) ! @else ✓ @endif
         </div>
-        <div class="min-w-0 flex-1 text-sm {{ session('error') || $errors->any() ? 'text-rose-800' : 'text-emerald-800' }}">
+        <div class="min-w-0 flex-1 text-sm">
           @if($errors->any())
             <div class="font-semibold">Periksa input</div>
             <div class="mt-1">{{ $errors->first() }}</div>
@@ -267,6 +268,14 @@
       const form = event.target;
       const message = form?.dataset?.confirm;
       if (message && !window.confirm(message)) event.preventDefault();
+      if (event.defaultPrevented) return;
+      const submitter = event.submitter || form?.querySelector('button[type="submit"]');
+      if (submitter && !submitter.disabled) {
+        submitter.disabled = true;
+        submitter.classList.add('is-loading');
+        submitter.setAttribute('aria-busy', 'true');
+        submitter.innerHTML = '<span class="loading-spinner" aria-hidden="true"></span><span>Memproses…</span>';
+      }
     });
   </script>
 </body>

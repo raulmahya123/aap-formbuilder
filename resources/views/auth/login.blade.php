@@ -7,42 +7,8 @@
   <link rel="icon" type="image/png" href="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}">
   <title>Login — Andalan Group</title>
 
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            ivory: {
-              100: '#F7F5F0'
-            },
-            maroon: {
-              900: '#bb9974',
-              800: '#bb9974',
-              700: '#bb9974',
-              600: '#bb9974',
-              500: '#bb9974',
-              400: '#bb9974',
-              300: '#bb9974',
-              200: '#bb9974',
-              100: '#bb9974',
-              50: '#bb9974',
-            },
-            gold: '#D4AF37',
-          },
-          fontFamily: {
-            serif: ['"Playfair Display"', 'serif'],
-            sans: ['Poppins', 'sans-serif']
-          },
-          dropShadow: {
-            gold: '0 0 12px rgba(212,175,55,.35)'
-          }
-        }
-      }
-    }
-  </script>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#603813">
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <style>
     @media (min-width: 768px) and (max-height: 780px) {
       .login-brand-copy {
@@ -83,7 +49,7 @@
   </style>
 </head>
 
-<body class="grid min-h-screen font-sans md:grid-cols-12 bg-gradient-to-t from-maroon-900 via-maroon-600 to-maroon-300 text-ivory-100">
+<body class="grid min-h-screen bg-[#603813] font-sans text-white md:grid-cols-12">
 
   <!-- LEFT BRANDING + EFFORT -->
   <div class="relative hidden overflow-hidden shadow-2xl md:block md:col-span-7 login-brand-panel ring-1 ring-black/10">
@@ -110,7 +76,7 @@
           Spesialis nikel, overburden, hauling, mine plan, compliance & ESG.<br>
           Kami menambang dengan presisi & integritas.
         </p>
-        <div class="mt-8 mx-auto h-[3px] w-52 bg-gradient-to-r from-gold to-transparent drop-shadow-gold login-brand-rule"></div>
+        <div class="login-brand-rule mx-auto mt-8 h-[3px] w-52 bg-[#D4AF37]"></div>
       </div>
 
 
@@ -125,7 +91,7 @@
 
         <!-- Dekor garis emas tipis -->
         <div class="relative">
-          <div class="pointer-events-none absolute -top-3 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-gold/60 to-transparent"></div>
+          <div class="pointer-events-none absolute -top-3 left-0 right-0 h-px bg-[#D4AF37]"></div>
 
           <!-- Grid lingkaran E F F O R T -->
           <div class="grid grid-cols-3 gap-6 sm:grid-cols-6 login-value-grid">
@@ -202,7 +168,7 @@
           </div>
 
           <!-- Garis dekor bawah -->
-          <div class="pointer-events-none mt-8 h-[1px] bg-gradient-to-r from-transparent via-gold/60 to-transparent"></div>
+          <div class="pointer-events-none mt-8 h-px bg-[#D4AF37]"></div>
         </div>
       </div>
     </div>

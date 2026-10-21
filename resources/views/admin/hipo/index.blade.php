@@ -6,7 +6,7 @@
     {{-- HEADER --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">⚠️ HIPO / Nearmiss</h1>
+            <h1 class="flex items-center gap-2 text-2xl font-bold text-gray-800"><x-ui-icon name="warning" class="h-6 w-6 text-[#603813]" /> HIPO / Nearmiss</h1>
             <p class="text-sm text-gray-500">Daftar laporan HIPO & Nearmiss</p>
         </div>
 
@@ -141,7 +141,7 @@
                                     @method('DELETE')
                                     <button type="submit"
                                             class="action-icon danger" title="Hapus" aria-label="Hapus">
-                                        🗑️
+                                        <x-ui-icon name="trash" class="h-4 w-4" />
                                     </button>
                                 </form>
                             </div>

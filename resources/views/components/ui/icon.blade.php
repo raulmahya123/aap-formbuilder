@@ -23,6 +23,9 @@
     'shield' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3 20 6v5c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-3Zm-3 9 2 2 4-4"/>',
     'location' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/>',
     'input' => '<path stroke-linecap="round" stroke-linejoin="round" d="M5 4h14v16H5V4Zm3 4h8M8 12h5m-5 4h8"/>',
+    'eye' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/>',
+    'edit' => '<path stroke-linecap="round" stroke-linejoin="round" d="m4 16.5-.8 4.3 4.3-.8L19 8.5a2.1 2.1 0 0 0-3-3L4 16.5Z"/><path stroke-linecap="round" d="m14.5 7.5 2 2"/>',
+    'trash' => '<path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14m-9 4v6m4-6v6M9 7V4h6v3m-9 0 1 14h10l1-14"/>',
   ];
 @endphp
 <svg {{ $attributes->merge(['class' => $class]) }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">

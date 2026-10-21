@@ -1,3 +1,167 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --surface: #ffffff;
+    --surface-secondary: #f5f5f5;
+    --brand-primary: #603813;
+    --brand-hover: #4a2c10;
+    --text-primary: #111111;
+    --text-secondary: #303030;
+    --text-muted: #525252;
+    --border: #c5c5c5;
+    --border-strong: #777777;
+    --action-primary: #0057d9;
+    --action-primary-hover: #0045ad;
+    --action-danger: #c8102e;
+    --action-danger-hover: #a30d26;
+    --action-secondary: #303030;
+  }
+
+  html { background: var(--background); }
+  body { color: var(--text-primary); background: var(--background); }
+  [x-cloak] { display: none !important; }
+  :where(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid var(--action-primary); outline-offset: 2px; }
+  button, [role='button'] { -webkit-tap-highlight-color: transparent; }
+}
+
+@layer components {
+  .btn-primary,
+  main button.bg-maroon-700,
+  main a.bg-maroon-700 {
+    @apply inline-flex items-center justify-center gap-2 border border-transparent bg-[#0057D9] px-4 py-2 text-sm font-semibold text-white transition;
+    min-height: 2.5rem;
+    border-radius: 0.5rem;
+  }
+  .btn-primary:hover,
+  main button.bg-maroon-700:hover,
+  main a.bg-maroon-700:hover { background: #0045ad !important; }
+  .btn-primary:focus-visible,
+  main button.bg-maroon-700:focus-visible,
+  main a.bg-maroon-700:focus-visible { @apply outline-none ring-2 ring-[#0057D9] ring-offset-2; }
+
+  /* Legacy module classes are normalized here so older screens follow the same design system. */
+  main button.bg-maroon-600,
+  main a.bg-maroon-600,
+  main button.bg-emerald-600,
+  main a.bg-emerald-600 { @apply border-transparent bg-[#0057D9] text-white; }
+  main button.bg-blue-600,
+  main a.bg-blue-600,
+  main button.bg-blue-700,
+  main a.bg-blue-700 { @apply border-transparent bg-[#0057D9] text-white; }
+  main button.bg-maroon-600:hover,
+  main a.bg-maroon-600:hover,
+  main button.bg-emerald-600:hover,
+  main a.bg-emerald-600:hover { background: #0045ad !important; }
+  main button.bg-blue-600:hover,
+  main a.bg-blue-600:hover,
+  main button.bg-blue-700:hover,
+  main a.bg-blue-700:hover { background: #0045ad !important; }
+  main button.bg-rose-600,
+  main a.bg-rose-600,
+  main button.bg-red-600,
+  main a.bg-red-600 { @apply border-transparent bg-[#C8102E] text-white; }
+  main button.bg-rose-600:hover,
+  main a.bg-rose-600:hover,
+  main button.bg-red-600:hover,
+  main a.bg-red-600:hover { background: #a30d26 !important; }
+
+  .btn-primary:disabled,
+  .btn-secondary:disabled,
+  .btn-danger:disabled,
+  .btn-ghost:disabled { @apply cursor-not-allowed opacity-50; }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 border border-[#303030] bg-white px-4 py-2 text-sm font-semibold text-[#303030] transition;
+    min-height: 2.5rem;
+    border-radius: 0.5rem;
+  }
+  .btn-secondary:hover { @apply bg-[#f5f5f5]; }
+  .btn-secondary:focus-visible { @apply outline-none ring-2 ring-[#0057D9] ring-offset-2; }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 border border-transparent bg-[#C8102E] px-4 py-2 text-sm font-semibold text-white transition;
+    min-height: 2.5rem;
+    border-radius: 0.5rem;
+  }
+  .btn-danger:hover { background: #a30d26; }
+  .btn-danger:focus-visible { @apply outline-none ring-2 ring-[#C8102E] ring-offset-2; }
+
+  .btn-ghost {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-3 py-2 text-sm font-semibold text-[#303030] transition;
+  }
+  .btn-ghost:hover { @apply bg-[#f5f5f5] text-[#111111]; }
+  .btn-ghost:focus-visible { @apply outline-none ring-2 ring-[#0057D9] ring-offset-2; }
+
+  main input:not([type='checkbox']):not([type='radio']):not([type='file']),
+  main select,
+  main textarea {
+    @apply border-[#C5C5C5] bg-white text-[#111111] shadow-none;
+    border-radius: 0.5rem;
+  }
+  main input:not([type='checkbox']):not([type='radio']):not([type='file']):focus,
+  main select:focus,
+  main textarea:focus { @apply border-[#0057D9] ring-1 ring-[#0057D9]; }
+
+  main input:disabled,
+  main select:disabled,
+  main textarea:disabled { @apply cursor-not-allowed bg-[#f5f5f5] text-[#777777]; }
+  main input[type='checkbox'],
+  main input[type='radio'] { @apply accent-[#0057D9]; }
+  main input[type='file'] { @apply block w-full text-sm text-[#303030] file:mr-4 file:rounded-lg file:border-0 file:bg-[#f5f5f5] file:px-3 file:py-2 file:font-semibold file:text-[#303030] hover:file:bg-[#e5e5e5]; }
+
+  .form-hint { @apply mt-1 text-xs text-[#525252]; }
+  .form-error { @apply mt-1 text-sm font-medium text-[#C8102E]; }
+
+  main table { @apply w-full border-collapse bg-white; }
+  main table thead th { @apply border-y border-[#777777] bg-white px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[#111111]; background-color: #fff !important; color: #111 !important; }
+  main table tbody td { @apply border-b border-[#e5e5e5] px-4 py-3 text-sm text-[#303030]; }
+  main table tbody tr:hover { @apply bg-[#f5f5f5]; }
+  main table tbody tr { @apply transition-colors; }
+
+  main nav[role='navigation'] { @apply flex flex-wrap items-center gap-1; }
+  main nav[role='navigation'] a,
+  main nav[role='navigation'] span { @apply inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg border border-[#C5C5C5] bg-white px-3 py-1.5 text-sm text-[#303030] transition; }
+  main nav[role='navigation'] a:hover { @apply bg-[#f5f5f5] text-[#111111]; }
+  main nav[role='navigation'] span[aria-current='page'] { @apply border-[#0057D9] bg-[#0057D9] font-semibold text-white; }
+  main nav[role='navigation'] span[aria-disabled='true'] { @apply cursor-not-allowed opacity-50; }
+
+  .table-shell { @apply overflow-hidden rounded-lg border border-[#C5C5C5] bg-white; }
+  .table-scroll { @apply overflow-x-auto; }
+  .empty-state { @apply border border-dashed border-[#C5C5C5] bg-white px-6 py-12 text-center text-sm text-[#525252]; }
+  .filter-bar { @apply flex flex-wrap items-end gap-3 rounded-lg border border-[#C5C5C5] bg-white p-4; }
+  main form button[type='submit'] { min-height: 2.5rem; border-radius: .5rem; }
+
+  .modal-overlay { background: rgba(17, 17, 17, 0.58); }
+  .modal-panel { @apply overflow-hidden rounded-lg border border-[#C5C5C5] bg-white shadow-soft; }
+
+  .skeleton { @apply animate-pulse rounded bg-[#e5e5e5]; }
+  .loading-spinner { @apply inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent; }
+  .is-loading { @apply cursor-wait opacity-70; }
+  .toast { @apply rounded-lg border bg-white p-4 shadow-soft; }
+  .toast-success { @apply border-[#0057D9] text-[#003b94]; }
+  .toast-error { @apply border-[#C8102E] text-[#8e0b21]; }
+
+  .pagination > * { border-color: #c5c5c5; color: #303030; background: #fff; border-radius: 0.5rem; }
+  .pagination .active { background: #0057d9; color: #fff; border-color: #0057d9; }
+}
+
+@media (max-width: 640px) {
+  main { padding-left: 1rem !important; padding-right: 1rem !important; }
+  main table thead th,
+  main table tbody td { padding-left: .75rem; padding-right: .75rem; }
+  main nav[role='navigation'] a,
+  main nav[role='navigation'] span { min-width: 2.25rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

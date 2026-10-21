@@ -15,7 +15,7 @@
 {{-- HEADER --}}
 <div class="flex items-center justify-between">
     <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-2xl">⚠️</div>
+        <div class="flex h-12 w-12 items-center justify-center rounded-xl border border-[#C5C5C5] text-[#603813]"><x-ui-icon name="warning" class="h-6 w-6" /></div>
         <div>
             <h1 class="text-xl font-bold">Detail HIPO / Nearmiss</h1>
             <p class="text-sm">High Potential Hazard Report</p>

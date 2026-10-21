@@ -6,7 +6,7 @@
     {{-- HEADER --}}
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">🧯 Critical Control Management</h1>
+            <h1 class="flex items-center gap-2 text-2xl font-bold text-gray-800"><x-ui-icon name="shield" class="h-6 w-6 text-[#603813]" /> Critical Control Management</h1>
             <p class="text-sm text-gray-500">Daftar Laporan Pengendalian Risiko Kritis</p>
         </div>
 
@@ -56,7 +56,7 @@
                         <td class="p-4 text-center text-lg">
                             <div class="flex items-center justify-center space-x-1">
                                 @if($r->kendaraan_ada_kegiatan) <span title="Kendaraan">🚚</span> @endif
-                                @if($r->izin_kerja_ada) <span title="Izin Kerja">📄</span> @endif
+                                @if($r->izin_kerja_ada) <span title="Izin Kerja"><x-ui-icon name="file" class="h-5 w-5" /></span> @endif
                                 @if($r->tebing_ada) <span title="Tebing">⛰️</span> @endif
                                 @if($r->air_lumpur_ada) <span title="Air & Lumpur">💧</span> @endif
                                 @if($r->chainsaw_ada) <span title="Chainsaw">🪚</span> @endif
@@ -95,19 +95,19 @@
                             <div class="flex items-center justify-center gap-3">
                                 <a href="{{ route('ccm-reports.show', $r->id) }}" 
                                    class="action-icon" title="Lihat detail" aria-label="Lihat detail">
-                                    👁️
+                                    <x-ui-icon name="eye" class="h-4 w-4" />
                                 </a>
                                 
                                 <a href="{{ route('ccm-reports.edit', $r->id) }}" 
                                    class="action-icon" title="Ubah data" aria-label="Ubah data">
-                                    ✏️
+                                    <x-ui-icon name="edit" class="h-4 w-4" />
                                 </a>
 
                                 <form action="{{ route('ccm-reports.destroy', $r->id) }}" method="POST" data-confirm="Hapus laporan ini?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="action-icon danger" title="Hapus laporan" aria-label="Hapus laporan">
-                                        🗑️
+                                        <x-ui-icon name="trash" class="h-4 w-4" />
                                     </button>
                                 </form>
                             </div>
@@ -117,7 +117,7 @@
                     <tr>
                         <td colspan="6" class="p-10 text-center text-gray-500">
                             <div class="flex flex-col items-center">
-                                <span class="text-4xl mb-2">📁</span>
+                                <x-ui-icon name="file" class="mb-2 h-10 w-10 text-[#777777]" />
                                 <p>Belum ada data laporan CCM yang tersimpan.</p>
                             </div>
                         </td>

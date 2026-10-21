@@ -6,7 +6,7 @@
     {{-- HEADER --}}
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">🧯 Detail CCM Report</h1>
+        <h1 class="flex items-center gap-2 text-2xl font-bold text-gray-800"><x-ui-icon name="shield" class="h-6 w-6 text-[#603813]" /> Detail CCM Report</h1>
             <p class="text-sm font-medium text-gray-500">ID Laporan: #{{ $report->id }}</p>
         </div>
         <div class="flex gap-2">
@@ -69,15 +69,15 @@
     {{-- ================= SECTION CCM ================= --}}
     @php
     $sections = [
-        'kendaraan' => '🚚 Kendaraan & Alat Berat',
-        'izin_kerja' => '📄 Izin Kerja',
-        'tebing' => '⛰️ Tebing / Disposal',
-        'air_lumpur' => '💧 Air & Lumpur',
-        'chainsaw' => '🪚 Chainsaw',
-        'loto' => '🔒 LOTO & Penanganan Ban',
-        'lifting' => '🏗️ Lifting',
-        'blasting' => '💥 Blasting',
-        'kritis_baru' => '🆕 Pekerjaan Kritis Baru',
+        'kendaraan' => 'Kendaraan & Alat Berat',
+        'izin_kerja' => 'Izin Kerja',
+        'tebing' => 'Tebing / Disposal',
+        'air_lumpur' => 'Air & Lumpur',
+        'chainsaw' => 'Chainsaw',
+        'loto' => 'LOTO & Penanganan Ban',
+        'lifting' => 'Lifting',
+        'blasting' => 'Blasting',
+        'kritis_baru' => 'Pekerjaan Kritis Baru',
     ];
     @endphp
 
