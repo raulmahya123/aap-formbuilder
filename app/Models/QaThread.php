@@ -11,6 +11,7 @@ class QaThread extends Model
         'subject',
         'scope',
         'department_id',
+        'site_id',
         'created_by',
         'status',
         'last_message_at',
@@ -24,6 +25,11 @@ class QaThread extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function site(): BelongsTo
+    {
+        return $this->belongsTo(Site::class);
     }
 
     /** Pesan dalam thread */

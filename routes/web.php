@@ -480,6 +480,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/', [QaThreadController::class, 'store'])->name('store');
             Route::get('/{thread}', [QaThreadController::class, 'show'])->name('show')->whereNumber('thread');
             Route::post('/{thread}/messages', [QaMessageController::class, 'store'])->name('messages.store')->whereNumber('thread');
+            Route::get('/messages/{message}/attachments/{index}', [QaMessageController::class, 'downloadAttachment'])->name('messages.attachments.download')->whereNumber(['message', 'index']);
             Route::post('/{thread}/resolve', [QaThreadController::class, 'resolve'])->name('resolve')->whereNumber('thread');
         });
 

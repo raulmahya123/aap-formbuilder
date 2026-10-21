@@ -22,6 +22,10 @@ class QaThreadPolicy
      */
     public function view(User $user, QaThread $thread): bool
     {
+        if ($thread->site_id && !$user->hasSiteAccess((int) $thread->site_id)) {
+            return false;
+        }
+
         if ($thread->scope === 'public') {
             return true;
         }
@@ -49,6 +53,10 @@ class QaThreadPolicy
      */
     public function reply(User $user, QaThread $thread): bool
     {
+        if ($thread->site_id && !$user->hasSiteAccess((int) $thread->site_id)) {
+            return false;
+        }
+
         if ($thread->scope === 'public') {
             return (bool) ($user->is_active ?? true);
         }

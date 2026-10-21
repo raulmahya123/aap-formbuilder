@@ -61,24 +61,15 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
 
   <div x-show="!sidebarCollapsed" x-cloak class="flex min-h-0 flex-1 flex-col">
 
-  {{-- USER --}}
-  @auth
-  <div class="px-4 py-4 border-b border-coal-200 bg-ivory-50/70">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-full bg-maroon-700 text-ivory-50 flex items-center justify-center text-sm font-semibold">
-        {{ strtoupper(Str::of(auth()->user()->name)->explode(' ')->map(fn($s)=>Str::substr($s,0,1))->take(2)->implode('')) }}
-      </div>
-      <div class="min-w-0">
-        <div class="text-sm font-semibold truncate">{{ auth()->user()->name }}</div>
-        <div class="text-xs text-coal-500 truncate">{{ auth()->user()->email ?? '' }}</div>
-      </div>
-    </div>
-    <button type="button" @click="toggleSidebarCollapse()" class="mt-4 hidden w-full items-center justify-center gap-2 rounded-xl border border-coal-200 px-3 py-2 text-xs text-coal-600 hover:bg-white lg:flex" title="Ciutkan sidebar">
+  {{-- BRAND --}}
+  <div class="flex items-center justify-between border-b border-coal-200 bg-ivory-50/70 px-4 py-4">
+    <a href="{{ $homeUrl }}" class="inline-flex items-center" aria-label="Mandala">
+      <img src="{{ asset('assets/images/logomandala.png') }}" alt="Mandala" class="h-10 w-auto max-w-[9rem] object-contain">
+    </a>
+    <button type="button" @click="toggleSidebarCollapse()" class="hidden h-9 w-9 items-center justify-center rounded-xl border border-coal-200 bg-white text-coal-600 hover:bg-ivory-100 lg:inline-flex" title="Ciutkan sidebar" aria-label="Ciutkan sidebar">
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5l-7 7 7 7M4 12h16"/></svg>
-      Ciutkan menu
     </button>
   </div>
-  @endauth
 
 
   {{-- MENU --}}
