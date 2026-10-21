@@ -38,8 +38,8 @@
         <div 
           x-data="{
             slides: [
-              '{{ asset('assets/images/foto2.png') }}',
-              '{{ asset('assets/images/foto.png') }}'
+              '{{ asset('assets/images/foto1.png') }}',
+              '{{ asset('assets/images/foto2.png') }}'
             ],
             currentSlide: 0,
             init() {

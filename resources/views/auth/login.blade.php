@@ -178,7 +178,6 @@
         <img src="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}" alt="Andalan Group" class="h-4 w-auto object-contain" />
         <span class="font-bold text-[#111827]">Andalan Group</span>
       </div>
-      <p class="text-[11px] text-[#94A3B8]">Copyright © 2026 Andalan Group. Seluruh hak cipta dilindungi.</p>
     </div>
   </div>
 </x-guest-layout>

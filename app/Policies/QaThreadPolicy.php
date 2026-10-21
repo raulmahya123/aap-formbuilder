@@ -27,8 +27,8 @@ class QaThreadPolicy
             return false;
         }
 
-        // Cek batasan site jika thread terikat site
-        if ($thread->site_id && !$user->hasSiteAccess((int) $thread->site_id)) {
+        // Cek batasan site jika thread terikat site (hanya untuk non-personal / group / site channels)
+        if ($thread->type !== 'personal' && $thread->site_id && !$user->hasSiteAccess((int) $thread->site_id)) {
             return false;
         }
 

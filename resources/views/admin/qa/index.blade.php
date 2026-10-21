@@ -1405,6 +1405,8 @@ function mandalaChat(config) {
     },
 
     async loadThreadById(threadId) {
+      this.loadingMessages = true;
+      this.replyingTo = null;
       try {
         const res = await fetch(`/admin/qa/${threadId}/messages`);
         const data = await res.json();
@@ -1417,6 +1419,8 @@ function mandalaChat(config) {
         }
       } catch (e) {
         console.error(e);
+      } finally {
+        this.loadingMessages = false;
       }
     },
 
@@ -1638,12 +1642,16 @@ function mandalaChat(config) {
           body: JSON.stringify({ recipient_id: emp.id }),
         });
         const data = await res.json();
-        if (data.success) {
+        if (data.success && data.thread_id) {
+          // Immediately set active thread info
+          await this.loadThreadById(data.thread_id);
           await this.fetchConversations();
-          this.loadThreadById(data.thread_id);
+          this.$nextTick(() => {
+            this.$refs.messageInput?.focus();
+          });
         }
       } catch (e) {
-        console.error(e);
+        console.error('Failed to start personal chat', e);
       }
     },
 

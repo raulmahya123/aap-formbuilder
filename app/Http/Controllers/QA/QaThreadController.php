@@ -71,9 +71,13 @@ class QaThreadController extends Controller
                 });
             })
             ->when(is_array($allowedSiteIds), fn ($q) => $q->where(function ($siteQuery) use ($allowedSiteIds) {
-                $siteQuery->whereNull('site_id')->orWhereIn('site_id', $allowedSiteIds ?: [-1]);
+                $siteQuery->where('type', 'personal')
+                          ->orWhereNull('site_id')
+                          ->orWhereIn('site_id', $allowedSiteIds ?: [-1]);
             }))
-            ->when($siteId > 0 && $user->hasSiteAccess($siteId), fn ($q) => $q->where('site_id', $siteId));
+            ->when($siteId > 0 && $user->hasSiteAccess($siteId), fn ($q) => $q->where(function ($sub) use ($siteId) {
+                $sub->where('type', 'personal')->orWhere('site_id', $siteId);
+            }));
 
         // Filter tab
         if ($tab === 'personal') {
@@ -307,6 +311,8 @@ class QaThreadController extends Controller
                 'group_type'    => $thread->group_type,
                 'status'        => $thread->status,
                 'site'          => $thread->site ? ['id' => $thread->site->id, 'code' => $thread->site->code, 'name' => $thread->site->name] : null,
+                'avatar_url'    => ($thread->type === 'personal' && $otherUser) ? $otherUser['avatar_url'] : ($thread->avatar_path ? asset('storage/' . $thread->avatar_path) : null),
+                'initials'      => strtoupper(substr($displayName, 0, 2)),
                 'department'    => $thread->department ? ['id' => $thread->department->id, 'name' => $thread->department->name] : null,
                 'company'       => $thread->company ? ['id' => $thread->company->id, 'name' => $thread->company->name] : null,
                 'member_count'  => $thread->participants->count(),
@@ -349,17 +355,13 @@ class QaThreadController extends Controller
         $thread = QaThread::where('direct_hash', $directHash)->first();
 
         if (!$thread) {
-            // Tentukan site_id konteks (dari shared site atau user site)
-            $sharedSiteId = $user->sites()->whereIn('sites.id', $recipient->sites()->pluck('sites.id'))->value('sites.id')
-                ?? $user->sites()->value('sites.id');
-
-            DB::transaction(function () use (&$thread, $user, $recipient, $directHash, $sharedSiteId) {
+            DB::transaction(function () use (&$thread, $user, $recipient, $directHash) {
                 $thread = QaThread::create([
                     'subject'         => $recipient->name,
                     'type'            => 'personal',
                     'scope'           => 'private',
                     'direct_hash'     => $directHash,
-                    'site_id'         => $sharedSiteId,
+                    'site_id'         => null,
                     'created_by'      => $user->id,
                     'status'          => 'open',
                     'last_message_at' => now(),

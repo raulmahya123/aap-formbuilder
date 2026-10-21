@@ -63,8 +63,10 @@ class QaMessageController extends Controller
 
             $thread->update(['last_message_at' => now()]);
 
-            // Update user read pointer
-            $thread->participants()->updateExistingPivot($user->id, ['last_read_at' => now()]);
+            // Update user read pointer safely
+            $thread->participants()->syncWithoutDetaching([
+                $user->id => ['last_read_at' => now()]
+            ]);
         });
 
         $message->load(['user:id,name,role,avatar_path', 'parent.user:id,name', 'reactions']);
