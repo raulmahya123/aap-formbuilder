@@ -1,6 +1,8 @@
 @props(['name', 'class' => 'h-5 w-5'])
 @php
   $paths = [
+    'x' => '<path stroke-linecap="round" stroke-linejoin="round" d="m6 6 12 12M6 18 18 6"/>',
+    'menu' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>',
     'dashboard' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 13h7V3H3v10Zm11 8h7V11h-7v10ZM3 21h7v-4H3v4Zm11-10h7V3h-7v8Z"/>',
     'wellness' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21c5-3 8-7.5 8-12a4 4 0 0 0-8-1.5A4 4 0 0 0 4 9c0 4.5 3 9 8 12Zm0-12v8m0-4 4-3m-4 1-3-2"/>',
     'department' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4 21V5l8-3 8 3v16M4 9h16M8 21v-4h8v4M8 13h.01M12 13h.01M16 13h.01"/>',

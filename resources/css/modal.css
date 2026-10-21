@@ -3,14 +3,14 @@
 /* Base modal */
 .ui-modal {
   position: fixed; inset: 0; margin: auto;
-  max-height: calc(100dvh - 64px); display: flex; flex-direction: column;
+  max-height: calc(100dvh - 64px); display: none; flex-direction: column;
   border: 1px solid var(--border); border-radius: var(--modal-radius, 12px);
   background: var(--surface); color: var(--text-primary);
   box-shadow: 0 20px 48px -8px rgb(24 24 27 / .24); padding: 0;
   overflow: hidden;
 }
 .ui-modal::backdrop { background: rgb(24 24 27 / .55); backdrop-filter: blur(2px); }
-.ui-modal[open] { animation: ui-modal-in .2s ease-out; }
+.ui-modal[open] { display: flex; animation: ui-modal-in .2s ease-out; }
 @keyframes ui-modal-in {
   from { opacity: 0; transform: translateY(12px) scale(.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }

@@ -1,4 +1,5 @@
 // Shared action controls preserve native forms, validation, named submitters and policy-gated markup.
+import { openDialog } from './ui-dialogs';
 const originalButtonContent = new WeakMap();
 document.addEventListener('change', event => {
     if (event.target.matches('[data-site-selector] select')) event.target.form.requestSubmit();
@@ -86,7 +87,7 @@ document.addEventListener('submit', event => {
                 confirmButton.classList.toggle('ui-button--primary', !destructive);
             }
 
-            dialog.showModal();
+            openDialog(dialog);
             dialog.querySelector('[data-dialog-cancel]')?.focus();
             return;
         }
@@ -141,7 +142,7 @@ document.addEventListener('click', event => {
         delete form.dataset.uiSubmitting;
         form.action = trigger.dataset.resetUrl;
         dialog.querySelector('[data-reset-name]').textContent = trigger.dataset.resetUser;
-        dialog.showModal();
+        openDialog(dialog);
         form.querySelector('[name="password"]').focus();
     }
 });

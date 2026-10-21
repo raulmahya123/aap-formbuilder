@@ -3,7 +3,8 @@
 <html
   lang="{{ str_replace('_','-', app()->getLocale()) }}"
   x-data="layout()"
-  @keydown.escape.window="sidebarOpen = false"
+  @keydown.escape.window="if (sidebarOpen) { sidebarOpen = false; $nextTick(() => document.getElementById('navigation-toggle').focus()); }"
+  @keydown.tab.window="trapDrawerFocus($event)"
   @resize.window="isDesktop = window.innerWidth >= 1024; if (isDesktop) sidebarOpen = false; else sidebarCollapsed = false"
   class="scroll-smooth"
 >
@@ -12,6 +13,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="theme-color" content="#713F12">
+  {{-- Critical visibility rules must work before assets load or with cached CSS. --}}
+  <style>dialog.ui-modal:not([open]),dialog.ui-modal [hidden]{display:none!important}dialog.ui-modal[open]{display:flex}</style>
   <link rel="icon" type="image/png" href="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}">
   <link rel="apple-touch-icon" href="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}">
   <title>@yield('title', config('app.name', 'AAP FormBuilder'))</title>
@@ -30,8 +33,21 @@
         sidebarCollapsed: localStorage.getItem('aap-sidebar-collapsed') === '1',
         init() {
           if (window.innerWidth < 1024) this.sidebarCollapsed = false;
+          this.$watch('sidebarOpen', value => { document.body.style.overflow = value && !this.isDesktop ? 'hidden' : ''; });
+          this.$watch('isDesktop', () => { document.body.style.overflow = ''; });
         },
-        toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; },
+        toggleSidebar() {
+          this.sidebarOpen = !this.sidebarOpen;
+          if (this.sidebarOpen) this.$nextTick(() => document.querySelector('#app-sidebar a')?.focus());
+        },
+        trapDrawerFocus(event) {
+          if (this.isDesktop || !this.sidebarOpen) return;
+          const controls = [...document.querySelectorAll('#app-sidebar a, #app-sidebar button')].filter(el => el.getClientRects().length);
+          const first = controls[0], last = controls[controls.length - 1];
+          if (!first) return;
+          if (event.shiftKey && (document.activeElement === first || !document.getElementById('app-sidebar').contains(document.activeElement))) { event.preventDefault(); last.focus(); }
+          else if (!event.shiftKey && (document.activeElement === last || !document.getElementById('app-sidebar').contains(document.activeElement))) { event.preventDefault(); first.focus(); }
+        },
         toggleSidebarCollapse() {
           this.sidebarCollapsed = !this.sidebarCollapsed;
           localStorage.setItem('aap-sidebar-collapsed', this.sidebarCollapsed ? '1' : '0');
@@ -50,22 +66,6 @@
 <body class="ui-shell min-h-screen bg-white text-coal-900">
   <a class="ui-skip" href="#main-content">Lewati ke konten</a>
 
-  {{-- ===== Mobile hamburger (tanpa topbar) ===== --}}
-  <div class="lg:hidden fixed top-3 left-3 z-[60]">
-    <button
-      type="button"
-      @click="toggleSidebar()"
-      aria-label="Open menu"
-      :aria-expanded="sidebarOpen"
-      class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#D4D4D8] bg-white text-[#18181B] hover:bg-[#F4F4F5] transition"
-    >
-      <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"/>
-      </svg>
-    </button>
-  </div>
-
   {{-- ===== Grid 2 kolom: Sidebar kiri + Konten kanan ===== --}}
   <div class="max-w-[100vw] mx-auto lg:grid" :class="sidebarCollapsed ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[256px_minmax(0,1fr)]'">
 
@@ -73,7 +73,7 @@
     @include('layouts.navigation')
 
     {{-- ===== Konten ===== --}}
-    <div class="min-h-screen min-w-0 flex flex-col">
+    <div class="min-h-screen min-w-0 flex flex-col" :inert="sidebarOpen && !isDesktop">
 
       @php
         $navbarUser = auth()->user();
@@ -88,16 +88,12 @@
 
       {{-- Navbar --}}
       <header class="ui-topbar sticky top-0 z-30 border-b border-[#D4D4D8] bg-white px-4 py-3 lg:px-8">
-        <div class="flex min-h-10 items-center justify-between gap-4">
+        <div class="ui-topbar__inner flex min-w-0 items-center justify-between gap-3">
           <div class="flex min-w-0 items-center gap-3">
-            <button type="button" @click="toggleSidebarCollapse()" class="hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-coal-200 bg-white text-coal-700 hover:bg-ivory-100 lg:inline-flex" title="Buka/tutup sidebar" aria-label="Buka/tutup sidebar">
-              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <button id="navigation-toggle" type="button" @click="isDesktop ? toggleSidebarCollapse() : toggleSidebar()" class="ui-shell-toggle" aria-controls="app-sidebar" :aria-expanded="isDesktop ? !sidebarCollapsed : sidebarOpen" aria-label="Buka/tutup navigasi" title="Buka/tutup navigasi">
+              <x-ui.icon name="menu" />
             </button>
-            <div class="hidden text-sm font-semibold text-[#713F12] sm:block">AAP Form Builder</div>
-            <div class="h-5 w-px bg-[#D4D4D8]"></div>
-            <div class="ui-breadcrumb min-w-0 truncate text-[#18181B]">
-              {{ trim($__env->yieldContent('title')) ?: 'Dashboard' }}
-            </div>
+            <span class="ui-app-name truncate text-sm font-semibold text-[#18181B]">Mandala</span>
           </div>
 
           <div class="flex items-center gap-2 sm:gap-3">
@@ -120,7 +116,7 @@
 
             @if($navbarUser)
               <div x-data="{open:false}" class="relative">
-                <button type="button" @click="open=!open" @click.outside="open=false" class="inline-flex items-center gap-2 rounded-lg border border-[#D4D4D8] bg-white px-2 py-2 text-left text-[#18181B] hover:bg-[#F4F4F5]" aria-label="Buka profil akun">
+                <button type="button" @click="open=!open" @click.outside="open=false" class="ui-account-toggle inline-flex items-center gap-2 rounded-lg border border-[#D4D4D8] bg-white px-2 text-left text-[#18181B] hover:bg-[#F4F4F5]" aria-label="Buka profil akun" x-ref="accountButton" aria-controls="account-dropdown" :aria-expanded="open" @keydown.escape.stop="open=false; $el.focus()">
                   @if($navbarUser->avatar_path)
                     <img src="{{ asset('storage/'.$navbarUser->avatar_path) }}" alt="" class="h-8 w-8 rounded-lg object-cover">
                   @else
@@ -129,7 +125,7 @@
                   <span class="hidden max-w-[10rem] truncate text-sm font-medium sm:block">{{ $navbarUser->name }}</span>
                   <svg class="hidden h-4 w-4 text-coal-400 sm:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
                 </button>
-                <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-80 rounded-lg border border-[#D4D4D8] bg-white p-4 shadow-none">
+                <div id="account-dropdown" x-show="open" @keydown.escape.stop="open=false; $refs.accountButton.focus()" x-transition x-cloak class="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-[#D4D4D8] bg-white p-4 shadow-none">
                   <div class="flex items-center gap-3 border-b border-coal-100 pb-4">
                     @if($navbarUser->avatar_path)
                       <img src="{{ asset('storage/'.$navbarUser->avatar_path) }}" alt="Foto {{ $navbarUser->name }}" class="h-14 w-14 rounded-lg object-cover">

@@ -169,3 +169,10 @@ Unified modal dialogs built on native HTML `<dialog>` with standard styling (`re
 - Global site selection now feeds Dashboard, Wellness, HIPO, CCM and Input Harian queries; permissions remain checked. Wellness summary and rows share the same authorized filter. Switching sites removes stale local site/page filters; the header selector is usable at mobile widths. Contracts/documents have no site relationship in their current domain and retain their own ACL rules.
 
 Validation: 8 targeted tests / 30 assertions; Blade syntax and public-view rendering checks; production build; browser review of inline validation, error clearing, radio-group errors, notification dismissal and persistent error lifetime, with no console errors or desktop overflow. Authenticated role-by-role CRUD and full mobile visual regression are still separate QA work; this is not a claim that all redesign phases are complete.
+
+## Navigation shell refinement
+
+- One permission-gated navigation tree serves expanded (256px) and collapsed (80px) desktop modes; every link retains its label and native tooltip. Section toggles are keyboard-accessible buttons, and CCM active-route matching is corrected.
+- White topbar is exactly 64px, with one responsive hamburger, Mandala application identity, existing authorized site selector and avatar dropdown. Page titles appear only in PageHeader.
+- Mobile drawer locks background scrolling, isolates background focus, traps Tab within navigation, closes with Escape/backdrop/close button and restores focus. Sidebar scroll remains independent.
+- Browser measurements confirmed 256px sidebar / 64px topbar and no desktop overflow. Reviewed collapsed menus, mobile drawer at 375px, focus restoration and account dropdown with synthetic data. No console errors observed. Production build and 172-template checks passed; seven relevant password/site tests passed (20 assertions). Temporary preview files were removed.

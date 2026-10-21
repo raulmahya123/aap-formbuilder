@@ -1,3 +1,4 @@
+import { openDialog } from './ui-dialogs';
 const dialog = document.getElementById('ui-remote-modal');
 let controller, returnFocus;
 const body = dialog?.querySelector('[data-remote-body]');
@@ -28,18 +29,21 @@ async function openRemote(url, restore = null) {
     if (!dialog) { location.assign(url); return; }
     const target = new URL(url, location.href);
     if (target.origin !== location.origin || !['/admin/', '/ccm-reports/'].some(prefix => target.pathname.startsWith(prefix))) return;
+    if (!openDialog(dialog)) return;
     sourceUrl = target.href;
     controller?.abort(); controller = new AbortController();
+    const requestController = controller;
+    const timeout = setTimeout(() => requestController.abort('timeout'), 15000);
     body.replaceChildren(); body.setAttribute('aria-busy', 'true');
     const loading = document.createElement('p'); loading.textContent = 'Memuat formulir…'; loading.setAttribute('role', 'status'); body.append(loading);
     save.hidden = true;
     dialog.querySelector('[data-remote-edit]').hidden = true;
     dialog.querySelector('.ui-modal__title').textContent = 'Memuat…';
-    if (!dialog.open) dialog.showModal();
     try {
-        const response = await fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, signal: controller.signal });
+        const response = await fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, signal: requestController.signal });
         if (!response.ok || response.redirected) throw new Error(response.status === 403 ? 'Anda tidak memiliki akses ke data ini.' : 'Formulir gagal dimuat. Silakan coba lagi.');
         const parsed = new DOMParser().parseFromString(await response.text(), 'text/html');
+        if (controller !== requestController || !dialog.open) return;
         const title = target.searchParams.has('edit') ? 'Edit HIPO / Nearmiss' : parsed.querySelector('.ui-page-title')?.textContent.trim() || 'Detail';
         dialog.querySelector('.ui-modal__title').textContent = title;
         const main = parsed.querySelector('main');
@@ -95,17 +99,20 @@ async function openRemote(url, restore = null) {
         }
         dialog.querySelector('.ui-modal__footer [data-dialog-cancel]').textContent = save.hidden ? 'Tutup' : 'Batal';
     } catch (error) {
-        if (error.name === 'AbortError') return;
-        const message = document.createElement('p'); message.textContent = error.message || 'Gagal memuat data.'; message.setAttribute('role', 'alert');
+        if (controller !== requestController || !dialog.open || (requestController.signal.aborted && requestController.signal.reason !== 'timeout')) return;
+        dialog.querySelector('.ui-modal__title').textContent = 'Gagal memuat';
+        save.hidden = true;
+        dialog.querySelector('[data-remote-edit]').hidden = true;
+        const message = document.createElement('p'); message.textContent = requestController.signal.reason === 'timeout' ? 'Waktu memuat habis. Periksa koneksi lalu coba lagi.' : 'Data gagal dimuat. Silakan coba lagi.'; message.setAttribute('role', 'alert');
         const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'ui-button ui-button--secondary'; retry.textContent = 'Coba lagi'; retry.addEventListener('click', () => openRemote(sourceUrl, restore));
         body.replaceChildren(message, retry);
-    } finally { body.removeAttribute('aria-busy'); }
+    } finally { clearTimeout(timeout); if (controller === requestController) body.removeAttribute('aria-busy'); }
 }
 document.addEventListener('click', event => {
     const opener = event.target.closest('[data-dialog-open]');
     if (opener) {
         const target = document.getElementById(opener.dataset.dialogOpen);
-        if (target instanceof HTMLDialogElement) { target.showModal(); target.addEventListener('close', () => opener.focus(), { once: true }); }
+        if (openDialog(target)) target.addEventListener('close', () => opener.focus(), { once: true });
         return;
     }
     const link = event.target.closest('a[data-modal-form],a[data-modal-detail]');
@@ -117,4 +124,4 @@ document.addEventListener('click', event => {
 dialog?.addEventListener('close', () => { controller?.abort(); body.replaceChildren(); returnFocus?.focus(); });
 const restore = document.querySelector('[data-modal-restore]');
 if (restore) { const data = JSON.parse(restore.textContent); if (data.url) openRemote(data.url, data.input); }
-document.querySelectorAll('dialog[data-auto-open]').forEach(modal => { if (!modal.open) modal.showModal(); });
+document.querySelectorAll('dialog[data-auto-open]').forEach(modal => openDialog(modal));
