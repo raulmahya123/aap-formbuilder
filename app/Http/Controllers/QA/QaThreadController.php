@@ -65,7 +65,10 @@ class QaThreadController extends Controller
             ? Site::query()->orderBy('code')->get(['id', 'code', 'name'])
             : $request->user()->sites()->orderBy('code')->get(['sites.id', 'sites.code', 'sites.name']);
 
-        $selectedSiteId = $request->integer('site_id') ?: old('site_id');
+        $selectedSiteId = $request->integer('site_id') ?: session('active_site_id') ?: old('site_id');
+        if (!$selectedSiteId && $sites->count() === 1) {
+            $selectedSiteId = (int) $sites->first()->id;
+        }
         $members = $selectedSiteId && $request->user()->hasSiteAccess((int) $selectedSiteId)
             ? User::whereHas('sites', fn ($q) => $q->where('sites.id', $selectedSiteId))
                 ->where('is_active', true)->orderBy('name')->get(['id', 'name', 'email', 'role'])

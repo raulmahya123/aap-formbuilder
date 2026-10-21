@@ -214,7 +214,7 @@
                     @endif
                     <div class="min-w-0"><div class="truncate font-semibold text-coal-900">{{ $navbarUser->name }}</div><div class="truncate text-xs text-coal-500">{{ $navbarUser->email }}</div></div>
                   </div>
-                  <div class="mt-4 grid gap-2 border-t border-coal-100 pt-4">
+                  <div class="mt-4 grid gap-2">
                     @if(Route::has('profile.edit'))
                       <a href="{{ route('profile.edit') }}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-maroon-700 px-3 py-2.5 text-sm font-semibold text-white hover:bg-maroon-800">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path stroke-linecap="round" d="M5 20c.8-3.2 3.2-5 7-5s6.2 1.8 7 5"/></svg>

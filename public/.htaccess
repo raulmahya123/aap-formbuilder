@@ -5,6 +5,11 @@
 
     RewriteEngine On
 
+    # Keep GET and multipart POST requests on HTTPS. 308 preserves the
+    # upload method and body instead of downgrading the request to HTTP.
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^ https://mandala.andalan-nusantara.id%{REQUEST_URI} [R=308,L,NE]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

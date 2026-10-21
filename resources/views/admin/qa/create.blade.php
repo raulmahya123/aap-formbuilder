@@ -15,7 +15,7 @@
       <select name="site_id" required onchange="if (this.value) window.location='{{ route('admin.qa.create') }}?site_id='+this.value" class="w-full rounded-xl border-coal-200 focus:border-maroon-500 focus:ring-maroon-500">
         <option value="">Pilih site</option>
         @foreach($sites as $site)
-          <option value="{{ $site->id }}" @selected((int) old('site_id', request('site_id')) === (int) $site->id)>{{ $site->code }} — {{ $site->name }}</option>
+          <option value="{{ $site->id }}" @selected((int) $selectedSiteId === (int) $site->id)>{{ $site->code }} — {{ $site->name }}</option>
         @endforeach
       </select>
       @error('site_id')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
@@ -26,16 +26,16 @@
       <input type="text" name="subject" value="{{ old('subject') }}" required class="w-full rounded-xl border-coal-200 focus:border-maroon-500 focus:ring-maroon-500">
     </div>
 
-    <div x-data="{scope:'public'}">
+    <div>
       <label class="block text-sm font-medium text-coal-700">Privasi diskusi</label>
-      <select name="scope" x-model="scope" class="w-full rounded-lg border-gray-300 focus:border-maroon-500 focus:ring-maroon-500">
+      <select name="scope" class="w-full rounded-lg border-gray-300 focus:border-maroon-500 focus:ring-maroon-500">
         <option value="public">Publik (semua user bisa lihat)</option>
         <option value="private">Grup privat (anggota yang dipilih)</option>
       </select>
 
-      <div x-show="scope==='private'" x-cloak class="mt-3 rounded-xl border border-coal-200 bg-ivory-50 p-3">
-        <label class="block text-sm font-medium text-coal-700">Anggota grup</label>
-        <p class="mt-1 text-xs text-coal-500">Pilih orang yang boleh membaca dan membalas chat ini.</p>
+      <div class="mt-3 rounded-xl border border-coal-200 bg-ivory-50 p-3">
+        <label class="block text-sm font-medium text-coal-700">Anggota grup privat <span class="font-normal text-coal-500">(opsional)</span></label>
+        <p class="mt-1 text-xs text-coal-500">Pilihan ini digunakan jika tipe diskusi diubah menjadi grup privat.</p>
         @if($members->isEmpty())
           <p class="mt-3 text-sm text-amber-700">Pilih site terlebih dahulu untuk melihat anggota.</p>
         @else
