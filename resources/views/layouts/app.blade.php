@@ -214,13 +214,13 @@
                     @endif
                     <div class="min-w-0"><div class="truncate font-semibold text-coal-900">{{ $navbarUser->name }}</div><div class="truncate text-xs text-coal-500">{{ $navbarUser->email }}</div></div>
                   </div>
-                  <dl class="grid gap-2 py-4 text-sm">
-                    <div class="flex justify-between gap-3"><dt class="text-coal-500">NIK</dt><dd class="font-medium text-coal-800">{{ $navbarUser->nik ?: 'Belum diisi' }}</dd></div>
-                    <div class="flex justify-between gap-3"><dt class="text-coal-500">Tanggal lahir</dt><dd class="font-medium text-coal-800">{{ $navbarUser->birth_date?->format('d M Y') ?: 'Belum diisi' }}</dd></div>
-                    <div class="flex justify-between gap-3"><dt class="text-coal-500">Site</dt><dd class="max-w-[10rem] truncate text-right font-medium text-coal-800">{{ $navbarActiveSite?->name ?? 'Semua site' }}</dd></div>
-                  </dl>
-                  <div class="grid gap-2 border-t border-coal-100 pt-3">
-                    @if(Route::has('profile.edit'))<a href="{{ route('profile.edit') }}" class="rounded-xl bg-ivory-100 px-3 py-2 text-center text-sm font-medium text-coal-800 hover:bg-ivory-200">Kelola profil</a>@endif
+                  <div class="mt-4 grid gap-2 border-t border-coal-100 pt-4">
+                    @if(Route::has('profile.edit'))
+                      <a href="{{ route('profile.edit') }}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-maroon-700 px-3 py-2.5 text-sm font-semibold text-white hover:bg-maroon-800">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path stroke-linecap="round" d="M5 20c.8-3.2 3.2-5 7-5s6.2 1.8 7 5"/></svg>
+                        Lihat akun
+                      </a>
+                    @endif
                     <form method="POST" action="{{ route('logout') }}">@csrf<button class="w-full rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50">Logout</button></form>
                   </div>
                 </div>

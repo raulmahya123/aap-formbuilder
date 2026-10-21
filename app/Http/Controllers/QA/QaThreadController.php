@@ -134,7 +134,7 @@ class QaThreadController extends Controller
             ])->values()->all()]);
         }
 
-        return redirect()->route('admin.qa.show',$thread)->with('ok','Thread berhasil dibuat.');
+        return redirect()->route('admin.qa.index', ['site_id' => $thread->site_id])->with('ok','Topik berhasil dibuat.');
     }
 
     /**
