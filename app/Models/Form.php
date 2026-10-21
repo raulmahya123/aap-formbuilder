@@ -154,6 +154,20 @@ class Form extends Model
         return $deptId ? $q->where('department_id', $deptId) : $q;
     }
 
+    public function scopeAccessibleTo($q, User $user)
+    {
+        if ($user->isSuperAdmin()) return $q;
+
+        $departmentIds = $user->departmentIds();
+        $siteIds = $user->sites()->pluck('sites.id')->all();
+
+        return $q->whereIn('department_id', $departmentIds ?: [-1])
+            ->where(function ($siteQuery) use ($siteIds) {
+                $siteQuery->whereNull('site_id');
+                if ($siteIds) $siteQuery->orWhereIn('site_id', $siteIds);
+            });
+    }
+
     public function scopeDocType($q, ?string $docType)
     {
         $docType = strtoupper((string) $docType);

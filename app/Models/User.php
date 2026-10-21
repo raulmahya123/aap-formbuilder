@@ -42,6 +42,34 @@ class User extends Authenticatable
             || $this->departments()->wherePivot('dept_role', 'dept_admin')->exists();
     }
 
+    public function isUser(): bool
+    {
+        return ($this->role ?? 'user') === 'user';
+    }
+
+    public function departmentIds(): array
+    {
+        return $this->departments()->pluck('departments.id')->merge(
+            $this->department_id ? [$this->department_id] : []
+        )->unique()->map(fn ($id) => (int) $id)->values()->all();
+    }
+
+    public function hasSiteAccess(?int $siteId): bool
+    {
+        if (!$siteId) return false;
+        if ($this->isSuperAdmin()) return true;
+
+        return $this->sites()->whereKey($siteId)->exists();
+    }
+
+    /** Null means HO can see every site; other roles receive only assigned sites. */
+    public function allowedSiteIds(): ?array
+    {
+        if ($this->isSuperAdmin()) return null;
+
+        return $this->sites()->pluck('sites.id')->map(fn ($id) => (int) $id)->all();
+    }
+
     public function isDeptAdminOf(int $departmentId): bool
     {
         return $this->departments()

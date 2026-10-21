@@ -13,6 +13,7 @@ class DailyNoteController extends Controller
 {
     public function index(Request $request)
     {
+        $allowedSiteIds = Auth::user()?->allowedSiteIds();
         $dateInput   = $request->input('date');             // opsional
         $q           = trim((string) $request->input('q', ''));
         $userId      = $request->input('user_id');          // opsional: filter penulis
@@ -36,6 +37,9 @@ class DailyNoteController extends Controller
             ->when($userId, fn($qb) => $qb->where('user_id', $userId))
             ->when($companyId, fn($qb) => $qb->where('company_id', $companyId))
             ->when($siteId, fn($qb) => $qb->where('site_id', $siteId))
+            ->when(is_array($allowedSiteIds), fn ($qb) => $qb->where(function ($w) use ($allowedSiteIds) {
+                $w->whereNull('site_id')->orWhereIn('site_id', $allowedSiteIds ?: [-1]);
+            }))
             ->when($q !== '', function ($qb) use ($q) {
                 $qb->where(function ($w) use ($q) {
                     $w->where('title', 'like', "%{$q}%")
@@ -56,7 +60,9 @@ class DailyNoteController extends Controller
 
         // siapkan daftar perusahaan & site untuk filter di view
         $companies = Company::orderBy('code')->get(['id','code','name']);
-        $sites     = Site::orderBy('name')->get(['id','name','company_id']);
+        $sitesQuery = Site::orderBy('name');
+        if (is_array($allowedSiteIds)) $sitesQuery->whereIn('id', $allowedSiteIds ?: [-1]);
+        $sites = $sitesQuery->get(['id','name','company_id']);
 
         return view('user.daily_notes.index', [
             'notes'       => $notes,
@@ -74,7 +80,10 @@ class DailyNoteController extends Controller
     public function create()
     {
         $companies = Company::orderBy('code')->get(['id','code','name']);
-        $sites     = Site::orderBy('name')->get(['id','name','company_id']);
+        $sitesQuery = Site::orderBy('name');
+        $allowedSiteIds = Auth::user()?->allowedSiteIds();
+        if (is_array($allowedSiteIds)) $sitesQuery->whereIn('id', $allowedSiteIds ?: [-1]);
+        $sites = $sitesQuery->get(['id','name','company_id']);
 
         return view('user.daily_notes.create', [
             'companies' => $companies,
@@ -91,6 +100,10 @@ class DailyNoteController extends Controller
             'company_id' => ['nullable', 'exists:companies,id'],
             'site_id'    => ['nullable', 'exists:sites,id'],
         ]);
+
+        if (!empty($data['site_id'])) {
+            abort_unless(Auth::user()->hasSiteAccess((int) $data['site_id']), 403);
+        }
 
         // Validasi konsistensi: jika ada site_id & company_id, keduanya harus match
         if (!empty($data['site_id']) && !empty($data['company_id'])) {

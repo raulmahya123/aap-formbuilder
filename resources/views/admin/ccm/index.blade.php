@@ -94,20 +94,20 @@
                         <td class="p-4 text-center">
                             <div class="flex items-center justify-center gap-3">
                                 <a href="{{ route('ccm-reports.show', $r->id) }}" 
-                                   class="text-blue-600 hover:text-blue-800 font-bold text-xs uppercase tracking-tighter" title="Lihat Detail">
-                                    Detail
+                                   class="action-icon" title="Lihat detail" aria-label="Lihat detail">
+                                    👁️
                                 </a>
                                 
                                 <a href="{{ route('ccm-reports.edit', $r->id) }}" 
-                                   class="text-amber-600 hover:text-amber-800 font-bold text-xs uppercase tracking-tighter" title="Ubah Data">
-                                    Edit
+                                   class="action-icon" title="Ubah data" aria-label="Ubah data">
+                                    ✏️
                                 </a>
 
-                                <form action="{{ route('ccm-reports.destroy', $r->id) }}" method="POST" onsubmit="return confirm('Hapus laporan ini?')">
+                                <form action="{{ route('ccm-reports.destroy', $r->id) }}" method="POST" data-confirm="Hapus laporan ini?">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700 font-bold text-xs uppercase tracking-tighter" title="Hapus Laporan">
-                                        Hapus
+                                    <button type="submit" class="action-icon danger" title="Hapus laporan" aria-label="Hapus laporan">
+                                        🗑️
                                     </button>
                                 </form>
                             </div>

@@ -130,18 +130,18 @@
                         <td class="py-3 px-3 text-center whitespace-nowrap">
                             <div class="flex justify-center gap-3">
                                 <a href="{{ route('admin.hipo.show', $r->id) }}"
-                                   class="text-blue-600 hover:underline text-sm font-medium">
-                                    Detail
+                                   class="action-icon" title="Lihat detail" aria-label="Lihat detail">
+                                    👁️
                                 </a>
 
                                 <form action="{{ route('admin.hipo.destroy', $r->id) }}"
                                       method="POST"
-                                      onsubmit="return confirm('Yakin ingin hapus data ini?')">
+                                      data-confirm="Yakin ingin hapus data ini?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
-                                            class="text-red-600 hover:underline text-sm font-medium">
-                                        Hapus
+                                            class="action-icon danger" title="Hapus" aria-label="Hapus">
+                                        🗑️
                                     </button>
                                 </form>
                             </div>
@@ -158,6 +158,10 @@
                 </tbody>
             </table>
         </div>
+
+        @if($reports->hasPages())
+          <div class="border-t border-gray-100 px-4 py-4">{{ $reports->withQueryString()->links() }}</div>
+        @endif
 
     </div>
 </div>

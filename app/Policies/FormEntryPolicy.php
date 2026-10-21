@@ -33,10 +33,13 @@ class FormEntryPolicy
      */
     public function view(User $user, FormEntry $entry): bool
     {
-        $entry->loadMissing('form:id,department_id');
+        $entry->loadMissing('form:id,department_id,site_id');
+
+        $formAccess = $user->isDeptAdminOf($entry->form->department_id)
+            && (!$entry->form->site_id || $user->hasSiteAccess((int) $entry->form->site_id));
 
         return ($entry->user_id === $user->id)
-            || (method_exists($user, 'isDeptAdminOf') && $user->isDeptAdminOf($entry->form->department_id));
+            || $formAccess;
     }
 
     /**
@@ -56,10 +59,11 @@ class FormEntryPolicy
      */
     public function update(User $user, FormEntry $entry): bool
     {
-        $entry->loadMissing('form:id,department_id');
+        $entry->loadMissing('form:id,department_id,site_id');
 
         return method_exists($user, 'isDeptAdminOf')
-            && $user->isDeptAdminOf($entry->form->department_id);
+            && $user->isDeptAdminOf($entry->form->department_id)
+            && (!$entry->form->site_id || $user->hasSiteAccess((int) $entry->form->site_id));
     }
 
     /**
@@ -68,10 +72,11 @@ class FormEntryPolicy
      */
     public function delete(User $user, FormEntry $entry): bool
     {
-        $entry->loadMissing('form:id,department_id');
+        $entry->loadMissing('form:id,department_id,site_id');
 
         return method_exists($user, 'isDeptAdminOf')
-            && $user->isDeptAdminOf($entry->form->department_id);
+            && $user->isDeptAdminOf($entry->form->department_id)
+            && (!$entry->form->site_id || $user->hasSiteAccess((int) $entry->form->site_id));
     }
 
     /**
@@ -79,10 +84,11 @@ class FormEntryPolicy
      */
     public function restore(User $user, FormEntry $entry): bool
     {
-        $entry->loadMissing('form:id,department_id');
+        $entry->loadMissing('form:id,department_id,site_id');
 
         return method_exists($user, 'isDeptAdminOf')
-            && $user->isDeptAdminOf($entry->form->department_id);
+            && $user->isDeptAdminOf($entry->form->department_id)
+            && (!$entry->form->site_id || $user->hasSiteAccess((int) $entry->form->site_id));
     }
 
     /**
@@ -90,10 +96,11 @@ class FormEntryPolicy
      */
     public function forceDelete(User $user, FormEntry $entry): bool
     {
-        $entry->loadMissing('form:id,department_id');
+        $entry->loadMissing('form:id,department_id,site_id');
 
         return method_exists($user, 'isDeptAdminOf')
-            && $user->isDeptAdminOf($entry->form->department_id);
+            && $user->isDeptAdminOf($entry->form->department_id)
+            && (!$entry->form->site_id || $user->hasSiteAccess((int) $entry->form->site_id));
     }
 
     /**
@@ -102,9 +109,10 @@ class FormEntryPolicy
      */
     public function approve(User $user, FormEntry $entry): bool
     {
-        $entry->loadMissing('form:id,department_id');
+        $entry->loadMissing('form:id,department_id,site_id');
 
         return method_exists($user, 'isDeptAdminOf')
-            && $user->isDeptAdminOf($entry->form->department_id);
+            && $user->isDeptAdminOf($entry->form->department_id)
+            && (!$entry->form->site_id || $user->hasSiteAccess((int) $entry->form->site_id));
     }
 }

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use App\Models\{Form, FormEntry, Department, Document, DocumentTemplate, DocumentAcl};
+use App\Models\{Form, FormEntry, Department, Document, DocumentTemplate, DocumentAcl, Site, WellnessResponse, HipoReport, CcmReport, IndicatorDaily, DailyNote};
 
 class DashboardController extends Controller
 {
@@ -15,18 +15,59 @@ class DashboardController extends Controller
 
     public function index(Request $r)
     {
-        // Filter opsional: department_id, form_id, date_from, date_to
-        $filters = [
-            'department_id' => $r->integer('department_id') ?: null,
-            'form_id'       => $r->integer('form_id') ?: null,
-            'date_from'     => $r->date('date_from') ?: null,
-            'date_to'       => $r->date('date_to') ?: null,
+        $allowed = $r->user()->allowedSiteIds();
+        $sitesQuery = Site::query()->with('company:id,code,name')->orderBy('code');
+        if (is_array($allowed)) $sitesQuery->whereIn('id', $allowed ?: [-1]);
+        $sites = $sitesQuery->get(['id','code','name','company_id']);
+
+        $selectedSiteId = $r->integer('site_id') ?: null;
+        if ($selectedSiteId && !$r->user()->hasSiteAccess($selectedSiteId)) abort(403);
+        $selectedSite = $selectedSiteId ? $sites->firstWhere('id', $selectedSiteId) : null;
+
+        $siteFilter = fn ($q, $column = 'site_id') => is_array($allowed)
+            ? $q->whereIn($column, $allowed ?: [-1])
+            : $q;
+        $siteFilterSelected = fn ($q, $column = 'site_id') => $selectedSiteId
+            ? $q->where($column, $selectedSiteId)
+            : $q;
+
+        $metrics = [
+            'wellness' => $this->wellnessQuery($selectedSite, $allowed)->count(),
+            'hipo' => $siteFilterSelected($siteFilter(HipoReport::query))->count(),
+            'kpi' => $siteFilterSelected($siteFilter(IndicatorDaily::query))->count(),
+            'notes' => $siteFilterSelected($siteFilter(DailyNote::query))->count(),
+            'ccm' => $this->ccmCount($selectedSite, $allowed),
         ];
 
-        $departments = Department::orderBy('name')->get(['id','name']);
-        $forms       = Form::orderBy('title')->get(['id','title']);
+        return view('admin.dashboard.index', compact('sites', 'selectedSiteId', 'selectedSite', 'metrics'));
+    }
 
-        return view('admin.dashboard.index', compact('filters','departments','forms'));
+    private function wellnessQuery(?Site $site, ?array $allowed)
+    {
+        $q = WellnessResponse::query();
+        if ($site) return $q->where(function ($w) use ($site) {
+            $w->where('site', $site->name)->orWhere('site', $site->code);
+        });
+        if (is_array($allowed)) {
+            $labels = Site::whereIn('id', $allowed ?: [-1])->get(['name','code'])
+                ->flatMap(fn ($s) => [$s->name, $s->code])->filter()->values()->all();
+            $q->whereIn('site', $labels ?: ['__none__']);
+        }
+        return $q;
+    }
+
+    private function ccmCount(?Site $site, ?array $allowed): int
+    {
+        if (!$site && is_array($allowed)) {
+            $labels = Site::whereIn('id', $allowed ?: [-1])->with('company:id,code,name')->get()
+                ->map(fn ($s) => $s->company ? (($s->company->code ?: $s->company->name) . '-' . ($s->code ?: $s->name)) : ($s->code ?: $s->name));
+            return CcmReport::whereIn('jobsite', $labels->all())->count();
+        }
+        if ($site) {
+            $label = $site->company ? (($site->company->code ?: $site->company->name) . '-' . ($site->code ?: $site->name)) : ($site->code ?: $site->name);
+            return CcmReport::where('jobsite', $label)->count();
+        }
+        return CcmReport::count();
     }
 
     /** Kartu ringkas: total form, total entries, aktif form, pengguna unik */
@@ -37,6 +78,7 @@ class DashboardController extends Controller
 public function summary(Request $r)
 {
     [$from, $to, $deptId, $formId] = $this->extractFilters($r);
+    $user = $r->user();
 
     // window untuk "recent" (bisa override pakai ?recent_days=14)
     $recentDays = (int)($r->recent_days ?? 30);
@@ -50,19 +92,20 @@ public function summary(Request $r)
     $cacheKey = 'dash_summary:'.md5(json_encode([
         $from?->toDateString(), $to?->toDateString(), $deptId, $formId,
         'recentDays'=>$recentDays, 'recentFrom'=>$recentFrom->toDateTimeString(), 'recentTo'=>$recentTo->toDateTimeString(),
+        'user' => $user->id,
     ]));
 
-    $data = $this->rememberDashboard($cacheKey, function() use ($from,$to,$deptId,$formId,$recentFrom,$recentTo){
+    $data = $this->rememberDashboard($cacheKey, function() use ($user,$from,$to,$deptId,$formId,$recentFrom,$recentTo){
         // Base queries
-        $formQuery  = Form::query();
+        $formQuery  = Form::accessibleTo($user);
         $entryQuery = FormEntry::query();
 
         if ($deptId) {
             $formQuery->where('department_id', $deptId);
-            $entryQuery->whereIn('form_id', Form::query()
-                ->select('id')
-                ->where('department_id', $deptId));
+            $entryQuery->whereIn('form_id', Form::accessibleTo($user)
+                ->select('id')->where('department_id', $deptId));
         }
+        if (!$deptId) $entryQuery->whereIn('form_id', Form::accessibleTo($user)->select('id'));
         if ($formId) {
             $formQuery->where('id', $formId);
             $entryQuery->where('form_id', $formId);
@@ -122,17 +165,19 @@ public function summary(Request $r)
     public function entriesByDay(Request $r)
     {
         [$from, $to, $deptId, $formId] = $this->extractFilters($r);
+        $user = $r->user();
         if (!$from && !$to) {
             $to   = now();
             $from = now()->copy()->subDays(29);
         }
 
         $cacheKey = 'dash_entries_by_day:'.md5(json_encode([$from,$to,$deptId,$formId]));
-        $data = $this->rememberDashboard($cacheKey, function() use ($from,$to,$deptId,$formId){
+        $data = $this->rememberDashboard($cacheKey, function() use ($user,$from,$to,$deptId,$formId){
             $q = FormEntry::selectRaw('DATE(created_at) as d, COUNT(*) as c')
                 ->when($deptId, fn($qq) => $qq->whereIn('form_id', Form::query()
                     ->select('id')
                     ->where('department_id', $deptId)))
+                ->whereIn('form_id', Form::accessibleTo($user)->select('id'))
                 ->when($formId, fn($qq) => $qq->where('form_id', $formId))
                 ->when($from,   fn($qq) => $qq->where('created_at', '>=', (clone $from)->startOfDay()))
                 ->when($to,     fn($qq) => $qq->where('created_at', '<=', (clone $to)->endOfDay()))
@@ -166,13 +211,15 @@ public function summary(Request $r)
     public function topForms(Request $r)
     {
         [$from, $to, $deptId, $formId] = $this->extractFilters($r);
+        $user = $r->user();
         $topN = max(3, min(20, (int) ($r->integer('topN') ?: 10)));
         $cacheKey = 'dash_top_forms:'.md5(json_encode([$from,$to,$deptId,$formId,$topN]));
 
-        $data = $this->rememberDashboard($cacheKey, function() use ($from,$to,$deptId,$formId,$topN){
+        $data = $this->rememberDashboard($cacheKey, function() use ($user,$from,$to,$deptId,$formId,$topN){
             $rows = DB::table('form_entries')
                 ->join('forms', 'forms.id', '=', 'form_entries.form_id')
                 ->when($deptId, fn($q) => $q->where('forms.department_id', $deptId))
+                ->whereIn('forms.id', Form::accessibleTo($user)->select('id'))
                 ->when($formId, fn($q) => $q->where('form_entries.form_id', $formId))
                 ->when($from,   fn($q) => $q->where('form_entries.created_at', '>=', (clone $from)->startOfDay()))
                 ->when($to,     fn($q) => $q->where('form_entries.created_at', '<=', (clone $to)->endOfDay()))
@@ -199,9 +246,10 @@ public function summary(Request $r)
     public function byDepartment(Request $r)
     {
         [$from, $to, $deptId, $formId] = $this->extractFilters($r);
+        $user = $r->user();
         $cacheKey = 'dash_by_dept:'.md5(json_encode([$from,$to,$deptId,$formId]));
 
-        $data = $this->rememberDashboard($cacheKey, function() use ($from,$to,$deptId,$formId){
+        $data = $this->rememberDashboard($cacheKey, function() use ($user,$from,$to,$deptId,$formId){
             // forms per dept (aktif & total)
             $forms = Form::select(
                     'department_id',
@@ -209,6 +257,7 @@ public function summary(Request $r)
                     DB::raw('SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_forms')
                 )
                 ->when($deptId, fn($q) => $q->where('department_id', $deptId))
+                ->whereIn('id', Form::accessibleTo($user)->select('id'))
                 ->when($formId, fn($q) => $q->where('id', $formId))
                 ->groupBy('department_id')
                 ->get()
@@ -218,6 +267,7 @@ public function summary(Request $r)
             $entries = FormEntry::select('forms.department_id', DB::raw('COUNT(form_entries.id) as total_entries'))
                 ->join('forms','forms.id','=','form_entries.form_id')
                 ->when($deptId, fn($q) => $q->where('forms.department_id', $deptId))
+                ->whereIn('forms.id', Form::accessibleTo($user)->select('id'))
                 ->when($formId, fn($q) => $q->where('forms.id', $formId))
                 ->when($from,   fn($q) => $q->where('form_entries.created_at', '>=', (clone $from)->startOfDay()))
                 ->when($to,     fn($q) => $q->where('form_entries.created_at', '<=', (clone $to)->endOfDay()))

@@ -11,7 +11,9 @@ class FormPolicy
     public function view(User $user, Form $form): bool
     {
         if ($user->isSuperAdmin()) return true;
-        return $user->departments()->where('department_id', $form->department_id)->exists();
+        $inDepartment = in_array((int) $form->department_id, $user->departmentIds(), true);
+        $inSite = !$form->site_id || $user->hasSiteAccess((int) $form->site_id);
+        return $inDepartment && $inSite;
     }
 
     // ⬇️ departmentId dibuat opsional
@@ -31,13 +33,15 @@ class FormPolicy
     public function update(User $user, Form $form): bool
     {
         return $user->isSuperAdmin()
-            || $user->isDeptAdminOf($form->department_id)
-            || $user->id === $form->created_by;
+            || ($user->isDeptAdminOf($form->department_id)
+                && (!$form->site_id || $user->hasSiteAccess((int) $form->site_id)));
     }
 
     public function delete(User $user, Form $form): bool
     {
-        return $user->isSuperAdmin() || $user->isDeptAdminOf($form->department_id);
+        return $user->isSuperAdmin()
+            || ($user->isDeptAdminOf($form->department_id)
+                && (!$form->site_id || $user->hasSiteAccess((int) $form->site_id)));
     }
 
     public function submit(User $user, Form $form): bool

@@ -8,6 +8,7 @@ use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
 
 class HipoReportController extends Controller
 {
@@ -16,7 +17,9 @@ class HipoReportController extends Controller
     // ==============================
     public function index()
     {
-        $reports = HipoReport::latest()->get();
+        $allowed = auth()->user()->allowedSiteIds();
+        $reports = HipoReport::when(is_array($allowed), fn ($q) => $q->whereIn('site_id', $allowed ?: [-1]))
+            ->latest()->paginate(15)->withQueryString();
 
         return view('admin.hipo.index', compact('reports'));
     }
@@ -67,6 +70,8 @@ class HipoReportController extends Controller
             'evidence_ppe' => 'nullable|image|max:2048',
         ]);
 
+        Gate::authorize('site-access', (int) $validated['site_id']);
+
         // ================= SYSTEM FIELDS =================
         $validated['status'] = 'Open';
         $validated['user_id'] = auth()->id();
@@ -100,6 +105,7 @@ class HipoReportController extends Controller
     // ==============================
     public function show(HipoReport $hipo)
     {
+        Gate::authorize('site-access', (int) $hipo->site_id);
         return view('admin.hipo.show', compact('hipo'));
     }
 
@@ -108,6 +114,7 @@ class HipoReportController extends Controller
     // ==============================
     public function update(Request $request, HipoReport $hipo)
     {
+        Gate::authorize('site-access', (int) $hipo->site_id);
         $validated = $request->validate([
             'status' => 'required|in:Open,On Progress,Closed,Rejected',
             'description' => 'required|string',
@@ -155,6 +162,7 @@ class HipoReportController extends Controller
     // ==============================
     public function destroy(HipoReport $hipo)
     {
+        Gate::authorize('site-access', (int) $hipo->site_id);
         foreach (['engineering', 'administrative', 'work_practice', 'ppe'] as $key) {
 
             if ($hipo->{"evidence_$key"}) {
@@ -169,9 +177,13 @@ class HipoReportController extends Controller
 
     private function siteOptions()
     {
-        return Site::with('company:id,code,name')
+        $query = Site::with('company:id,code,name')
             ->orderBy('name')
-            ->get(['id', 'code', 'name', 'company_id'])
+            ->when(is_array(auth()->user()->allowedSiteIds()), function ($q) {
+                $q->whereIn('id', auth()->user()->allowedSiteIds() ?: [-1]);
+            });
+
+        return $query->get(['id', 'code', 'name', 'company_id'])
             ->map(function (Site $site) {
                 return [
                     'id' => $site->id,

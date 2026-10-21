@@ -35,6 +35,8 @@ class FormEntryController extends Controller
 
     public function store(Request $r, Form $form)
     {
+        abort_unless($form->is_active && $r->user()->can('view', $form), 403);
+
         // Ambil payload jawaban. Dukung dua skema name:
         // - data[...]
         // - answers[...]

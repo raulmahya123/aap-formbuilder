@@ -13,6 +13,7 @@ use App\Models\{
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class ReportController extends Controller
 {
@@ -23,6 +24,8 @@ class ReportController extends Controller
     {
         $scope  = $r->string('scope')->lower()->value() ?: 'month'; // day|week|month|year
         $siteId = $r->input('site_id'); // null = semua site
+        $allowedSiteIds = auth()->user()->allowedSiteIds();
+        if ($siteId) Gate::authorize('site-access', (int) $siteId);
 
         $now   = now();
         $year  = (int) $r->input('year',  $now->year);
@@ -32,7 +35,9 @@ class ReportController extends Controller
 
         [$startDate, $endDate, $periodLabel] = $this->resolveRange($scope, $year, $month, $week, $date);
 
-        $sites  = Site::orderBy('code')->get();
+        $sitesQuery = Site::orderBy('code');
+        if (is_array($allowedSiteIds)) $sitesQuery->whereIn('id', $allowedSiteIds ?: [-1]);
+        $sites = $sitesQuery->get();
         $groups = IndicatorGroup::with([
                         'indicators' => fn ($q) => $q->where('is_active', true)->orderBy('order_index')
                   ])->where('is_active', true)
@@ -46,6 +51,7 @@ class ReportController extends Controller
                 ->where('year', $year)
                 ->where('month', $month)
                 ->where('site_id', $siteId)
+                ->when(is_array($allowedSiteIds), fn ($q) => $q->whereIn('site_id', $allowedSiteIds ?: [-1]))
                 ->get()
                 ->keyBy('indicator_id');
         }
@@ -60,6 +66,7 @@ class ReportController extends Controller
             ])
             ->whereBetween('date', [$startDate, $endDate])
             ->when($siteId, fn ($q) => $q->where('site_id', $siteId))
+            ->when(is_array($allowedSiteIds), fn ($q) => $q->whereIn('site_id', $allowedSiteIds ?: [-1]))
             ->groupBy('indicator_id')
             ->get()
             ->keyBy('indicator_id');
@@ -118,6 +125,7 @@ class ReportController extends Controller
             ')
             ->whereBetween('date', [$startDate, $endDate])
             ->when($siteId, fn ($q) => $q->where('site_id', $siteId))
+            ->when(is_array($allowedSiteIds), fn ($q) => $q->whereIn('site_id', $allowedSiteIds ?: [-1]))
             ->first();
 
         $totalLate   = (float) ($sum->late_total ?? 0);
@@ -273,6 +281,7 @@ class ReportController extends Controller
         $siteId      = (int) $request->input('site_id');
 
         abort_unless($siteId, 400, 'Pilih site terlebih dahulu untuk override total.');
+        Gate::authorize('site-access', $siteId);
 
         $indicator = $indicatorId ? Indicator::find($indicatorId) : null;
         $site      = $siteId ? Site::find($siteId) : null;
@@ -326,6 +335,8 @@ class ReportController extends Controller
             'site_id'      => 'required|integer|exists:sites,id',
             'total'        => 'required|numeric',
         ]);
+
+        Gate::authorize('site-access', (int) $data['site_id']);
 
         // Simpan / update ke IndicatorValue
         $iv = IndicatorValue::updateOrCreate(

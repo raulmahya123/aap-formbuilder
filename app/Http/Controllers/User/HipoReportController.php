@@ -7,6 +7,7 @@ use App\Models\HipoReport;
 use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,7 +18,8 @@ class HipoReportController extends Controller
         return view('user.hipo.index', [
             'reports' => HipoReport::where('user_id', Auth::id())
                 ->latest()
-                ->get()
+                ->paginate(15)
+                ->withQueryString()
         ]);
     }
 
@@ -58,6 +60,8 @@ class HipoReportController extends Controller
             'evidence_ppe' => 'required|image|mimes:jpg,jpeg,png|max:5120',
         ]);
 
+        Gate::authorize('site-access', (int) $data['site_id']);
+
         // SIMPAN FILE EVIDENCE
         foreach (['engineering', 'administrative', 'work_practice', 'ppe'] as $key) {
             $data["evidence_$key"] = $request
@@ -89,9 +93,13 @@ class HipoReportController extends Controller
 
     private function siteOptions()
     {
-        return Site::with('company:id,code,name')
+        $query = Site::with('company:id,code,name')
             ->orderBy('name')
-            ->get(['id', 'code', 'name', 'company_id'])
+            ->when(is_array(Auth::user()?->allowedSiteIds()), function ($q) {
+                $q->whereIn('id', Auth::user()->allowedSiteIds() ?: [-1]);
+            });
+
+        return $query->get(['id', 'code', 'name', 'company_id'])
             ->map(function (Site $site) {
                 return [
                     'id' => $site->id,

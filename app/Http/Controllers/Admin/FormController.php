@@ -25,7 +25,8 @@ class FormController extends Controller
     // =======================
     public function index(Request $r)
     {
-        $q = Form::with(['department:id,name', 'creator:id,name', 'company:id,code,name', 'site:id,name,company_id'])
+        $q = Form::accessibleTo($r->user())
+            ->with(['department:id,name', 'creator:id,name', 'company:id,code,name', 'site:id,name,company_id'])
             ->latest();
 
         if ($r->filled('department_id')) {
@@ -49,9 +50,9 @@ class FormController extends Controller
         if (!in_array($perPage, $allowed, true)) $perPage = 10;
 
         $forms       = $q->paginate($perPage)->appends($r->only('department_id','company_id','site_id','doc_type','per_page'));
-        $departments = Department::orderBy('name')->get(['id','name']);
+        $departments = $this->availableDepartments($r);
         $companies   = Company::orderBy('code')->get(['id','code','name']);
-        $sites       = Site::orderBy('name')->get(['id','name','company_id']);
+        $sites       = $this->availableSites($r);
 
         return view('admin.forms.index', compact('forms','departments','companies','sites'));
     }
@@ -61,9 +62,9 @@ class FormController extends Controller
     // =======================
     public function create()
     {
-        $departments = Department::orderBy('name')->get(['id','name']);
+        $departments = $this->availableDepartments(request());
         $companies   = Company::orderBy('code')->get(['id','code','name']);
-        $sites       = Site::orderBy('name')->get(['id','name','company_id']); // dipakai buat SITES_BY_COMPANY di Blade
+        $sites       = $this->availableSites(request()); // dipakai buat SITES_BY_COMPANY di Blade
 
         return view('admin.forms.create', compact('departments','companies','sites'));
     }
@@ -78,7 +79,7 @@ class FormController extends Controller
         // VALIDASI DASAR
         $validated = $r->validate([
             'company_id'    => ['required', 'exists:companies,id'],
-            'site_id'       => ['nullable', 'exists:sites,id'],
+            'site_id'       => ['required', 'exists:sites,id'],
             'department_id' => ['required', 'exists:departments,id'],
             'title'         => ['required', 'string', 'max:190'],
             'doc_type'      => ['required', Rule::in(self::DOC_TYPES)],
@@ -105,6 +106,8 @@ class FormController extends Controller
                     ->withInput();
             }
         }
+
+        $this->authorizeScope($r, (int) $validated['department_id'], (int) $validated['site_id']);
 
         try {
             return DB::transaction(function () use ($r, $validated) {
@@ -188,9 +191,10 @@ class FormController extends Controller
     // =======================
     public function edit(Form $form)
     {
-        $departments = Department::orderBy('name')->get(['id','name']);
+        $this->authorize('update', $form);
+        $departments = $this->availableDepartments(request());
         $companies   = Company::orderBy('code')->get(['id','code','name']);
-        $sites       = Site::orderBy('name')->get(['id','name','company_id']);
+        $sites       = $this->availableSites(request());
 
         return view('admin.forms.edit', compact('form','departments','companies','sites'));
     }
@@ -205,6 +209,7 @@ class FormController extends Controller
             && !$r->hasAny(['company_id','site_id','department_id','title','type','schema','pdf','is_active']);
 
         if ($onlyDocType) {
+            $this->authorize('update', $form);
             $r->validate(['doc_type' => ['required', Rule::in(self::DOC_TYPES)]]);
             $form->update(['doc_type' => strtoupper($r->doc_type)]);
             return response()->json(['ok' => true, 'doc_type' => $form->doc_type]);
@@ -212,7 +217,7 @@ class FormController extends Controller
 
         $validated = $r->validate([
             'company_id'    => ['required', 'exists:companies,id'],
-            'site_id'       => ['nullable', 'exists:sites,id'],
+            'site_id'       => ['required', 'exists:sites,id'],
             'department_id' => ['required', 'exists:departments,id'],
             'title'         => ['required', 'string', 'max:190'],
             'doc_type'      => ['required', Rule::in(self::DOC_TYPES)],
@@ -238,6 +243,9 @@ class FormController extends Controller
                     ->withInput();
             }
         }
+
+        $this->authorize('update', $form);
+        $this->authorizeScope($r, (int) $validated['department_id'], (int) $validated['site_id']);
 
         try {
             return DB::transaction(function () use ($r, $validated, $form) {
@@ -309,6 +317,7 @@ class FormController extends Controller
     public function destroy(Form $form)
     {
         try {
+            $this->authorize('delete', $form);
             if ($form->pdf_path) {
                 $this->deleteMandalaFile($form->pdf_path);
             }
@@ -325,6 +334,7 @@ class FormController extends Controller
     // =======================
     public function builder(Form $form)
     {
+        $this->authorize('update', $form);
         abort_if($form->type !== 'builder', 404, 'Hanya untuk form tipe builder');
         $schema = $form->schema ?? ['fields' => []];
         return view('admin.forms.builder', compact('form','schema'));
@@ -332,6 +342,7 @@ class FormController extends Controller
 
     public function saveSchema(Request $r, Form $form)
     {
+        $this->authorize('update', $form);
         abort_if($form->type !== 'builder', 404);
 
         $r->validate(['schema' => ['required']]);
@@ -349,17 +360,44 @@ class FormController extends Controller
 
     public function file(Form $form)
     {
+        $this->authorize('view', $form);
         return $this->serveMandalaFile($form, false);
     }
 
     public function download(Form $form)
     {
+        $this->authorize('view', $form);
         return $this->serveMandalaFile($form, true);
     }
 
     // =======================
     // HELPERS
     // =======================
+    private function authorizeScope(Request $request, int $departmentId, int $siteId): void
+    {
+        $user = $request->user();
+        if ($user->isSuperAdmin()) return;
+
+        abort_unless($user->isDeptAdminOf($departmentId), 403);
+        abort_unless($user->hasSiteAccess($siteId), 403);
+    }
+
+    private function availableDepartments(Request $request)
+    {
+        $user = $request->user();
+        return $user->isSuperAdmin()
+            ? Department::orderBy('name')->get(['id','name'])
+            : Department::whereIn('id', $user->departmentIds())->orderBy('name')->get(['id','name']);
+    }
+
+    private function availableSites(Request $request)
+    {
+        $user = $request->user();
+        return $user->isSuperAdmin()
+            ? Site::orderBy('name')->get(['id','name','company_id'])
+            : $user->sites()->orderBy('name')->get(['sites.id','sites.name','sites.company_id']);
+    }
+
     private function resolveCreatorId(Request $request): ?int
     {
         $userId = $request->user()?->getAuthIdentifier();
@@ -600,6 +638,7 @@ class FormController extends Controller
      */
     public function importSchema(Request $r, Form $form)
     {
+        $this->authorize('update', $form);
         $r->validate([
             'csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:4096'],
         ]);

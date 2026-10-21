@@ -28,6 +28,7 @@ class FormBrowseController extends Controller
             });
         })
         ->where('is_active', true)
+        ->accessibleTo($r->user())
         ->when($currentDocType, fn($qb) => $qb->where('doc_type', $currentDocType))
         ->latest();
 
@@ -39,7 +40,8 @@ class FormBrowseController extends Controller
                 $qq->where('title','like',$term)->orWhere('description','like',$term);
             });
         })
-        ->where('is_active', true);
+        ->where('is_active', true)
+        ->accessibleTo($r->user());
 
     $counts = [
         'SOP'  => (clone $base)->where('doc_type','SOP')->count(),
@@ -66,12 +68,7 @@ class FormBrowseController extends Controller
             abort(403, 'Form tidak aktif');
         }
 
-        if (!$user->isAdmin()) {
-            $allowed = $user->departments()->where('departments.id', $form->department_id)->exists();
-            if (!$allowed) {
-                abort(403, 'Anda tidak punya akses ke form ini');
-            }
-        }
+        abort_unless($user->can('view', $form), 403, 'Anda tidak punya akses ke form ini');
 
         return view('front.forms.show', compact('form'));
     }
@@ -87,12 +84,7 @@ class FormBrowseController extends Controller
             abort(403);
         }
 
-        if (!$user->isAdmin()) {
-            $allowed = $user->departments()->where('departments.id', $form->department_id)->exists();
-            if (!$allowed) {
-                abort(403);
-            }
-        }
+        abort_unless($user->can('view', $form), 403);
 
         return view('front.forms.preview', compact('form'));
     }

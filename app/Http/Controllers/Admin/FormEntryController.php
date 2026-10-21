@@ -22,7 +22,8 @@ class FormEntryController extends Controller
         // Pastikan FormEntryPolicy terpasang: viewAny
         $this->authorize('viewAny', FormEntry::class);
 
-        $q = FormEntry::with(['form:id,title,department_id', 'user:id,name,email'])
+        $q = FormEntry::with(['form:id,title,department_id,site_id', 'user:id,name,email'])
+            ->whereHas('form', fn ($formQuery) => $formQuery->accessibleTo($r->user()))
             ->latest();
 
         // Filter by form_id
@@ -105,7 +106,8 @@ class FormEntryController extends Controller
     {
         $this->authorize('viewAny', FormEntry::class);
 
-        $q = FormEntry::with(['form:id,title', 'user:id,name,email'])
+        $q = FormEntry::with(['form:id,title,department_id,site_id', 'user:id,name,email'])
+            ->whereHas('form', fn ($formQuery) => $formQuery->accessibleTo($r->user()))
             ->latest();
 
         if ($r->filled('form_id')) {

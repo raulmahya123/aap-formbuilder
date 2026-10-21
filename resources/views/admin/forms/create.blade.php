@@ -52,11 +52,11 @@
       <p class="text-sm text-slate-500 mt-1">Form ini akan dimiliki oleh perusahaan yang dipilih.</p>
     </div>
 
-    {{-- ===== Site (opsional, otomatis filter by company) ===== --}}
+  {{-- ===== Site assignment (otomatis filter by company) ===== --}}
     <div class="mb-3">
-      <label class="block font-medium mb-1">Site (Opsional)</label>
+      <label class="block font-medium mb-1">Site <span class="text-rose-600">*</span></label>
       <select name="site_id" id="site_id" class="border rounded w-full p-2" {{ $selectedCompanyId ? '' : 'disabled' }}>
-        <option value="">— Tanpa Site —</option>
+        <option value="" disabled>— Pilih Site —</option>
         {{-- Render awal (kalau ada default company) --}}
         @if($selectedCompanyId && !empty($sitesByCompany[(string)$selectedCompanyId]))
           @foreach($sitesByCompany[(string)$selectedCompanyId] as $s)
@@ -65,7 +65,7 @@
         @endif
       </select>
       @error('site_id')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
-      <p class="text-sm text-slate-500 mt-1">Opsional: hubungkan form ke site tertentu dalam perusahaan.</p>
+      <p class="text-sm text-slate-500 mt-1">Form hanya dapat diakses user yang memiliki assignment ke site ini.</p>
     </div>
 
     {{-- ===== Department ===== --}}

@@ -138,6 +138,9 @@
             </tbody>
         </table>
     </div>
+    @if($reports->hasPages())
+      <div class="mt-4">{{ $reports->links() }}</div>
+    @endif
 
 </div>
 @endsection

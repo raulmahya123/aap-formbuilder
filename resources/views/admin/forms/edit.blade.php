@@ -77,13 +77,13 @@
         @error('company_id')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
       </div>
 
-      {{-- Site (opsional, ter-filter by company) --}}
+      {{-- Site assignment (ter-filter by company) --}}
       <div>
-        <label class="block text-sm font-medium text-slate-700">Site (Opsional)</label>
+        <label class="block text-sm font-medium text-slate-700">Site <span class="text-rose-600">*</span></label>
         <select name="site_id" id="site_id"
                 class="mt-1 w-full rounded-lg border px-3 py-2"
                 {{ $currentCompanyId ? '' : 'disabled' }}>
-          <option value="">— Tanpa Site —</option>
+          <option value="" disabled>— Pilih Site —</option>
           @if($currentCompanyId !== '' && !empty($sitesByCompany[(string)$currentCompanyId]))
             @foreach($sitesByCompany[(string)$currentCompanyId] as $s)
               <option value="{{ $s['id'] }}" @selected((string)$currentSiteId === (string)$s['id'])>{{ $s['name'] }}</option>
@@ -91,7 +91,7 @@
           @endif
         </select>
         @error('site_id')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
-        <p class="text-xs text-slate-500 mt-1">Opsional: hubungkan form ke site tertentu dalam perusahaan.</p>
+        <p class="text-xs text-slate-500 mt-1">Form hanya dapat diakses user yang memiliki assignment ke site ini.</p>
       </div>
 
       {{-- Department --}}

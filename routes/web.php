@@ -110,7 +110,11 @@ Route::middleware('can:is-admin')
 
 // Redirect root ke dashboard
 Route::get('/', fn() => redirect()->route('admin.dashboard'));
-Route::get('/dashboard', fn() => redirect()->route('admin.dashboard'))
+Route::get('/dashboard', function () {
+    return auth()->user()->isAdmin()
+        ? redirect()->route('admin.dashboard')
+        : redirect()->route('front.forms.index');
+})
     ->middleware('auth')
     ->name('dashboard');
 
@@ -302,12 +306,14 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
 
         // ==== DASHBOARD ====
-        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        Route::get('dashboard/data/summary', [DashboardController::class, 'summary'])->name('dashboard.data.summary');
-        Route::get('dashboard/data/entries-by-day', [DashboardController::class, 'entriesByDay'])->name('dashboard.data.entries_by_day');
-        Route::get('dashboard/data/top-forms', [DashboardController::class, 'topForms'])->name('dashboard.data.top_forms');
-        Route::get('dashboard/data/by-department', [DashboardController::class, 'byDepartment'])->name('dashboard.data.by_department');
-        Route::get('dashboard/data/by-aggregate', [DashboardController::class, 'byAggregate'])->name('dashboard.data.by_aggregate');
+        Route::middleware('can:is-admin')->group(function () {
+            Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+            Route::get('dashboard/data/summary', [DashboardController::class, 'summary'])->name('dashboard.data.summary');
+            Route::get('dashboard/data/entries-by-day', [DashboardController::class, 'entriesByDay'])->name('dashboard.data.entries_by_day');
+            Route::get('dashboard/data/top-forms', [DashboardController::class, 'topForms'])->name('dashboard.data.top_forms');
+            Route::get('dashboard/data/by-department', [DashboardController::class, 'byDepartment'])->name('dashboard.data.by_department');
+            Route::get('dashboard/data/by-aggregate', [DashboardController::class, 'byAggregate'])->name('dashboard.data.by_aggregate');
+        });
 
         Route::middleware('can:is-admin')->group(function () {
             Route::get('wellness', [AdminWellnessController::class, 'index'])->name('wellness.index');
@@ -341,9 +347,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('departments', DepartmentController::class);
 
         // Forms CRUD (admin) + Builder
-        Route::resource('forms', AdminFormController::class)->except('show');
-        Route::get('forms/{form}/builder', [AdminFormController::class, 'builder'])->name('forms.builder');
-        Route::put('forms/{form}/builder', [AdminFormController::class, 'saveSchema'])->name('forms.builder.save');
+        Route::middleware('can:is-admin')->group(function () {
+            Route::resource('forms', AdminFormController::class)->except('show');
+            Route::get('forms/{form}/builder', [AdminFormController::class, 'builder'])->name('forms.builder');
+            Route::put('forms/{form}/builder', [AdminFormController::class, 'saveSchema'])->name('forms.builder.save');
+        });
 
         /* ⇩⇩ Tambahkan ini ⇩⇩ */
         // Lihat file (inline) dan unduh file — tidak bergantung ke /public/storage
@@ -382,11 +390,11 @@ Route::middleware('auth')->group(function () {
 
         Route::get('daily/create', [AdminDailyInputController::class, 'create'])
             ->name('daily.create')
-            ->middleware('can:daily.manage'); // tanpa site_id ⇒ Gate kamu meloloskan admin
+            ->middleware('can:is-admin');
 
         Route::post('daily',       [AdminDailyInputController::class, 'store'])
             ->name('daily.store')
-            ->middleware('can:daily.manage'); // StoreDailyRequest juga meng-autorize
+            ->middleware('can:is-admin'); // request tetap mengecek site_id
 
         // Rekap utama (pakai aggregate.blade.php)
         Route::get('reports/monthly', [AdminReportController::class, 'report'])
@@ -448,17 +456,19 @@ Route::middleware('auth')->group(function () {
         Route::post('/upload-temp', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'uploadTemp'])->name('upload_temp');
         Route::post('/uploads/image', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'storeImage'])->name('uploads.image');
 
-        // Entries
-        Route::resource('entries', AdminEntryController::class)
-            ->only(['index', 'show', 'destroy'])
-            ->where(['entry' => '[0-9]+']);
+        // Entries: hanya admin; policy tetap memeriksa departemen + site.
+        Route::middleware('can:is-admin')->group(function () {
+            Route::resource('entries', AdminEntryController::class)
+                ->only(['index', 'show', 'destroy'])
+                ->where(['entry' => '[0-9]+']);
 
-        Route::get('entries/export', [AdminEntryController::class, 'export'])->name('entries.export');
-        Route::get('entries/{entry}/download-pdf', [AdminEntryController::class, 'downloadPdf'])->name('entries.download_pdf')->whereNumber('entry');
-        Route::post('entries/{entry}/approval', [EntryApprovalController::class, 'act'])->name('entries.approval')->whereNumber('entry');
-        Route::get('entries/{entry}/download-all', [AdminEntryController::class, 'downloadAll'])->name('entries.download_all')->whereNumber('entry');
-        Route::get('entries/{entry}/data.pdf', [AdminEntryController::class, 'downloadDataPdf'])->name('entries.data_pdf')->whereNumber('entry');
-        Route::get('entries/export-zip', [AdminEntryController::class, 'exportZip'])->name('entries.export_zip');
+            Route::get('entries/export', [AdminEntryController::class, 'export'])->name('entries.export');
+            Route::get('entries/{entry}/download-pdf', [AdminEntryController::class, 'downloadPdf'])->name('entries.download_pdf')->whereNumber('entry');
+            Route::post('entries/{entry}/approval', [EntryApprovalController::class, 'act'])->name('entries.approval')->whereNumber('entry');
+            Route::get('entries/{entry}/download-all', [AdminEntryController::class, 'downloadAll'])->name('entries.download_all')->whereNumber('entry');
+            Route::get('entries/{entry}/data.pdf', [AdminEntryController::class, 'downloadDataPdf'])->name('entries.data_pdf')->whereNumber('entry');
+            Route::get('entries/export-zip', [AdminEntryController::class, 'exportZip'])->name('entries.export_zip');
+        });
 
         // ==============================
         // QA

@@ -53,15 +53,10 @@ class AuthServiceProvider extends ServiceProvider
             $siteId = is_numeric($site) ? (int) $site : ($site->id ?? null);
             if (!$siteId) return false;
 
-            if (method_exists($user, 'isAdmin') && $user->isAdmin()) return true;
-            if (method_exists($user, 'sites')) {
-                return $user->sites()->where('site_id', $siteId)->exists();
-            }
-            return false;
+            return method_exists($user, 'hasSiteAccess') && $user->hasSiteAccess($siteId);
         });
 
         Gate::define('daily.manage', function ($user, $site = null) {
-            if (method_exists($user, 'isAdmin') && $user->isAdmin()) return true;
             if ($site === null) return false;
             return Gate::forUser($user)->allows('site-access', $site);
         });

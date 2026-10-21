@@ -18,8 +18,10 @@ class SiteController extends Controller
         $companyId  = $request->integer('company_id'); // null kalau ga ada
         $perPage    = (int) $request->get('per', 15);
 
+        $allowedSiteIds = auth()->user()->allowedSiteIds();
         $sites = Site::query()
             ->with(['company:id,code,name']) // eager load
+            ->when(is_array($allowedSiteIds), fn ($qq) => $qq->whereIn('id', $allowedSiteIds ?: [-1]))
             ->when($q !== '', function ($qq) use ($q) {
                 $qq->where(function ($w) use ($q) {
                     $w->where('name', 'like', "%{$q}%")
@@ -43,6 +45,7 @@ class SiteController extends Controller
      */
     public function create()
     {
+        abort_unless(auth()->user()->isSuperAdmin(), 403);
         $site = new Site();
 
         // untuk select perusahaan di form
@@ -56,6 +59,7 @@ class SiteController extends Controller
      */
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->isSuperAdmin(), 403);
         $data = $request->validate([
             'code'        => ['required','string','max:20','unique:sites,code'],
             'name'        => ['required','string','max:150'],
@@ -75,6 +79,7 @@ class SiteController extends Controller
      */
     public function edit(Site $site)
     {
+        abort_unless(auth()->user()->hasSiteAccess((int) $site->id), 403);
         $companies = Company::orderBy('code')->get(['id','code','name']);
         return view('admin.sites.form', compact('site', 'companies'));
     }
@@ -84,6 +89,7 @@ class SiteController extends Controller
      */
     public function update(Request $request, Site $site)
     {
+        abort_unless(auth()->user()->hasSiteAccess((int) $site->id), 403);
         $data = $request->validate([
             'code'        => [
                 'required','string','max:20',
@@ -106,6 +112,7 @@ class SiteController extends Controller
      */
     public function destroy(Site $site)
     {
+        abort_unless(auth()->user()->hasSiteAccess((int) $site->id), 403);
         $site->delete();
         return back()->with('success', "Site {$site->code} dihapus.");
     }
@@ -119,12 +126,8 @@ class SiteController extends Controller
             'site_id' => ['nullable','integer','exists:sites,id'],
         ]);
 
-        if (!auth()->user()->isSuperAdmin() && !\Gate::allows('is-admin')) {
-            if ($request->filled('site_id')
-                && method_exists(auth()->user(),'hasSite')
-                && !auth()->user()->hasSite((int)$request->site_id)) {
-                return back()->with('error','Kamu tidak punya akses ke site tersebut.');
-            }
+        if ($request->filled('site_id') && !auth()->user()->hasSiteAccess((int) $request->site_id)) {
+            return back()->with('error','Kamu tidak punya akses ke site tersebut.');
         }
 
         session(['active_site_id' => $request->site_id ?: null]);

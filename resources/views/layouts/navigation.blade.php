@@ -18,7 +18,7 @@ return $active ? "$base $activeCls" : "$base $inactive";
 
 $sites = collect();
 if ($user) {
-if ($isAdmin) {
+if ($isSuper) {
 $sites = Site::select('id','code','name')->orderBy('code')->get();
 } elseif (method_exists($user, 'sites')) {
 $sites = $user->sites()->select('sites.id','sites.code','sites.name')->orderBy('sites.code')->get();
@@ -42,6 +42,19 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
                bg-ivory-50 border-r border-coal-200
                flex flex-col">
 
+  {{-- Icon rail ketika sidebar diciutkan --}}
+  <div x-show="sidebarCollapsed" x-cloak class="hidden lg:flex flex-col items-center gap-3 p-3">
+    <button type="button" @click="toggleSidebarCollapse()" class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-maroon-700 text-white shadow-sm hover:bg-maroon-800" title="Buka sidebar" aria-label="Buka sidebar">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <a href="{{ route('admin.dashboard') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="Dashboard" aria-label="Dashboard"><x-ui-icon name="dashboard"/></a>
+    @if(Route::has('admin.wellness.index'))<a href="{{ route('admin.wellness.index') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="Wellness" aria-label="Wellness"><x-ui-icon name="wellness"/></a>@endif
+    @if(Route::has('admin.forms.index'))<a href="{{ route('admin.forms.index') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="Mandala" aria-label="Mandala"><x-ui-icon name="mandala"/></a>@endif
+    @if($isSuper && Route::has('admin.site_access.index'))<a href="{{ route('admin.site_access.index') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="Site access" aria-label="Site access"><x-ui-icon name="access"/></a>@endif
+  </div>
+
+  <div x-show="!sidebarCollapsed" x-cloak class="contents">
+
   {{-- USER --}}
   @auth
   <div class="px-4 py-4 border-b border-coal-200 bg-ivory-50/70">
@@ -54,6 +67,10 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
         <div class="text-xs text-coal-500 truncate">{{ auth()->user()->email ?? '' }}</div>
       </div>
     </div>
+    <button type="button" @click="toggleSidebarCollapse()" class="mt-4 hidden w-full items-center justify-center gap-2 rounded-xl border border-coal-200 px-3 py-2 text-xs text-coal-600 hover:bg-white lg:flex" title="Ciutkan sidebar">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5l-7 7 7 7M4 12h16"/></svg>
+      Ciutkan menu
+    </button>
   </div>
   @endauth
 
@@ -73,44 +90,30 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
       </div>
 
       <div class="mt-2 grid gap-1" x-show="openMenu" x-transition>
-        <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
+        <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}"><x-ui-icon name="dashboard"/> Dashboard</a>
 
         @if(Route::has('admin.wellness.index'))
-        <a href="{{ route('admin.wellness.index') }}" class="{{ $navItemClass(request()->routeIs('admin.wellness.*')) }}">🌿 Wellness</a>
+        <a href="{{ route('admin.wellness.index') }}" class="{{ $navItemClass(request()->routeIs('admin.wellness.*')) }}"><x-ui-icon name="wellness"/> Wellness</a>
         @endif
 
         @if(Route::has('admin.departments.index'))
-        <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}">🏷️ Departments</a>
+        <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}"><x-ui-icon name="department"/> Departments</a>
         @endif
 
         @if(Route::has('admin.forms.index'))
-        <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}">🧾 Mandala</a>
-        @endif
-
-        @if(Route::has('admin.documents.index'))
-        <a href="{{ route('admin.documents.index') }}" class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}">📄 Documents</a>
-        @endif
-
-        @if(($user && method_exists($user,'isSuperAdmin') && $user->isSuperAdmin()) || ($user && $user->department_id))
-        @if(Route::has('admin.document_templates.index'))
-        <a href="{{ route('admin.document_templates.index') }}" class="{{ $navItemClass(request()->routeIs('admin.document_templates.*')) }}">🧩 Doc Templates</a>
-        @endif
-        @endif
-
-        @if(Route::has('admin.entries.index'))
-        <a href="{{ route('admin.entries.index') }}" class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">📥 Entries</a>
+        <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}"><x-ui-icon name="mandala"/> Mandala</a>
         @endif
 
         @if(Route::has('admin.qa.index'))
-        <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+        <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="chat"/> Tanya Jawab</a>
         @endif
 
         @if(Route::has('admin.contracts.index'))
-        <a href="{{ route('admin.contracts.index') }}" class="{{ $navItemClass(request()->routeIs('admin.contracts.*')) }}">📑 Contracts</a>
+        <a href="{{ route('admin.contracts.index') }}" class="{{ $navItemClass(request()->routeIs('admin.contracts.*')) }}"><x-ui-icon name="contract"/> Contracts</a>
         @endif
 
         @if($isSuper && Route::has('admin.users.active.index'))
-        <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
+        <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}"><x-ui-icon name="users"/> Manage Users</a>
         @endif
       </div>
     </div>
@@ -138,7 +141,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
         @if(Route::has('admin.hipo.index'))
         <a href="{{ route('admin.hipo.index') }}"
           class="{{ $navItemClass(request()->routeIs('admin.hipo.*')) }}">
-          ⚠️ HIPO / Nearmiss
+          <x-ui-icon name="warning"/> HIPO / Nearmiss
         </a>
         @endif
 
@@ -147,15 +150,15 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
         @endif
 
         @if($isSuper && Route::has('admin.companies.index'))
-        <a href="{{ route('admin.companies.index') }}" class="{{ $navItemClass(request()->routeIs('admin.companies.*')) }}">🏢 Companies</a>
+        <a href="{{ route('admin.companies.index') }}" class="{{ $navItemClass(request()->routeIs('admin.companies.*')) }}"><x-ui-icon name="company"/> Companies</a>
         @endif
 
         @if(Route::has('admin.groups.index'))
-        <a href="{{ route('admin.groups.index') }}" class="{{ $navItemClass(request()->routeIs('admin.groups.*')) }}">🗂️ Indicator Groups</a>
+        <a href="{{ route('admin.groups.index') }}" class="{{ $navItemClass(request()->routeIs('admin.groups.*')) }}"><x-ui-icon name="groups"/> Indicator Groups</a>
         @endif
 
         @if(Route::has('admin.indicators.index'))
-        <a href="{{ route('admin.indicators.index') }}" class="{{ $navItemClass(request()->routeIs('admin.indicators.*')) }}">📊 Indicators</a>
+        <a href="{{ route('admin.indicators.index') }}" class="{{ $navItemClass(request()->routeIs('admin.indicators.*')) }}"><x-ui-icon name="chart"/> Indicators</a>
         @endif
 
         @if(Route::has('admin.daily.create'))
@@ -163,15 +166,15 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
         @endif
 
         @if(Route::has('user.daily_notes.index'))
-        <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
+        <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}"><x-ui-icon name="note"/> Catatan Harian</a>
         @endif
 
         @if(Route::has('admin.reports.monthly'))
-        <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+        <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}"><x-ui-icon name="report"/> Rekap Bulanan</a>
         @endif
 
         @if(Route::has('admin.site_access.index'))
-        <a href="{{ route('admin.site_access.index') }}" class="{{ $navItemClass(request()->routeIs('admin.site_access.*')) }}">🛂 Input Access</a>
+        <a href="{{ route('admin.site_access.index') }}" class="{{ $navItemClass(request()->routeIs('admin.site_access.*')) }}"><x-ui-icon name="access"/> Input Access</a>
         @endif
       </div>
     </div>
@@ -187,18 +190,18 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
       </div>
 
       <div class="mt-2 grid gap-1" x-show="openMenu" x-transition>
-        <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
+        <a href="{{ route('dashboard') }}" class="{{ $navItemClass(request()->routeIs('dashboard')) }}"><x-ui-icon name="dashboard"/> Beranda</a>
 
         @if(Route::has('front.forms.index'))
-        <a href="{{ route('front.forms.index') }}" class="{{ $navItemClass(request()->routeIs('front.forms.*')) }}">🧾 FORM</a>
+        <a href="{{ route('front.forms.index') }}" class="{{ $navItemClass(request()->routeIs('front.forms.*')) }}"><x-ui-icon name="mandala"/> FORM</a>
         @endif
 
         @if($userContractsUrl)
-        <a href="{{ $userContractsUrl }}" class="{{ $navItemClass(request()->routeIs('user.contracts.*') || request()->routeIs('contracts.*')) }}">📑 Kontrak Saya</a>
+        <a href="{{ $userContractsUrl }}" class="{{ $navItemClass(request()->routeIs('user.contracts.*') || request()->routeIs('contracts.*')) }}"><x-ui-icon name="contract"/> Kontrak Saya</a>
         @endif
 
         @if(Route::has('admin.qa.index'))
-        <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+        <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="chat"/> Tanya Jawab</a>
         @endif
       </div>
     </div>
@@ -225,11 +228,11 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
         @endif
 
         @if(Route::has('user.daily_notes.index'))
-        <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
+        <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}"><x-ui-icon name="note"/> Catatan Harian</a>
         @endif
 
         @if(Route::has('admin.reports.monthly'))
-        <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+        <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}"><x-ui-icon name="report"/> Rekap Bulanan</a>
         @endif
       </div>
     </div>
@@ -280,6 +283,8 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
   </div>
   @endauth
 
+  </div>
+
 </aside>
 
 
@@ -321,34 +326,30 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
             </div>
 
             <div class="mt-2 grid gap-1" x-show="openMenu" x-transition>
-              <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
+              <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}"><x-ui-icon name="dashboard"/> Dashboard</a>
 
               @if(Route::has('admin.wellness.index'))
-              <a href="{{ route('admin.wellness.index') }}" class="{{ $navItemClass(request()->routeIs('admin.wellness.*')) }}">🌿 Wellness</a>
+              <a href="{{ route('admin.wellness.index') }}" class="{{ $navItemClass(request()->routeIs('admin.wellness.*')) }}"><x-ui-icon name="wellness"/> Wellness</a>
               @endif
 
               @if(Route::has('admin.departments.index'))
-              <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}">🏷️ Departments</a>
+              <a href="{{ route('admin.departments.index') }}" class="{{ $navItemClass(request()->routeIs('admin.departments.*')) }}"><x-ui-icon name="department"/> Departments</a>
               @endif
 
               @if(Route::has('admin.forms.index'))
-              <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}">🧾 Mandala</a>
-              @endif
-
-              @if(Route::has('admin.entries.index'))
-              <a href="{{ route('admin.entries.index') }}" class="{{ $navItemClass(request()->routeIs('admin.entries.*')) }}">📥 Entries</a>
+              <a href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}"><x-ui-icon name="mandala"/> Mandala</a>
               @endif
 
               @if(Route::has('admin.qa.index'))
-              <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+              <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="chat"/> Tanya Jawab</a>
               @endif
 
               @if(Route::has('admin.contracts.index'))
-              <a href="{{ route('admin.contracts.index') }}" class="{{ $navItemClass(request()->routeIs('admin.contracts.*')) }}">📑 Contracts</a>
+              <a href="{{ route('admin.contracts.index') }}" class="{{ $navItemClass(request()->routeIs('admin.contracts.*')) }}"><x-ui-icon name="contract"/> Contracts</a>
               @endif
 
               @if($isSuper && Route::has('admin.users.active.index'))
-              <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}">👥 Manage Users</a>
+              <a href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}"><x-ui-icon name="users"/> Manage Users</a>
               @endif
             </div>
           </div>
@@ -368,15 +369,15 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
               @endif
 
               @if($isSuper && Route::has('admin.companies.index'))
-              <a href="{{ route('admin.companies.index') }}" class="{{ $navItemClass(request()->routeIs('admin.companies.*')) }}">🏢 Companies</a>
+              <a href="{{ route('admin.companies.index') }}" class="{{ $navItemClass(request()->routeIs('admin.companies.*')) }}"><x-ui-icon name="company"/> Companies</a>
               @endif
 
               @if(Route::has('admin.groups.index'))
-              <a href="{{ route('admin.groups.index') }}" class="{{ $navItemClass(request()->routeIs('admin.groups.*')) }}">🗂️ Indicator Groups</a>
+              <a href="{{ route('admin.groups.index') }}" class="{{ $navItemClass(request()->routeIs('admin.groups.*')) }}"><x-ui-icon name="groups"/> Indicator Groups</a>
               @endif
 
               @if(Route::has('admin.indicators.index'))
-              <a href="{{ route('admin.indicators.index') }}" class="{{ $navItemClass(request()->routeIs('admin.indicators.*')) }}">📊 Indicators</a>
+              <a href="{{ route('admin.indicators.index') }}" class="{{ $navItemClass(request()->routeIs('admin.indicators.*')) }}"><x-ui-icon name="chart"/> Indicators</a>
               @endif
 
               @if(Route::has('admin.daily.create'))
@@ -384,15 +385,15 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
               @endif
 
               @if(Route::has('user.daily_notes.index'))
-              <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
+              <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}"><x-ui-icon name="note"/> Catatan Harian</a>
               @endif
 
               @if(Route::has('admin.reports.monthly'))
-              <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+              <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}"><x-ui-icon name="report"/> Rekap Bulanan</a>
               @endif
 
               @if($isSuper && Route::has('admin.site_access.index'))
-              <a href="{{ route('admin.site_access.index') }}" class="{{ $navItemClass(request()->routeIs('admin.site_access.*')) }}">🛂 Input Access</a>
+              <a href="{{ route('admin.site_access.index') }}" class="{{ $navItemClass(request()->routeIs('admin.site_access.*')) }}"><x-ui-icon name="access"/> Input Access</a>
               @endif
             </div>
           </div>
@@ -408,18 +409,18 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
             </div>
 
             <div class="mt-2 grid gap-1" x-show="openMenu" x-transition>
-              <a href="{{ route('admin.dashboard') }}" class="{{ $navItemClass(request()->routeIs('admin.dashboard')) }}">🏛️ Dashboard</a>
+              <a href="{{ route('dashboard') }}" class="{{ $navItemClass(request()->routeIs('dashboard')) }}"><x-ui-icon name="dashboard"/> Beranda</a>
 
               @if(Route::has('front.forms.index'))
-              <a href="{{ route('front.forms.index') }}" class="{{ $navItemClass(request()->routeIs('front.forms.*')) }}">🧾 FORM</a>
+              <a href="{{ route('front.forms.index') }}" class="{{ $navItemClass(request()->routeIs('front.forms.*')) }}"><x-ui-icon name="mandala"/> FORM</a>
               @endif
 
               @if($userContractsUrl)
-              <a href="{{ $userContractsUrl }}" class="{{ $navItemClass(request()->routeIs('user.contracts.*') || request()->routeIs('contracts.*')) }}">📑 Kontrak Saya</a>
+              <a href="{{ $userContractsUrl }}" class="{{ $navItemClass(request()->routeIs('user.contracts.*') || request()->routeIs('contracts.*')) }}"><x-ui-icon name="contract"/> Kontrak Saya</a>
               @endif
 
               @if(Route::has('admin.qa.index'))
-              <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">💬 Tanya Jawab</a>
+              <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="chat"/> Tanya Jawab</a>
               @endif
             </div>
           </div>
@@ -436,7 +437,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
               @if(Route::has('admin.hipo.index'))
               <a href="{{ route('admin.hipo.index') }}"
                 class="{{ $navItemClass(request()->routeIs('admin.hipo.*')) }}">
-                ⚠️ HIPO / Nearmiss
+                <x-ui-icon name="warning"/> HIPO / Nearmiss
               </a>
               @endif
 
@@ -445,11 +446,11 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
               @endif
 
               @if(Route::has('user.daily_notes.index'))
-              <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}">📝 Catatan Harian</a>
+              <a href="{{ route('user.daily_notes.index') }}" class="{{ $navItemClass(request()->routeIs('user.daily_notes.*')) }}"><x-ui-icon name="note"/> Catatan Harian</a>
               @endif
 
               @if(Route::has('admin.reports.monthly'))
-              <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}">📈 Rekap Bulanan</a>
+              <a href="{{ route('admin.reports.monthly') }}" class="{{ $navItemClass(request()->routeIs('admin.reports.monthly')) }}"><x-ui-icon name="report"/> Rekap Bulanan</a>
               @endif
             </div>
           </div>

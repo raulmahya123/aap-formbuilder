@@ -22,7 +22,9 @@ class CcmReportController extends Controller
      * ========================================================= */
     public function index()
     {
-        $reports = CcmReport::orderBy('waktu_pelaporan', 'desc')
+        $allowedJobsites = $this->jobsiteOptions()->pluck('value')->all();
+        $reports = CcmReport::when(!auth()->user()->isSuperAdmin(), fn ($q) => $q->whereIn('jobsite', $allowedJobsites ?: ['__none__']))
+            ->orderBy('waktu_pelaporan', 'desc')
             ->paginate(10);
 
         return view('admin.ccm.index', compact('reports'));
@@ -50,6 +52,7 @@ class CcmReportController extends Controller
         );
 
         $validated = $request->validate($rules);
+        $this->authorizeJobsite($validated['jobsite']);
 
         // 2. Handle File Upload (Dengan Kompresi Image V3)
         $validated = $this->handleFileUploads($request, $validated);
@@ -68,6 +71,7 @@ class CcmReportController extends Controller
     public function show($id)
     {
         $report = CcmReport::findOrFail($id);
+        $this->authorizeJobsite($report->jobsite);
         return view('admin.ccm.show', compact('report'));
     }
 
@@ -77,6 +81,7 @@ class CcmReportController extends Controller
     public function edit($id)
     {
         $report = CcmReport::findOrFail($id);
+        $this->authorizeJobsite($report->jobsite);
         return view('admin.ccm.edit', compact('report'));
     }
 
@@ -93,6 +98,8 @@ class CcmReportController extends Controller
         );
 
         $validated = $request->validate($rules);
+        $this->authorizeJobsite($report->jobsite);
+        $this->authorizeJobsite($validated['jobsite']);
 
         // Handle File Upload (Ganti file lama jika ada upload baru)
         $validated = $this->handleFileUploads($request, $validated, $report);
@@ -110,6 +117,7 @@ class CcmReportController extends Controller
     public function destroy($id)
     {
         $report = CcmReport::findOrFail($id);
+        $this->authorizeJobsite($report->jobsite);
 
         // Hapus semua file fisik dari storage agar tidak memenuhi server
         foreach ($report->getAttributes() as $field => $value) {
@@ -257,9 +265,13 @@ class CcmReportController extends Controller
 
     private function jobsiteOptions()
     {
-        return Site::with('company:id,code,name')
+        $query = Site::with('company:id,code,name')
             ->orderBy('name')
-            ->get(['id', 'code', 'name', 'company_id'])
+            ->when(is_array(auth()->user()->allowedSiteIds()), function ($q) {
+                $q->whereIn('id', auth()->user()->allowedSiteIds() ?: [-1]);
+            });
+
+        return $query->get(['id', 'code', 'name', 'company_id'])
             ->map(function (Site $site) {
                 $value = $this->jobsiteLabel($site);
 
@@ -269,6 +281,12 @@ class CcmReportController extends Controller
                 ];
             })
             ->values();
+    }
+
+    private function authorizeJobsite(string $jobsite): void
+    {
+        if (auth()->user()->isSuperAdmin()) return;
+        abort_unless($this->jobsiteOptions()->pluck('value')->contains($jobsite), 403);
     }
 
     private function jobsiteLabel(Site $site): string
