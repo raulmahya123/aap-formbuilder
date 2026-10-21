@@ -2,8 +2,12 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-2xl mx-auto p-4 sm:p-6">
-  <h1 class="text-xl font-semibold mb-4">Buat Thread Q&A</h1>
+<x-ui.page class="max-w-2xl mx-auto">
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Buat Thread Q&A</x-ui.page-title>
+<x-ui.page-description>Kelola percakapan dan tindak lanjut laporan.</x-ui.page-description></div>
+  <x-ui.page-actions></x-ui.page-actions>
+</x-ui.page-header>
 
   <form method="POST" action="{{ route('admin.qa.store') }}" class="space-y-4">
     @csrf
@@ -29,9 +33,9 @@
     </div>
 
     <div class="flex justify-end gap-2">
-      <a href="{{ url()->previous() }}" class="px-3 py-1.5 rounded-lg border">Batal</a>
-      <button class="px-4 py-1.5 rounded-lg bg-emerald-600 text-white">Simpan</button>
+      <x-ui.link variant="secondary" href="{{ url()->previous() }}" class="px-3 py-2 rounded-lg border">Batal</x-ui.link>
+      <x-ui.button variant="primary" class="px-4 py-2 rounded-lg">Simpan</x-ui.button>
     </div>
   </form>
-</div>
+</x-ui.page>
 @endsection

@@ -3,24 +3,21 @@
 <html
   lang="{{ str_replace('_','-', app()->getLocale()) }}"
   x-data="layout()"
-  x-init="init()"
+  @keydown.escape.window="sidebarOpen = false"
+  @resize.window="isDesktop = window.innerWidth >= 1024; if (isDesktop) sidebarOpen = false; else sidebarCollapsed = false"
   class="scroll-smooth"
 >
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <meta name="theme-color" content="#603813">
+  <meta name="theme-color" content="#713F12">
   <link rel="icon" type="image/png" href="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}">
   <link rel="apple-touch-icon" href="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}">
   <title>@yield('title', config('app.name', 'AAP FormBuilder'))</title>
 
-  {{-- Fonts: Poppins --}}
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-
   {{-- Vite assets --}}
+  <link rel="preload" href="{{ Vite::asset('resources/fonts/InterVariable.woff2') }}" as="font" type="font/woff2" crossorigin>
   @vite(['resources/css/app.css','resources/js/app.js'])
   @stack('styles')
 
@@ -29,6 +26,7 @@
       return {
         // HANYA untuk drawer mobile
         sidebarOpen: false,
+        isDesktop: window.innerWidth >= 1024,
         sidebarCollapsed: localStorage.getItem('aap-sidebar-collapsed') === '1',
         init() {
           if (window.innerWidth < 1024) this.sidebarCollapsed = false;
@@ -46,73 +44,11 @@
     }
   </script>
 
-  <style>
-    :root {
-      --font-sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans';
-      --brand-maroon: #603813;
-    }
-    body  { font-family: var(--font-sans); }
 
-    /* Scrollbar halus */
-    .nice-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
-    .nice-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
-    .nice-scroll::-webkit-scrollbar-track { background: transparent; }
-
-    /* Active state menu */
-    aside nav a.is-active {
-      background-color: #603813 !important;
-      color: #fff !important;
-      border-color: #603813 !important;
-    }
-    aside nav a:is(:active, :focus):not(.is-active) {
-      color: inherit !important;
-      background-color: inherit !important;
-      border-color: transparent !important;
-      box-shadow: none !important;
-      outline: none !important;
-    }
-
-    .table-header {
-      background: #ffffff;
-      color: #111111;
-      font-size: .72rem;
-      font-weight: 700;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    main table thead th {
-      background: #ffffff;
-      color: #111111;
-      font-size: .72rem;
-      font-weight: 700;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    .action-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 2rem;
-      height: 2rem;
-      border-radius: .65rem;
-      border: 1px solid #e7ddd4;
-      color: #303030;
-      background: #fff;
-      transition: .15s ease;
-    }
-    .action-icon:hover { background: #f5f5f5; color: #111111; transform: translateY(-1px); }
-    .action-icon.danger { color: #be123c; border-color: #fecdd3; }
-    .action-icon.danger:hover { background: #fff1f2; }
-    .pagination { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
-    .pagination > * { display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 .55rem; border: 1px solid #c5c5c5; border-radius: .5rem; background: #fff; font-size: .8rem; }
-    .pagination .active { background: #0057d9; color: #fff; border-color: #0057d9; }
-    .pagination .disabled { color: #777; background: #f5f5f5; }
-  </style>
 </head>
 
-<body class="min-h-screen bg-white text-coal-900">
+<body class="ui-shell min-h-screen bg-white text-coal-900">
+  <a class="ui-skip" href="#main-content">Lewati ke konten</a>
 
   {{-- ===== Mobile hamburger (tanpa topbar) ===== --}}
   <div class="lg:hidden fixed top-3 left-3 z-[60]">
@@ -121,9 +57,7 @@
       @click="toggleSidebar()"
       aria-label="Open menu"
       :aria-expanded="sidebarOpen"
-      class="inline-flex h-10 w-10 items-center justify-center rounded-lg border
-             border-[#C5C5C5] bg-white text-[#111111]
-             hover:bg-[#F5F5F5] transition"
+      class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#D4D4D8] bg-white text-[#18181B] hover:bg-[#F4F4F5] transition"
     >
       <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -133,7 +67,7 @@
   </div>
 
   {{-- ===== Grid 2 kolom: Sidebar kiri + Konten kanan ===== --}}
-  <div class="max-w-[100vw] mx-auto lg:grid" :class="sidebarCollapsed ? 'lg:grid-cols-[76px_1fr]' : 'lg:grid-cols-[260px_1fr]'">
+  <div class="max-w-[100vw] mx-auto lg:grid" :class="sidebarCollapsed ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[256px_minmax(0,1fr)]'">
 
     {{-- Sidebar (handle drawer di partial) --}}
     @include('layouts.navigation')
@@ -153,38 +87,34 @@
       @endphp
 
       {{-- Navbar --}}
-      <header class="sticky top-0 z-30 border-b border-[#C5C5C5] bg-white px-4 py-3 lg:px-8">
+      <header class="ui-topbar sticky top-0 z-30 border-b border-[#D4D4D8] bg-white px-4 py-3 lg:px-8">
         <div class="flex min-h-10 items-center justify-between gap-4">
           <div class="flex min-w-0 items-center gap-3">
             <button type="button" @click="toggleSidebarCollapse()" class="hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-coal-200 bg-white text-coal-700 hover:bg-ivory-100 lg:inline-flex" title="Buka/tutup sidebar" aria-label="Buka/tutup sidebar">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
-            <div class="hidden text-sm font-semibold text-[#603813] sm:block">AAP Form Builder</div>
-            <div class="h-5 w-px bg-[#C5C5C5]"></div>
-            <div class="min-w-0 truncate text-sm font-medium text-[#303030]">
-            @hasSection('breadcrumbs')
-              @yield('breadcrumbs')
-            @else
+            <div class="hidden text-sm font-semibold text-[#713F12] sm:block">AAP Form Builder</div>
+            <div class="h-5 w-px bg-[#D4D4D8]"></div>
+            <div class="ui-breadcrumb min-w-0 truncate text-[#18181B]">
               {{ trim($__env->yieldContent('title')) ?: 'Dashboard' }}
-            @endif
             </div>
           </div>
 
           <div class="flex items-center gap-2 sm:gap-3">
             @if($navbarUser && $navbarUser->isAdmin() && $navbarSites->count() > 0 && Route::has('admin.sites.switch'))
               <div x-data="{open:false}" class="relative hidden md:block">
-                <button type="button" @click="open=!open" @click.outside="open=false" class="inline-flex max-w-[15rem] items-center gap-2 rounded-lg border border-[#C5C5C5] bg-white px-3 py-2 text-left text-sm text-[#111111] hover:bg-[#F5F5F5]" aria-label="Pilih site">
-                  <svg class="h-4 w-4 shrink-0 text-[#603813]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
+                <button type="button" @click="open=!open" @click.outside="open=false" class="inline-flex max-w-[15rem] items-center gap-2 rounded-lg border border-[#D4D4D8] bg-white px-3 py-2 text-left text-sm text-[#18181B] hover:bg-[#F4F4F5]" aria-label="Pilih site">
+                  <svg class="h-4 w-4 shrink-0 text-[#713F12]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
                   <span class="truncate font-medium">{{ $navbarActiveSite?->code ?? 'ALL SITES' }}</span>
                   <svg class="h-4 w-4 text-coal-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
                 </button>
-                <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-72 rounded-xl border border-[#C5C5C5] bg-white p-2 shadow-soft">
-                  <div class="px-3 py-2 text-[11px] font-semibold uppercase tracking-[.12em] text-[#525252]">Active Site</div>
+                <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-72 rounded-lg border border-[#D4D4D8] bg-white p-2 shadow-none">
+                  <div class="px-3 py-2 text-[11px] font-semibold normal-case tracking-normal text-[#52525B]">Active Site</div>
                   <form method="POST" action="{{ route('admin.sites.switch') }}" class="grid gap-1">
                     @csrf
-                    <button name="site_id" value="" class="flex items-center justify-between rounded-xl px-3 py-2 text-left text-sm hover:bg-ivory-100"><span>ALL SITES</span>@if(!$navbarActiveSite)<span class="text-maroon-700">✓</span>@endif</button>
+                    <button name="site_id" value="" class="flex items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-ivory-100"><span>ALL SITES</span>@if(!$navbarActiveSite)<span class="text-maroon-700">✓</span>@endif</button>
                     @foreach($navbarSites as $navbarSite)
-                      <button name="site_id" value="{{ $navbarSite->id }}" class="flex items-center justify-between rounded-xl px-3 py-2 text-left text-sm hover:bg-ivory-100"><span>{{ $navbarSite->code }} — {{ $navbarSite->name }}</span>@if($navbarActiveSite?->id === $navbarSite->id)<span class="text-maroon-700">✓</span>@endif</button>
+                      <button name="site_id" value="{{ $navbarSite->id }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-ivory-100"><span>{{ $navbarSite->code }} — {{ $navbarSite->name }}</span>@if($navbarActiveSite?->id === $navbarSite->id)<span class="text-maroon-700">✓</span>@endif</button>
                     @endforeach
                   </form>
                 </div>
@@ -192,12 +122,11 @@
             @endif
 
             @hasSection('actions')
-              @yield('actions')
             @endif
 
             @if($navbarUser)
               <div x-data="{open:false}" class="relative">
-                <button type="button" @click="open=!open" @click.outside="open=false" class="inline-flex items-center gap-2 rounded-lg border border-[#C5C5C5] bg-white px-2 py-1.5 text-left text-[#111111] hover:bg-[#F5F5F5]" aria-label="Buka profil akun">
+                <button type="button" @click="open=!open" @click.outside="open=false" class="inline-flex items-center gap-2 rounded-lg border border-[#D4D4D8] bg-white px-2 py-2 text-left text-[#18181B] hover:bg-[#F4F4F5]" aria-label="Buka profil akun">
                   @if($navbarUser->avatar_path)
                     <img src="{{ asset('storage/'.$navbarUser->avatar_path) }}" alt="" class="h-8 w-8 rounded-lg object-cover">
                   @else
@@ -206,23 +135,23 @@
                   <span class="hidden max-w-[10rem] truncate text-sm font-medium sm:block">{{ $navbarUser->name }}</span>
                   <svg class="hidden h-4 w-4 text-coal-400 sm:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
                 </button>
-                <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-80 rounded-xl border border-[#C5C5C5] bg-white p-4 shadow-soft">
+                <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-80 rounded-lg border border-[#D4D4D8] bg-white p-4 shadow-none">
                   <div class="flex items-center gap-3 border-b border-coal-100 pb-4">
                     @if($navbarUser->avatar_path)
-                      <img src="{{ asset('storage/'.$navbarUser->avatar_path) }}" alt="Foto {{ $navbarUser->name }}" class="h-14 w-14 rounded-2xl object-cover">
+                      <img src="{{ asset('storage/'.$navbarUser->avatar_path) }}" alt="Foto {{ $navbarUser->name }}" class="h-14 w-14 rounded-lg object-cover">
                     @else
-                      <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-maroon-700 text-lg font-semibold text-white">{{ strtoupper(substr($navbarUser->name, 0, 2)) }}</span>
+                      <span class="flex h-14 w-14 items-center justify-center rounded-lg bg-maroon-700 text-lg font-semibold text-white">{{ strtoupper(substr($navbarUser->name, 0, 2)) }}</span>
                     @endif
                     <div class="min-w-0"><div class="truncate font-semibold text-coal-900">{{ $navbarUser->name }}</div><div class="truncate text-xs text-coal-500">{{ $navbarUser->email }}</div></div>
                   </div>
                   <div class="mt-4 grid gap-2">
                     @if(Route::has('profile.edit'))
-                      <a href="{{ route('profile.edit') }}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-maroon-700 px-3 py-2.5 text-sm font-semibold text-white hover:bg-maroon-800">
+                      <a href="{{ route('profile.edit') }}" class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-3 py-3 text-sm font-semibold text-white hover:bg-blue-800">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path stroke-linecap="round" d="M5 20c.8-3.2 3.2-5 7-5s6.2 1.8 7 5"/></svg>
                         Lihat akun
                       </a>
                     @endif
-                    <form method="POST" action="{{ route('logout') }}">@csrf<button class="w-full rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50">Logout</button></form>
+                    <form method="POST" action="{{ route('logout') }}">@csrf<button class="w-full rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50">Logout</button></form>
                   </div>
                 </div>
               </div>
@@ -232,7 +161,7 @@
       </header>
 
       {{-- Main content --}}
-      <main class="px-4 lg:px-8 py-6 grow">
+      <main id="main-content" tabindex="-1" class="px-4 lg:px-8 py-6 grow">
         @yield('content')
       </main>
 
@@ -242,7 +171,7 @@
   @if(session('ok') || session('success') || session('error') || $errors->any())
     <div x-data="{show:true}" x-show="show" x-transition class="toast fixed right-4 top-4 z-[100] w-[min(92vw,26rem)] {{ session('error') || $errors->any() ? 'toast-error' : 'toast-success' }}" role="status" aria-live="polite">
       <div class="flex items-start gap-3">
-        <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-current text-sm font-bold">
+        <div class="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-current text-sm font-bold">
           @if(session('error') || $errors->any()) ! @else ✓ @endif
         </div>
         <div class="min-w-0 flex-1 text-sm">
@@ -258,25 +187,9 @@
     </div>
   @endif
 
+  <x-ui.action-dialogs />
   @stack('modals')
   @stack('scripts')
 
-  {{-- Alpine (defer) --}}
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <script>
-    document.addEventListener('submit', function (event) {
-      const form = event.target;
-      const message = form?.dataset?.confirm;
-      if (message && !window.confirm(message)) event.preventDefault();
-      if (event.defaultPrevented) return;
-      const submitter = event.submitter || form?.querySelector('button[type="submit"]');
-      if (submitter && !submitter.disabled) {
-        submitter.disabled = true;
-        submitter.classList.add('is-loading');
-        submitter.setAttribute('aria-busy', 'true');
-        submitter.innerHTML = '<span class="loading-spinner" aria-hidden="true"></span><span>Memproses…</span>';
-      }
-    });
-  </script>
 </body>
 </html>

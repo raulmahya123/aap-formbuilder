@@ -2,42 +2,40 @@
 @extends('layouts.app')
 
 @section('content')
-<div
+<x-ui.page
   x-data="{ submitting:false, dark: (localStorage.getItem('theme') ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark' }"
   x-init="document.documentElement.classList.toggle('dark', dark)"
-  :class="dark ? 'dark' : ''"
-  class="bg-ivory-100 dark:bg-coal-900 min-h-screen text-coal-800 dark:text-ivory-100">
-  <div class="max-w-3xl mx-auto px-4 py-8">
+  ::class="dark ? 'dark' : ''"
+  class="min-h-screen text-coal-800 dark:text-ivory-100">
+  <div class="max-w-3xl mx-auto">
 
     {{-- Breadcrumbs --}}
-    <nav class="text-sm text-coal-500 dark:text-coal-400 mb-4">
+
+
+    {{-- Header --}}
+    <x-ui.page-header>
+<x-slot:breadcrumbs>
       <a href="{{ route('dashboard') }}" class="hover:underline text-maroon-700 dark:text-maroon-300">Beranda</a>
       <span class="mx-2">/</span>
       <span class="text-coal-700 dark:text-ivory-100">{{ $form->title ?? 'Form' }}</span>
-    </nav>
-
-    {{-- Header --}}
-    <header class="mb-6">
-      <h1 class="text-2xl md:text-3xl font-serif tracking-tight">{{ $form->title }}</h1>
+    </x-slot:breadcrumbs>
+  <div class="ui-page-header__copy"><x-ui.page-title>{{ $form->title }}</x-ui.page-title>
       @if(!empty($form->description))
-      <p class="mt-2 text-coal-600 dark:text-coal-300">{{ $form->description }}</p>
-      @endif
-    </header>
+      <x-ui.page-description>{{ $form->description }}</x-ui.page-description>
+      @endif</div>
+  <x-ui.page-actions></x-ui.page-actions>
+</x-ui.page-header>
 
     {{-- Flash sukses --}}
     @if(session('success'))
-    <div class="mb-4 rounded-lg border px-4 py-3
-                  bg-maroon-50 text-maroon-700 border-maroon-200
-                  dark:bg-maroon-900/20 dark:text-maroon-300 dark:border-maroon-900/30">
+    <div class="mb-4 rounded-lg border px-4 py-3 bg-maroon-50 text-maroon-700 border-maroon-200 dark:bg-maroon-900/20 dark:text-maroon-300 dark:border-maroon-900/30">
       {{ session('success') }}
     </div>
     @endif
 
     {{-- Error global --}}
     @if ($errors->any())
-    <div class="mb-4 rounded-lg border px-4 py-3
-                  bg-rose-50 text-rose-700 border-rose-200
-                  dark:bg-rose-900/20 dark:text-rose-300 dark:border-rose-900/30">
+    <div class="mb-4 rounded-lg border px-4 py-3 bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-300 dark:border-rose-900/30">
       <div class="font-medium">Terjadi kesalahan pada input:</div>
       <ul class="list-disc pl-5 mt-2 space-y-1">
         @foreach ($errors->all() as $error)
@@ -48,8 +46,6 @@
     @endif
 
     @php
-    use Illuminate\Support\Str;
-    use Illuminate\Support\Facades\Storage;
 
     /** ================== FILE HANDLING (normalisasi + fallback) ================== */
     $fileDisks = ['mandala_uploads', 'public'];
@@ -63,13 +59,13 @@
     $candidates = [];
     if ($basePath) {
     $candidates[] = $basePath;
-    if (!Str::startsWith($basePath, 'forms/files/')) {
+    if (!\Illuminate\Support\Str::startsWith($basePath, 'forms/files/')) {
     $candidates[] = 'forms/files/'.ltrim($basePath, '/');
     }
     }
 
     // tebak nama dari slug/kode/judul/id
-    $slugGuess = Str::slug($form->slug ?? $form->code ?? $form->title ?? (string)$form->id, '-');
+    $slugGuess = \Illuminate\Support\Str::slug($form->slug ?? $form->code ?? $form->title ?? (string)$form->id, '-');
     if ($slugGuess) {
     $candidates[] = "forms/files/{$slugGuess}.pdf";
     }
@@ -82,7 +78,7 @@
     $resolvedDisk = null;
     foreach ($candidates as $cand) {
     foreach ($fileDisks as $diskName) {
-    if (Storage::disk($diskName)->exists($cand)) {
+    if (\Illuminate\Support\Facades\Storage::disk($diskName)->exists($cand)) {
     $resolvedPath = $cand;
     $resolvedDisk = $diskName;
     break 2;
@@ -96,21 +92,21 @@
     foreach ($fileDisks as $diskName) {
     try {
     $all = $all->merge(
-    collect(Storage::disk($diskName)->files('forms/files'))->map(fn($p) => [$diskName, $p])
+    collect(\Illuminate\Support\Facades\Storage::disk($diskName)->files('forms/files'))->map(fn($p) => [$diskName, $p])
     );
     } catch (\Throwable $e) {}
     }
     $all = $all
-    ->filter(fn($row) => Str::lower(pathinfo($row[1], PATHINFO_EXTENSION)) === 'pdf')
+    ->filter(fn($row) => \Illuminate\Support\Str::lower(pathinfo($row[1], PATHINFO_EXTENSION)) === 'pdf')
     ->values();
     if ($all->count() === 1) { [$resolvedDisk, $resolvedPath] = $all->first(); }
     }
 
     $path = $resolvedPath; // final (bisa null)
-    $fileExists = $path && $resolvedDisk ? Storage::disk($resolvedDisk)->exists($path) : false;
+    $fileExists = $path && $resolvedDisk ? \Illuminate\Support\Facades\Storage::disk($resolvedDisk)->exists($path) : false;
 
     // URL publik biasa (kalau symlink /storage sehat) — tidak dipakai untuk iframe
-    $urlPublic = $fileExists && $resolvedDisk === 'public' ? Storage::url($path) : null;
+    $urlPublic = $fileExists && $resolvedDisk === 'public' ? \Illuminate\Support\Facades\Storage::url($path) : null;
 
     // URL streaming (bypass symlink /storage)
     $streamUrl = $fileExists ? route('pubfile.stream', ['path' => $path]) : null;
@@ -124,7 +120,7 @@
     $size = null;
     if ($fileExists) {
     try {
-    $bytes = Storage::disk($resolvedDisk)->size($path);
+    $bytes = \Illuminate\Support\Facades\Storage::disk($resolvedDisk)->size($path);
     $units = ['B','KB','MB','GB'];
     $pow = $bytes > 0 ? floor(log($bytes, 1024)) : 0;
     $pow = min($pow, count($units)-1);
@@ -170,24 +166,24 @@
     <div class="mb-6">
       @if($fileExists && $isPdf)
       {{-- HANYA PDF yang di-embed --}}
-      <div class="rounded-xl border overflow-hidden bg-white dark:bg-coal-900 dark:border-coal-800 shadow-soft">
+      <x-ui.panel class="rounded-lg border overflow-hidden bg-white dark:bg-coal-900 dark:border-coal-800 shadow-none">
         <iframe
           src="{{ $streamUrl }}#toolbar=1&navpanes=0&scrollbar=1"
           class="w-full"
           style="height:75vh"></iframe>
-      </div>
+      </x-ui.panel>
       <div class="mt-3 flex flex-wrap gap-2">
-        <a href="{{ $streamUrl }}" target="_blank" rel="noopener"
-          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 dark:hover:bg-coal-800">
+        <x-ui.link variant="secondary" href="{{ $streamUrl }}" target="_blank" rel="noopener"
+          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:hover:bg-coal-800">
           🔎 Buka di Tab Baru
-        </a>
-        <a href="{{ route('pubfile.download', [
+        </x-ui.link>
+        <x-ui.link variant="primary" href="{{ route('pubfile.download', [
     'path' => $path,
     'name' => $form->slug ?? $form->code ?? $form->name ?? 'form'
 ]) }}"
-          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg">
           ⬇️ Download
-        </a>
+        </x-ui.link>
 
         {{-- Opsional tampilkan juga link publik biasa untuk debug --}}
         {{-- <a href="{{ $urlPublic }}" class="text-xs underline" target="_blank">/storage (debug)</a> --}}
@@ -197,21 +193,21 @@
       {{-- Word/Excel/PPT/dll: tombol saja --}}
       <div class="p-4 rounded-lg border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800">
         <div class="text-sm">
-          File: <span class="font-medium uppercase">{{ $ext }}</span>
+          File: <span class="font-medium normal-case">{{ $ext }}</span>
           @if($size) • <span class="text-slate-500">{{ $size }}</span> @endif
         </div>
         <div class="mt-3 flex flex-wrap gap-2">
-          <a href="{{ $streamUrl }}" target="_blank" rel="noopener"
-            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 dark:hover:bg-coal-800">
+          <x-ui.link variant="secondary" href="{{ $streamUrl }}" target="_blank" rel="noopener"
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:hover:bg-coal-800">
             🔎 Buka di Tab Baru
-          </a>
-          <a href="{{ route('pubfile.download', [
+          </x-ui.link>
+          <x-ui.link variant="primary" href="{{ route('pubfile.download', [
     'path' => $path,
     'name' => $form->slug ?? $form->code ?? $form->name ?? 'form'
 ]) }}"
-            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg">
             ⬇️ Download
-          </a>
+          </x-ui.link>
         </div>
       </div>
       @else
@@ -237,7 +233,7 @@
       @csrf
       <input type="hidden" name="form_id" value="{{ $form->id }}">
 
-      <div class="rounded-2xl border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 p-5 space-y-5 shadow-soft">
+      <div class="rounded-lg border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 p-5 space-y-5 shadow-none">
         @if($fileExists && $isPdf && !$hasFields)
         <div class="text-sm text-coal-600 dark:text-coal-300">
           Dokumen PDF ditampilkan di atas. Tidak ada isian tambahan.
@@ -267,8 +263,7 @@
           @switch($type)
           @case('textarea')
           <textarea id="f_{{ $i }}" name="data[{{ $name }}]"
-            class="mt-1 w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-950 dark:border-coal-700
-                                   focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500"
+            class="mt-1 w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500"
             placeholder="{{ $placeholder }}"
             @if($required) required @endif
             rows="{{ $field['rows'] ?? 4 }}">{{ fval($name) }}</textarea>
@@ -276,8 +271,7 @@
 
           @case('select')
           <select id="f_{{ $i }}" name="data[{{ $name }}]"
-            class="mt-1 w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-950 dark:border-coal-700
-                                 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500"
+            class="mt-1 w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500"
             @if($required) required @endif>
             <option value="">— Pilih —</option>
             @foreach($options as $optKey => $opt)
@@ -293,7 +287,7 @@
             @php [$v,$l] = opt_tuple($optKey, $opt); @endphp
             <label class="inline-flex items-center gap-2">
               <input type="radio" name="data[{{ $name }}]" value="{{ $v }}"
-                class="rounded border-coal-300 text-maroon-700 focus:ring-maroon-500"
+                class="rounded-lg border-coal-300 text-maroon-700 focus:ring-maroon-500"
                 @checked(fval($name)===$v)
                 @if($required) required @endif>
               <span>{{ $l }}</span>
@@ -310,7 +304,7 @@
             @php [$v,$l] = opt_tuple($optKey, $opt); @endphp
             <label class="flex items-center gap-2">
               <input type="checkbox" name="data[{{ $name }}][]" value="{{ $v }}"
-                class="rounded border-coal-300 text-maroon-700 focus:ring-maroon-500"
+                class="rounded-lg border-coal-300 text-maroon-700 focus:ring-maroon-500"
                 @checked(is_array($oval) && in_array($v, (array)$oval, true))>
               <span>{{ $l }}</span>
             </label>
@@ -319,7 +313,7 @@
           @else
           <label class="inline-flex items-center gap-2 mt-1">
             <input type="checkbox" id="f_{{ $i }}" name="data[{{ $name }}]" value="1"
-              class="rounded border-coal-300 text-maroon-700 focus:ring-maroon-500"
+              class="rounded-lg border-coal-300 text-maroon-700 focus:ring-maroon-500"
               @checked((string)fval($name)==='1' )>
             <span>{{ $placeholder ?: 'Ya' }}</span>
           </label>
@@ -338,12 +332,7 @@
 
           <input type="file" id="f_{{ $i }}"
             name="data[{{ $name }}]{{ $multiple ? '[]' : '' }}"
-            class="mt-1 block w-full text-sm
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-lg file:border-0
-                file:bg-maroon-50 file:text-maroon-700
-                hover:file:bg-maroon-100
-                dark:file:bg-maroon-900/20 dark:file:text-maroon-300"
+            class="mt-1 block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-maroon-50 file:text-maroon-700 hover:file:bg-maroon-100 dark:file:bg-maroon-900/20 dark:file:text-maroon-300"
             @if($multiple) multiple @endif
             @if($required) required @endif
             @if($accept) accept="{{ $accept }}" @endif>
@@ -351,8 +340,7 @@
 
           @case('number')
           <input type="number" id="f_{{ $i }}" name="data[{{ $name }}]"
-            class="mt-1 w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-950 dark:border-coal-700
-                                focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500"
+            class="mt-1 w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500"
             placeholder="{{ $placeholder }}"
             value="{{ fval($name) }}"
             @if($required) required @endif
@@ -363,8 +351,7 @@
 
           @case('date')
           <input type="date" id="f_{{ $i }}" name="data[{{ $name }}]"
-            class="mt-1 w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-950 dark:border-coal-700
-                                focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500"
+            class="mt-1 w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500"
             value="{{ fval($name) }}"
             @if($required) required @endif>
           @break
@@ -372,8 +359,7 @@
           @default
           <input type="{{ in_array($type,['email','tel','url','password']) ? $type : 'text' }}"
             id="f_{{ $i }}" name="data[{{ $name }}]"
-            class="mt-1 w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-950 dark:border-coal-700
-                                focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500"
+            class="mt-1 w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500"
             placeholder="{{ $placeholder }}"
             value="{{ fval($name) }}"
             @if($required) required @endif>
@@ -399,23 +385,21 @@
 
       @if($showSubmit)
       <div class="mt-6 flex items-center gap-3">
-        <button type="submit" :disabled="submitting"
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-maroon-700 text-ivory-50 hover:bg-maroon-600 disabled:opacity-60 transition">
+        <x-ui.button variant="primary" type="submit" ::disabled="submitting"
+          class="inline-flex items-center gap-2 px-5 py-3 rounded-lg text-ivory-50 disabled:opacity-60 transition">
           <span x-text="submitting ? 'Mengirim…' : 'Kirim'"></span>
-        </button>
-        <a href="{{ url()->previous() }}"
-          class="px-4 py-2 rounded-xl border border-maroon-600 text-maroon-700 hover:bg-maroon-50/60 transition
-                    dark:text-maroon-300 dark:border-maroon-900/30 dark:hover:bg-maroon-900/20">
+        </x-ui.button>
+        <x-ui.link variant="secondary" href="{{ url()->previous() }}"
+          class="px-4 py-2 rounded-lg border transition dark:text-maroon-300 dark:border-maroon-900/30 dark:hover:bg-maroon-900/20">
           Batal
-        </a>
+        </x-ui.link>
       </div>
       @else
       <div class="mt-6">
-        <a href="{{ url()->previous() }}"
-          class="px-4 py-2 rounded-xl border border-maroon-600 text-maroon-700 hover:bg-maroon-50/60 transition
-                    dark:text-maroon-300 dark:border-maroon-900/30 dark:hover:bg-maroon-900/20">
+        <x-ui.link variant="secondary" href="{{ url()->previous() }}"
+          class="px-4 py-2 rounded-lg border transition dark:text-maroon-300 dark:border-maroon-900/30 dark:hover:bg-maroon-900/20">
           Kembali
-        </a>
+        </x-ui.link>
       </div>
       @endif
 
@@ -424,7 +408,7 @@
       </p>
     </form>
   </div>
-</div>
+</x-ui.page>
 
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 @endsection

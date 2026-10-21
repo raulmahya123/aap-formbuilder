@@ -1,5 +1,10 @@
-import defaultTheme from 'tailwindcss/defaultTheme'
 import forms from '@tailwindcss/forms'
+import colors from 'tailwindcss/colors'
+
+const semanticScale = (solid, hover) => ({
+  50: '#F4F4F5', 100: '#F4F4F5', 200: '#D4D4D8', 300: '#D4D4D8',
+  400: solid, 500: solid, 600: solid, 700: solid, 800: hover, 900: hover, 950: hover,
+})
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -11,39 +16,52 @@ export default {
 
   theme: {
     extend: {
+      borderRadius: {
+        DEFAULT: '8px', sm: '8px', md: '8px', lg: '8px',
+        xl: '8px', '2xl': '8px', '3xl': '8px',
+      },
+      fontSize: {
+        base: ['14px', { lineHeight: '1.5' }],
+      },
       fontFamily: {
-        sans: ['Poppins', ...defaultTheme.fontFamily.sans], // ganti ke Poppins
-        serif: ['Playfair Display', 'ui-serif', 'Georgia', 'serif'],
+        sans: ['Inter', 'sans-serif'],
+        serif: ['Inter', 'sans-serif'], // Compatibility alias; UI never switches to a serif font.
       },
       colors: {
+        'primary-dark': '#18181B',
+        background: '#FFFFFF',
+        surface: '#FFFFFF',
+        'neutral-surface': '#F4F4F5',
+        border: '#D4D4D8',
+        brown: '#713F12',
+        action: '#1D4ED8',
+        danger: '#DC2626',
+        success: '#15803D',
+        warning: '#C2410C',
+        secondary: '#52525B',
+        blue: semanticScale('#1D4ED8', '#1E40AF'),
+        red: semanticScale('#DC2626', '#B91C1C'),
+        rose: semanticScale('#DC2626', '#B91C1C'),
+        green: semanticScale('#15803D', '#166534'),
+        emerald: semanticScale('#15803D', '#166534'),
+        orange: semanticScale('#C2410C', '#9A3412'),
+        amber: semanticScale('#C2410C', '#9A3412'),
+        yellow: semanticScale('#C2410C', '#9A3412'),
+        gray: {...colors.zinc, 400: '#52525B', 500: '#52525B'},
+        slate: {...colors.zinc, 400: '#52525B', 500: '#52525B'},
         maroon: {
-          50:  '#f5f2ef',
-          100: '#ebe4de',
-          200: '#d8c9bc',
-          300: '#bda895',
-          400: '#96735a',
-          500: '#603813',
-          600: '#553110',
-          700: '#603813',
-          800: '#4a2c10',
-          900: '#38200c',
+          ...semanticScale('#713F12', '#542F0E'),
         },
         coal: {
-          50:  '#f5f5f6',
-          100: '#e7e7e9',
-          200: '#cfcfd3',
-          300: '#a8a8ad',
-          400: '#73737b',
-          500: '#3a3a40',
-          600: '#2f2f34',
-          700: '#252529',
-          800: '#1b1b1f',
-          900: '#121214',
+          ...colors.zinc,
+          50: '#F4F4F5', 100: '#F4F4F5', 200: '#D4D4D8', 300: '#D4D4D8',
+          400: '#52525B', 500: '#52525B', 600: '#52525B',
+          700: '#18181B', 800: '#18181B', 900: '#18181B',
         },
         ivory: {
           50:  '#ffffff',
           100: '#ffffff',
-          200: '#f5f5f5',
+          200: '#F4F4F5',
           300: '#eeeeee',
           400: '#e4e4e4',
           500: '#d4d4d4',
@@ -51,7 +69,7 @@ export default {
         gold: '#D4AF37',
       },
       boxShadow: {
-        soft: '0 2px 10px rgba(17,17,17,0.06)',
+        soft: 'none',
       },
       dropShadow: {
         gold: '0 0 12px rgba(212,175,55,.35)',

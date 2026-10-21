@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body { background: var(--background); color: var(--text-primary); }
+  [x-cloak] { display: none !important; }
+  button, [role='button'] { -webkit-tap-highlight-color: transparent; }
+}
+@layer components {
+  main input:disabled, main select:disabled, main textarea:disabled { cursor: not-allowed; }
+  main input[type='file'] { @apply block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:px-3 file:py-2 file:font-semibold; }
+  main input[type='file']::file-selector-button { background: var(--surface-secondary); color: var(--text-primary); }
+  .form-hint { @apply mt-1 text-xs; color: var(--gray); }
+  .form-error { @apply mt-1 text-sm font-medium; color: var(--red); }
+  main table { @apply w-full border-collapse; background: var(--surface); }
+  main table thead th { @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide; border-bottom: 1px solid var(--border); background: var(--surface-secondary); color: var(--text-primary); }
+  main table tbody td { @apply px-4 py-3 text-sm; border-bottom: 1px solid var(--border); color: var(--text-primary); }
+  main table tbody tr:hover { background: var(--surface-secondary); }
+  main nav[role='navigation'] { @apply flex flex-wrap items-center gap-1; }
+  main nav[role='navigation'] a, main nav[role='navigation'] span { @apply inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg border px-3 py-1.5 text-sm; border-color: var(--border); background: var(--surface); color: var(--blue); }
+  main nav[role='navigation'] a:hover { background: var(--surface-secondary); }
+  main nav[role='navigation'] span[aria-current='page'] { border-color: var(--blue); background: var(--blue); color: white; }
+  main nav[role='navigation'] span[aria-disabled='true'] { @apply cursor-not-allowed opacity-50; }
+  .table-shell { @apply overflow-hidden rounded-lg border; border-color: var(--border); background: var(--surface); }
+  .table-scroll { @apply overflow-x-auto; }
+  .empty-state { @apply border border-dashed px-6 py-12 text-center text-sm; border-color: var(--border); background: var(--surface); color: var(--gray); }
+  .filter-bar { @apply flex flex-wrap items-end gap-3 rounded-lg border p-4; border-color: var(--border); background: var(--surface); }
+  .modal-overlay { background: rgb(24 24 27 / .58); }
+  .modal-panel { @apply overflow-hidden rounded-lg border shadow-soft; border-color: var(--border); background: var(--surface); }
+  .skeleton { @apply animate-pulse rounded; background: var(--surface-secondary); }
+  .loading-spinner { @apply inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent; }
+  .is-loading { @apply cursor-wait opacity-70; }
+  .toast { @apply rounded-lg border p-4 shadow-soft; background: var(--surface); }
+  .toast-success { border-color: var(--green); color: var(--green); }
+  .toast-error { border-color: var(--red); color: var(--red); }
+  .pagination { @apply flex flex-wrap items-center gap-1; }
+  .pagination > * { @apply inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg border px-3 text-sm; border-color: var(--border); color: var(--blue); background: var(--surface); }
+  .pagination .active { border-color: var(--blue); background: var(--blue); color: white; }
+  .pagination .disabled { color: var(--gray); background: var(--surface-secondary); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}

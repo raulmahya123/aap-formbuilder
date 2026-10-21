@@ -2,7 +2,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="">
+<x-ui.page class="">
 
   <style>
     .soft-scroll::-webkit-scrollbar {
@@ -15,7 +15,7 @@
     }
   </style>
 
-  <div class="max-w-7xl mx-auto p-4 sm:p-6 min-w-0">
+  <div class="max-w-7xl mx-auto min-w-0">
 
     @php
     $pp = (int) request('per_page', 10);
@@ -37,39 +37,34 @@
 
 
     {{-- HEADER --}}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-      <div>
-        <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3">
-          <span class="w-10 h-10 bg-maroon-700 text-white rounded-xl flex items-center justify-center shadow-md">📂</span>
-          Management Form
-        </h1>
-        <p class="text-slate-500 dark:text-slate-400 mt-1">
+    <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+        <x-ui.page-title>Management Form</x-ui.page-title>
+        <x-ui.page-description>
           Pilih perusahaan → departemen → site → tipe dokumen
-        </p>
-      </div>
-
-      <div class="flex flex-wrap gap-2 mt-4 sm:mt-0">
-        <a href="{{ $makeUrl($activeCompany,$activeDept,$activeSite,'SOP') }}"
-          class="px-4 py-2 rounded-xl bg-maroon-700 text-white text-xs text-center hover:brightness-110 shadow">
+        </x-ui.page-description>
+      </div></div>
+  <x-ui.page-actions><div class="flex flex-wrap gap-2 mt-4 sm:mt-0">
+        <x-ui.link variant="primary" href="{{ $makeUrl($activeCompany,$activeDept,$activeSite,'SOP') }}"
+          class="px-4 py-2 rounded-lg text-xs text-center hover:brightness-110 shadow-none">
           SOP
-        </a>
-        <a href="{{ $makeUrl($activeCompany,$activeDept,$activeSite,'IK') }}"
-          class="px-4 py-2 rounded-xl bg-amber-500 text-white text-xs text-center hover:brightness-110 shadow">
+        </x-ui.link>
+        <x-ui.link variant="secondary" href="{{ $makeUrl($activeCompany,$activeDept,$activeSite,'IK') }}"
+          class="px-4 py-2 rounded-lg text-xs text-center hover:brightness-110 shadow-none">
           IK
-        </a>
-        <a href="{{ $makeUrl($activeCompany,$activeDept,$activeSite,'FORM') }}"
-          class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs text-center hover:brightness-125 shadow">
+        </x-ui.link>
+        <x-ui.link variant="secondary" href="{{ $makeUrl($activeCompany,$activeDept,$activeSite,'FORM') }}"
+          class="px-4 py-2 rounded-lg text-xs text-center hover:brightness-125 shadow-none">
           FORM
-        </a>
+        </x-ui.link>
 
         @can('create', \App\Models\Form::class)
-        <a href="{{ route('admin.forms.create') }}"
-          class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs text-center hover:brightness-110 shadow">
-          + Tambah Form
-        </a>
+        <x-ui.link icon="plus" variant="primary" href="{{ route('admin.forms.create') }}"
+          class="px-4 py-2 rounded-lg text-xs text-center hover:brightness-110 shadow-none">Tambah Form
+        </x-ui.link>
         @endcan
-      </div>
-    </div>
+      </div></x-ui.page-actions>
+</x-ui.page-header>
 
 
 
@@ -78,8 +73,8 @@
     @if(isset($companies))
     <div class="mb-6">
       <div class="flex items-center gap-2 mb-3">
-        <span class="w-8 h-8 bg-maroon-700 text-white rounded-xl flex items-center justify-center text-sm shadow">1</span>
-        <h3 class="font-semibold text-lg">Pilih Perusahaan (PT)</h3>
+        <span class="w-8 h-8 bg-maroon-700 text-white rounded-lg flex items-center justify-center text-sm shadow-none">1</span>
+        <x-ui.card-title class="font-semibold text-lg">Pilih Perusahaan (PT)</x-ui.card-title>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -87,7 +82,7 @@
           class="p-4 rounded-2xl border bg-white dark:bg-coal-900 dark:border-coal-700 shadow-sm hover:shadow-lg transition
        {{ empty($activeCompany) ? 'ring-2 ring-maroon-400' : '' }}">
           <div class="flex gap-3 items-center">
-            <div class="w-10 h-10 bg-maroon-700 text-white rounded-xl flex items-center justify-center shadow">🌐</div>
+            <div class="w-10 h-10 bg-maroon-700 text-white rounded-lg flex items-center justify-center shadow-none">🌐</div>
             <div>
               <div class="font-semibold">Semua Perusahaan</div>
               <div class="text-xs text-slate-500">Tampilkan global</div>
@@ -101,7 +96,7 @@
           class="p-4 rounded-2xl border bg-white dark:bg-coal-900 dark:border-coal-700 shadow-sm hover:shadow-lg transition
        {{ $chosen ? 'border-maroon-600 ring-2 ring-maroon-400 bg-maroon-50 dark:bg-maroon-900/20' : '' }}">
           <div class="flex gap-3 items-center">
-            <div class="w-10 h-10 bg-maroon-700 text-white rounded-xl flex items-center justify-center shadow">🏢</div>
+            <div class="w-10 h-10 bg-maroon-700 text-white rounded-lg flex items-center justify-center shadow-none">🏢</div>
             <div>
               <div class="font-semibold">{{ $c->code ?? 'PT' }}</div>
               <div class="text-xs text-slate-500">{{ $c->name }}</div>
@@ -120,15 +115,15 @@
     @if($activeCompany && isset($departments))
     <div class="mb-6">
       <div class="flex items-center gap-2 mb-3">
-        <span class="w-8 h-8 bg-emerald-600 text-white rounded-xl flex items-center justify-center text-sm shadow">2</span>
-        <h3 class="font-semibold text-lg">Pilih Departemen</h3>
+        <span class="w-8 h-8 bg-emerald-600 text-white rounded-lg flex items-center justify-center text-sm shadow-none">2</span>
+        <x-ui.card-title class="font-semibold text-lg">Pilih Departemen</x-ui.card-title>
       </div>
 
       <div class="flex gap-3 overflow-x-auto soft-scroll pb-3 snap-x">
 
         {{-- ALL --}}
         <a href="{{ $makeUrl($activeCompany,null,$activeSite,$activeDoc ?: null) }}"
-          class="shrink-0 snap-start inline-flex items-center gap-2 
+          class="shrink-0 snap-start inline-flex items-center gap-2
           px-8 min-h-[64px] min-w-[200px]
           rounded-[20px] border-2 bg-white dark:bg-coal-900 dark:border-coal-700
           shadow hover:shadow-md transition whitespace-nowrap
@@ -144,8 +139,8 @@
           class="shrink-0 snap-start inline-flex items-center gap-2
           px-8 min-h-[64px] min-w-[200px]
           rounded-[20px] bg-white dark:bg-coal-900 shadow hover:shadow-md transition whitespace-nowrap
-          {{ $isActiveDept 
-              ? 'border-emerald-500 border-2 bg-emerald-50 dark:bg-emerald-900/20' 
+          {{ $isActiveDept
+              ? 'border-emerald-500 border-2 bg-emerald-50 dark:bg-emerald-900/20'
               : 'border-2 border-slate-200 dark:border-coal-700' }}">
           🏷️ {{ $d->name }}
         </a>
@@ -170,8 +165,8 @@
     @if($sitesByCompany->count())
     <div class="mb-6">
       <div class="flex items-center gap-2 mb-3">
-        <span class="w-8 h-8 bg-sky-600 text-white rounded-xl flex items-center justify-center text-sm shadow">3</span>
-        <h3 class="font-semibold text-lg">Pilih Site</h3>
+        <span class="w-8 h-8 bg-sky-600 text-white rounded-lg flex items-center justify-center text-sm shadow-none">3</span>
+        <x-ui.card-title class="font-semibold text-lg">Pilih Site</x-ui.card-title>
       </div>
 
       <div class="flex gap-3 overflow-x-auto soft-scroll pb-3 snap-x">
@@ -181,8 +176,8 @@
           class="shrink-0 snap-start inline-flex items-center gap-2
           px-8 min-h-[64px] min-w-[200px]
           rounded-[20px] bg-white dark:bg-coal-900 shadow hover:shadow-md whitespace-nowrap
-          {{ empty($activeSite) 
-              ? 'border-2 border-sky-500 bg-sky-50 dark:bg-sky-900/20' 
+          {{ empty($activeSite)
+              ? 'border-2 border-sky-500 bg-sky-50 dark:bg-sky-900/20'
               : 'border-2 border-slate-200 dark:border-coal-700' }}">
           🌍 Semua Site
         </a>
@@ -195,8 +190,8 @@
           class="shrink-0 snap-start inline-flex items-center gap-2
           px-8 min-h-[64px] min-w-[200px]
           rounded-[20px] bg-white dark:bg-coal-900 shadow hover:shadow-md transition whitespace-nowrap
-          {{ $siteActive 
-              ? 'border-2 border-sky-500 bg-sky-50 dark:bg-sky-900/20' 
+          {{ $siteActive
+              ? 'border-2 border-sky-500 bg-sky-50 dark:bg-sky-900/20'
               : 'border-2 border-slate-200 dark:border-coal-700' }}">
           📌 {{ $s->name }}
         </a>
@@ -228,7 +223,7 @@
       : 'bg-slate-800');
       @endphp
 
-      <div class="p-4 rounded-2xl border bg-white dark:bg-coal-900 dark:border-coal-700 shadow-sm hover:shadow-xl transition">
+      <x-ui.panel class="rounded-lg border bg-white dark:bg-coal-900 dark:border-coal-700 shadow-none hover:shadow-xl transition">
         <div class="flex justify-between items-start gap-3">
           <div>
             <div class="flex items-center gap-2">
@@ -249,18 +244,12 @@
             </div>
           </div>
 
-          <div class="flex gap-2">
-            <a href="{{ route('front.forms.show',$f->slug ?? $f) }}"
-              class="text-xs px-3 py-1 rounded-xl bg-slate-900 text-white hover:brightness-125 shadow">
-              Lihat
-            </a>
-            <a href="{{ route('admin.forms.edit',$f) }}"
-              class="text-xs px-3 py-1 rounded-xl border shadow">
-              Edit
-            </a>
+          <div class="flex flex-nowrap items-center gap-2">
+            <x-ui.icon-button action="view" label="Lihat form" href="{{ route('front.forms.show',$f->slug ?? $f) }}" />
+            <x-ui.icon-button action="edit" label="Edit form" href="{{ route('admin.forms.edit',$f) }}" />
           </div>
         </div>
-      </div>
+      </x-ui.panel>
 
       @empty
       <div class="text-slate-500 dark:text-slate-400">Tidak ada form.</div>
@@ -274,13 +263,13 @@
     @endif
 
     @else
-    <div class="mt-8 p-5 rounded-2xl border bg-white dark:bg-coal-900 dark:border-coal-700 shadow">
+    <x-ui.panel class="mt-8 rounded-lg border bg-white dark:bg-coal-900 dark:border-coal-700 shadow-none">
       Pilih <b>PT</b> → <b>Departemen</b> → <b>Site</b> → <b>SOP / IK / FORM</b>.
-    </div>
+    </x-ui.panel>
     @endif
 
 
 
   </div>
-</div>
+</x-ui.page>
 @endsection

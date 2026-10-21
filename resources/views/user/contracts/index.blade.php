@@ -2,37 +2,37 @@
 @section('title','Kontrak Saya')
 
 @section('content')
-<div class="max-w-7xl mx-auto space-y-6">
+<x-ui.page class="max-w-7xl mx-auto">
 
   {{-- Header --}}
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight text-[#1D1C1A]">Kontrak</h1>
-      <p class="text-sm text-coal-500">Menampilkan kontrak milikmu atau yang dibagikan ke akunmu.</p>
-    </div>
-
-    {{-- Search --}}
-    <form method="get" class="w-full md:w-auto">
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+      <x-ui.page-title>Kontrak</x-ui.page-title>
+      <x-ui.page-description>Menampilkan kontrak milikmu atau yang dibagikan ke akunmu.</x-ui.page-description>
+    </div></div>
+  <x-ui.page-actions>{{-- Search --}}
+    </x-ui.page-actions>
+</x-ui.page-header>
+<div class="ui-page-filters"><form method="get" class="w-full md:w-auto">
       <div class="relative">
         <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari judul kontrak…"
-               class="w-full md:w-80 border rounded-xl px-3 py-2 pr-9 focus:outline-none focus:border-[#bb9974]">
+               class="w-full md:w-80 border rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-[#713F12]">
         <span class="absolute right-3 top-2.5 text-coal-400">🔎</span>
       </div>
-    </form>
-  </div>
+    </form></div>
 
   {{-- Flash --}}
   @if(session('ok'))
-    <div class="p-3 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200">{{ session('ok') }}</div>
+    <div class="p-3 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">{{ session('ok') }}</div>
   @endif
   @if(session('err'))
-    <div class="p-3 rounded-xl bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>
+    <div class="p-3 rounded-lg bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>
   @endif
 
   {{-- Desktop: Table --}}
   <div class="hidden md:block">
-    <div class="overflow-hidden rounded-2xl border shadow-sm">
-      <table class="w-full text-sm">
+    <div class="overflow-hidden rounded-lg border shadow-none">
+      <x-ui.table class="w-full text-sm">
         <thead class="bg-ivory-100 text-left">
           <tr>
             <th class="p-3">Judul</th>
@@ -53,7 +53,7 @@
               </td>
               <td class="p-3 align-top">
                 <div class="flex items-center gap-2 min-w-0">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#bb9974">
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#713F12">
                     {{ strtoupper(\Illuminate\Support\Str::of(optional($c->owner)->name)->explode(' ')->map(fn($s)=>\Illuminate\Support\Str::substr($s,0,1))->take(2)->implode('')) ?: 'U' }}
                   </div>
                   <div class="min-w-0">
@@ -64,45 +64,43 @@
               </td>
               <td class="p-3 align-top text-center">
                 @php $vc = $c->viewers_count ?? (method_exists($c,'viewers') ? $c->viewers->count() : 0); @endphp
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs border"
-                      style="border-color:#bb9974;color:#bb9974">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs border"
+                      style="border-color:#713F12;color:#713F12">
                   {{ $vc }} user
                 </span>
               </td>
               <td class="p-3 align-top whitespace-nowrap">{{ number_format(($c->size_bytes ?? 0)/1024,1) }} KB</td>
               <td class="p-3 align-top whitespace-nowrap">{{ optional($c->created_at)->format('d M Y H:i') }}</td>
-              <td class="p-3 align-top">
+              <td class="ui-action-cell p-3 align-top"><x-ui.table-actions>
                 <div class="flex justify-end gap-2">
-                  <a href="{{ route('user.contracts.show',$c) }}"
-                     class="px-3 py-1.5 rounded-lg border border-coal-300 hover:bg-ivory-100">Detail</a>
-                  <a href="{{ route('user.contracts.download',$c) }}"
-                     class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">Download</a>
+                  <x-ui.icon-button action="view" label="Lihat detail" href="{{ route('user.contracts.show',$c) }}" />
+                  <x-ui.icon-button action="download" label="Unduh" href="{{ route('user.contracts.download',$c) }}" />
                 </div>
-              </td>
+              </x-ui.table-actions></td>
             </tr>
           @empty
             <tr><td colspan="6" class="p-6 text-center text-coal-500">Tidak ada kontrak untukmu.</td></tr>
           @endforelse
         </tbody>
-      </table>
+      </x-ui.table>
     </div>
   </div>
 
   {{-- Mobile: Cards --}}
   <div class="grid gap-3 md:hidden">
     @forelse($contracts as $c)
-      <div class="rounded-2xl border shadow-sm p-4">
+      <div class="rounded-lg border shadow-none p-4">
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
             <a href="{{ route('user.contracts.show',$c) }}" class="font-semibold hover:underline">{{ $c->title }}</a>
-            <div class="text-xs text-coal-500 mt-0.5">{{ optional($c->created_at)->format('d M Y H:i') }}</div>
+            <div class="text-xs text-coal-500 mt-1">{{ optional($c->created_at)->format('d M Y H:i') }}</div>
           </div>
-          <a href="{{ route('user.contracts.download',$c) }}"
-             class="shrink-0 px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">Download</a>
+          <x-ui.link variant="primary" href="{{ route('user.contracts.download',$c) }}"
+             class="shrink-0 px-3 py-2 rounded-lg">Download</x-ui.link>
         </div>
 
         <div class="mt-3 flex items-center gap-2">
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#bb9974">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#713F12">
             {{ strtoupper(\Illuminate\Support\Str::of(optional($c->owner)->name)->explode(' ')->map(fn($s)=>\Illuminate\Support\Str::substr($s,0,1))->take(2)->implode('')) ?: 'U' }}
           </div>
           <div class="min-w-0">
@@ -116,7 +114,7 @@
         </div>
       </div>
     @empty
-      <div class="rounded-2xl border p-6 text-center text-coal-500">Tidak ada kontrak untukmu.</div>
+      <div class="rounded-lg border p-6 text-center text-coal-500">Tidak ada kontrak untukmu.</div>
     @endforelse
   </div>
 
@@ -125,5 +123,5 @@
     {{ $contracts->withQueryString()->links() }}
   </div>
 
-</div>
+</x-ui.page>
 @endsection

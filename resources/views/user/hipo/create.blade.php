@@ -1,9 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6 max-w-4xl mx-auto">
+<x-ui.page class="max-w-4xl mx-auto">
 
-<h1 class="flex items-center gap-2 text-xl font-semibold mb-4"><x-ui-icon name="warning" class="h-5 w-5 text-[#603813]" /> Form Laporan HIPO / Nearmiss</h1>
+<x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Form Laporan HIPO / Nearmiss</x-ui.page-title>
+<x-ui.page-description>Lengkapi informasi untuk menambahkan laporan HIPO dan Nearmiss.</x-ui.page-description></div>
+  <x-ui.page-actions>
+<x-ui.button form="page-primary-form" variant="primary" class="px-4 py-2 rounded-lg">
+        Kirim Laporan
+    </x-ui.button>
+</x-ui.page-actions>
+</x-ui.page-header>
 
 {{-- ERROR MESSAGE --}}
 @if ($errors->any())
@@ -16,12 +24,11 @@
 </div>
 @endif
 
-<form method="POST"
+<form id="page-primary-form" method="POST"
       action="{{ route('user.hipo.store') }}"
       enctype="multipart/form-data"
-      class="space-y-4 bg-white border rounded-xl p-6">
-
-@csrf
+      class="ui-card space-y-4 bg-white border rounded-lg p-6">
+  @csrf
 
 {{-- Jobsite --}}
 <div>
@@ -111,7 +118,7 @@
 
 <hr>
 
-<h2 class="font-semibold text-lg">Rincian Kejadian (WAJIB)</h2>
+<x-ui.section-title class="font-semibold text-lg">Rincian Kejadian (WAJIB)</x-ui.section-title>
 
 {{-- KTA --}}
 <div>
@@ -153,7 +160,7 @@
 
 <hr>
 
-<h2 class="font-semibold text-lg">Kontrol Risiko (WAJIB)</h2>
+<x-ui.section-title class="font-semibold text-lg">Kontrol Risiko (WAJIB)</x-ui.section-title>
 
 @foreach ([
     'engineering' => 'Rekayasa Engineering',
@@ -163,7 +170,7 @@
 ] as $key => $label)
 
 <div class="border rounded-lg p-4 space-y-2">
-    <h3 class="font-semibold">{{ $label }}</h3>
+    <x-ui.card-title class="font-semibold">{{ $label }}</x-ui.card-title>
 
     <textarea name="control_{{ $key }}"
               class="w-full border rounded-lg px-3 py-2"
@@ -190,15 +197,13 @@
 </div>
 
 <div class="pt-4 flex justify-end gap-2">
-    <a href="{{ route('user.hipo.index') }}"
+    <x-ui.link variant="secondary" href="{{ route('user.hipo.index') }}"
        class="px-4 py-2 border rounded-lg">
         Batal
-    </a>
-    <button class="px-4 py-2 bg-maroon-700 text-white rounded-lg">
-        Kirim Laporan
-    </button>
+    </x-ui.link>
+
 </div>
 
 </form>
-</div>
+</x-ui.page>
 @endsection

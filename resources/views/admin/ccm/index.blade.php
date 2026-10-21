@@ -1,26 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6 space-y-6">
+<x-ui.page class="">
 
     {{-- HEADER --}}
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="flex items-center gap-2 text-2xl font-bold text-gray-800"><x-ui-icon name="shield" class="h-6 w-6 text-[#603813]" /> Critical Control Management</h1>
-            <p class="text-sm text-gray-500">Daftar Laporan Pengendalian Risiko Kritis</p>
-        </div>
-
-        <a href="{{ route('ccm-reports.create') }}"
-           class="px-5 py-2.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold shadow-sm transition">
-          + Input CCM Baru
-        </a>
-    </div>
+    <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+            <x-ui.page-title>Critical Control Management</x-ui.page-title>
+            <x-ui.page-description>Daftar Laporan Pengendalian Risiko Kritis</x-ui.page-description>
+        </div></div>
+  <x-ui.page-actions><x-ui.link icon="plus" variant="primary" href="{{ route('ccm-reports.create') }}"
+           class="px-5 py-3 rounded-lg text-sm font-semibold shadow-none transition">Input CCM Baru
+        </x-ui.link></x-ui.page-actions>
+</x-ui.page-header>
 
     {{-- TABLE --}}
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <x-ui.panel :padded="false" class="bg-white rounded-lg border border-gray-200 shadow-none overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
-                <thead class="bg-gray-50 border-b border-gray-200 text-gray-600 uppercase text-xs font-bold">
+            <x-ui.table class="w-full text-sm text-left">
+                <thead class="bg-gray-50 border-b border-gray-200 text-gray-600 normal-case text-xs font-bold">
                     <tr>
                         <th class="p-4">Tanggal</th>
                         <th class="p-4">Jobsite</th>
@@ -34,7 +32,7 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($reports as $r)
                     <tr class="hover:bg-gray-50 transition">
-                        
+
                         {{-- Tanggal --}}
                         <td class="p-4 whitespace-nowrap font-medium text-gray-700">
                             {{ $r->waktu_pelaporan->format('d M Y') }}
@@ -42,7 +40,7 @@
 
                         {{-- Jobsite --}}
                         <td class="p-4">
-                            <span class="px-2 py-1 rounded bg-gray-100 text-gray-700 font-bold text-xs border border-gray-200">
+                            <span class="px-2 py-1 rounded-lg bg-gray-100 text-gray-700 font-bold text-xs border border-gray-200">
                                 {{ $r->jobsite }}
                             </span>
                         </td>
@@ -91,31 +89,23 @@
                         </td>
 
                         {{-- AKSI --}}
-                        <td class="p-4 text-center">
+                        <td class="ui-action-cell p-4 text-center"><x-ui.table-actions>
                             <div class="flex items-center justify-center gap-3">
-                                <a href="{{ route('ccm-reports.show', $r->id) }}" 
-                                   class="action-icon" title="Lihat detail" aria-label="Lihat detail">
-                                    <x-ui-icon name="eye" class="h-4 w-4" />
-                                </a>
-                                
-                                <a href="{{ route('ccm-reports.edit', $r->id) }}" 
-                                   class="action-icon" title="Ubah data" aria-label="Ubah data">
-                                    <x-ui-icon name="edit" class="h-4 w-4" />
-                                </a>
+                                <x-ui.icon-button ability="view" :subject="$r" action="view" label="Lihat detail" href="{{ route('ccm-reports.show', $r->id) }}" />
+
+                                <x-ui.icon-button ability="update" :subject="$r" action="edit" label="Ubah data" href="{{ route('ccm-reports.edit', $r->id) }}" />
 
                                 <form action="{{ route('ccm-reports.destroy', $r->id) }}" method="POST" data-confirm="Hapus laporan ini?">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="action-icon danger" title="Hapus laporan" aria-label="Hapus laporan">
-                                        <x-ui-icon name="trash" class="h-4 w-4" />
-                                    </button>
+                                    <x-ui.icon-button ability="delete" :subject="$r" action="delete" label="Hapus laporan" type="submit" />
                                 </form>
                             </div>
-                        </td>
+                        </x-ui.table-actions></td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="p-10 text-center text-gray-500">
+                        <td colspan="6" class="p-8 text-center text-gray-500">
                             <div class="flex flex-col items-center">
                                 <x-ui-icon name="file" class="mb-2 h-10 w-10 text-[#777777]" />
                                 <p>Belum ada data laporan CCM yang tersimpan.</p>
@@ -124,14 +114,14 @@
                     </tr>
                     @endforelse
                 </tbody>
-            </table>
+            </x-ui.table>
         </div>
-    </div>
+    </x-ui.panel>
 
     {{-- PAGINATION --}}
     <div class="mt-4">
         {{ $reports->links() }}
     </div>
 
-</div>
+</x-ui.page>
 @endsection

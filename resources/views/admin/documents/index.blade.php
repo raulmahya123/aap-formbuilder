@@ -1,15 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto p-4 sm:p-6 min-w-0">
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
-    <h1 class="text-xl font-semibold text-[#1D1C1A]">Documents</h1>
-    <a href="{{ route('admin.documents.create') }}"
-       class="inline-flex justify-center px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">Buat Dokumen</a>
-  </div>
+<x-ui.page class="max-w-7xl mx-auto min-w-0">
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Documents</x-ui.page-title>
+<x-ui.page-description>Kelola dokumen, revisi, dan hak akses.</x-ui.page-description></div>
+  <x-ui.page-actions><x-ui.link icon="plus" variant="primary" href="{{ route('admin.documents.create') }}"
+       class="inline-flex justify-center px-4 py-2 rounded-lg hover:opacity-90">Buat Dokumen</x-ui.link></x-ui.page-actions>
+</x-ui.page-header>
 
-  <div class="max-w-full bg-white border rounded-xl overflow-x-auto">
-    <table class="w-full text-sm min-w-[980px]">
+  <x-ui.panel :padded="false" class="max-w-full bg-white border rounded-lg overflow-x-auto">
+    <x-ui.table class="w-full text-sm min-w-[980px]">
       <thead class="bg-[#1D1C1A] text-white">
         <tr>
           <th class="p-3 text-left">Template</th>
@@ -29,7 +30,7 @@
 
       <tbody>
       @forelse($docs as $d)
-        <tr class="border-b hover:bg-[#bb9974]/5">
+        <tr class="border-b hover:bg-[#713F12]/5">
           {{-- Template --}}
           <td class="p-3">
             @php
@@ -74,8 +75,8 @@
             @php
               $status = $d->controlled_status ?? '-';
               $badge  = match($status) {
-                'controlled'   => 'bg-emerald-100 text-emerald-700',
-                'uncontrolled' => 'bg-amber-100 text-amber-700',
+                'controlled'   => 'ui-status ui-status--success',
+                'uncontrolled' => 'ui-status ui-status--warning',
                 'obsolete'     => 'bg-gray-200 text-gray-700',
                 default        => 'bg-gray-100 text-gray-700',
               };
@@ -90,18 +91,18 @@
           <td class="p-3">{{ $d->owner->name ?? '—' }}</td>
 
           {{-- Actions --}}
-          <td class="p-3 text-right">
+          <td class="ui-action-cell p-3 text-right"><x-ui.table-actions>
             <div class="inline-flex items-center gap-2">
-              <a class="text-[#bb9974] hover:underline" href="{{ route('admin.documents.show',$d) }}">Lihat</a>
-              <span class="text-gray-300">|</span>
-              <a class="text-[#1D1C1A] hover:underline" href="{{ route('admin.documents.edit',$d) }}">Edit</a>
-              <span class="text-gray-300">|</span>
-              <form action="{{ route('admin.documents.destroy',$d) }}" method="POST" onsubmit="return confirm('Hapus dokumen ini?')" class="inline">
+              <x-ui.icon-button ability="view" :subject="$d" action="view" label="Lihat detail" href="{{ route('admin.documents.show',$d) }}" />
+
+              <x-ui.icon-button ability="update" :subject="$d" action="edit" label="Edit" href="{{ route('admin.documents.edit',$d) }}" />
+
+              <form action="{{ route('admin.documents.destroy',$d) }}" method="POST" data-confirm="Hapus dokumen ini?" class="inline">
                 @csrf @method('DELETE')
-                <button class="text-red-600 hover:underline">Hapus</button>
+                <x-ui.icon-button ability="delete" :subject="$d" action="delete" label="Hapus" type="submit" />
               </form>
             </div>
-          </td>
+          </x-ui.table-actions></td>
         </tr>
       @empty
         <tr>
@@ -109,9 +110,9 @@
         </tr>
       @endforelse
       </tbody>
-    </table>
-  </div>
+    </x-ui.table>
+  </x-ui.panel>
 
   <div class="mt-4">{{ $docs->links() }}</div>
-</div>
+</x-ui.page>
 @endsection

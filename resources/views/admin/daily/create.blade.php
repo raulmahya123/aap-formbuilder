@@ -6,21 +6,12 @@
 {{-- ===== Overlay Watermark TELAT (opsional, kirim $showLateWatermark dari controller) ===== --}}
 @if(!empty($showLateWatermark))
 <div class="pointer-events-none select-none fixed inset-0 flex items-center justify-center" style="z-index:0">
-  <div class="font-black tracking-widest uppercase"
+  <div class="font-black tracking-normal normal-case"
     style="color: rgba(220,38,38,.12); font-size: clamp(3rem,12vw,10rem); transform: rotate(-20deg);">
     LATE INPUT
   </div>
 </div>
 @endif
-
-<h1 class="text-2xl font-bold mb-6 text-maroon-700">
-  Input Harian Per Site
-  @isset($currentShift)
-  <span class="ml-2 text-sm px-2 py-1 rounded bg-gray-100 border">
-    Shift {{ $currentShift ?? '—' }}
-  </span>
-  @endisset
-</h1>
 
 @php
 // dari controller: $sites (sudah terfilter), $date, $groups
@@ -37,6 +28,24 @@ $computedReadonly = !auth()->user()?->can('daily.manage', (int)$selectedSite);
 $computedReadonly = !$hasAnyAllowedSite;
 }
 @endphp
+<x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Input Harian Per Site
+  @isset($currentShift)
+  <span class="ml-2 text-sm px-2 py-1 rounded-lg bg-gray-100 border">
+    Shift {{ $currentShift ?? '—' }}
+  </span>
+  @endisset</x-ui.page-title>
+<x-ui.page-description>Lengkapi informasi untuk menambahkan input harian.</x-ui.page-description></div>
+  <x-ui.page-actions>
+<x-ui.button form="page-primary-form" variant="primary"
+      class="mt-6 px-6 py-3 rounded-lg shadow-none disabled:opacity-60 disabled:cursor-not-allowed"
+      :disabled="!$hasAnyAllowedSite || $computedReadonly">
+      Simpan
+    </x-ui.button>
+</x-ui.page-actions>
+</x-ui.page-header>
+
+
 
 @if($computedReadonly)
 <div class="max-w-6xl mb-4 p-3 rounded-lg border border-blue-200 bg-blue-50 text-blue-900 text-sm">
@@ -51,7 +60,7 @@ $computedReadonly = !$hasAnyAllowedSite;
 </div>
 @endif
 
-<form action="{{ route('admin.daily.store') }}" method="post"
+<form id="page-primary-form" action="{{ route('admin.daily.store') }}" method="post"
   x-data="{
         sanitize($el) {
           // normalisasi koma → titik
@@ -105,12 +114,12 @@ $computedReadonly = !$hasAnyAllowedSite;
           requestAnimationFrame(() => this.sanitize(e.target));
         }
       }"
-  class="relative space-y-6 max-w-6xl bg-white rounded-xl border border-gray-200 shadow-sm p-6 {{ $computedReadonly ? 'opacity-95' : '' }}">
+  class="ui-card relative space-y-5 max-w-6xl bg-white rounded-lg border border-gray-200 shadow-none p-6 {{ $computedReadonly ? 'opacity-95' : '' }}">
   @csrf
 
   {{-- Jika readonly total, blok pointer supaya benar2 tidak bisa edit --}}
   @if($computedReadonly)
-  <div class="absolute inset-0 rounded-xl" style="pointer-events: none;"></div>
+  <div class="absolute inset-0 rounded-lg" style="pointer-events: none;"></div>
   @endif
 
   {{-- Header input: site & tanggal --}}
@@ -152,8 +161,8 @@ $computedReadonly = !$hasAnyAllowedSite;
     <div class="px-4 py-2 font-semibold bg-maroon-700 text-white rounded-t">
       {{ $g->name }}
     </div>
-    <div class="bg-white border-x border-b rounded-b-lg overflow-hidden">
-      <table class="min-w-full text-sm">
+    <x-ui.panel :padded="false" class="bg-white border-x border-b rounded-b-lg overflow-hidden">
+      <x-ui.table class="min-w-full text-sm">
         <thead class="bg-maroon-50 text-maroon-800">
           <tr>
             <th class="px-3 py-2 text-left w-10">#</th>
@@ -196,7 +205,7 @@ $computedReadonly = !$hasAnyAllowedSite;
               <div class="font-medium">
                 {{ $i->name }}
                 @if($i->is_derived)
-                <span class="ml-2 px-2 py-0.5 text-[10px] rounded-full bg-gray-100 text-gray-600 border">Derived</span>
+                <span class="ml-2 px-2 py-1 text-[10px] rounded-full bg-gray-100 text-gray-600 border">Derived</span>
                 @endif
               </div>
               <div class="text-xs text-gray-500 font-mono">CODE: {{ $i->code }}</div>
@@ -246,7 +255,7 @@ $computedReadonly = !$hasAnyAllowedSite;
               : $val;
               @endphp
 
-              <div class="mt-0.5 font-mono text-sm text-gray-800">{{ $display }}</div>
+              <div class="mt-1 font-mono text-sm text-gray-800">{{ $display }}</div>
             </td>
 
             <td class="px-3 py-2">
@@ -260,22 +269,18 @@ $computedReadonly = !$hasAnyAllowedSite;
           </tr>
           @endforeach
         </tbody>
-      </table>
-    </div>
+      </x-ui.table>
+    </x-ui.panel>
   </div>
   @endforeach
 
   {{-- Tombol submit --}}
   <div class="{{ $computedReadonly ? 'opacity-60 pointer-events-none' : '' }}">
-    <button
-      class="mt-6 px-6 py-2.5 rounded-lg bg-maroon-600 hover:bg-maroon-700 text-white shadow disabled:opacity-60 disabled:cursor-not-allowed"
-      @if(!$hasAnyAllowedSite || $computedReadonly) disabled @endif>
-      Simpan
-    </button>
-    <a href="{{ route('admin.daily.index') }}"
-      class="ml-2 px-6 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700">
+
+    <x-ui.link variant="secondary" href="{{ route('admin.daily.index') }}"
+      class="ml-2 px-6 py-3 rounded-lg border">
       Batal
-    </a>
+    </x-ui.link>
   </div>
 </form>
 @endsection

@@ -2,36 +2,37 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-6xl mx-auto p-6"
+<x-ui.page class="max-w-6xl mx-auto"
      x-data="formBuilder({
         initial: @js($schema['fields'] ?? []),
         saveUrl: @js(route('admin.forms.builder.save', $form)),
         csrf: @js(csrf_token()),
      })">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-xl font-semibold">Builder — {{ $form->title }}</h1>
-    <a class="text-sm underline" href="{{ route('admin.forms.edit', $form) }}">← Kembali ke Edit</a>
-  </div>
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Builder — {{ $form->title }}</x-ui.page-title>
+<x-ui.page-description>Kelola form, struktur isian, dan tipe dokumen.</x-ui.page-description></div>
+  <x-ui.page-actions><a class="text-sm underline" href="{{ route('admin.forms.edit', $form) }}">← Kembali ke Edit</a></x-ui.page-actions>
+</x-ui.page-header>
 
-  <div class="grid md:grid-cols-3 gap-6">
+  <div class="grid md:grid-cols-3 gap-5">
     {{-- PALETTE (kiri) --}}
-    <div class="bg-white rounded-xl border p-4">
-      <h2 class="font-medium mb-3">Palette</h2>
+    <x-ui.panel class="bg-white rounded-lg border">
+      <x-ui.section-title class="font-medium mb-3">Palette</x-ui.section-title>
       <div class="grid grid-cols-2 gap-2 text-sm">
         <template x-for="t in palette" :key="t.type">
-          <button type="button" @click.prevent="addField(t.type)"
-                  class="px-3 py-2 rounded border hover:bg-slate-50 text-left">
+          <x-ui.button variant="secondary" type="button" @click.prevent="addField(t.type)"
+                  class="px-3 py-2 rounded-lg border text-left">
             <div class="font-semibold" x-text="t.label"></div>
             <div class="text-xs text-slate-500" x-text="t.desc"></div>
-          </button>
+          </x-ui.button>
         </template>
       </div>
-    </div>
+    </x-ui.panel>
 
     {{-- CANVAS (tengah) --}}
-    <div class="bg-white rounded-xl border p-4">
+    <x-ui.panel class="bg-white rounded-lg border">
       <div class="flex items-center justify-between mb-3">
-        <h2 class="font-medium">Form Fields</h2>
+        <x-ui.section-title class="font-medium">Form Fields</x-ui.section-title>
         <div class="text-xs text-slate-500">Drag untuk urutan</div>
       </div>
 
@@ -52,8 +53,8 @@
                 </template>
               </div>
               <div class="flex items-center gap-2">
-                <button type="button" class="text-xs underline" @click.prevent="editIndex=idx">Edit</button>
-                <button type="button" class="text-xs text-red-600 underline" @click.prevent="removeField(idx)">Hapus</button>
+                <x-ui.icon-button action="edit" label="Edit field" type="button" @click.prevent="editIndex=idx" />
+                <x-ui.icon-button action="delete" label="Hapus field" type="button" @click.prevent="removeField(idx)" />
               </div>
             </div>
             {{-- ringkasan properti --}}
@@ -63,13 +64,13 @@
           </div>
         </template>
       </div>
-    </div>
+    </x-ui.panel>
 
     {{-- PROPERTIES (kanan) --}}
-    <div class="bg-white rounded-xl border p-4">
+    <x-ui.panel class="bg-white rounded-lg border">
       <div class="flex items-center justify-between mb-3">
-        <h2 class="font-medium">Properties</h2>
-        <button type="button" class="text-xs underline" @click.prevent="editIndex=null" x-show="editIndex!==null">Selesai</button>
+        <x-ui.section-title class="font-medium">Properties</x-ui.section-title>
+        <x-ui.button variant="secondary" type="button" class="text-xs underline" @click.prevent="editIndex=null" x-show="editIndex!==null">Selesai</x-ui.button>
       </div>
 
       <template x-if="editIndex===null">
@@ -80,16 +81,16 @@
         <div class="space-y-3" x-init="$nextTick(() => focusNameInput())">
           <div>
             <label class="text-sm block">Label</label>
-            <input x-model="fields[editIndex].label" @input="queueSave()" id="prop-label" class="border rounded w-full px-2 py-1">
+            <input x-model="fields[editIndex].label" @input="queueSave()" id="prop-label" class="border rounded-lg w-full px-2 py-1">
           </div>
           <div>
             <label class="text-sm block">Name (snake_case, unik)</label>
-            <input x-model="fields[editIndex].name" @input="queueSave()" id="prop-name" class="border rounded w-full px-2 py-1">
+            <input x-model="fields[editIndex].name" @input="queueSave()" id="prop-name" class="border rounded-lg w-full px-2 py-1">
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="text-sm block">Type</label>
-              <select x-model="fields[editIndex].type" @change="saveNow()" class="border rounded w-full px-2 py-1">
+              <select x-model="fields[editIndex].type" @change="saveNow()" class="border rounded-lg w-full px-2 py-1">
                 <template x-for="t in palette" :key="t.type">
                   <option :value="t.type" x-text="t.type"></option>
                 </template>
@@ -105,7 +106,7 @@
           <div>
             <label class="text-sm block">Rules (opsional, format Laravel: min:3|max:80|regex:...)</label>
             <input x-model="fields[editIndex].rules" @input="queueSave()" placeholder="mis. string|min:3|max:80"
-                   class="border rounded w-full px-2 py-1">
+                   class="border rounded-lg w-full px-2 py-1">
           </div>
 
           {{-- MIMES & MAX khusus file --}}
@@ -113,11 +114,11 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="text-sm block">Mimes</label>
-                <input x-model="fields[editIndex].mimes" @input="queueSave()" placeholder="pdf,jpg,png" class="border rounded w-full px-2 py-1">
+                <input x-model="fields[editIndex].mimes" @input="queueSave()" placeholder="pdf,jpg,png" class="border rounded-lg w-full px-2 py-1">
               </div>
               <div>
                 <label class="text-sm block">Max (KB)</label>
-                <input type="number" x-model.number="fields[editIndex].max" @input="queueSave()" placeholder="2048" class="border rounded w-full px-2 py-1">
+                <input type="number" x-model.number="fields[editIndex].max" @input="queueSave()" placeholder="2048" class="border rounded-lg w-full px-2 py-1">
               </div>
             </div>
           </template>
@@ -127,14 +128,14 @@
             <div>
               <div class="flex items-center justify-between">
                 <label class="text-sm">Options</label>
-                <button type="button" class="text-xs underline" @click.prevent="addOption()">Tambah Opsi</button>
+                <x-ui.button variant="secondary" type="button" class="text-xs underline" @click.prevent="addOption()">Tambah Opsi</x-ui.button>
               </div>
               <div class="mt-2 space-y-2">
                 <template x-for="(opt,i) in (fields[editIndex].options ??= [])" :key="i">
                   <div class="flex items-center gap-2">
-                    <input class="border rounded px-2 py-1 w-28" x-model="fields[editIndex].options[i][0]" @input="queueSave()" placeholder="value">
-                    <input class="border rounded px-2 py-1 flex-1" x-model="fields[editIndex].options[i][1]" @input="queueSave()" placeholder="label">
-                    <button type="button" class="text-xs text-red-600 underline" @click.prevent="fields[editIndex].options.splice(i,1); saveNow()">hapus</button>
+                    <input class="border rounded-lg px-2 py-1 w-28" x-model="fields[editIndex].options[i][0]" @input="queueSave()" placeholder="value">
+                    <input class="border rounded-lg px-2 py-1 flex-1" x-model="fields[editIndex].options[i][1]" @input="queueSave()" placeholder="label">
+                    <x-ui.button variant="danger" type="button" class="text-xs underline" @click.prevent="fields[editIndex].options.splice(i,1); saveNow()">hapus</x-ui.button>
                   </div>
                 </template>
               </div>
@@ -142,30 +143,30 @@
           </template>
 
           <div class="pt-2">
-            <button type="button" class="px-3 py-2 bg-slate-800 text-white rounded" @click.prevent="editIndex=null">Selesai</button>
+            <x-ui.button variant="secondary" type="button" class="px-3 py-2 rounded-lg" @click.prevent="editIndex=null">Selesai</x-ui.button>
           </div>
         </div>
       </template>
-    </div>
+    </x-ui.panel>
   </div>
 
   {{-- PREVIEW JSON + SAVE --}}
-  <div class="mt-6 bg-white rounded-xl border p-4">
+  <x-ui.panel class="mt-6 bg-white rounded-lg border">
     <div class="flex items-center justify-between mb-3">
-      <h2 class="font-medium">Schema JSON</h2>
+      <x-ui.section-title class="font-medium">Schema JSON</x-ui.section-title>
       <div class="flex items-center gap-2">
-        <button type="button" class="px-3 py-2 rounded border" @click.prevent="pretty()">Format JSON</button>
-        <button type="button" class="px-3 py-2 bg-emerald-600 text-white rounded" @click.prevent="saveNow()">Save Schema</button>
+        <x-ui.button variant="secondary" type="button" class="px-3 py-2 rounded-lg border" @click.prevent="pretty()">Format JSON</x-ui.button>
+        <x-ui.button variant="primary" type="button" class="px-3 py-2 rounded-lg" @click.prevent="saveNow()">Save Schema</x-ui.button>
       </div>
     </div>
     <form method="post" action="{{ route('admin.forms.builder.save', $form) }}" x-ref="form">
       @csrf @method('PUT')
-      <textarea name="schema" x-model="json" rows="10" class="w-full font-mono text-sm border rounded p-2"></textarea>
+      <textarea name="schema" x-model="json" rows="10" class="w-full font-mono text-sm border rounded-lg p-2"></textarea>
     </form>
 
     <div class="text-xs mt-2" x-show="savedFlash" x-transition>✓ Tersimpan</div>
-  </div>
-</div>
+  </x-ui.panel>
+</x-ui.page>
 
 {{-- SortableJS --}}
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>

@@ -1,4 +1,8 @@
 <x-guest-layout>
+<x-ui.page-header>
+<div class="ui-page-header__copy"><x-ui.page-title>Atur ulang password</x-ui.page-title><x-ui.page-description>Buat password baru untuk akun Anda.</x-ui.page-description></div>
+<x-ui.page-actions />
+</x-ui.page-header>
     <form method="POST" action="{{ route('password.store') }}">
         @csrf
 

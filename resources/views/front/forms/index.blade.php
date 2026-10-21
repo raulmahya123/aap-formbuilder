@@ -47,7 +47,7 @@
       ['name'=>'Keuangan','color'=>'#0ea5e9'],
       ['name'=>'IT','color'=>'#059669'],
       ['name'=>'Legal','color'=>'#f59e0b'],
-      ['name'=>'Marketing','color'=>'#bb9974'],
+      ['name'=>'Marketing','color'=>'#713F12'],
       ['name'=>'Sales','color'=>'#8b5cf6'],
       ['name'=>'Procurement','color'=>'#14b8a6'],
       ['name'=>'HSE','color'=>'#16a34a'],
@@ -73,27 +73,27 @@
 @endphp
 
 @section('breadcrumbs')
-  <nav class="text-sm text-coal-600 dark:text-coal-300">
+
     <a href="{{ url('/') }}" class="hover:underline">Home</a>
     <span class="mx-1">/</span>
     <span class="font-medium">FORM</span>
-  </nav>
+
 @endsection
 
 @section('content')
   {{-- Header --}}
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-extrabold tracking-tight">FORM</h1>
-
-    @section('actions')
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>FORM</x-ui.page-title>
+<x-ui.page-description>Kelola form, struktur isian, dan tipe dokumen.</x-ui.page-description></div>
+  <x-ui.page-actions>@section('actions')
       @if(Route::has('front.forms.entries.index'))
-        <a href="{{ route('front.forms.entries.index') }}"
-           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 hover:bg-ivory-100 dark:hover:bg-coal-900 text-sm">
+        <x-ui.link variant="secondary" href="{{ route('front.forms.entries.index') }}"
+           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-900 text-sm">
           🗂️ Riwayat Saya
-        </a>
+        </x-ui.link>
       @endif
-    @endsection
-  </div>
+    @endsection</x-ui.page-actions>
+</x-ui.page-header>
 
   {{-- Search --}}
   <form method="get" class="mb-4 flex flex-col md:flex-row items-stretch md:items-center gap-3">
@@ -108,33 +108,33 @@
     @if(request('department_id'))
       <input type="hidden" name="department_id" value="{{ request('department_id') }}">
     @endif
-    <button class="px-4 py-2 rounded-lg border border-coal-300 dark:border-coal-700 hover:bg-ivory-100 dark:hover:bg-coal-900">
+    <x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-900">
       Cari
-    </button>
+    </x-ui.button>
   </form>
 
   {{-- Tabs --}}
   <div class="flex flex-wrap items-center gap-2 mb-6 text-sm">
-    <a href="{{ request()->fullUrlWithQuery($preserveQ(['doc_type'=>null, 'page'=>null])) }}"
+    <x-ui.link variant="secondary" href="{{ request()->fullUrlWithQuery($preserveQ(['doc_type'=>null, 'page'=>null])) }}"
        class="px-3 py-1.5 rounded-xl {{ $tabClass(!$dt) }}">
       Semua @if($counts && isset($counts['ALL'])) <span class="opacity-80">({{ $counts['ALL'] }})</span> @endif
-    </a>
-    <a href="{{ request()->fullUrlWithQuery($preserveQ(['doc_type'=>'SOP', 'page'=>null])) }}"
+    </x-ui.link>
+    <x-ui.link variant="secondary" href="{{ request()->fullUrlWithQuery($preserveQ(['doc_type'=>'SOP', 'page'=>null])) }}"
        class="px-3 py-1.5 rounded-xl {{ $tabClass($dt==='SOP') }}">
       SOP @if($counts && isset($counts['SOP'])) <span class="opacity-80">({{ $counts['SOP'] }})</span> @endif
-    </a>
-    <a href="{{ request()->fullUrlWithQuery($preserveQ(['doc_type'=>'IK', 'page'=>null])) }}"
+    </x-ui.link>
+    <x-ui.link variant="secondary" href="{{ request()->fullUrlWithQuery($preserveQ(['doc_type'=>'IK', 'page'=>null])) }}"
        class="px-3 py-1.5 rounded-xl {{ $tabClass($dt==='IK') }}">
       IK @if($counts && isset($counts['IK'])) <span class="opacity-80">({{ $counts['IK'] }})</span> @endif
-    </a>
-    <a href="{{ request()->fullUrlWithQuery($preserveQ(['doc_type'=>'FORM', 'page'=>null])) }}"
+    </x-ui.link>
+    <x-ui.link variant="secondary" href="{{ request()->fullUrlWithQuery($preserveQ(['doc_type'=>'FORM', 'page'=>null])) }}"
        class="px-3 py-1.5 rounded-xl {{ $tabClass($dt==='FORM') }}">
       FORM @if($counts && isset($counts['FORM'])) <span class="opacity-80">({{ $counts['FORM'] }})</span> @endif
-    </a>
+    </x-ui.link>
   </div>
 
   {{-- ===== GRID KOTAK DEPARTEMEN (selalu tampil & selalu bisa diklik) ===== --}}
-  <h2 class="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-3">Semua Departemen</h2>
+  <x-ui.section-title class="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-3">Semua Departemen</x-ui.section-title>
   @php $activeDept = request('department_id') ? (string) request('department_id') : null; @endphp
 
   <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 mb-6">
@@ -144,10 +144,10 @@
         $hex      = $d->color ?: '#e61caf';
       @endphp
 
-      <div class="relative group rounded-2xl border bg-white dark:bg-coal-900 border-slate-200/70 dark:border-coal-700/70 shadow-sm hover:shadow-md transition overflow-hidden {{ $isActive ? 'ring-2 ring-slate-300 dark:ring-slate-600' : '' }}">
+      <x-ui.panel class="relative group rounded-2xl border bg-white dark:bg-coal-900 border-slate-200/70 dark:border-coal-700/70 shadow-sm hover:shadow-md transition overflow-hidden {{ $isActive ? 'ring-2 ring-slate-300 dark:ring-slate-600' : '' }}">
         <div class="h-40 p-3 flex flex-col">
           <div class="flex items-center gap-2">
-            <div class="h-9 w-9 rounded-xl flex items-center justify-center" style="background: {{ $hex }};">
+            <div class="h-9 w-9 rounded-lg flex items-center justify-center" style="background: {{ $hex }};">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M3 3a1 1 0 0 1 1 1v11h12a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm5 4a1 1 0 0 1 1 1v6H7V8a1 1 0 0 1 1-1Zm6-3a1 1 0 0 1 1 1v9h-2V5a1 1 0 0 1 1-1ZM9 10a1 1 0 0 1 1-1h2v5h-2v-4Z"/>
               </svg>
@@ -160,42 +160,41 @@
 
           <div class="flex-1"></div>
 
-          <div class="mt-2 grid grid-cols-2 gap-1.5">
+          <div class="mt-2 grid grid-cols-2 gap-2">
             {{-- Semua --}}
-            <a href="{{ route('front.forms.index', $preserveQ(['department_id'=>$d->id, 'doc_type'=>null, 'page'=>null])) }}"
+            <x-ui.link variant="secondary" href="{{ route('front.forms.index', $preserveQ(['department_id'=>$d->id, 'doc_type'=>null, 'page'=>null])) }}"
                class="text-[11px] px-2 py-1 rounded-lg border border-slate-300 dark:border-coal-700 text-slate-700 dark:text-slate-300 text-center truncate
                       {{ $isActive && !$dt ? 'ring-2 ring-offset-1 ring-slate-300 dark:ring-slate-500' : '' }}">
               Semua
-            </a>
+            </x-ui.link>
             {{-- SOP --}}
-            <a href="{{ route('front.forms.index', $preserveQ(['department_id'=>$d->id, 'doc_type'=>'SOP', 'page'=>null])) }}"
+            <x-ui.link variant="primary" href="{{ route('front.forms.index', $preserveQ(['department_id'=>$d->id, 'doc_type'=>'SOP', 'page'=>null])) }}"
                class="text-[11px] px-2 py-1 rounded-lg bg-blue-700 text-white text-center truncate
                       {{ $isActive && $dt==='SOP' ? 'ring-2 ring-offset-1 ring-blue-300' : '' }}">
               SOP
-            </a>
+            </x-ui.link>
             {{-- IK --}}
-            <a href="{{ route('front.forms.index', $preserveQ(['department_id'=>$d->id, 'doc_type'=>'IK', 'page'=>null])) }}"
+            <x-ui.link variant="secondary" href="{{ route('front.forms.index', $preserveQ(['department_id'=>$d->id, 'doc_type'=>'IK', 'page'=>null])) }}"
                class="text-[11px] px-2 py-1 rounded-lg bg-amber-600 text-white text-center truncate
                       {{ $isActive && $dt==='IK' ? 'ring-2 ring-offset-1 ring-amber-300' : '' }}">
               IK
-            </a>
+            </x-ui.link>
             {{-- FORM --}}
-            <a href="{{ route('front.forms.index', $preserveQ(['department_id'=>$d->id, 'doc_type'=>'FORM', 'page'=>null])) }}"
+            <x-ui.link variant="secondary" href="{{ route('front.forms.index', $preserveQ(['department_id'=>$d->id, 'doc_type'=>'FORM', 'page'=>null])) }}"
                class="text-[11px] px-2 py-1 rounded-lg bg-slate-800 text-white text-center truncate
                       {{ $isActive && $dt==='FORM' ? 'ring-2 ring-offset-1 ring-slate-300' : '' }}">
               FORM
-            </a>
+            </x-ui.link>
           </div>
         </div>
-      </div>
+      </x-ui.panel>
     @endforeach
   </div>
 
   {{-- LIST FORM --}}
   @if($forms->count() > 0)
-    <div class="rounded-2xl border border-coal-200 dark:border-coal-800 overflow-hidden">
-      <div class="hidden md:grid grid-cols-12 gap-3 px-4 py-3 text-xs font-semibold
-                  bg-ivory-100 dark:bg-coal-900/40 border-b border-coal-200 dark:border-coal-800">
+    <div class="rounded-lg border border-coal-200 dark:border-coal-800 overflow-hidden">
+      <div class="hidden md:grid grid-cols-12 gap-3 px-4 py-3 text-xs font-semibold bg-ivory-100 dark:bg-coal-900/40 border-b border-coal-200 dark:border-coal-800">
         <div class="md:col-span-6">Info</div>
         <div class="md:col-span-4">Lokasi</div>
         <div class="md:col-span-2 text-right">Aksi</div>
@@ -215,17 +214,16 @@
 
           $doc = strtoupper($form->doc_type ?? 'FORM');
           $badge = match ($doc) {
-            'SOP'  => 'bg-blue-100 text-blue-700',
-            'IK'   => 'bg-amber-100 text-amber-700',
+            'SOP'  => 'ui-status ui-status--info',
+            'IK'   => 'ui-status ui-status--warning',
             default=> 'bg-slate-100 text-slate-700',
           };
         @endphp
 
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 px-4 py-4 border-t
-                    border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-950">
+        <x-ui.panel class="grid grid-cols-1 md:grid-cols-12 gap-3 border-t border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-950">
           <div class="md:col-span-6">
             <div class="flex items-start gap-2">
-              <h3 class="font-semibold leading-snug">{{ $title }}</h3>
+              <x-ui.card-title class="font-semibold leading-snug">{{ $title }}</x-ui.card-title>
               <span class="text-[10px] px-2 py-0.5 rounded-full {{ $badge }}">{{ $doc }}</span>
             </div>
             @if($desc)
@@ -238,15 +236,12 @@
           <div class="md:col-span-4">
             <div class="flex flex-wrap gap-2">
               @if($site)
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded border
-                             border-maroon-700 text-maroon-800 dark:text-maroon-300 dark:border-maroon-600
-                             bg-maroon-50/70 dark:bg-maroon-900/20">
+                <span class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-lg border border-maroon-700 text-maroon-800 dark:text-maroon-300 dark:border-maroon-600 bg-maroon-50/70 dark:bg-maroon-900/20">
                   📍 {{ $site }}
                 </span>
               @endif
               @if($dept)
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded border
-                             border-coal-300 dark:border-coal-700">
+                <span class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-lg border border-coal-300 dark:border-coal-700">
                   🏷️ {{ $dept }}
                 </span>
               @endif
@@ -255,24 +250,21 @@
 
           <div class="md:col-span-2 flex items-center md:justify-end gap-2">
             @if($isActive)
-              <span class="text-[10px] rounded px-2 py-0.5 bg-emerald-100 text-emerald-700
-                           dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              <span class="text-[10px] rounded-lg px-2 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                 Open
               </span>
             @else
-              <span class="text-[10px] rounded px-2 py-0.5 bg-rose-100 text-rose-700
-                           dark:bg-rose-900/30 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+              <span class="text-[10px] rounded-lg px-2 py-1 bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
                 Closed
               </span>
             @endif
 
-            <a href="{{ $showUrl }}"
-               class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-maroon-700 text-maroon-700 hover:bg-maroon-50
-                      dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20">
+            <x-ui.link variant="secondary" href="{{ $showUrl }}"
+               class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20">
               LIHAT
-            </a>
+            </x-ui.link>
           </div>
-        </div>
+        </x-ui.panel>
       @endforeach
     </div>
 
@@ -282,11 +274,11 @@
       </div>
     @endif
   @else
-    <div class="rounded-2xl border border-dashed border-coal-300 dark:border-coal-700 p-8 text-center">
+    <div class="rounded-lg border border-dashed border-coal-300 dark:border-coal-700 p-8 text-center">
       <div class="mx-auto w-12 h-12 mb-3 rounded-full border border-coal-300 dark:border-coal-700 flex items-center justify-center">
         🧾
       </div>
-      <h3 class="font-semibold mb-1">Belum ada FORM</h3>
+      <x-ui.card-title class="font-semibold mb-1">Belum ada FORM</x-ui.card-title>
       <p class="text-sm text-coal-600 dark:text-coal-400">Silakan kembali lagi nanti, atau gunakan kotak pencarian di atas.</p>
     </div>
   @endif

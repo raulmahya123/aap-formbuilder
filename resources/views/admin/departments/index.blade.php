@@ -1,28 +1,27 @@
 @extends('layouts.app')
 
 @section('content')
-<div
+<x-ui.page
   x-data="{ dark: (localStorage.getItem('theme') ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark' }"
   x-init="document.documentElement.classList.toggle('dark', dark)"
-  :class="dark ? 'dark' : ''"
-  class="bg-ivory-100 dark:bg-coal-900 min-h-screen text-coal-800 dark:text-ivory-100"
+  ::class="dark ? 'dark' : ''"
+  class="min-h-screen text-coal-800 dark:text-ivory-100"
 >
-  <div class="max-w-6xl mx-auto p-3 sm:p-4">
+  <div class="max-w-6xl mx-auto">
     <!-- HEADER -->
-    <div class="flex items-start justify-between gap-2 mb-3 sm:mb-4">
-      <div>
-        <h1 class="text-xl sm:text-2xl font-serif tracking-tight">Departments</h1>
-        <p class="text-xs sm:text-sm text-coal-500 dark:text-coal-300">Kelola daftar department dan anggotanya.</p>
-      </div>
-      @can('create', App\Models\Department::class)
-        <a href="{{ route('admin.departments.create') }}"
-           class="inline-flex items-center px-3 py-1.5 rounded-lg bg-maroon-700 text-ivory-50 hover:bg-maroon-600 text-sm transition">
-          + Tambah
-        </a>
-      @endcan
-    </div>
+    <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+        <x-ui.page-title>Departments</x-ui.page-title>
+        <x-ui.page-description>Kelola daftar department dan anggotanya.</x-ui.page-description>
+      </div></div>
+  <x-ui.page-actions>@can('create', App\Models\Department::class)
+        <x-ui.link icon="plus" variant="primary" href="{{ route('admin.departments.create') }}"
+           class="inline-flex items-center px-3 py-2 rounded-lg text-ivory-50 text-sm transition">Tambah Department
+        </x-ui.link>
+      @endcan</x-ui.page-actions>
+</x-ui.page-header>
 
-    <div class="rounded-xl border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 shadow-soft overflow-hidden">
+    <div class="rounded-lg border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 shadow-none overflow-hidden">
       {{-- ===== MOBILE / TABLET: CARD LIST (≤ md) ===== --}}
       <div class="md:hidden divide-y dark:divide-coal-800">
         @forelse($departments as $d)
@@ -32,20 +31,14 @@
                 <div class="font-medium text-sm">{{ $d->name }}</div>
                 <div class="text-[11px] text-coal-500 dark:text-coal-400">slug: {{ $d->slug }}</div>
               </div>
-              <div class="flex flex-wrap gap-1.5 justify-end">
-                @can('update', $d)
-                  <a href="{{ route('admin.departments.edit',$d) }}"
-                     class="px-2.5 py-1 rounded-full bg-maroon-700 text-ivory-50 hover:bg-maroon-600 text-[12px] transition">Edit</a>
-                @endcan
-                <a href="{{ route('admin.departments.members',$d) }}"
-                   class="px-2.5 py-1 rounded-full bg-maroon-700 text-ivory-50 hover:bg-maroon-600 text-[12px] transition">Members</a>
+              <div class="flex flex-nowrap items-center gap-2 justify-end">
+                <x-ui.icon-button ability="update" :subject="$d" action="edit" label="Edit Department" href="{{ route('admin.departments.edit',$d) }}" />
+                <x-ui.icon-button ability="update" :subject="$d" action="members" label="Kelola Anggota" href="{{ route('admin.departments.members',$d) }}" />
                 @can('delete', $d)
                   <form action="{{ route('admin.departments.destroy',$d) }}" method="post"
-                        onsubmit="return confirm('Hapus department & relasi anggotanya?')">
+                        data-confirm="Hapus department & relasi anggotanya?">
                     @csrf @method('DELETE')
-                    <button class="px-2.5 py-1 rounded-full bg-maroon-700 text-ivory-50 hover:bg-maroon-600 text-[12px] transition">
-                      Hapus
-                    </button>
+                    <x-ui.icon-button action="delete" label="Hapus Department" type="submit" />
                   </form>
                 @endcan
               </div>
@@ -63,7 +56,7 @@
 
       {{-- ===== DESKTOP: TABLE (≥ md) ===== --}}
       <div class="hidden md:block overflow-x-auto nice-scroll">
-        <table class="w-full text-sm min-w-[640px]">
+        <x-ui.table class="w-full text-sm min-w-[640px]">
           <thead class="bg-ivory-100 dark:bg-coal-800/60 text-coal-700 dark:text-coal-300">
             <tr>
               <th class="text-left p-3">Nama</th>
@@ -76,28 +69,23 @@
               <tr class="border-t dark:border-coal-800/70 hover:bg-ivory-100 dark:hover:bg-coal-800/50">
                 <td class="p-3 font-medium text-[13px]">{{ $d->name }}</td>
                 <td class="p-3 text-coal-500 dark:text-coal-400 text-[13px]">{{ $d->slug }}</td>
-                <td class="p-3">
-                  <div class="flex flex-wrap items-center gap-1.5">
+                <td class="ui-action-cell p-3"><x-ui.table-actions>
+                  <div class="flex flex-nowrap items-center gap-2">
                     @can('update', $d)
-                      <a href="{{ route('admin.departments.edit',$d) }}"
-                         class="px-2.5 py-1 rounded-full bg-maroon-700 text-ivory-50 hover:bg-maroon-600 text-[12px] transition"
-                         title="Edit Department">Edit</a>
+                      <x-ui.icon-button action="edit" label="Edit Department" href="{{ route('admin.departments.edit',$d) }}" />
                     @endcan
 
-                    <a href="{{ route('admin.departments.members',$d) }}"
-                       class="px-2.5 py-1 rounded-full bg-maroon-700 text-ivory-50 hover:bg-maroon-600 text-[12px] transition"
-                       title="Kelola Anggota">Members</a>
+                    <x-ui.icon-button action="members" label="Kelola Anggota" ability="update" :subject="$d" href="{{ route('admin.departments.members',$d) }}" />
 
                     @can('delete', $d)
                       <form action="{{ route('admin.departments.destroy',$d) }}" method="post"
-                            onsubmit="return confirm('Hapus department & relasi anggotanya?')">
+                            data-confirm="Hapus department & relasi anggotanya?">
                         @csrf @method('DELETE')
-                        <button class="px-2.5 py-1 rounded-full bg-maroon-700 text-ivory-50 hover:bg-maroon-600 text-[12px] transition"
-                                title="Hapus Department">Hapus</button>
+                        <x-ui.icon-button action="delete" label="Hapus Department" type="submit" />
                       </form>
                     @endcan
                   </div>
-                </td>
+                </x-ui.table-actions></td>
               </tr>
             @empty
               <tr>
@@ -110,7 +98,7 @@
               </tr>
             @endforelse
           </tbody>
-        </table>
+        </x-ui.table>
       </div>
     </div>
 
@@ -121,5 +109,5 @@
       </div>
     @endif
   </div>
-</div>
+</x-ui.page>
 @endsection

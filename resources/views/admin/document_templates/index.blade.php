@@ -3,18 +3,19 @@
 @section('title','Document Templates')
 
 @section('content')
-<div class="max-w-7xl mx-auto p-6 space-y-6">
+<x-ui.page class="max-w-7xl mx-auto">
 
   {{-- HEADER --}}
-  <div class="flex items-center justify-between">
-    <h1 class="text-xl font-semibold text-[#1D1C1A]">Document Templates</h1>
-    <a href="{{ route('admin.document_templates.create') }}"
-       class="px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">+ Template</a>
-  </div>
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Document Templates</x-ui.page-title>
+<x-ui.page-description>Kelola template dan tata letak dokumen.</x-ui.page-description></div>
+  <x-ui.page-actions><x-ui.link icon="plus" variant="primary" href="{{ route('admin.document_templates.create') }}"
+       class="px-4 py-2 rounded-lg hover:opacity-90">Template</x-ui.link></x-ui.page-actions>
+</x-ui.page-header>
 
   {{-- LIST --}}
-  <div class="bg-white border rounded-xl overflow-hidden">
-    <table class="w-full text-sm">
+  <x-ui.panel :padded="false" class="bg-white border rounded-lg overflow-hidden">
+    <x-ui.table class="w-full text-sm">
       <thead class="bg-[#1D1C1A] text-white">
         <tr>
           <th class="p-3 text-left">#</th>
@@ -73,15 +74,15 @@
           }
         @endphp
 
-        <tr class="border-b hover:bg-[#bb9974]/5">
+        <tr class="border-b hover:bg-[#713F12]/5">
           <td class="p-3 align-middle">{{ $tpl->id }}</td>
 
           {{-- FOTO --}}
           <td class="p-3 align-middle">
             @if($photoUrl)
-              <img src="{{ $photoUrl }}" alt="foto" class="h-10 w-10 rounded object-cover border bg-white">
+              <img src="{{ $photoUrl }}" alt="foto" class="h-10 w-10 rounded-lg object-cover border bg-white">
             @else
-              <div class="h-10 w-10 rounded border bg-gray-100 grid place-items-center text-[10px] text-gray-500">No\nPhoto</div>
+              <div class="h-10 w-10 rounded-lg border bg-gray-100 grid place-items-center text-[10px] text-gray-500">No\nPhoto</div>
             @endif
           </td>
 
@@ -104,25 +105,17 @@
             {{ optional($tpl->updated_at)->format('d M Y H:i') }}
           </td>
 
-          <td class="p-3 align-middle">
+          <td class="ui-action-cell p-3 align-middle"><x-ui.table-actions>
             <div class="flex items-center gap-2">
-              <a href="{{ route('admin.document_templates.show', $tpl) }}"
-                 class="px-3 py-1.5 rounded-lg border text-[#1D1C1A] hover:bg-gray-100">
-                Preview
-              </a>
-              <a href="{{ route('admin.document_templates.edit', $tpl) }}"
-                 class="px-3 py-1.5 rounded-lg border border-[#bb9974] text-[#bb9974] hover:bg-[#bb9974] hover:text-white">
-                Edit
-              </a>
+              <x-ui.icon-button action="view" label="Lihat detail" href="{{ route('admin.document_templates.show', $tpl) }}" />
+              <x-ui.icon-button action="edit" label="Edit" href="{{ route('admin.document_templates.edit', $tpl) }}" />
               <form method="POST" action="{{ route('admin.document_templates.destroy', $tpl) }}"
-                    onsubmit="return confirm('Hapus template ini?')">
+                    data-confirm="Hapus template ini?">
                 @csrf @method('DELETE')
-                <button class="px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700">
-                  Delete
-                </button>
+                <x-ui.icon-button action="delete" label="Hapus" type="submit" />
               </form>
             </div>
-          </td>
+          </x-ui.table-actions></td>
         </tr>
       @empty
         <tr>
@@ -130,10 +123,10 @@
         </tr>
       @endforelse
       </tbody>
-    </table>
-  </div>
+    </x-ui.table>
+  </x-ui.panel>
 
   {{-- PAGINATION --}}
   <div>{{ $templates->links() }}</div>
-</div>
+</x-ui.page>
 @endsection

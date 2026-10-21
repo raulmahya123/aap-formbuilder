@@ -16,19 +16,19 @@
   .focus\:ring-0:focus { box-shadow: none !important; }
 
   /* ===== Panel lebih besar ===== */
-  .panel-lg { font-size: 0.95rem; } /* ~15.2px */
-  .panel-lg .panel-title { font-size: 1rem; font-weight: 600; }
-  .panel-lg .field-grid { gap: .625rem; } /* 10px */
-  .panel-lg label { font-size: 0.95rem; }
+  .panel-lg { font-size: var(--type-body); }
+  .panel-lg .panel-title { font-size: var(--type-card); font-weight: 600; }
+  .panel-lg .field-grid { gap: var(--space-3); }
+  .panel-lg label { font-size: var(--type-label); font-weight: 500; }
   .panel-lg input,
   .panel-lg select,
   .panel-lg textarea {
-    padding: .6rem .7rem;
-    font-size: 0.95rem;
-    border-radius: .75rem; /* rounded-xl */
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--type-body);
+    border-radius: var(--radius);
     border-width: 1px;
   }
-  .panel-lg .hint { font-size: .8rem; color: #6b7280; } /* gray-500 */
+  .panel-lg .hint { font-size: var(--type-helper); color: #6b7280; } /* gray-500 */
 
   /* Garis panduan & label jarak */
   .guide-line {
@@ -51,27 +51,30 @@
 @endpush
 
 @section('content')
-<div x-data="docDesigner()" x-init="init()" class="max-w-6xl mx-auto p-6 space-y-6 select-none">
+<x-ui.page x-data="docDesigner()" x-init="init()" class="max-w-6xl mx-auto select-none">
   {{-- HEADER --}}
-  <div class="flex items-center justify-between">
-    <h1 class="text-xl font-semibold text-[#1D1C1A]">Buat Template — Drag, Drop, Resize & Custom Page</h1>
-    <a href="{{ route('admin.document_templates.index') }}" class="px-4 py-2 rounded-xl border text-[#1D1C1A]">← Kembali</a>
-  </div>
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Buat Template — Drag, Drop, Resize & Custom Page</x-ui.page-title>
+<x-ui.page-description>Lengkapi informasi untuk menambahkan template dokumen.</x-ui.page-description></div>
+  <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('admin.document_templates.index') }}" class="px-4 py-2 rounded-lg border">← Kembali</x-ui.link>
+<x-ui.button form="page-primary-form" variant="primary" class="px-4 py-2 rounded-lg hover:opacity-90">Simpan</x-ui.button>
+</x-ui.page-actions>
+</x-ui.page-header>
 
   {{-- FORM --}}
-  <form method="POST"
+  <form id="page-primary-form" method="POST"
         action="{{ route('admin.document_templates.store') }}"
         enctype="multipart/form-data"
         x-ref="form"
         @submit.prevent="beforeSubmit($event)"
-        class="bg-white border rounded-xl">
-    @csrf
+        class="bg-white border rounded-lg">
+  @csrf
 
     {{-- INPUT: Nama Template --}}
     <div class="px-4 pt-4">
       <label class="block text-sm font-medium text-[#1D1C1A]">Nama Template</label>
       <input type="text" name="name" required
-             class="mt-1 w-full rounded-xl px-3 py-2 border-2 border-gray-400 focus:border-[#bb9974] focus:ring-0 focus:outline-none"
+             class="mt-1 w-full rounded-lg px-3 py-2 border-2 border-gray-400 focus:border-[#713F12] focus:ring-0 focus:outline-none"
              placeholder="Contoh: Template Surat Jalan"
              value="{{ old('name') }}">
       @error('name') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
@@ -88,18 +91,18 @@
                @change="onPhotoChange($event)"
                class="block text-sm">
         <template x-if="photo.url">
-          <img :src="photo.url" alt="Preview" class="h-16 w-auto rounded border">
+          <img :src="photo.url" alt="Preview" class="h-16 w-auto rounded-lg border">
         </template>
-        <button type="button"
-                class="px-3 py-1.5 rounded border text-sm"
+        <x-ui.button variant="danger" type="button"
+                class="px-3 py-2 rounded-lg border text-sm"
                 @click="clearPhoto()"
                 x-show="photo.url"
-                x-cloak>Hapus</button>
-        <button type="button"
-                class="px-3 py-1.5 rounded border text-sm"
+                x-cloak>Hapus</x-ui.button>
+        <x-ui.button variant="secondary" type="button"
+                class="px-3 py-2 rounded-lg border text-sm"
                 @click="addPhotoToCanvas()"
                 x-show="photo.url"
-                x-cloak>Tampilkan di Kanvas</button>
+                x-cloak>Tampilkan di Kanvas</x-ui.button>
       </div>
       <p class="text-xs text-gray-500 mt-1">
         Gambar ini disimpan ke field <code>photo_path</code> pada template dan bisa dipakai sebagai logo default saat membuat dokumen dari template ini.
@@ -117,15 +120,15 @@
     {{-- TOOLBAR --}}
     <div class="border-b px-4 py-3 flex flex-wrap items-center gap-2">
       <div class="font-medium mr-3">Tambah Blok:</div>
-      <button type="button" @click="addText('Judul Dokumen')" class="px-3 py-1.5 rounded border text-sm">+ Teks</button>
-      <label class="px-3 py-1.5 rounded border text-sm cursor-pointer">
+      <x-ui.button variant="secondary" type="button" @click="addText('Judul Dokumen')" class="px-3 py-2 rounded-lg border text-sm">+ Teks</x-ui.button>
+      <label class="px-3 py-2 rounded-lg border text-sm cursor-pointer">
         + Logo / Gambar
         <input type="file" class="hidden" accept="image/*" @change="addImageFromFile($event)">
       </label>
-      <button type="button" @click="addHeaderRow()" class="px-3 py-1.5 rounded border text-sm">+ Row Tabel Header (2 sel)</button>
-      <button type="button" @click="openTableBuilder()" class="px-3 py-1.5 rounded border text-sm">+ Tabel (grid)</button>
-      <button type="button" @click="addFooter()" class="px-3 py-1.5 rounded border text-sm">+ Footer</button>
-      <button type="button" @click="addSignature()" class="px-3 py-1.5 rounded border text-sm">+ TTD</button>
+      <x-ui.button variant="secondary" type="button" @click="addHeaderRow()" class="px-3 py-2 rounded-lg border text-sm">+ Row Tabel Header (2 sel)</x-ui.button>
+      <x-ui.button variant="secondary" type="button" @click="openTableBuilder()" class="px-3 py-2 rounded-lg border text-sm">+ Tabel (grid)</x-ui.button>
+      <x-ui.button variant="secondary" type="button" @click="addFooter()" class="px-3 py-2 rounded-lg border text-sm">+ Footer</x-ui.button>
+      <x-ui.button variant="secondary" type="button" @click="addSignature()" class="px-3 py-2 rounded-lg border text-sm">+ TTD</x-ui.button>
 
       <div class="ml-auto flex flex-wrap items-center gap-3">
         <label class="inline-flex items-center gap-2 text-sm">
@@ -133,7 +136,7 @@
         </label>
         <div class="flex items-center gap-1 text-sm">
           Grid:
-          <input type="number" min="1" class="w-16 border rounded px-2 py-1" x-model.number="snap.grid"> px
+          <input type="number" min="1" class="w-16 border rounded-lg px-2 py-1" x-model.number="snap.grid"> px
         </div>
 
         <label class="inline-flex items-center gap-2 text-sm">
@@ -143,27 +146,27 @@
         {{-- Colors --}}
         <div class="flex items-center gap-2 text-sm">
           <span>Guide Color</span>
-          <input type="color" x-model="colors.guide" class="w-8 h-6 p-0 border rounded">
+          <input type="color" x-model="colors.guide" class="w-8 h-6 p-0 border rounded-lg">
         </div>
         <div class="flex items-center gap-2 text-sm">
           <span>Page Border</span>
-          <input type="color" x-model="colors.pageBorder" class="w-8 h-6 p-0 border rounded">
+          <input type="color" x-model="colors.pageBorder" class="w-8 h-6 p-0 border rounded-lg">
         </div>
 
         <div class="h-5 w-px bg-gray-200 mx-1"></div>
-        <button type="button" @click="centerSelectedH()" :disabled="selectedId===null" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Center H</button>
-        <button type="button" @click="centerSelectedV()" :disabled="selectedId===null" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Center V</button>
-        <button type="button" @click="centerSelectedBoth()" :disabled="selectedId===null" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Center Both</button>
-        <button type="button" @click="toggleBorderSelected()" :disabled="selectedId===null" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Toggle Border</button>
-        <button type="button" @click="bringToFront()" :disabled="selectedId===null" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Bring Front</button>
-        <button type="button" @click="sendToBack()" :disabled="selectedId===null" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Send Back</button>
+        <x-ui.button variant="secondary" type="button" @click="centerSelectedH()" ::disabled="selectedId===null" class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Center H</x-ui.button>
+        <x-ui.button variant="secondary" type="button" @click="centerSelectedV()" ::disabled="selectedId===null" class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Center V</x-ui.button>
+        <x-ui.button variant="secondary" type="button" @click="centerSelectedBoth()" ::disabled="selectedId===null" class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Center Both</x-ui.button>
+        <x-ui.button variant="secondary" type="button" @click="toggleBorderSelected()" ::disabled="selectedId===null" class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Toggle Border</x-ui.button>
+        <x-ui.button variant="secondary" type="button" @click="bringToFront()" ::disabled="selectedId===null" class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Bring Front</x-ui.button>
+        <x-ui.button variant="secondary" type="button" @click="sendToBack()" ::disabled="selectedId===null" class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Send Back</x-ui.button>
 
         {{-- Duplicate, Copy, Paste --}}
-        <button type="button" @click="duplicateSelected()" :disabled="selectedId===null" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Duplicate</button>
-        <button type="button" @click="copySelected()" :disabled="selectedId===null" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Copy</button>
-        <button type="button" @click="pasteClipboard()" :disabled="!clipboard" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Paste</button>
+        <x-ui.button variant="secondary" type="button" @click="duplicateSelected()" ::disabled="selectedId===null" class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Duplicate</x-ui.button>
+        <x-ui.button variant="secondary" type="button" @click="copySelected()" ::disabled="selectedId===null" class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Copy</x-ui.button>
+        <x-ui.button variant="secondary" type="button" @click="pasteClipboard()" ::disabled="!clipboard" class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Paste</x-ui.button>
 
-        <button type="button" @click="deleteSelected()" :disabled="selectedId===null" class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Hapus Blok</button>
+        <x-ui.button variant="danger" type="button" @click="deleteSelected()" ::disabled="selectedId===null" class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Hapus Blok</x-ui.button>
       </div>
     </div>
 
@@ -174,27 +177,27 @@
         <div class="panel-title">Properti Halaman</div>
         <div class="grid grid-cols-2 field-grid">
           <label class="col-span-2">Lebar Halaman (px)
-            <input type="number" min="100" class="mt-1 w-full border rounded px-2 py-1" x-model.number="layout.page.width">
+            <input type="number" min="100" class="mt-1 w-full border rounded-lg px-2 py-1" x-model.number="layout.page.width">
           </label>
           <label class="col-span-2">Tinggi Halaman (px)
-            <input type="number" min="100" class="mt-1 w-full border rounded px-2 py-1" x-model.number="layout.page.height">
+            <input type="number" min="100" class="mt-1 w-full border rounded-lg px-2 py-1" x-model.number="layout.page.height">
           </label>
           <label class="col-span-2">Margin Top (px)
-            <input type="number" class="mt-1 w-full border rounded px-2 py-1" x-model.number="layout.margins.top">
+            <input type="number" class="mt-1 w-full border rounded-lg px-2 py-1" x-model.number="layout.margins.top">
           </label>
           <label>Left
-            <input type="number" class="mt-1 w-full border rounded px-2 py-1" x-model.number="layout.margins.left">
+            <input type="number" class="mt-1 w-full border rounded-lg px-2 py-1" x-model.number="layout.margins.left">
           </label>
           <label>Right
-            <input type="number" class="mt-1 w-full border rounded px-2 py-1" x-model.number="layout.margins.right">
+            <input type="number" class="mt-1 w-full border rounded-lg px-2 py-1" x-model.number="layout.margins.right">
           </label>
           <label class="col-span-2">Bottom
-            <input type="number" class="mt-1 w-full border rounded px-2 py-1" x-model.number="layout.margins.bottom">
+            <input type="number" class="mt-1 w-full border rounded-lg px-2 py-1" x-model.number="layout.margins.bottom">
           </label>
 
           {{-- Default font family halaman --}}
           <label class="col-span-2">Font family default
-            <select class="mt-1 w-full border rounded px-2 py-1" x-model="layout.font.family">
+            <select class="mt-1 w-full border rounded-lg px-2 py-1" x-model="layout.font.family">
               <option value="Poppins, sans-serif">Poppins (sans)</option>
               <option value="Inter, sans-serif">Inter (sans)</option>
               <option value="Roboto, sans-serif">Roboto (sans)</option>
@@ -207,7 +210,7 @@
           </label>
 
           <label class="col-span-2">Font size default (pt)
-            <input type="number" min="8" class="mt-1 w-full border rounded px-2 py-1" x-model.number="layout.font.size">
+            <input type="number" min="8" class="mt-1 w-full border rounded-lg px-2 py-1" x-model.number="layout.font.size">
           </label>
         </div>
 
@@ -218,19 +221,19 @@
 
             <div class="grid grid-cols-2 field-grid">
               <label>X (px)
-                <input type="number" class="mt-1 w-full border rounded px-2 py-1" x-model.number="selected.left">
+                <input type="number" class="mt-1 w-full border rounded-lg px-2 py-1" x-model.number="selected.left">
               </label>
               <label>Y (px)
-                <input type="number" class="mt-1 w-full border rounded px-2 py-1" x-model.number="selected.top">
+                <input type="number" class="mt-1 w-full border rounded-lg px-2 py-1" x-model.number="selected.top">
               </label>
               <label>W (px)
-                <input type="number" class="mt-1 w-full border rounded px-2 py-1" x-model.number="selected.width">
+                <input type="number" class="mt-1 w-full border rounded-lg px-2 py-1" x-model.number="selected.width">
               </label>
               <label>H (px)
-                <input type="number" class="mt-1 w-full border rounded px-2 py-1" x-model.number="selected.height">
+                <input type="number" class="mt-1 w-full border rounded-lg px-2 py-1" x-model.number="selected.height">
               </label>
               <label class="col-span-2">Z-Index
-                <input type="number" class="mt-1 w-full border rounded px-2 py-1" x-model.number="selected.z">
+                <input type="number" class="mt-1 w-full border rounded-lg px-2 py-1" x-model.number="selected.z">
               </label>
               <label class="col-span-2 inline-flex items-center gap-2">
                 <input type="checkbox" x-model="selected.border"> Border
@@ -241,12 +244,12 @@
             <template x-if="selected.type==='text'">
               <div class="mt-4 space-y-3">
                 <label>Isi Teks
-                  <textarea rows="4" class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.text"></textarea>
+                  <textarea rows="4" class="mt-1 w-full border rounded-lg px-3 py-2" x-model="selected.text"></textarea>
                 </label>
 
                 <div class="grid grid-cols-2 field-grid">
                   <label>Align
-                    <select class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.align">
+                    <select class="mt-1 w-full border rounded-lg px-3 py-2" x-model="selected.align">
                       <option>left</option>
                       <option>center</option>
                       <option>right</option>
@@ -255,7 +258,7 @@
 
                   <label>Ukuran (pt)
                     <input type="number" min="8"
-                           class="mt-1 w-full border rounded-xl px-3 py-2"
+                           class="mt-1 w-full border rounded-lg px-3 py-2"
                            x-model.number="selected.fontSize">
                   </label>
                 </div>
@@ -263,7 +266,7 @@
                 {{-- Font family per-blok teks --}}
                 <div class="grid grid-cols-2 field-grid">
                   <label>Font family
-                    <select class="mt-1 w-full border rounded-xl px-3 py-2"
+                    <select class="mt-1 w-full border rounded-lg px-3 py-2"
                             x-model="selected.__fontSelect"
                             @change="selected.fontFamily = (selected.__fontSelect==='__custom__' ? (selected.__fontCustom||layout.font.family) : selected.__fontSelect)">
                       <option value="Poppins, sans-serif">Poppins (sans)</option>
@@ -279,7 +282,7 @@
                   </label>
                   <label x-show="selected.__fontSelect==='__custom__'">
                     Custom CSS font-family
-                    <input class="mt-1 w-full border rounded-xl px-3 py-2"
+                    <input class="mt-1 w-full border rounded-lg px-3 py-2"
                            placeholder="e.g. 'Playfair Display', serif"
                            x-model="selected.__fontCustom"
                            @input="selected.fontFamily = selected.__fontCustom || layout.font.family">
@@ -289,10 +292,10 @@
                 {{-- Warna teks & border --}}
                 <div class="grid grid-cols-2 field-grid">
                   <label>Warna Teks
-                    <input type="color" class="mt-1 w-full border rounded-xl px-2 py-1" x-model="selected.color">
+                    <input type="color" class="mt-1 w-full border rounded-lg px-2 py-1" x-model="selected.color">
                   </label>
                   <label>Warna Border
-                    <input type="color" class="mt-1 w-full border rounded-xl px-2 py-1" x-model="selected.borderColor">
+                    <input type="color" class="mt-1 w-full border rounded-lg px-2 py-1" x-model="selected.borderColor">
                   </label>
                 </div>
 
@@ -307,21 +310,21 @@
               <div class="mt-3 space-y-3">
                 <div class="grid grid-cols-2 field-grid">
                   <label>Role
-                    <input class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.role" placeholder="Disiapkan / Diperiksa / ...">
+                    <input class="mt-1 w-full border rounded-lg px-3 py-2" x-model="selected.role" placeholder="Disiapkan / Diperiksa / ...">
                   </label>
                   <label>Nama
-                    <input class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.name">
+                    <input class="mt-1 w-full border rounded-lg px-3 py-2" x-model="selected.name">
                   </label>
                   <label>Jabatan
-                    <input class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.position">
+                    <input class="mt-1 w-full border rounded-lg px-3 py-2" x-model="selected.position">
                   </label>
                   <label>Tanda Tangan (Teks, opsional)
-                    <input class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.signatureText" placeholder="tulis tanda tangan">
+                    <input class="mt-1 w-full border rounded-lg px-3 py-2" x-model="selected.signatureText" placeholder="tulis tanda tangan">
                   </label>
 
                   {{-- NEW: Align TTD --}}
                   <label>Align
-                    <select class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.align">
+                    <select class="mt-1 w-full border rounded-lg px-3 py-2" x-model="selected.align">
                       <option>left</option>
                       <option>center</option>
                       <option>right</option>
@@ -330,13 +333,13 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                  <button type="button" class="px-3 py-1.5 border rounded-xl text-sm" @click="openPad(selected.id)">Gambar TTD</button>
-                  <button type="button" class="px-3 py-1.5 border rounded-xl text-sm" @click="selected.src=''">Hapus Gambar</button>
+                  <x-ui.button variant="secondary" type="button" class="px-3 py-2 border rounded-lg text-sm" @click="openPad(selected.id)">Gambar TTD</x-ui.button>
+                  <x-ui.button variant="danger" type="button" class="px-3 py-2 border rounded-lg text-sm" @click="selected.src=''">Hapus Gambar</x-ui.button>
                 </div>
 
                 <div class="grid grid-cols-2 field-grid">
                   <label>Font family (TTD)
-                    <select class="mt-1 w-full border rounded-xl px-3 py-2"
+                    <select class="mt-1 w-full border rounded-lg px-3 py-2"
                             x-model="selected.__sigFontSelect"
                             @change="
                               selected.fontFamily = (selected.__sigFontSelect==='__custom__'
@@ -357,18 +360,18 @@
 
                   <label x-show="selected.__sigFontSelect==='__custom__'">
                     Custom CSS font-family
-                    <input class="mt-1 w-full border rounded-xl px-3 py-2"
+                    <input class="mt-1 w-full border rounded-lg px-3 py-2"
                            placeholder="e.g. 'Playfair Display', serif"
                            x-model="selected.__sigFontCustom"
                            @input="selected.fontFamily = selected.__sigFontCustom || layout.font.family">
                   </label>
 
                   <label>Signature Text Size (px)
-                    <input type="number" min="9" class="mt-1 w-full border rounded-xl px-3 py-2" x-model.number="selected.signatureFontSize">
+                    <input type="number" min="9" class="mt-1 w-full border rounded-lg px-3 py-2" x-model.number="selected.signatureFontSize">
                   </label>
 
                   <label>Role/Nama/Jabatan Size (px)
-                    <input type="number" min="9" class="mt-1 w-full border rounded-xl px-3 py-2" x-model.number="selected.infoFontSize">
+                    <input type="number" min="9" class="mt-1 w-full border rounded-lg px-3 py-2" x-model.number="selected.infoFontSize">
                   </label>
                 </div>
               </div>
@@ -378,11 +381,11 @@
             <template x-if="selected.type==='image'">
               <div class="mt-3 space-y-2">
                 <label>Sumber Gambar (URL / data URL)
-                  <input class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.src" placeholder="/uploads/logo.png atau data:image/jpeg;base64,...">
+                  <input class="mt-1 w-full border rounded-lg px-3 py-2" x-model="selected.src" placeholder="/uploads/logo.png atau data:image/jpeg;base64,...">
                 </label>
                 <div class="grid grid-cols-2 field-grid">
                   <label>Warna Border
-                    <input type="color" class="mt-1 w-full border rounded-xl px-2 py-1" x-model="selected.borderColor">
+                    <input type="color" class="mt-1 w-full border rounded-lg px-2 py-1" x-model="selected.borderColor">
                   </label>
                 </div>
               </div>
@@ -392,12 +395,12 @@
             <template x-if="selected.type==='tableCell'">
               <div class="mt-3 space-y-2">
                 <label>Label/Value
-                  <input class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.text" placeholder="Doc.No / (otomatis)">
+                  <input class="mt-1 w-full border rounded-lg px-3 py-2" x-model="selected.text" placeholder="Doc.No / (otomatis)">
                 </label>
                 <div class="grid grid-cols-2 field-grid">
                   <label>Bold <input type="checkbox" class="ml-2" x-model="selected.bold"></label>
                   <label>Warna Border
-                    <input type="color" class="mt-1 w-full border rounded-xl px-2 py-1" x-model="selected.borderColor">
+                    <input type="color" class="mt-1 w-full border rounded-lg px-2 py-1" x-model="selected.borderColor">
                   </label>
                 </div>
               </div>
@@ -407,7 +410,7 @@
             <template x-if="selected.type==='footer'">
               <div class="mt-3 space-y-2">
                 <label>Teks Footer
-                  <input class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.text" placeholder="© Perusahaan 2025">
+                  <input class="mt-1 w-full border rounded-lg px-3 py-2" x-model="selected.text" placeholder="© Perusahaan 2025">
                 </label>
                 <label class="inline-flex items-center gap-2">
                   <input type="checkbox" x-model="selected.showPage">
@@ -415,22 +418,22 @@
                 </label>
                 <div class="grid grid-cols-2 field-grid">
                   <label>Align
-                    <select class="mt-1 w-full border rounded-xl px-3 py-2" x-model="selected.align">
+                    <select class="mt-1 w-full border rounded-lg px-3 py-2" x-model="selected.align">
                       <option>left</option>
                       <option>center</option>
                       <option>right</option>
                     </select>
                   </label>
                   <label>Ukuran font (px)
-                    <input type="number" min="9" class="mt-1 w-full border rounded-xl px-3 py-2" x-model.number="selected.fontSize">
+                    <input type="number" min="9" class="mt-1 w-full border rounded-lg px-3 py-2" x-model.number="selected.fontSize">
                   </label>
                 </div>
                 <div class="grid grid-cols-2 field-grid">
                   <label>Warna Teks
-                    <input type="color" class="mt-1 w-full border rounded-xl px-2 py-1" x-model="selected.color">
+                    <input type="color" class="mt-1 w-full border rounded-lg px-2 py-1" x-model="selected.color">
                   </label>
                   <label>Warna Border
-                    <input type="color" class="mt-1 w-full border rounded-xl px-2 py-1" x-model="selected.borderColor">
+                    <input type="color" class="mt-1 w-full border rounded-lg px-2 py-1" x-model="selected.borderColor">
                   </label>
                 </div>
               </div>
@@ -446,7 +449,7 @@
         </div>
 
         {{-- Wrapper kanvas --}}
-        <div class="relative bg-white rounded-b-xl shadow"
+        <div class="relative bg-white rounded-b-xl shadow-none"
              :style="{ width: layout.page.width+'px', height: layout.page.height+'px', outline: pageBorder ? ('1px solid '+colors.pageBorder) : 'none' }"
              x-ref="page"
              @mousedown="pointerDown($event)"
@@ -551,7 +554,7 @@
 
               {{-- CONTENT: SIGNATURE (TTD) --}}
               <template x-if="blk.type==='signature'">
-                <div class="w-full h-full p-2 bg-white/90 backdrop-blur rounded"
+                <div class="w-full h-full p-2 bg-white/90 backdrop-blur rounded-lg"
                      :class="blk.border ? 'border' : ''"
                      :style="{
                         borderColor: (blk.borderColor || '#e5e7eb'),
@@ -562,7 +565,7 @@
                        :style="{fontSize: (blk.infoFontSize)+'px'}"
                        x-text="blk.role || 'Role'"></div>
 
-                  <div class="mt-1 w-full flex-1 border border-dashed rounded flex items-center"
+                  <div class="mt-1 w-full flex-1 border border-dashed rounded-lg flex items-center"
                        :style="{
                          borderColor: (blk.borderColor || '#e5e7eb'),
                          justifyContent: (blk.align==='right' ? 'flex-end' : (blk.align==='left' ? 'flex-start' : 'center'))
@@ -595,38 +598,46 @@
     </div>
 
     <div class="px-4 py-3 border-t flex items-center justify-end gap-3">
-      <a href="{{ route('admin.document_templates.index') }}" class="px-4 py-2 rounded-xl border text-[#1D1C1A]">Batal</a>
-      <button class="px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">Simpan</button>
+      <x-ui.link variant="secondary" href="{{ route('admin.document_templates.index') }}" class="px-4 py-2 rounded-lg border">Batal</x-ui.link>
+
     </div>
   </form>
 
   {{-- DRAW PAD MODAL --}}
-  <div x-show="pad.open" x-cloak @keydown.escape.window="closePad()" class="fixed inset-0 z-50 flex items-center justify-center">
-    <div class="absolute inset-0 bg-black/40" @click="closePad()"></div>
-    <div class="relative bg-white rounded-xl shadow-xl w-[720px] max-w-[95vw]" x-transition.scale.origin.center>
-      <div class="px-4 py-3 border-b flex items-center justify-between">
-        <div class="font-semibold">Gambar TTD</div>
-        <button class="text-sm" @click="closePad()">✕</button>
+  <div x-show="pad.open" x-cloak @keydown.escape.window="closePad()" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="fixed inset-0 bg-black/55 backdrop-blur-[2px]" @click="closePad()"></div>
+    <div class="ui-modal ui-modal--lg w-full relative" x-transition.scale.origin.center>
+      <div class="ui-modal__header">
+        <div class="ui-modal__icon">
+          <x-ui.lucide name="pencil" />
+        </div>
+        <div class="ui-modal__header-content">
+          <h2 class="ui-modal__title">Gambar TTD</h2>
+          <p class="ui-modal__description">Gambarkan tanda tangan pada kanvas di bawah.</p>
+        </div>
+        <button type="button" class="ui-modal__close" @click="closePad()" aria-label="Tutup">
+          <x-ui.lucide name="x" />
+        </button>
       </div>
-      <div class="p-4 space-y-3">
+      <div class="ui-modal__body space-y-4">
         <div class="flex items-center gap-3">
-          <label class="text-sm">Ketebalan</label>
+          <label class="text-sm font-medium">Ketebalan</label>
           <input type="range" min="1" max="8" x-model.number="pad.stroke" class="w-48">
           <span class="text-sm" x-text="pad.stroke + ' px'"></span>
-          <button type="button" class="ml-auto px-3 py-2 border rounded" @click="padClear()">Clear</button>
+          <x-ui.button variant="secondary" type="button" class="ml-auto" @click="padClear()">Clear</x-ui.button>
         </div>
-        <div class="relative border rounded-lg bg-gray-50">
-          <canvas x-ref="sigCanvas" width="640" height="200" class="block w-full h-auto touch-none cursor-crosshair bg-white rounded"></canvas>
+        <div class="relative border rounded-lg bg-gray-50 overflow-hidden">
+          <canvas x-ref="sigCanvas" width="640" height="200" class="block w-full h-auto touch-none cursor-crosshair bg-white"></canvas>
         </div>
-        <div class="flex items-center justify-end gap-3">
-          <button type="button" class="px-4 py-2 rounded border" @click="closePad()">Batal</button>
-          <button type="button" class="px-4 py-2 rounded bg-[#bb9974] text-white" @click="padSave()">Simpan ke Blok</button>
-        </div>
+      </div>
+      <div class="ui-modal__footer">
+        <x-ui.button variant="secondary" type="button" @click="closePad()">Batal</x-ui.button>
+        <x-ui.button variant="primary" type="button" @click="padSave()">Simpan ke Blok</x-ui.button>
       </div>
     </div>
   </div>
   {{-- /MODAL --}}
-</div>
+</x-ui.page>
 @endsection
 
 @push('scripts')

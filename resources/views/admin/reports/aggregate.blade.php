@@ -41,7 +41,7 @@
     height: 100%;
     min-width: 4px;
     border-radius: inherit;
-    background: #bb9974;
+    background: #713F12;
   }
 
   .kpi-meter__bar.is-over {
@@ -227,14 +227,14 @@ foreach ($categoryCharts as $key => $chart) {
 
 <div class="space-y-5">
   <div class="report-card p-5">
-    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-      <div>
-        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-maroon-700">HSE / KPI Report</p>
-        <h1 class="mt-1 text-2xl font-serif font-semibold text-coal-900">Rekap {{ $periodSafe }}</h1>
-        <p class="mt-1 text-sm text-coal-500">Rumus derived dihitung otomatis dari kode indikator, dan threshold dipakai konsisten di grafik serta tabel.</p>
-      </div>
-
-      <form method="get" class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6" x-data="{ scope: '{{ $scopeNow }}' }">
+    <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+        <x-ui.page-title>Rekap {{ $periodSafe }}</x-ui.page-title>
+        <x-ui.page-description>Rumus derived dihitung otomatis dari kode indikator, dan threshold dipakai konsisten di grafik serta tabel.</x-ui.page-description>
+      </div></div>
+  <x-ui.page-actions></x-ui.page-actions>
+</x-ui.page-header>
+<div class="ui-page-filters"><form method="get" class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6" x-data="{ scope: '{{ $scopeNow }}' }">
         <input type="hidden" name="scope" :value="scope">
         <select name="site_id" class="px-3 py-2 border rounded-lg bg-white">
           <option value="">Semua Site</option>
@@ -268,9 +268,8 @@ foreach ($categoryCharts as $key => $chart) {
 
         <input type="number" name="year" value="{{ $yearVal }}" class="px-3 py-2 border rounded-lg" x-show="scope === 'year'">
 
-        <button class="px-4 py-2 font-semibold text-white rounded-lg bg-maroon-700 hover:bg-maroon-800">Terapkan</button>
-      </form>
-    </div>
+        <x-ui.button variant="primary" class="px-4 py-2 font-semibold rounded-lg">Terapkan</x-ui.button>
+      </form></div>
   </div>
 
   <div class="grid grid-cols-2 gap-3 md:grid-cols-5">
@@ -305,7 +304,7 @@ foreach ($categoryCharts as $key => $chart) {
       <section class="report-card overflow-hidden">
         <div class="flex items-start justify-between gap-3 border-b px-4 py-3">
           <div>
-            <h2 class="font-semibold text-coal-900">{{ $chart['title'] }}</h2>
+            <x-ui.section-title class="font-semibold text-coal-900">{{ $chart['title'] }}</x-ui.section-title>
             <p class="text-xs text-coal-500">{{ $rows->count() }} indikator dalam satu grafik</p>
           </div>
           <div class="text-right">
@@ -331,7 +330,7 @@ foreach ($categoryCharts as $key => $chart) {
                         <div class="truncate font-mono text-[10px] text-coal-500" title="{{ $ind->formula }}">= {{ $ind->formula }}</div>
                       @endif
                     </div>
-                    <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold {{ $item['isOver'] ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700' }}">
+                    <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold {{ $item['isOver'] ? 'ui-status ui-status--danger' : 'ui-status ui-status--success' }}">
                       {{ $threshold === null ? 'No target' : ($item['isOver'] ? 'Lewat' : 'Aman') }}
                     </span>
                   </div>
@@ -359,19 +358,19 @@ foreach ($categoryCharts as $key => $chart) {
   <section class="report-card overflow-hidden">
     <div class="flex flex-col gap-2 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h2 class="font-semibold text-coal-900">Detail Indikator</h2>
+        <x-ui.section-title class="font-semibold text-coal-900">Detail Indikator</x-ui.section-title>
         <p class="text-xs text-coal-500">Data lengkap tetap tersedia tanpa membuat grafik memanjang.</p>
       </div>
       <div class="flex items-center gap-3 text-xs">
-        <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-[#bb9974]"></span>Normal</span>
+        <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-[#713F12]"></span>Normal</span>
         <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-rose-600"></span>Lewat threshold</span>
         <span class="inline-flex items-center gap-1"><span class="h-3 w-0.5 bg-amber-500"></span>Threshold</span>
       </div>
     </div>
 
     <div class="overflow-x-auto">
-      <table class="min-w-full text-sm">
-        <thead class="bg-gray-50 text-xs uppercase text-coal-500">
+      <x-ui.table class="min-w-full text-sm">
+        <thead class="bg-gray-50 text-xs normal-case text-coal-500">
           <tr>
             <th class="px-3 py-2 text-left">Kategori</th>
             <th class="px-3 py-2 text-left">Indicator</th>
@@ -409,7 +408,7 @@ foreach ($categoryCharts as $key => $chart) {
               <td class="px-3 py-2">
                 <div class="font-medium text-coal-900">{{ $ind->name }}</div>
                 @if($ind->is_derived && $ind->formula)
-                  <div class="mt-0.5 font-mono text-xs text-coal-500">= {{ $ind->formula }}</div>
+                  <div class="mt-1 font-mono text-xs text-coal-500">= {{ $ind->formula }}</div>
                 @endif
               </td>
               <td class="px-3 py-2 text-right font-bold {{ $isOver ? 'text-rose-600' : 'text-coal-900' }}">
@@ -426,25 +425,25 @@ foreach ($categoryCharts as $key => $chart) {
                 @if($threshold === null)
                   <span class="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-600">Tanpa threshold</span>
                 @elseif($isOver)
-                  <span class="rounded-full bg-rose-50 px-2 py-1 text-xs font-semibold text-rose-700">Lewat</span>
+                  <x-ui.badge variant="danger" class="rounded-full px-2 py-1 text-xs font-semibold">Lewat</x-ui.badge>
                 @else
-                  <span class="rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">Aman</span>
+                  <x-ui.badge variant="success" class="rounded-full px-2 py-1 text-xs font-semibold">Aman</x-ui.badge>
                 @endif
               </td>
               @if($isSuperAdmin)
-                <td class="px-3 py-2 text-center">
-                  <div class="flex flex-col items-center gap-1">
-                    <a href="{{ route('admin.indicators.edit', $ind->id) }}" class="rounded-md border border-maroon-500 px-2.5 py-1 text-xs font-semibold text-maroon-700 hover:bg-maroon-50">Edit Indikator</a>
+                <td class="ui-action-cell px-3 py-2 text-center"><x-ui.table-actions>
+                  <div class="flex flex-row items-center gap-2">
+                    <x-ui.icon-button action="edit" label="Edit indikator" href="{{ route('admin.indicators.edit', $ind->id) }}" />
                     @if($siteId)
-                      <a href="{{ route('admin.report-totals.edit', $editTotalParams) }}" class="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50">Edit Total</a>
+                      <x-ui.icon-button action="edit" label="Edit total" href="{{ route('admin.report-totals.edit', $editTotalParams) }}" />
                     @endif
                   </div>
-                </td>
+                </x-ui.table-actions></td>
               @endif
             </tr>
           @endforeach
         </tbody>
-      </table>
+      </x-ui.table>
     </div>
   </section>
 </div>
@@ -517,7 +516,7 @@ window.addEventListener('DOMContentLoaded', function () {
     ctx.lineTo(left + plotW, top + plotH);
     ctx.stroke();
 
-    drawFlatLine(value, row.isOver ? '#dc2626' : '#bb9974', false, 3);
+    drawFlatLine(value, row.isOver ? '#dc2626' : '#713F12', false, 3);
     if (threshold !== null && Number.isFinite(threshold)) {
       drawFlatLine(threshold, '#f59e0b', true, 2);
     }

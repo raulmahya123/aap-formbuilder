@@ -2,10 +2,14 @@
 @section('title','Edit Indicator')
 
 @section('content')
-<h1 class="text-2xl font-bold mb-6 text-maroon-700">Edit Indicator</h1>
+<x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Edit Indicator</x-ui.page-title>
+<x-ui.page-description>Perbarui informasi indikator.</x-ui.page-description></div>
+  <x-ui.page-actions></x-ui.page-actions>
+</x-ui.page-header>
 
 <form action="{{ route('admin.indicators.update', $indicator) }}" method="post"
-      class="space-y-5 max-w-2xl bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+      class="ui-card space-y-5 max-w-2xl bg-white rounded-lg border border-gray-200 shadow-none">
   @csrf
   @method('put')
 
@@ -91,7 +95,7 @@
       {{-- pastikan selalu kirim 0 saat uncheck --}}
       <input type="hidden" name="is_derived" value="0">
       <input type="checkbox" name="is_derived" value="1" id="chkDerived"
-             class="h-4 w-4 text-maroon-600 border-gray-300 rounded focus:ring-maroon-500"
+             class="h-4 w-4 text-maroon-600 border-gray-300 rounded-lg focus:ring-maroon-500"
              @checked(old('is_derived', $indicator->is_derived))>
       <span>Derived (pakai formula)</span>
     </label>
@@ -106,13 +110,13 @@
   </div>
 
   <div class="flex gap-3">
-    <button class="px-5 py-2.5 rounded-lg bg-maroon-600 hover:bg-maroon-700 text-white shadow">
+    <x-ui.button variant="primary" class="px-5 py-3 rounded-lg shadow-none">
       Update
-    </button>
-    <a href="{{ route('admin.indicators.index') }}"
-       class="px-5 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700">
+    </x-ui.button>
+    <x-ui.link variant="secondary" href="{{ route('admin.indicators.index') }}"
+       class="px-5 py-3 rounded-lg border">
       Cancel
-    </a>
+    </x-ui.link>
   </div>
 </form>
 

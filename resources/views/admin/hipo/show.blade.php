@@ -1,35 +1,34 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6 max-w-6xl mx-auto space-y-6 text-black">
+<x-ui.page class="max-w-6xl mx-auto text-black">
 
 {{-- FLASH MESSAGE --}}
 @if(session('success'))
 <div x-data="{show:true}" x-init="setTimeout(()=>show=false,3000)" x-show="show"
-     class="bg-green-100 border border-black px-4 py-3 rounded-xl flex items-center gap-3">
+     class="bg-green-100 border border-black px-4 py-3 rounded-lg flex items-center gap-3">
     <span class="text-xl">✅</span>
     <div class="text-sm font-semibold">{{ session('success') }}</div>
 </div>
 @endif
 
 {{-- HEADER --}}
-<div class="flex items-center justify-between">
-    <div class="flex items-center gap-3">
-        <div class="flex h-12 w-12 items-center justify-center rounded-xl border border-[#C5C5C5] text-[#603813]"><x-ui-icon name="warning" class="h-6 w-6" /></div>
+<x-ui.page-header>
+  <div class="ui-page-header__copy"><div class="flex items-center gap-3">
+        <div class="flex h-12 w-12 items-center justify-center rounded-lg border border-[#D4D4D8] text-[#713F12]"><x-ui-icon name="warning" class="h-6 w-6" /></div>
         <div>
-            <h1 class="text-xl font-bold">Detail HIPO / Nearmiss</h1>
-            <p class="text-sm">High Potential Hazard Report</p>
+            <x-ui.page-title>Detail HIPO / Nearmiss</x-ui.page-title>
+            <x-ui.page-description>High Potential Hazard Report</x-ui.page-description>
         </div>
-    </div>
-
-    <a href="{{ route('admin.hipo.index') }}"
-       class="text-sm px-4 py-2 rounded-lg border border-black hover:bg-gray-100">
+    </div></div>
+  <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('admin.hipo.index') }}"
+       class="text-sm px-4 py-2 rounded-lg border">
         ← Kembali
-    </a>
-</div>
+    </x-ui.link></x-ui.page-actions>
+</x-ui.page-header>
 
 {{-- STATUS --}}
-<div class="flex items-center justify-between bg-white border rounded-xl px-6 py-4">
+<x-ui.panel class="flex items-center justify-between bg-white border rounded-lg">
     <div>
         <div class="text-xs">Status</div>
         <div class="text-xl font-bold">{{ strtoupper($hipo->status) }}</div>
@@ -37,17 +36,11 @@
 
     <div class="text-right">
         <div class="text-xs">Risk Level</div>
-        <span class="px-3 py-1 rounded text-sm font-bold
-            @class([
-                'bg-green-100 text-green-700' => $hipo->risk_level==='Low',
-                'bg-yellow-100 text-yellow-700' => $hipo->risk_level==='Medium',
-                'bg-orange-100 text-orange-700' => $hipo->risk_level==='High',
-                'bg-red-100 text-red-700' => $hipo->risk_level==='Extreme',
-            ])">
+        <span class="px-3 py-1 rounded-lg text-sm font-bold @class([ 'ui-status ui-status--success' => $hipo->risk_level==='Low', 'ui-status ui-status--warning' => $hipo->risk_level==='Medium', 'ui-status ui-status--warning' => $hipo->risk_level==='High', 'ui-status ui-status--danger' => $hipo->risk_level==='Extreme', ])">
             {{ $hipo->risk_level }}
         </span>
     </div>
-</div>
+</x-ui.panel>
 
 {{-- INFO --}}
 <div class="grid md:grid-cols-4 gap-4 text-sm">
@@ -63,16 +56,16 @@
     'Stop Work' => $hipo->stop_work ? 'YA' : 'TIDAK',
     'PIC Utama' => $hipo->pic,
 ] as $label => $value)
-<div class="bg-white border rounded-xl p-4">
+<x-ui.panel class="bg-white border rounded-lg">
     <div class="text-xs">{{ $label }}</div>
     <div class="font-semibold">{{ $value }}</div>
-</div>
+</x-ui.panel>
 @endforeach
 </div>
 
 {{-- RINCIAN KEJADIAN --}}
-<div class="bg-white border rounded-xl p-6 space-y-4">
-    <h3 class="font-semibold">📝 Rincian Kejadian</h3>
+<x-ui.panel class="bg-white border rounded-lg space-y-4">
+    <x-ui.card-title class="font-semibold">📝 Rincian Kejadian</x-ui.card-title>
 
     <div>
         <div class="text-xs font-semibold">KTA (Kondisi Tidak Aman)</div>
@@ -88,7 +81,7 @@
         <div class="text-xs font-semibold">Deskripsi Kejadian</div>
         <div class="text-sm whitespace-pre-line">{{ $hipo->description }}</div>
     </div>
-</div>
+</x-ui.panel>
 
 {{-- KONTROL RISIKO --}}
 <div class="grid md:grid-cols-2 gap-4">
@@ -98,7 +91,7 @@
     'work_practice' => 'Praktek Kerja',
     'ppe' => 'APD'
 ] as $key => $label)
-<div class="bg-white border rounded-xl p-4 space-y-2">
+<x-ui.panel class="bg-white border rounded-lg space-y-2">
     <h4 class="font-semibold">{{ $label }}</h4>
 
     <div class="text-sm whitespace-pre-line">
@@ -112,19 +105,19 @@
             📎 Lihat Evidence
         </a>
     @endif
-</div>
+</x-ui.panel>
 @endforeach
 </div>
 
 {{-- ADMIN ACTION --}}
 <form method="POST"
       action="{{ route('admin.hipo.update', $hipo->id) }}"
-      class="bg-white border rounded-xl p-6 space-y-4">
+      class="ui-card bg-white border rounded-lg space-y-4">
 
 @csrf
 @method('PUT')
 
-<h3 class="font-semibold text-sm">🔧 Tindakan Admin</h3>
+<x-ui.card-title class="font-semibold text-sm">🔧 Tindakan Admin</x-ui.card-title>
 
 <div class="grid md:grid-cols-2 gap-4">
     <div>
@@ -154,11 +147,11 @@
 </div>
 
 <div class="flex justify-end">
-    <button class="px-5 py-2 border border-black rounded-lg hover:bg-gray-100">
+    <x-ui.button variant="primary" class="px-5 py-2 border rounded-lg">
         Simpan Perubahan
-    </button>
+    </x-ui.button>
 </div>
 </form>
 
-</div>
+</x-ui.page>
 @endsection

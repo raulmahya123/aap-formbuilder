@@ -4,18 +4,17 @@
 @section('title','Detail Dokumen')
 
 @section('content')
-<div x-data="docShow()" x-init="init()" class="max-w-7xl mx-auto p-6 space-y-6">
+<x-ui.page x-data="docShow()" x-init="init()" class="max-w-7xl mx-auto">
   {{-- HEADER --}}
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-xl font-semibold text-[#1D1C1A]">Detail Dokumen</h1>
-      <p class="text-sm text-gray-600 mt-1">
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+      <x-ui.page-title>Detail Dokumen</x-ui.page-title>
+      <x-ui.page-description>
         {{ $document->doc_no ?? '—' }} · Rev {{ $document->revision_no ?? 0 }} ·
         {{ $document->dept_code ?? '—' }} / {{ $document->doc_type ?? '—' }} / {{ $document->project_code ?? '—' }}
-      </p>
-    </div>
-
-    @php
+      </x-ui.page-description>
+    </div></div>
+  <x-ui.page-actions>@php
       $pdfRoute = \Illuminate\Support\Facades\Route::has('admin.documents.download')
                   ? route('admin.documents.download', $document)
                   : (\Illuminate\Support\Facades\Route::has('admin.documents.pdf')
@@ -24,13 +23,13 @@
     @endphp
 
     <div class="flex items-center gap-3">
-      <a href="{{ route('admin.documents.index') }}" class="px-4 py-2 rounded-xl border text-[#1D1C1A]">← Kembali</a>
+      <x-ui.link variant="secondary" href="{{ route('admin.documents.index') }}" class="px-4 py-2 rounded-lg border">← Kembali</x-ui.link>
       @if($pdfRoute)
-        <a href="{{ $pdfRoute }}" class="px-4 py-2 rounded-xl border text-[#1D1C1A]" target="_blank" rel="noopener">Unduh PDF</a>
+        <x-ui.link variant="secondary" href="{{ $pdfRoute }}" class="px-4 py-2 rounded-lg border" target="_blank" rel="noopener">Unduh PDF</x-ui.link>
       @endif
-      <button type="button" onclick="window.print()" class="px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">Cetak</button>
-    </div>
-  </div>
+      <x-ui.button variant="primary" type="button" onclick="window.print()" class="px-4 py-2 rounded-lg hover:opacity-90">Cetak</x-ui.button>
+    </div></x-ui.page-actions>
+</x-ui.page-header>
 
   {{-- Inject: templates & data dokumen --}}
   <script type="application/json" id="doc-templates-json">
@@ -48,19 +47,19 @@
   </script>
 
   {{-- PREVIEW --}}
-  <div class="bg-white border rounded-2xl p-5">
+  <x-ui.panel class="bg-white border rounded-lg">
     <div class="flex items-center justify-between">
-      <h2 class="font-semibold text-[#1D1C1A]">Preview</h2>
+      <x-ui.section-title class="font-semibold text-[#1D1C1A]">Preview</x-ui.section-title>
       <div class="flex items-center gap-2 text-sm">
-        <button type="button" class="px-2 py-1 border rounded" @click="zoomOut()">–</button>
+        <x-ui.button variant="secondary" type="button" class="px-2 py-1 border rounded-lg" @click="zoomOut()">–</x-ui.button>
         <span x-text="Math.round(preview.zoom*100)+'%'"></span>
-        <button type="button" class="px-2 py-1 border rounded" @click="zoomIn()">+</button>
+        <x-ui.button variant="secondary" type="button" class="px-2 py-1 border rounded-lg" @click="zoomIn()">+</x-ui.button>
       </div>
     </div>
 
-    <div class="mt-4 rounded-xl border bg-gray-50 p-6 overflow-auto max-h-[80vh]">
+    <div class="mt-4 rounded-lg border bg-gray-50 p-6 overflow-auto max-h-[80vh]">
       <template x-for="p in preview.pagesCount" :key="'p'+p">
-        <div class="mx-auto mb-8 shadow-sm bg-white relative" :style="pageStyle()">
+        <div class="mx-auto mb-8 shadow-none bg-white relative" :style="pageStyle()">
           {{-- margin box --}}
           <div class="absolute inset-0 pointer-events-none">
             <div class="absolute" :style="marginBoxStyle()"></div>
@@ -126,9 +125,9 @@
 
               {{-- SIGNATURE (honor align, from template/grid/fallback) --}}
               <template x-if="blk.type==='signature'">
-                <div class="w-full h-full p-2 bg-white/90 rounded" :style="{ textAlign: (blk.align || 'center'), color:'#000' }">
+                <div class="w-full h-full p-2 bg-white/90 rounded-lg" :style="{ textAlign: (blk.align || 'center'), color:'#000' }">
                   <div class="text-[11px]" x-text="blk.role||'Role'"></div>
-                  <div class="mt-1 w-full flex-1 rounded flex items-center justify-center p-1"
+                  <div class="mt-1 w-full flex-1 rounded-lg flex items-center justify-center p-1"
                        :style="{
                          height: (blk.boxHeight ?? 96) + 'px',
                          borderStyle: (blk.borderStyle ?? 'solid'),
@@ -153,8 +152,8 @@
         </div>
       </template>
     </div>
-  </div>
-</div>
+  </x-ui.panel>
+</x-ui.page>
 
 @push('scripts')
 <script>

@@ -19,32 +19,32 @@
   })->toArray();
 @endphp
 
-<div class="max-w-4xl mx-auto p-6">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-xl font-semibold">Edit Form</h1>
-
-    <div class="flex items-center gap-2">
+<div class="max-w-4xl mx-auto">
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Edit Form</x-ui.page-title>
+<x-ui.page-description>Perbarui informasi form dan dokumen.</x-ui.page-description></div>
+  <x-ui.page-actions><div class="flex items-center gap-2">
       @if($form->type === 'builder' && Route::has('admin.forms.builder'))
-        <a href="{{ route('admin.forms.builder', $form) }}"
-           class="px-3 py-1.5 rounded-lg border bg-white hover:bg-slate-50 text-sm">
+        <x-ui.link variant="secondary" href="{{ route('admin.forms.builder', $form) }}"
+           class="px-3 py-2 rounded-lg border text-sm">
           Open Builder
-        </a>
+        </x-ui.link>
       @endif
-      <a href="{{ route('admin.forms.index') }}"
-         class="px-3 py-1.5 rounded-lg border text-sm">Kembali</a>
-    </div>
-  </div>
+      <x-ui.link variant="secondary" href="{{ route('admin.forms.index') }}"
+         class="px-3 py-2 rounded-lg border text-sm">Kembali</x-ui.link>
+    </div></x-ui.page-actions>
+</x-ui.page-header>
 
   {{-- Flash --}}
   @if (session('ok'))
-    <div class="mb-4 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 px-4 py-3">
+    <div class="mb-4 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 px-4 py-3">
       {{ session('ok') }}
     </div>
   @endif
 
   {{-- Errors --}}
   @if ($errors->any())
-    <div class="mb-4 rounded bg-rose-50 text-rose-700 border border-rose-200 px-4 py-3">
+    <div class="mb-4 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 px-4 py-3">
       <div class="font-medium">Terjadi kesalahan:</div>
       <ul class="list-disc pl-5 mt-2 space-y-1">
         @foreach ($errors->all() as $e)
@@ -62,7 +62,7 @@
     @csrf
     @method('PUT')
 
-    <div class="rounded-2xl border bg-white p-5 space-y-5">
+    <x-ui.panel class="rounded-lg border bg-white space-y-5">
 
       {{-- Company --}}
       <div>
@@ -157,20 +157,20 @@
         <div class="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
           <p class="text-sm font-medium text-slate-700 mb-2">Import Soal dari CSV</p>
           <div class="flex items-center gap-3">
-            <a href="{{ route('admin.forms.import-template') }}"
-               class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100">
+            <x-ui.link variant="secondary" href="{{ route('admin.forms.import-template') }}"
+               class="inline-flex items-center gap-1 px-3 py-2 text-xs font-medium border rounded-lg">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
               Download Template
-            </a>
+            </x-ui.link>
             <form action="{{ route('admin.forms.import-schema', $form) }}" method="POST" enctype="multipart/form-data" class="flex items-center gap-2">
               @csrf
-              <input type="file" name="csv_file" accept=".csv,.txt" class="text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300">
-              <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-emerald-600 rounded hover:bg-emerald-700">
+              <input type="file" name="csv_file" accept=".csv,.txt" class="text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300">
+              <x-ui.button variant="primary" type="submit" class="px-3 py-2 text-xs font-medium rounded-lg">
                 Import
-              </button>
+              </x-ui.button>
             </form>
           </div>
-          <p class="text-xs text-slate-400 mt-1.5">Format: no, pertanyaan, tipe (text/radio/checkbox/select/textarea/number/date/email/file), wajib (ya/tidak), opsi_value, opsi_label, placeholder, rules</p>
+          <p class="text-xs text-slate-400 mt-2">Format: no, pertanyaan, tipe (text/radio/checkbox/select/textarea/number/date/email/file), wajib (ya/tidak), opsi_value, opsi_label, placeholder, rules</p>
         </div>
       </div>
 
@@ -179,9 +179,7 @@
         <label class="block text-sm font-medium text-slate-700">Unggah File (opsional untuk ganti)</label>
         <input type="file" name="pdf" id="pdfInput"
                accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-               class="mt-1 block w-full text-sm file:mr-4 file:py-2 file:px-4
-                      file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700
-                      hover:file:bg-emerald-100">
+               class="mt-1 block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
         <p class="text-xs text-slate-500 mt-1">
           Format: PDF, DOC/DOCX, XLS/XLSX — maks 4 MB. File akan dikompresi otomatis saat disimpan.
         </p>
@@ -206,12 +204,12 @@
         <label for="active" class="text-sm">Aktif</label>
       </div>
 
-    </div>
+    </x-ui.panel>
 
     <div class="mt-6 flex items-center gap-3">
-      <button class="px-5 py-2.5 rounded-xl bg-[color:var(--brand-maroon,#bb9974)] text-white hover:brightness-105">
+      <x-ui.button variant="primary" class="px-5 py-3 rounded-lg hover:brightness-105">
         Simpan Perubahan
-      </button>
+      </x-ui.button>
     </div>
   </form>
 
@@ -219,11 +217,11 @@
   <form method="POST"
         action="{{ route('admin.forms.destroy', $form) }}"
         class="mt-4"
-        onsubmit="return confirm('Hapus form ini? Tindakan tidak bisa dibatalkan.')">
+        data-confirm="Hapus form ini? Tindakan tidak bisa dibatalkan.">
     @csrf @method('DELETE')
-    <button class="px-4 py-2 rounded-xl border text-rose-700 border-rose-200 hover:bg-rose-50">
+    <x-ui.button variant="danger" class="px-4 py-2 rounded-lg border">
       Hapus
-    </button>
+    </x-ui.button>
   </form>
 </div>
 

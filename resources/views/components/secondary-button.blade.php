@@ -1,3 +1,1 @@
-<button {{ $attributes->merge(['type' => 'button', 'class' => 'btn-secondary']) }}>
-    {{ $slot }}
-</button>
+<x-ui.button variant="secondary" {{ $attributes->merge(['type' => 'button']) }}>{{ $slot }}</x-ui.button>

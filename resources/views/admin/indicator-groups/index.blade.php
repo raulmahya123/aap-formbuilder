@@ -2,16 +2,16 @@
 @section('title','Indicator Groups')
 
 @section('content')
-<div class="flex items-center justify-between mb-6">
-  <h1 class="text-2xl font-bold text-maroon-700">Indicator Groups</h1>
-  <a href="{{ route('admin.groups.create') }}"
-     class="px-4 py-2 rounded-lg bg-maroon-600 hover:bg-maroon-700 text-white shadow">
-     + New Group
-  </a>
-</div>
+<x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Indicator Groups</x-ui.page-title>
+<x-ui.page-description>Atur pengelompokan indikator operasional.</x-ui.page-description></div>
+  <x-ui.page-actions><x-ui.link icon="plus" variant="primary" href="{{ route('admin.groups.create') }}"
+     class="px-4 py-2 rounded-lg shadow-none">New Group
+  </x-ui.link></x-ui.page-actions>
+</x-ui.page-header>
 
-<div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white">
-  <table class="min-w-full divide-y divide-gray-200">
+<x-ui.panel :padded="false" class="overflow-hidden rounded-lg border border-gray-200 shadow-none bg-white">
+  <x-ui.table class="min-w-full divide-y divide-gray-200">
     {{-- Header pakai maroon gelap agar tegas --}}
     <thead class="bg-maroon-700 text-white">
       <tr>
@@ -30,26 +30,21 @@
         <td class="px-4 py-3 font-mono text-gray-600">{{ $g->code }}</td>
         <td class="px-4 py-3">
           @if($g->is_active)
-            <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Yes</span>
+            <x-ui.badge variant="success" class="px-2 py-1 text-xs font-semibold rounded-full">Yes</x-ui.badge>
           @else
-            <span class="px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">No</span>
+            <x-ui.badge variant="danger" class="px-2 py-1 text-xs font-semibold rounded-full">No</x-ui.badge>
           @endif
         </td>
-        <td class="px-4 py-3 text-right space-x-2">
+        <td class="ui-action-cell px-4 py-3 text-right space-x-2"><x-ui.table-actions>
           {{-- Tombol Edit pakai maroon terang --}}
-          <a href="{{ route('admin.groups.edit',$g) }}"
-             class="inline-block px-3 py-1 rounded-lg bg-maroon-500 text-white hover:bg-maroon-600 shadow-sm">
-             Edit
-          </a>
+          <x-ui.icon-button ability="update" :subject="$g" action="edit" label="Edit" href="{{ route('admin.groups.edit',$g) }}" />
           {{-- Tombol Delete pakai maroon gelap --}}
           <form action="{{ route('admin.groups.destroy',$g) }}" method="post" class="inline"
-                onsubmit="return confirm('Delete this group?')">
+                data-confirm="Delete this group?">
             @csrf @method('delete')
-            <button class="inline-block px-3 py-1 rounded-lg bg-maroon-700 text-white hover:bg-maroon-800 shadow-sm">
-              Delete
-            </button>
+            <x-ui.icon-button ability="delete" :subject="$g" action="delete" label="Hapus" type="submit" />
           </form>
-        </td>
+        </x-ui.table-actions></td>
       </tr>
       @empty
       <tr>
@@ -57,6 +52,6 @@
       </tr>
       @endforelse
     </tbody>
-  </table>
-</div>
+  </x-ui.table>
+</x-ui.panel>
 @endsection

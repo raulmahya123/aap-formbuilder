@@ -1,0 +1,23 @@
+.ui-page-header { width: 100%; margin: 0 0 var(--section-gap); padding: 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; text-align: left; }
+.ui-shell main > .ui-page-header, .ui-page > .ui-page-header { margin-block: 0; }
+.ui-page-header__row { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-5); min-height: 80px; }
+.ui-page-header__copy { flex: 1 1 auto; min-width: 0; text-align: left; }
+.ui-page-header .ui-page-title { display: block; margin: 0; padding: 0; color: var(--text-primary); font: 600 var(--type-page)/1.35 var(--font-sans); letter-spacing: -.025em; text-align: left; text-transform: none; white-space: normal; }
+.ui-page-header .ui-page-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ui-page-description { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; max-height: 3em; overflow: hidden; margin: var(--space-1) 0 0; color: var(--gray); font: 400 var(--type-body)/1.5 var(--font-sans); text-align: left; }
+.ui-page-actions { display: flex; flex: 0 0 auto; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2); max-width: 60%; margin-left: auto; text-align: right; }
+.ui-page-actions > :where(div, form) { margin-block: 0; }
+.ui-page-actions > .flex { justify-content: flex-end; flex-wrap: wrap; }
+.ui-page-actions .ui-button { margin: 0; }
+.ui-page-actions:empty { display: none; }
+.ui-page-filters { margin-bottom: var(--section-gap); }
+.ui-page-filters > form { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.ui-breadcrumbs { margin: 0 0 var(--space-3); padding: 0; color: var(--gray); text-align: left; }
+.ui-breadcrumbs a { color: var(--blue); }
+.ui-page-header .ui-page-header { margin: 0; }
+.ui-page.grid > .ui-page-header { grid-column: 1 / -1; }
+@media (max-width: 639px) {
+  .ui-page-header__row { flex-wrap: wrap; gap: var(--space-3); }
+  .ui-page-header__copy { flex-basis: 100%; }
+  .ui-page-actions { max-width: 100%; width: 100%; justify-content: flex-end; }
+}

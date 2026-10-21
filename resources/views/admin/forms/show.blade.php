@@ -1,21 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-3xl mx-auto p-6 bg-white rounded-xl">
-  <h1 class="text-xl font-semibold mb-2 flex items-center gap-2">
-    {{ $form->title }}
+<x-ui.page class="max-w-3xl mx-auto">
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>{{ $form->title }}
 
     {{-- doc_type badge --}}
     @php
       $doc = strtoupper($form->doc_type ?? 'FORM');
       $docClass = match ($doc) {
-        'SOP'  => 'bg-blue-100 text-blue-700',
-        'IK'   => 'bg-amber-100 text-amber-700',
+        'SOP'  => 'ui-status ui-status--info',
+        'IK'   => 'ui-status ui-status--warning',
         default=> 'bg-slate-100 text-slate-700',
       };
     @endphp
-    <span class="text-[10px] px-2 py-0.5 rounded-full {{ $docClass }}">{{ $doc }}</span>
-  </h1>
+    <span class="text-[10px] px-2 py-0.5 rounded-full {{ $docClass }}">{{ $doc }}</span></x-ui.page-title>
+<x-ui.page-description>Lihat detail dan lengkapi isian form berikut.</x-ui.page-description></div>
+  <x-ui.page-actions></x-ui.page-actions>
+</x-ui.page-header>
 
   {{-- Preview / Download referensi untuk tipe "file" (value tetap 'pdf') --}}
   @if($form->type === 'pdf' && $form->pdf_path)
@@ -37,7 +39,7 @@
 
     @if($ext === 'pdf')
       <iframe
-        class="w-full h-[70vh] border rounded mb-4"
+        class="w-full h-[70vh] border rounded-lg mb-4"
         src="{{ $url }}#view=FitH">
       </iframe>
       <div class="text-xs text-slate-500 mb-6">
@@ -48,27 +50,27 @@
       {{-- Word/Excel: tampilkan kartu download --}}
       <div class="mb-6 p-4 rounded-lg border bg-ivory-50">
         <div class="text-sm text-slate-700 mb-2">
-          File referensi: <span class="font-medium uppercase">{{ $ext }}</span>
+          File referensi: <span class="font-medium normal-case">{{ $ext }}</span>
           @if($size) • <span class="text-slate-500">{{ $size }}</span> @endif
         </div>
-        <a
+        <x-ui.link variant="primary"
           href="{{ $url }}"
           download
-          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition">
+          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg transition">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 16l4-5h-3V4h-2v7H8l4 5z"/><path d="M5 18h14v2H5z"/>
           </svg>
           Download {{ strtoupper($ext) }}
-        </a>
+        </x-ui.link>
       </div>
     @endif
   @endif
 
   {{-- Error summary --}}
   @if ($errors->any())
-    <div class="mb-4 rounded border border-red-200 bg-red-50 text-red-800 p-3 text-sm">
+    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 text-red-800 p-3 text-sm">
       <div class="font-medium mb-1">Ada kesalahan pada isian kamu:</div>
-      <ul class="list-disc pl-5 space-y-0.5">
+      <ul class="list-disc pl-5 space-y-1">
         @foreach ($errors->all() as $error)
           <li>{{ $error }}</li>
         @endforeach
@@ -88,8 +90,7 @@
     @if ($form->type === 'builder')
       @foreach (($form->schema['fields'] ?? []) as $field)
         @php
-          use Illuminate\Support\Str;
-          $name     = $field['name'] ?? Str::slug($field['label'] ?? 'field','_');
+          $name     = $field['name'] ?? \Illuminate\Support\Str::slug($field['label'] ?? 'field','_');
           $type     = $field['type'] ?? 'text';
           $label    = $field['label'] ?? ucfirst($name);
           $required = !empty($field['required']);
@@ -114,7 +115,7 @@
               id="{{ $name }}"
               type="{{ $type }}"
               name="{{ $name }}"
-              class="border rounded w-full px-3 py-2"
+              class="border rounded-lg w-full px-3 py-2"
               value="{{ old($name) }}"
               @if($required) required @endif>
 
@@ -123,14 +124,14 @@
               id="{{ $name }}"
               name="{{ $name }}"
               rows="{{ $field['rows'] ?? 4 }}"
-              class="border rounded w-full px-3 py-2"
+              class="border rounded-lg w-full px-3 py-2"
               @if($required) required @endif>{{ old($name) }}</textarea>
 
           @elseif ($type === 'select')
             <select
               id="{{ $name }}"
               name="{{ $name }}"
-              class="border rounded w-full px-3 py-2"
+              class="border rounded-lg w-full px-3 py-2"
               @if($required) required @endif>
               <option value="">— Pilih —</option>
               @foreach ($options as $opt)
@@ -176,7 +177,7 @@
               id="{{ $name }}"
               type="file"
               name="{{ $name }}"
-              class="border rounded w-full px-3 py-2"
+              class="border rounded-lg w-full px-3 py-2"
               @if($acceptStr) accept="{{ $acceptStr }}" @endif
               @if($required) required @endif>
             @if(!empty($field['mimes']))
@@ -191,7 +192,7 @@
               id="{{ $name }}"
               type="text"
               name="{{ $name }}"
-              class="border rounded w-full px-3 py-2"
+              class="border rounded-lg w-full px-3 py-2"
               value="{{ old($name) }}"
               @if($required) required @endif>
           @endif
@@ -210,16 +211,16 @@
       {{-- Untuk tipe file: form meta opsional (tanpa preview Word/Excel) --}}
       <div class="mb-4">
         <label class="block mb-1 font-medium" for="catatan">Catatan</label>
-        <textarea id="catatan" name="catatan" class="border rounded w-full px-3 py-2" rows="3">{{ old('catatan') }}</textarea>
+        <textarea id="catatan" name="catatan" class="border rounded-lg w-full px-3 py-2" rows="3">{{ old('catatan') }}</textarea>
         @error('catatan')
           <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
         @enderror
       </div>
     @endif
 
-    <button class="px-4 py-2 bg-emerald-600 text-white rounded">
+    <x-ui.button variant="primary" class="px-4 py-2 rounded-lg">
       Kirim
-    </button>
+    </x-ui.button>
   </form>
-</div>
+</x-ui.page>
 @endsection

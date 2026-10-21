@@ -3,14 +3,18 @@
 @section('title', 'Kelola Akses Site')
 
 @section('breadcrumbs')
-  <h1 class="text-lg font-semibold">Kelola Akses Site</h1>
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Kelola Akses Site</x-ui.page-title>
+<x-ui.page-description>Atur akses pengguna berdasarkan site.</x-ui.page-description></div>
+  <x-ui.page-actions></x-ui.page-actions>
+</x-ui.page-header>
 @endsection
 
 @section('actions')
   @if(Route::has('admin.sites.index'))
-    <a href="{{ route('admin.sites.index') }}" class="px-3 py-2 rounded-lg border text-sm">
+    <x-ui.link variant="secondary" href="{{ route('admin.sites.index') }}" class="px-3 py-2 rounded-lg border text-sm">
       📍 Kelola Sites
-    </a>
+    </x-ui.link>
   @endif
 @endsection
 
@@ -26,10 +30,7 @@
 
 {{-- Flash message (opsional) --}}
 @if(session('ok') || session('info') || session('error'))
-  <div class="mb-4 rounded-lg border p-3
-              @if(session('ok')) border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 @endif
-              @if(session('info')) border-amber-300 bg-amber-50 dark:bg-amber-900/20 @endif
-              @if(session('error')) border-rose-300 bg-rose-50 dark:bg-rose-900/20 @endif">
+  <div class="mb-4 rounded-lg border p-3 @if(session('ok')) border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 @endif @if(session('info')) border-amber-300 bg-amber-50 dark:bg-amber-900/20 @endif @if(session('error')) border-rose-300 bg-rose-50 dark:bg-rose-900/20 @endif">
     <div class="text-sm">
       {{ session('ok') ?? session('info') ?? session('error') }}
     </div>
@@ -62,16 +63,16 @@
   </div>
 
   <div class="flex items-end gap-2">
-    <button class="px-3 py-2 rounded-lg border">Terapkan</button>
-    <a href="{{ route('admin.site_access.index') }}" class="px-3 py-2 rounded-lg border">Reset</a>
+    <x-ui.button variant="secondary" class="px-3 py-2 rounded-lg border">Terapkan</x-ui.button>
+    <x-ui.link variant="secondary" href="{{ route('admin.site_access.index') }}" class="px-3 py-2 rounded-lg border">Reset</x-ui.link>
   </div>
 </form>
 
-<div class="grid lg:grid-cols-2 gap-6">
+<div class="grid lg:grid-cols-2 gap-5">
 
   {{-- Form Tambah Akses (per-site & per-email) --}}
-  <div class="rounded-2xl border p-4">
-    <h2 class="font-semibold mb-3">Tambah Akses (Email ↔ Site)</h2>
+  <div class="rounded-lg border p-4">
+    <x-ui.section-title class="font-semibold mb-3">Tambah Akses (Email ↔ Site)</x-ui.section-title>
 
     <form method="POST" action="{{ route('admin.site_access.store') }}" class="grid gap-3">
       @csrf
@@ -103,17 +104,16 @@
       </div>
 
       <div class="pt-2">
-        <button class="px-4 py-2 rounded-lg border border-maroon-700 text-maroon-700 hover:bg-maroon-50
-                       dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-coal-900/20">
+        <x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-coal-900/20">
           + Tambah Akses
-        </button>
+        </x-ui.button>
       </div>
     </form>
   </div>
 
   {{-- Info Panduan (opsional) --}}
-  <div class="rounded-2xl border p-4">
-    <h2 class="font-semibold mb-3">Panduan</h2>
+  <div class="rounded-lg border p-4">
+    <x-ui.section-title class="font-semibold mb-3">Panduan</x-ui.section-title>
     <ul class="list-disc pl-5 space-y-1 text-sm text-coal-700 dark:text-coal-200">
       <li>Pilih <strong>Site</strong> dan <strong>Email</strong> user, lalu klik <em>Tambah Akses</em>.</li>
       <li>Gunakan filter di atas untuk menyaring daftar berdasarkan Site/Email.</li>
@@ -124,13 +124,13 @@
 </div>
 
 {{-- Daftar Akses --}}
-<div class="mt-8 rounded-2xl border overflow-hidden">
+<div class="mt-8 rounded-lg border overflow-hidden">
   <div class="px-4 py-3 border-b">
-    <h2 class="font-semibold">Daftar Akses User ↔ Site</h2>
+    <x-ui.section-title class="font-semibold">Daftar Akses User ↔ Site</x-ui.section-title>
   </div>
 
   <div class="overflow-x-auto">
-    <table class="min-w-full text-sm">
+    <x-ui.table class="min-w-full text-sm">
       <thead class="bg-ivory-100 dark:bg-coal-900">
         <tr>
           <th class="text-left px-4 py-2">#</th>
@@ -155,15 +155,13 @@
             <td class="px-4 py-2 align-top text-coal-600 dark:text-coal-300">
               {{ $a->created_at?->format('Y-m-d H:i') }}
             </td>
-            <td class="px-4 py-2 align-top">
+            <td class="ui-action-cell px-4 py-2 align-top"><x-ui.table-actions>
               <form method="POST" action="{{ route('admin.site_access.destroy', $a->id) }}"
-                    onsubmit="return confirm('Hapus akses ini?')">
+                    data-confirm="Hapus akses ini?">
                 @csrf @method('DELETE')
-                <button class="px-3 py-1.5 rounded-lg border hover:bg-ivory-100 dark:hover:bg-coal-900">
-                  Hapus
-                </button>
+                <x-ui.icon-button action="delete" label="Hapus" type="submit" />
               </form>
-            </td>
+            </x-ui.table-actions></td>
           </tr>
         @empty
           <tr>
@@ -171,7 +169,7 @@
           </tr>
         @endforelse
       </tbody>
-    </table>
+    </x-ui.table>
   </div>
 
   @if($accesses->hasPages())

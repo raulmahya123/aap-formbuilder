@@ -1,0 +1,72 @@
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --page-padding: var(--space-6);
+  --section-gap: var(--space-5);
+  --card-padding: var(--space-5);
+  --input-height: 40px;
+  --button-height: 40px;
+  --table-row-height: 48px;
+  --radius: 8px;
+  --modal-radius: 12px;
+  --sidebar-width: 256px;
+  --shadow-overlay: 0 4px 16px rgb(24 24 27 / .08);
+}
+
+.ui-shell main { padding: var(--page-padding); display: flex; flex-direction: column; gap: var(--section-gap); }
+.ui-page { padding: 0; }
+.ui-page:not(.flex):not(.grid) { display: flex; flex-direction: column; gap: var(--section-gap); }
+.ui-page:not(.flex):not(.grid) > * { margin-block: 0; }
+.ui-page.grid { gap: var(--section-gap); }
+.ui-page.flex { flex-wrap: wrap; gap: var(--space-3); }
+.ui-topbar { padding-inline: var(--page-padding); padding-block: var(--space-3); }
+.ui-panel, .ui-card, .ui-auth-card { padding: var(--card-padding); border-radius: var(--radius); box-shadow: none; }
+.ui-shell main .card:not(:has(.ui-table)) { padding: var(--card-padding); }
+.ui-panel.ui-panel--flush { padding: 0; }
+.ui-table-scroll, .table-shell, .filter-bar, .toast, .empty-state { border-radius: var(--radius); }
+.filter-bar { padding: var(--card-padding); gap: var(--space-3); }
+.toast { padding: var(--card-padding); }
+.empty-state { padding: var(--space-8) var(--card-padding); }
+.ui-status { gap: var(--space-1); padding: var(--space-1) var(--space-2); border-radius: var(--radius); }
+.ui-button, .btn-primary, .btn-secondary, .btn-danger, .btn-ghost {
+  height: var(--button-height); min-height: var(--button-height); box-sizing: border-box;
+  padding: var(--space-2) var(--space-4); gap: var(--space-2); border-radius: var(--radius);
+  white-space: nowrap;
+}
+.ui-shell main input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='range']),
+.ui-shell main select:not([multiple]):not([size]),
+.ui-auth input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+.ui-auth select:not([multiple]):not([size]),
+.ui-public input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='range']),
+.ui-public select:not([multiple]):not([size]), .ui-input {
+  height: var(--input-height); min-height: var(--input-height); padding-block: var(--space-2); padding-inline: var(--space-3); border-radius: var(--radius);
+}
+:where(main, .ui-auth) textarea { min-height: 96px; padding: var(--space-3); border-radius: var(--radius); }
+main .ui-table tbody tr { height: var(--table-row-height); }
+main .ui-table tbody td { height: var(--table-row-height); padding: var(--space-3) var(--space-4); }
+main .ui-table thead th { padding: var(--space-3) var(--space-4); }
+.modal-panel, .ui-modal-panel { border-radius: var(--modal-radius); box-shadow: var(--shadow-overlay); }
+.modal-panel > form, .modal-panel > .p-6 { padding: var(--card-padding); }
+.ui-panel.ui-modal-panel { border-radius: var(--modal-radius); box-shadow: var(--shadow-overlay); }
+.ui-modal-panel > :is(.p-4, .px-4) { padding: var(--card-padding); }
+:where(main, .ui-auth) input[type='file'] { padding: 0; line-height: 38px; }
+:where(main, .ui-auth) input[type='file']::file-selector-button { height: 38px; padding-block: 0; }
+.ui-sidebar nav { padding: var(--space-4); }
+main.ui-public { padding: var(--page-padding); }
+.ui-public > * + * { margin-top: var(--section-gap); }
+.ui-public form { padding: var(--card-padding); border-radius: var(--radius); }
+.action-icon { width: var(--button-height); height: var(--button-height); border-radius: var(--radius); }
+@media (min-width: 1024px) { .ui-sidebar { width: auto; } }
+@media (max-width: 1023px) {
+  .ui-sidebar { width: min(var(--sidebar-width), 100vw); }
+  .ui-topbar { padding-left: 64px; }
+}
+@media (max-width: 639px) {
+  :root { --page-padding: var(--space-4); }
+  .ui-button { min-height: var(--button-height); }
+}

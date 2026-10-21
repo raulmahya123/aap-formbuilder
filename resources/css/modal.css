@@ -1,0 +1,190 @@
+/* ─── Modal System ─── */
+
+/* Base modal */
+.ui-modal {
+  position: fixed; inset: 0; margin: auto;
+  max-height: calc(100dvh - 64px); display: flex; flex-direction: column;
+  border: 1px solid var(--border); border-radius: var(--modal-radius, 12px);
+  background: var(--surface); color: var(--text-primary);
+  box-shadow: 0 20px 48px -8px rgb(24 24 27 / .24); padding: 0;
+  overflow: hidden;
+}
+.ui-modal::backdrop { background: rgb(24 24 27 / .55); backdrop-filter: blur(2px); }
+.ui-modal[open] { animation: ui-modal-in .2s ease-out; }
+@keyframes ui-modal-in {
+  from { opacity: 0; transform: translateY(12px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Sizes */
+.ui-modal--sm { width: min(420px, calc(100vw - 32px)); }
+.ui-modal--md { width: min(580px, calc(100vw - 32px)); }
+.ui-modal--lg { width: min(760px, calc(100vw - 32px)); }
+.ui-modal--xl { width: min(980px, calc(100vw - 32px)); }
+
+/* Header */
+.ui-modal__header {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  background: var(--surface); flex-shrink: 0;
+}
+.ui-modal__header-content { flex: 1 1 auto; min-width: 0; }
+.ui-modal__icon {
+  display: flex; align-items: center; justify-content: center;
+  flex: 0 0 40px; width: 40px; height: 40px;
+  border-radius: 10px; background: #DBEAFE; color: var(--blue);
+}
+.ui-modal__icon .ui-lucide { width: 20px; height: 20px; }
+.ui-modal__icon--danger { background: #FEE2E2; color: var(--red); }
+.ui-modal__icon--success { background: #DCFCE7; color: var(--green); }
+.ui-modal__icon--warning { background: #FEF3C7; color: var(--orange); }
+.ui-modal__title { font: 600 18px/1.4 var(--font-sans); margin: 0; color: var(--text-primary); }
+.ui-modal__description { font: 400 13px/1.5 var(--font-sans); color: var(--gray); margin: 4px 0 0; }
+.ui-modal__close {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: 0 0 32px; width: 32px; height: 32px; margin-left: auto;
+  border: none; border-radius: 8px; background: transparent; color: var(--gray);
+  cursor: pointer; padding: 0; transition: background-color .15s, color .15s;
+}
+.ui-modal__close:hover { background: var(--surface-secondary); color: var(--text-primary); }
+.ui-modal__close:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* Body */
+.ui-modal__body {
+  flex: 1 1 auto; overflow-y: auto; padding: 24px;
+  font: 400 14px/1.6 var(--font-sans);
+}
+.ui-modal__body::-webkit-scrollbar { width: 6px; }
+.ui-modal__body::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 8px; }
+
+/* Footer */
+.ui-modal__footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 16px 24px; border-top: 1px solid var(--border);
+  background: var(--surface); flex-shrink: 0;
+}
+
+/* ─── Form fields inside modals ─── */
+.ui-modal__body .ui-form-group { margin-bottom: 18px; }
+.ui-modal__body .ui-form-group:last-child { margin-bottom: 0; }
+.ui-modal__body .ui-form-label {
+  display: block; font: 500 13px/1.5 var(--font-sans); color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.ui-modal__body .ui-form-label .ui-required { color: var(--red); margin-left: 2px; font-weight: 600; }
+.ui-modal__body .ui-form-helper {
+  font: 400 12px/1.5 var(--font-sans); color: var(--gray); margin-top: 4px;
+}
+.ui-modal__body .ui-form-error {
+  font: 400 12px/1.5 var(--font-sans); color: var(--danger-text, #B91C1C); margin-top: 4px;
+}
+.ui-modal__body .ui-form-input {
+  width: 100%; height: 40px; padding: 8px 12px;
+  border: 1px solid var(--border-strong, #CBD5E1); border-radius: 8px;
+  background: #FFFFFF; color: var(--text-primary);
+  font: 400 14px/1.5 var(--font-sans);
+  transition: border-color .15s, box-shadow .15s;
+}
+.ui-modal__body .ui-form-input:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 2px rgb(29 78 216 / .15); }
+.ui-modal__body .ui-form-input.is-invalid { border-color: var(--red); }
+.ui-modal__body .ui-form-input.is-invalid:focus { box-shadow: 0 0 0 2px rgb(220 38 38 / .15); }
+.ui-modal__body textarea.ui-form-input { height: auto; min-height: 90px; resize: vertical; padding: 10px 12px; }
+.ui-modal__body select.ui-form-input { cursor: pointer; }
+
+/* ─── Upload Area ─── */
+.ui-upload-area {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; padding: 24px 16px; border: 2px dashed var(--border);
+  border-radius: 8px; background: var(--surface-secondary);
+  cursor: pointer; transition: border-color .15s, background-color .15s;
+  text-align: center;
+}
+.ui-upload-area:hover { border-color: var(--blue); background: #EFF6FF; }
+.ui-upload-area .ui-lucide { width: 32px; height: 32px; color: var(--gray); }
+.ui-upload-area__text { font: 500 13px/1.5 var(--font-sans); color: var(--text-primary); }
+.ui-upload-area__hint { font: 400 12px/1.5 var(--font-sans); color: var(--gray); }
+
+/* ─── Delete confirmation modal ─── */
+.ui-modal--delete .ui-modal__body { text-align: left; padding: 20px 24px; }
+.ui-modal--delete .ui-modal__delete-desc { font: 400 14px/1.6 var(--font-sans); color: var(--text-primary); margin: 0; }
+.ui-modal--delete .ui-modal__delete-warning {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 14px; border-radius: 8px; background: #FEF2F2;
+  border: 1px solid #FEE2E2;
+  font: 500 13px/1.5 var(--font-sans); color: #991B1B;
+  margin-top: 14px;
+}
+.ui-modal--delete .ui-modal__delete-warning .ui-lucide { width: 16px; height: 16px; flex-shrink: 0; color: #DC2626; }
+
+/* ─── Detail Modal Sections & Rows ─── */
+.ui-detail-section {
+  margin-bottom: 24px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+}
+.ui-detail-section:last-child { margin-bottom: 0; }
+.ui-detail-section__header {
+  padding: 10px 16px; background: var(--surface-secondary);
+  border-bottom: 1px solid var(--border);
+  font: 600 13px/1.5 var(--font-sans); color: var(--text-primary);
+  text-transform: uppercase; letter-spacing: .025em;
+}
+.ui-detail-section__body { padding: 8px 16px; background: var(--surface); }
+.ui-detail-row {
+  display: flex; align-items: baseline; gap: 16px;
+  padding: 8px 0; border-bottom: 1px solid var(--surface-secondary);
+  font-size: 13px; line-height: 1.5;
+}
+.ui-detail-row:last-child { border-bottom: none; }
+.ui-detail-row__label {
+  flex: 0 0 160px; font-weight: 500; color: var(--gray);
+}
+.ui-detail-row__value {
+  flex: 1 1 auto; color: var(--text-primary); word-break: break-word;
+}
+
+/* ─── Loading state overlay ─── */
+.ui-modal__loading {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 48px 24px; color: var(--gray); font: 400 14px/1.5 var(--font-sans);
+}
+.ui-modal__loading .ui-lucide {
+  width: 24px; height: 24px; animation: ui-spin 1s linear infinite; color: var(--blue);
+}
+@keyframes ui-spin { to { transform: rotate(360deg); } }
+
+/* ─── Button loading state ─── */
+.ui-button.is-loading {
+  position: relative; color: transparent !important; pointer-events: none;
+}
+.ui-button.is-loading::after {
+  content: ''; position: absolute; inset: 0; margin: auto;
+  width: 18px; height: 18px; border: 2px solid transparent;
+  border-top-color: currentColor; border-radius: 50%;
+  animation: ui-spin .6s linear infinite;
+  border-top-color: #fff;
+}
+.ui-button--secondary.is-loading::after,
+.ui-button.is-loading::after { border-top-color: inherit; }
+.ui-button--primary.is-loading::after,
+.ui-button--danger.is-loading::after,
+.ui-button--success.is-loading::after { border-top-color: #fff; }
+
+/* ─── Mobile Bottom Sheet ─── */
+@media (max-width: 640px) {
+  .ui-modal {
+    position: fixed; inset-block: auto 0; inset-inline: 0; margin: 0 auto;
+    max-height: calc(100dvh - 32px);
+    width: 100% !important; max-width: 100% !important;
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+    animation: ui-modal-sheet-in .25s ease-out;
+  }
+  @keyframes ui-modal-sheet-in {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  .ui-modal__header { padding: 16px 20px; }
+  .ui-modal__body { padding: 20px; }
+  .ui-modal__footer { padding: 14px 20px; }
+  .ui-detail-row { flex-direction: column; gap: 2px; }
+  .ui-detail-row__label { flex: none; font-size: 12px; }
+}

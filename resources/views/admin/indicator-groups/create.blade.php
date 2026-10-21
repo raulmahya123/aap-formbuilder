@@ -2,7 +2,11 @@
 @section('title','New Group')
 
 @section('content')
-<h1 class="text-2xl font-bold mb-6 text-maroon-700">New Group</h1>
+<x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>New Group</x-ui.page-title>
+<x-ui.page-description>Lengkapi informasi untuk menambahkan grup indikator.</x-ui.page-description></div>
+  <x-ui.page-actions></x-ui.page-actions>
+</x-ui.page-header>
 
 @if ($errors->any())
   <div class="mb-5 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800">
@@ -15,7 +19,7 @@
 @endif
 
 <form action="{{ route('admin.groups.store') }}" method="post"
-      class="space-y-5 max-w-xl bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+      class="ui-card space-y-5 max-w-xl bg-white rounded-lg shadow-none border border-gray-200">
   @csrf
 
   <div>
@@ -40,19 +44,19 @@
     </div>
     <div class="flex items-center gap-2">
       <input type="checkbox" name="is_active" value="1" {{ old('is_active',1) ? 'checked' : '' }}
-             class="h-4 w-4 text-maroon-600 border-gray-300 rounded focus:ring-maroon-500">
+             class="h-4 w-4 text-maroon-600 border-gray-300 rounded-lg focus:ring-maroon-500">
       <span class="text-sm text-gray-700">Active</span>
     </div>
   </div>
 
   <div class="flex gap-3">
-    <button class="px-5 py-2.5 rounded-lg bg-maroon-600 hover:bg-maroon-700 text-white shadow">
+    <x-ui.button variant="primary" class="px-5 py-3 rounded-lg shadow-none">
       Save
-    </button>
-    <a href="{{ route('admin.groups.index') }}"
-       class="px-5 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700">
+    </x-ui.button>
+    <x-ui.link variant="secondary" href="{{ route('admin.groups.index') }}"
+       class="px-5 py-3 rounded-lg border">
       Cancel
-    </a>
+    </x-ui.link>
   </div>
 </form>
 @endsection

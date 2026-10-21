@@ -55,26 +55,26 @@
     photoUrl: @js($photoUrl),
   })"
   x-init="init()"
-  class="max-w-6xl mx-auto p-6 space-y-6 select-none"
+  class="max-w-6xl mx-auto space-y-5 select-none"
 >
   {{-- HEADER --}}
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-xl font-semibold text-[#1D1C1A]">Preview Template</h1>
-      <p class="text-sm text-gray-600">#{{ $template->id }} — {{ $template->name }}</p>
-    </div>
-    <a href="{{ route('admin.document_templates.index') }}" class="px-4 py-2 rounded-xl border text-[#1D1C1A]">← Kembali</a>
-  </div>
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+      <x-ui.page-title>Preview Template</x-ui.page-title>
+      <x-ui.page-description>#{{ $template->id }} — {{ $template->name }}</x-ui.page-description>
+    </div></div>
+  <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('admin.document_templates.index') }}" class="px-4 py-2 rounded-lg border">← Kembali</x-ui.link></x-ui.page-actions>
+</x-ui.page-header>
 
   {{-- BAR TOOLS (read-only helper) --}}
-  <div class="bg-white border rounded-xl px-4 py-3 flex flex-wrap items-center gap-3">
+  <x-ui.panel class="bg-white border rounded-lg flex flex-wrap items-center gap-3">
     <div class="text-sm">Guides:</div>
     <label class="inline-flex items-center gap-2 text-sm">
       <input type="checkbox" x-model="guides"> Show
     </label>
     <div class="flex items-center gap-2 text-sm">
       <span>Guide Color</span>
-      <input type="color" x-model="colors.guide" class="w-8 h-6 p-0 border rounded">
+      <input type="color" x-model="colors.guide" class="w-8 h-6 p-0 border rounded-lg">
     </div>
     <div class="h-5 w-px bg-gray-200 mx-2"></div>
     <label class="inline-flex items-center gap-2 text-sm">
@@ -82,13 +82,13 @@
     </label>
     <div class="flex items-center gap-2 text-sm">
       <span>Page Border</span>
-      <input type="color" x-model="colors.pageBorder" class="w-8 h-6 p-0 border rounded">
+      <input type="color" x-model="colors.pageBorder" class="w-8 h-6 p-0 border rounded-lg">
     </div>
 
     <div class="ml-auto text-sm text-gray-600">
       Font default: <span class="font-medium" x-text="layout.font.family"></span>, size <span class="font-medium" x-text="layout.font.size"></span> pt
     </div>
-  </div>
+  </x-ui.panel>
 
   {{-- KANVAS --}}
   <div class="p-4 bg-transparent">
@@ -96,7 +96,7 @@
       Kanvas — <span x-text="layout.page.width"></span>×<span x-text="layout.page.height"></span> px
     </div>
 
-    <div class="relative bg-white rounded-b-xl shadow overflow-hidden"
+    <div class="relative bg-white rounded-b-xl shadow-none overflow-hidden"
          :style="{ width: layout.page.width+'px', height: layout.page.height+'px', outline: pageBorder ? ('1px solid '+colors.pageBorder) : 'none' }"
          x-ref="page"
          tabindex="-1">
@@ -179,7 +179,7 @@
 
           {{-- SIGNATURE (TTD) --}}
           <template x-if="blk.type==='signature'">
-            <div class="w-full h-full p-2 bg-white/90 backdrop-blur rounded"
+            <div class="w-full h-full p-2 bg-white/90 backdrop-blur rounded-lg"
                  :class="blk.border ? 'border' : ''"
                  :style="{
                    borderColor: (blk.borderColor || '#e5e7eb'),
@@ -190,7 +190,7 @@
                    :style="{fontSize: (blk.infoFontSize ?? 11)+'px'}"
                    x-text="blk.role || 'Role'"></div>
 
-              <div class="mt-1 w-full flex-1 border border-dashed rounded flex items-center"
+              <div class="mt-1 w-full flex-1 border border-dashed rounded-lg flex items-center"
                    :style="{
                       borderColor: (blk.borderColor || '#e5e7eb'),
                       justifyContent: (blk.align==='right' ? 'flex-end' : (blk.align==='left' ? 'flex-start' : 'center'))

@@ -1,7 +1,8 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
+<x-ui.page-header>
+<div class="ui-page-header__copy"><x-ui.page-title>Lupa password</x-ui.page-title><x-ui.page-description>Masukkan email Anda untuk menerima tautan pengaturan ulang password.</x-ui.page-description></div>
+<x-ui.page-actions />
+</x-ui.page-header>
 
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />

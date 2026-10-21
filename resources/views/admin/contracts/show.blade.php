@@ -2,52 +2,51 @@
 @section('title', $contract->title)
 
 @section('content')
-<div class="max-w-6xl mx-auto space-y-6">
+<x-ui.page class="max-w-6xl mx-auto">
 
   {{-- Header --}}
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight text-[#1D1C1A]">{{ $contract->title }}</h1>
-      <p class="text-sm text-coal-500">Kontrak • UUID: <span class="font-mono">{{ $contract->uuid }}</span></p>
-    </div>
-
-    <div class="flex flex-wrap items-center gap-2">
-      <a href="{{ route('admin.contracts.download', $contract) }}"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+      <x-ui.page-title>{{ $contract->title }}</x-ui.page-title>
+      <x-ui.page-description>Kontrak • UUID: <span class="font-mono">{{ $contract->uuid }}</span></x-ui.page-description>
+    </div></div>
+  <x-ui.page-actions><div class="flex flex-wrap items-center gap-2">
+      <x-ui.link variant="primary" href="{{ route('admin.contracts.download', $contract) }}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 3v10.586l3.293-3.293 1.414 1.414L12 17.414l-4.707-4.707 1.414-1.414L12 13.586V3h0z"/>
           <path d="M5 19h14v2H5z"/>
         </svg>
         Download PDF
-      </a>
-      <a href="{{ route('admin.contracts.index') }}"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-coal-300 hover:bg-ivory-100">
+      </x-ui.link>
+      <x-ui.link variant="secondary" href="{{ route('admin.contracts.index') }}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border">
         ← Kembali
-      </a>
-    </div>
-  </div>
+      </x-ui.link>
+    </div></x-ui.page-actions>
+</x-ui.page-header>
 
   {{-- Alerts --}}
   @if(session('ok'))
-    <div class="p-3 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200">{{ session('ok') }}</div>
+    <div class="p-3 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">{{ session('ok') }}</div>
   @endif
   @if(session('err'))
-    <div class="p-3 rounded-xl bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>
+    <div class="p-3 rounded-lg bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>
   @endif
 
 
 
   {{-- Grid: Info + ACL --}}
-  <div class="grid lg:grid-cols-3 gap-6">
+  <div class="grid lg:grid-cols-3 gap-5">
     {{-- Left: Info Card --}}
     <div class="lg:col-span-1">
-      <div class="rounded-2xl border shadow-sm overflow-hidden">
-        <div class="px-4 py-3 bg-[#bb9974] text-white">
+      <div class="rounded-lg border shadow-none overflow-hidden">
+        <div class="px-4 py-3 bg-[#713F12] text-white">
           <div class="font-semibold">Informasi Kontrak</div>
         </div>
         <div class="p-4 space-y-4">
           <div class="flex items-start gap-3">
-            <div class="shrink-0 w-10 h-10 rounded-full bg-[#bb9974] text-white flex items-center justify-center">
+            <div class="shrink-0 w-10 h-10 rounded-full bg-[#713F12] text-white flex items-center justify-center">
               {{ strtoupper(Str::of($contract->owner->name)->explode(' ')->map(fn($s)=>Str::substr($s,0,1))->take(2)->implode('')) }}
             </div>
             <div class="min-w-0">
@@ -81,8 +80,8 @@
 
     {{-- Right: ACL Card --}}
     <div class="lg:col-span-2">
-      <div class="rounded-2xl border shadow-sm overflow-hidden">
-        <div class="px-4 py-3 bg-[#bb9974] text-white flex items-center justify-between">
+      <div class="rounded-lg border shadow-none overflow-hidden">
+        <div class="px-4 py-3 bg-[#713F12] text-white flex items-center justify-between">
           <div class="font-semibold">Akses Viewer</div>
           <span class="text-xs bg-white/20 px-2 py-1 rounded-md">{{ $contract->viewers->count() }} user</span>
         </div>
@@ -95,7 +94,7 @@
               @csrf
               @isset($users)
                 <select name="emails[]" multiple size="6"
-                        class="flex-1 border rounded-xl px-3 py-2 focus:outline-none focus:border-[#bb9974]">
+                        class="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:border-[#713F12]">
                   @foreach($users as $u)
                     <option value="{{ $u->email }}">{{ $u->name }} — {{ $u->email }}</option>
                   @endforeach
@@ -103,11 +102,11 @@
               @else
                 <input type="text" name="emails"
                        placeholder="email1@contoh.com, email2@contoh.com"
-                       class="flex-1 border rounded-xl px-3 py-2 focus:outline-none focus:border-[#bb9974]" required>
+                       class="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:border-[#713F12]" required>
               @endisset
-              <button class="shrink-0 px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">
+              <x-ui.button variant="primary" class="shrink-0 px-4 py-2 rounded-lg hover:opacity-90">
                 Tambah Akses
-              </button>
+              </x-ui.button>
             </form>
             <p class="text-xs text-coal-500 mt-1">
               @isset($users)
@@ -119,12 +118,12 @@
           </div>
 
           {{-- Daftar viewers --}}
-          <div class="rounded-xl border">
+          <div class="rounded-lg border">
             @forelse($contract->viewers as $u)
               <div class="flex items-center justify-between gap-3 px-4 py-3 border-b last:border-b-0">
                 <div class="flex items-center gap-3 min-w-0">
                   <div class="w-9 h-9 rounded-full bg-maroon-700 text-ivory-50 flex items-center justify-center text-xs font-semibold"
-                       style="background:#bb9974">
+                       style="background:#713F12">
                     {{ strtoupper(Str::of($u->name)->explode(' ')->map(fn($s)=>Str::substr($s,0,1))->take(2)->implode('')) }}
                   </div>
                   <div class="min-w-0">
@@ -133,12 +132,12 @@
                   </div>
                 </div>
                 <form method="post" action="{{ route('admin.contracts.revoke', $contract) }}"
-                      onsubmit="return confirm('Cabut akses {{ $u->name }}?')">
+                      data-confirm="Cabut akses {{ $u->name }}?">
                   @csrf @method('delete')
                   <input type="hidden" name="user_id" value="{{ $u->id }}">
-                  <button class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-rose-300 text-rose-700 hover:bg-rose-50">
+                  <x-ui.button variant="danger" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border">
                     Cabut
-                  </button>
+                  </x-ui.button>
                 </form>
               </div>
             @empty
@@ -152,8 +151,8 @@
     </div>
   </div>
   {{-- Preview PDF --}}
-  <div class="rounded-2xl border shadow-sm overflow-hidden">
-    <div class="px-4 py-3 bg-[#bb9974] text-white">
+  <div class="rounded-lg border shadow-none overflow-hidden">
+    <div class="px-4 py-3 bg-[#713F12] text-white">
       <div class="font-semibold">Preview Dokumen</div>
     </div>
     <div class="p-4">
@@ -168,5 +167,5 @@
       </p>
     </div>
   </div>
-</div>
+</x-ui.page>
 @endsection

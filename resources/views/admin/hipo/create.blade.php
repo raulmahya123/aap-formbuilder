@@ -1,16 +1,20 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6 max-w-6xl mx-auto space-y-6">
+<x-ui.page class="max-w-6xl mx-auto">
 
-    <div class="flex justify-between items-center">
-        <h1 class="text-xl font-bold">➕ Tambah HIPO / Nearmiss</h1>
-
-        <a href="{{ route('admin.hipo.index') }}"
-            class="px-4 py-2 border rounded-lg hover:bg-gray-100">
+    <x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Tambah HIPO / Nearmiss</x-ui.page-title>
+<x-ui.page-description>Lengkapi informasi untuk menambahkan laporan HIPO dan Nearmiss.</x-ui.page-description></div>
+  <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('admin.hipo.index') }}"
+            class="px-4 py-2 border rounded-lg">
             ← Kembali
-        </a>
-    </div>
+        </x-ui.link>
+<x-ui.button form="page-primary-form" variant="primary" class="px-6 py-2 rounded-lg transition">
+                💾 Simpan Laporan
+            </x-ui.button>
+</x-ui.page-actions>
+</x-ui.page-header>
 
     {{-- ERROR ALERT --}}
     @if ($errors->any())
@@ -23,16 +27,15 @@
         </div>
     @endif
 
-    <form method="POST"
+    <form id="page-primary-form" method="POST"
         action="{{ route('admin.hipo.store') }}"
         enctype="multipart/form-data"
-        class="bg-white border rounded-xl p-6 space-y-6 shadow-sm">
-
-        @csrf
+        class="ui-card bg-white border rounded-lg p-6 space-y-5 shadow-none">
+  @csrf
 
         {{-- ================= DATA UMUM ================= --}}
         <div>
-            <h3 class="font-semibold text-sm mb-3">📋 Data Umum</h3>
+            <x-ui.card-title class="font-semibold text-sm mb-3">📋 Data Umum</x-ui.card-title>
 
             <div class="grid md:grid-cols-3 gap-4">
 
@@ -141,7 +144,7 @@
 
         {{-- ================= RINCIAN ================= --}}
         <div>
-            <h3 class="font-semibold text-sm mb-3">📝 Rincian Kejadian</h3>
+            <x-ui.card-title class="font-semibold text-sm mb-3">📝 Rincian Kejadian</x-ui.card-title>
 
             <div class="space-y-4">
 
@@ -195,9 +198,9 @@
 
         {{-- ================= KONTROL RISIKO ================= --}}
         <div>
-            <h3 class="font-semibold text-sm mb-3">🛡️ Kontrol Risiko</h3>
+            <x-ui.card-title class="font-semibold text-sm mb-3">🛡️ Kontrol Risiko</x-ui.card-title>
 
-            <div class="grid md:grid-cols-2 gap-6">
+            <div class="grid md:grid-cols-2 gap-5">
 
                 @foreach([
                     'engineering' => 'Rekayasa Engineering',
@@ -206,7 +209,7 @@
                     'ppe' => 'APD'
                 ] as $key => $label)
 
-                <div class="border rounded-xl p-4 space-y-3 bg-gray-50">
+                <div class="border rounded-lg p-4 space-y-3 bg-gray-50">
 
                     <h4 class="font-semibold text-sm">{{ $label }}</h4>
 
@@ -234,12 +237,10 @@
 
         {{-- SUBMIT --}}
         <div class="flex justify-end">
-            <button class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
-                💾 Simpan Laporan
-            </button>
+
         </div>
 
     </form>
 
-</div>
+</x-ui.page>
 @endsection

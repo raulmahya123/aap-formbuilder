@@ -1,13 +1,19 @@
 @extends('layouts.app')
 @section('content')
-<div class="max-w-xl mx-auto p-6 bg-white rounded-xl">
-  <h1 class="text-xl font-semibold mb-4">Tambah Department</h1>
-  <form method="post" action="{{ route('admin.departments.store') }}">
-    @csrf
+<x-ui.page class="max-w-xl mx-auto">
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Tambah Department</x-ui.page-title>
+<x-ui.page-description>Lengkapi informasi untuk menambahkan department dan anggota.</x-ui.page-description></div>
+  <x-ui.page-actions>
+<x-ui.button form="page-primary-form" variant="primary" class="px-4 py-2 rounded-lg">Simpan</x-ui.button>
+</x-ui.page-actions>
+</x-ui.page-header>
+  <form id="page-primary-form" method="post" action="{{ route('admin.departments.store') }}">
+  @csrf
     <label class="block mb-2">Nama</label>
-    <input type="text" name="name" class="border rounded w-full mb-3" required>
+    <input type="text" name="name" class="border rounded-lg w-full mb-3" required>
 
-    <button class="px-4 py-2 bg-emerald-600 text-white rounded">Simpan</button>
+
   </form>
-</div>
+</x-ui.page>
 @endsection

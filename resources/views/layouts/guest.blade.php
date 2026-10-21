@@ -4,27 +4,25 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <meta name="theme-color" content="#603813">
+        <meta name="theme-color" content="#713F12">
         <link rel="icon" type="image/png" href="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link rel="preload" href="{{ Vite::asset('resources/fonts/InterVariable.woff2') }}" as="font" type="font/woff2" crossorigin>
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-[#111111] antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center px-4 py-8 bg-white">
+    <body class="ui-auth font-sans text-[#18181B] antialiased">
+        <div class="min-h-screen flex flex-col sm:justify-center items-center px-4 py-8">
             <div class="mb-6">
                 <a href="/">
                     <img src="{{ asset('assets/images/logomandala.png') }}" alt="Mandala" class="mx-auto h-12 w-auto">
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md px-6 py-6 bg-white border border-[#C5C5C5] shadow-soft overflow-hidden rounded-lg">
+            <div class="ui-auth-card w-full sm:max-w-md px-6 py-6 bg-white border border-[#D4D4D8] shadow-none overflow-hidden rounded-lg">
                 {{ $slot }}
             </div>
         </div>

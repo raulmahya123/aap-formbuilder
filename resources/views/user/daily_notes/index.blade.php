@@ -17,38 +17,26 @@
 <style>
   :root{
     /* Maroon lebih gelap (fallback jika --brand-maroon tidak diset secara global) */
-    --maroon: var(--brand-maroon, #bb9974);
+    --maroon: var(--brand-maroon, #713F12);
   }
-  .btn {
-    border-radius: 12px;
-    padding: 8px 12px;
-    border: 1px solid #e2e8f0;
-    background: #fff;
-    transition: filter .2s ease, background .2s ease, border-color .2s ease;
-  }
-  .btn:hover { background: #f8fafc; }
-  .btn-primary{
-    background: var(--maroon);
-    color: #fff;
-    border: none;
-  }
-  .btn-primary:hover{ filter: brightness(1.06); }
+
+
   .chip{
     border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 6px 10px;
+    border-radius: var(--radius);
+    padding: var(--space-2) var(--space-3);
     background: #fff;
     font-size: 12px;
   }
   .card{
     background: #fff;
     border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    box-shadow: 0 6px 24px rgba(0,0,0,.05);
+    border-radius: var(--radius);
+    box-shadow: none;
   }
   .input{
     border: 1px solid #e2e8f0;
-    border-radius: 10px;
+    border-radius: var(--radius);
     padding: 8px 12px;
     background: #fff;
     transition: box-shadow .2s ease, border-color .2s ease;
@@ -61,20 +49,29 @@
   }
 </style>
 
-<div class="max-w-6xl mx-auto space-y-6">
+<div class="max-w-6xl mx-auto space-y-5">
   {{-- Header --}}
-  <div class="flex flex-col sm:flex-row sm:items-end gap-3 justify-between">
-    <div>
-      <h1 class="text-2xl font-extrabold tracking-tight" style="color:var(--maroon);">
-        📝 Catatan Harian
-      </h1>
-      <p class="text-sm text-slate-600">
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+      <x-ui.page-title>Catatan Harian</x-ui.page-title>
+      <x-ui.page-description>
         Rekap judul, deskripsi, tanggal & waktu (WIB), penulis, perusahaan & site.
-      </p>
-    </div>
+      </x-ui.page-description>
+    </div></div>
+  <x-ui.page-actions><div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
 
-    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-      <form method="get" class="grid w-full grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center">
+
+      @if(Route::has('user.daily_notes.create'))
+        <a href="{{ route('user.daily_notes.create') }}"
+           class="btn text-center"
+           style="border-color:var(--maroon); color:var(--maroon);
+                  background: color-mix(in oklab, var(--maroon) 10%, white);">
+          ➕ Catatan Baru
+        </a>
+      @endif
+    </div></x-ui.page-actions>
+</x-ui.page-header>
+<div class="ui-page-filters"><form method="get" class="grid w-full grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center">
         {{-- Tanggal --}}
         <input type="date" name="date"
                value="{{ $targetDate ?? now('Asia/Jakarta')->format('Y-m-d') }}"
@@ -112,23 +109,12 @@
           @endforeach
         </select>
 
-        <button class="btn w-full sm:w-auto">Filter</button>
+        <x-ui.button variant="secondary" class="btn w-full sm:w-auto">Filter</x-ui.button>
 
         @if(request()->hasAny(['date','q','perPage','company_id','site_id']))
           <a href="{{ route('user.daily_notes.index') }}" class="text-sm underline">Reset</a>
         @endif
-      </form>
-
-      @if(Route::has('user.daily_notes.create'))
-        <a href="{{ route('user.daily_notes.create') }}"
-           class="btn text-center"
-           style="border-color:var(--maroon); color:var(--maroon);
-                  background: color-mix(in oklab, var(--maroon) 10%, white);">
-          ➕ Catatan Baru
-        </a>
-      @endif
-    </div>
-  </div>
+      </form></div>
 
   {{-- (Opsional) Alpine.js CDN jika belum ada --}}
   <script>
@@ -167,25 +153,25 @@
         Ukuran teks Deskripsi: <span class="font-medium" x-text="descSize + 'px'"></span>
       </span>
 
-      <button @click="descSize = Math.max(10, descSize - 1); save()"
-        class="btn" aria-label="Perkecil">−</button>
+      <x-ui.button variant="secondary" @click="descSize = Math.max(10, descSize - 1); save()"
+        class="btn" aria-label="Perkecil">−</x-ui.button>
 
       <input type="range" min="10" max="24" step="1" x-model.number="descSize" @input="save()"
         class="w-32 sm:w-40" style="accent-color: var(--maroon);" aria-label="Geser ukuran deskripsi" />
 
-      <button @click="descSize = Math.min(24, descSize + 1); save()"
-        class="btn" aria-label="Perbesar">+</button>
+      <x-ui.button variant="secondary" @click="descSize = Math.min(24, descSize + 1); save()"
+        class="btn" aria-label="Perbesar">+</x-ui.button>
 
-      <button @click="descSize = 14; save()" class="btn">Reset</button>
+      <x-ui.button variant="secondary" @click="descSize = 14; save()" class="btn">Reset</x-ui.button>
     </div>
 
     {{-- Tabel --}}
     <div class="overflow-x-auto card">
-      <table class="min-w-[760px] divide-y divide-gray-200">
+      <x-ui.table class="min-w-[760px] divide-y divide-gray-200">
         <thead style="background: color-mix(in oklab, var(--maroon) 14%, white);">
           <tr class="text-left text-sm">
             <th class="px-4 py-3 font-semibold">Judul</th>
-            <th class="px-4 py-3 font-semibold" :style="`font-size:${descSize + 2}px`">Deskripsi</th>
+            <th class="px-4 py-3 font-semibold">Deskripsi</th>
             <th class="px-4 py-3 font-semibold whitespace-nowrap">Tanggal (WIB)</th>
             <th class="px-4 py-3 font-semibold whitespace-nowrap">Waktu (WIB)</th>
             <th class="px-4 py-3 font-semibold">Oleh</th>
@@ -207,8 +193,7 @@
                 <textarea
                   readonly
                   rows="2"
-                  class="w-full resize-y overflow-auto min-h-[2.6em] max-h-[32rem]
-                         border border-gray-200 rounded-md p-2 bg-transparent"
+                  class="w-full resize-y overflow-auto min-h-[2.6em] max-h-[32rem] border border-gray-200 rounded-md p-2 bg-transparent"
                   :style="`font-size:${descSize}px; line-height:1.4;`"
                 >{{ $n->content }}</textarea>
               </td>
@@ -241,7 +226,7 @@
             </tr>
           @endforelse
         </tbody>
-      </table>
+      </x-ui.table>
     </div>
   </div>
 

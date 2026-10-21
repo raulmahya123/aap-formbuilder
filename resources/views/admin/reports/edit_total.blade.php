@@ -25,21 +25,22 @@
   $existingTotal = $existingTotal ?? 0;
 @endphp
 
-<div class="max-w-2xl mx-auto space-y-6">
+<div class="max-w-2xl mx-auto space-y-5">
 
   {{-- HEADER --}}
-  <div>
-    <h1 class="text-2xl font-bold text-maroon-700">Edit Total Indikator</h1>
-    <p class="mt-1 text-sm text-slate-500">
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Edit Total Indikator</x-ui.page-title>
+    <x-ui.page-description>
       Override nilai total agregat untuk periode
       <span class="font-semibold text-slate-800">{{ $periodLabel ?? '-' }}</span>.
-    </p>
-  </div>
+    </x-ui.page-description></div>
+  <x-ui.page-actions></x-ui.page-actions>
+</x-ui.page-header>
 
   {{-- INFO KONTEKS --}}
-  <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+  <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
     <div class="font-semibold text-slate-900">{{ $indName }}</div>
-    <dl class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-slate-600">
+    <dl class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-1 text-xs text-slate-600">
       <div class="flex justify-between">
         <dt class="opacity-70">Group</dt>
         <dd class="font-mono">{{ $groupCode ?? '-' }}</dd>
@@ -50,7 +51,7 @@
       </div>
       <div class="flex justify-between">
         <dt class="opacity-70">Scope</dt>
-        <dd class="uppercase font-medium text-right">{{ $scope }}</dd>
+        <dd class="normal-case font-medium text-right">{{ $scope }}</dd>
       </div>
       <div class="flex justify-between">
         <dt class="opacity-70">Periode</dt>
@@ -61,16 +62,16 @@
 
   {{-- FLASH STATUS (kalau ada) --}}
   @if (session('status'))
-    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
+    <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
       {{ session('status') }}
     </div>
   @endif
 
   {{-- ERROR VALIDASI --}}
   @if ($errors->any())
-    <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800">
+    <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800">
       <div class="font-semibold mb-1">Periksa kembali isian anda:</div>
-      <ul class="list-disc list-inside space-y-0.5">
+      <ul class="list-disc list-inside space-y-1">
         @foreach ($errors->all() as $error)
           <li>{{ $error }}</li>
         @endforeach
@@ -80,7 +81,7 @@
 
   {{-- FORM --}}
   <form action="{{ route('admin.report-totals.update') }}" method="post"
-        class="space-y-4 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm">
+        class="space-y-4 rounded-lg border border-slate-200 bg-white px-4 py-4 shadow-none">
     @csrf
     {{-- kalau route update kamu pakainya PUT/PATCH, aktifkan baris ini --}}
     {{-- @method('PUT') --}}
@@ -104,7 +105,7 @@
         step="0.01"
         name="total"
         value="{{ old('total', $existingTotal) }}"
-        class="w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-maroon-500 focus:ring-maroon-500"
+        class="w-full rounded-lg border-slate-300 text-sm shadow-none focus:border-maroon-500 focus:ring-maroon-500"
         required
       >
       <p class="mt-1 text-[11px] text-slate-500">
@@ -118,15 +119,15 @@
 
     <div class="flex items-center justify-between gap-3 pt-2">
       {{-- Kembali ke rekap: paling aman pakai URL sebelumnya --}}
-      <a href="{{ url()->previous() }}"
-         class="inline-flex items-center px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+      <x-ui.link variant="secondary" href="{{ url()->previous() }}"
+         class="inline-flex items-center px-3 py-2 rounded-lg border text-xs font-semibold">
         ← Kembali ke Rekap
-      </a>
+      </x-ui.link>
 
-      <button type="submit"
-              class="inline-flex items-center px-4 py-1.5 rounded-xl bg-maroon-600 text-xs font-semibold text-white hover:bg-maroon-700 shadow-sm">
+      <x-ui.button variant="primary" type="submit"
+              class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-semibold shadow-none">
         Simpan Total
-      </button>
+      </x-ui.button>
     </div>
   </form>
 </div>

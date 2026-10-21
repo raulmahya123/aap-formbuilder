@@ -3,7 +3,7 @@
 <script>
 window.addEventListener('DOMContentLoaded', function () {
   // ====== DATA DARI SERVER ======
-  const payload      = @json($charts ? (object)$charts : (object){});
+  const payload      = @json($charts ? (object)$charts : (object)[]);
   const trendLabels  = @json($trendLabels ?? []);
   const trendValues  = @json($trendValues ?? []);
   const datasetLabel = @json($trendLabel ?? 'Trend');

@@ -6,51 +6,49 @@
   $isSuper = auth()->check() && auth()->user()->isSuperAdmin();
 @endphp
 
-<div class="max-w-7xl mx-auto space-y-6">
+<div class="max-w-7xl mx-auto space-y-5">
 
   {{-- Header + Actions --}}
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight text-[#1D1C1A]">Daftar Kontrak</h1>
-      <p class="text-sm text-coal-500">Kontrak yang kamu miliki atau yang dibagikan ke kamu.</p>
-    </div>
-
-    @if($isSuper)
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+      <x-ui.page-title>Daftar Kontrak</x-ui.page-title>
+      <x-ui.page-description>Kontrak yang kamu miliki atau yang dibagikan ke kamu.</x-ui.page-description>
+    </div></div>
+  <x-ui.page-actions>@if($isSuper)
       <div class="flex items-center gap-2">
-        <a href="{{ route('admin.contracts.create') }}"
-           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#bb9974] text-white hover:opacity-90">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+        <x-ui.link icon="plus" variant="primary" href="{{ route('admin.contracts.create') }}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:opacity-90"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
           Upload Baru
-        </a>
+        </x-ui.link>
       </div>
-    @endif
-  </div>
+    @endif</x-ui.page-actions>
+</x-ui.page-header>
 
   {{-- Flash --}}
   @if(session('ok'))
-    <div class="p-3 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200">{{ session('ok') }}</div>
+    <div class="p-3 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">{{ session('ok') }}</div>
   @endif
   @if(session('err'))
-    <div class="p-3 rounded-xl bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>
+    <div class="p-3 rounded-lg bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>
   @endif
 
   {{-- Toolbar: Search + filter sederhana --}}
   <form method="get" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
     <div class="relative flex-1">
       <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari judul kontrak…"
-             class="w-full border rounded-xl px-3 py-2 pr-9 focus:outline-none focus:border-[#bb9974]">
+             class="w-full border rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-[#713F12]">
       <span class="absolute right-3 top-2.5 text-coal-400">🔎</span>
     </div>
-    <button class="px-4 py-2 rounded-xl border border-coal-300 hover:bg-ivory-100">Filter</button>
+    <x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border">Filter</x-ui.button>
     @if(request()->has('q') && request('q')!=='')
-      <a href="{{ route('admin.contracts.index') }}" class="px-4 py-2 rounded-xl border border-coal-300 hover:bg-ivory-100">Reset</a>
+      <x-ui.link variant="secondary" href="{{ route('admin.contracts.index') }}" class="px-4 py-2 rounded-lg border">Reset</x-ui.link>
     @endif
   </form>
 
   {{-- Desktop: Table --}}
   <div class="hidden md:block">
-    <div class="overflow-hidden rounded-2xl border shadow-sm">
-      <table class="w-full text-sm">
+    <div class="overflow-hidden rounded-lg border shadow-none">
+      <x-ui.table class="w-full text-sm">
         <thead class="bg-ivory-100 text-left">
           <tr>
             <th class="p-3">Judul</th>
@@ -78,7 +76,7 @@
               </td>
               <td class="p-3 align-top">
                 <div class="flex items-center gap-2 min-w-0">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#bb9974">
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#713F12">
                     {{ strtoupper(\Illuminate\Support\Str::of(optional($c->owner)->name)->explode(' ')->map(fn($s)=>\Illuminate\Support\Str::substr($s,0,1))->take(2)->implode('')) ?: 'U' }}
                   </div>
                   <div class="min-w-0">
@@ -89,56 +87,51 @@
               </td>
               <td class="p-3 align-top text-center">
                 @php $vc = method_exists($c,'viewers') ? $c->viewers->count() : ($c->viewers_count ?? 0); @endphp
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs border"
-                      style="border-color:#bb9974;color:#bb9974">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs border"
+                      style="border-color:#713F12;color:#713F12">
                   {{ $vc }} user
                 </span>
               </td>
               <td class="p-3 align-top whitespace-nowrap">{{ number_format(($c->size_bytes ?? 0)/1024,1) }} KB</td>
               <td class="p-3 align-top whitespace-nowrap">{{ optional($c->created_at)->format('d M Y H:i') }}</td>
-              <td class="p-3 align-top">
+              <td class="ui-action-cell p-3 align-top"><x-ui.table-actions>
                 <div class="flex justify-end gap-2">
                   @if($isSuper)
-                    <a href="{{ route('admin.contracts.show',$c) }}"
-                       class="px-3 py-1.5 rounded-lg border border-coal-300 hover:bg-ivory-100">Detail</a>
+                    <x-ui.icon-button action="view" label="Lihat detail" href="{{ route('admin.contracts.show',$c) }}" />
                   @endif
 
-                  <a href="{{ route('admin.contracts.download',$c) }}"
-                     class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">Download</a>
+                  <x-ui.icon-button action="download" label="Unduh" href="{{ route('admin.contracts.download',$c) }}" />
 
                   @can('delete', $c)
                     <form action="{{ route('admin.contracts.destroy',$c) }}" method="POST" class="inline"
-                          onsubmit="return confirm('Yakin mau hapus kontrak ini? Tindakan ini tidak bisa dibatalkan.')">
+                          data-confirm="Yakin mau hapus kontrak ini? Tindakan ini tidak bisa dibatalkan.">
                       @csrf
                       @method('DELETE')
-                      <button type="submit"
-                              class="px-3 py-1.5 rounded-lg bg-rose-600 text-white hover:bg-rose-700">
-                        Delete
-                      </button>
+                      <x-ui.icon-button action="delete" label="Hapus" type="submit" />
                     </form>
                   @endcan
                 </div>
-              </td>
+              </x-ui.table-actions></td>
             </tr>
           @empty
             <tr>
               <td colspan="6" class="p-6 text-center text-coal-500">
                 Belum ada kontrak.
                 @if($isSuper)
-                  <a href="{{ route('admin.contracts.create') }}" class="text-[#bb9974] underline">Upload sekarang</a>.
+                  <a href="{{ route('admin.contracts.create') }}" class="text-[#713F12] underline">Upload sekarang</a>.
                 @endif
               </td>
             </tr>
           @endforelse
         </tbody>
-      </table>
+      </x-ui.table>
     </div>
   </div>
 
   {{-- Mobile: Cards --}}
   <div class="grid gap-3 md:hidden">
     @forelse($contracts as $c)
-      <div class="rounded-2xl border shadow-sm p-4">
+      <div class="rounded-lg border shadow-none p-4">
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
             @if($isSuper)
@@ -146,16 +139,16 @@
             @else
               <span class="font-semibold">{{ $c->title }}</span>
             @endif
-            <div class="text-xs text-coal-500 mt-0.5">{{ optional($c->created_at)->format('d M Y H:i') }}</div>
+            <div class="text-xs text-coal-500 mt-1">{{ optional($c->created_at)->format('d M Y H:i') }}</div>
           </div>
-          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs border"
-                style="border-color:#bb9974;color:#bb9974">
+          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs border"
+                style="border-color:#713F12;color:#713F12">
             {{ method_exists($c,'viewers') ? $c->viewers->count() : ($c->viewers_count ?? 0) }} user
           </span>
         </div>
 
         <div class="mt-3 flex items-center gap-2">
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#bb9974">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#713F12">
             {{ strtoupper(\Illuminate\Support\Str::of(optional($c->owner)->name)->explode(' ')->map(fn($s)=>\Illuminate\Support\Str::substr($s,0,1))->take(2)->implode('')) ?: 'U' }}
           </div>
           <div class="min-w-0">
@@ -166,31 +159,29 @@
 
         <div class="mt-3 flex items-center justify-between text-sm text-coal-600">
           <div>{{ number_format(($c->size_bytes ?? 0)/1024,1) }} KB</div>
-          <div class="flex gap-2">
+          <div class="flex flex-nowrap items-center gap-2">
             @if($isSuper)
-              <a href="{{ route('admin.contracts.show',$c) }}" class="px-3 py-1.5 rounded-lg border border-coal-300 hover:bg-ivory-100">Detail</a>
+              <x-ui.icon-button action="view" label="Lihat detail" href="{{ route('admin.contracts.show',$c) }}" />
             @endif
 
-            <a href="{{ route('admin.contracts.download',$c) }}" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">Download</a>
+            <x-ui.icon-button action="download" label="Unduh" href="{{ route('admin.contracts.download',$c) }}" />
 
             @can('delete', $c)
               <form action="{{ route('admin.contracts.destroy',$c) }}" method="POST" class="inline"
-                    onsubmit="return confirm('Hapus kontrak ini?')">
+                    data-confirm="Hapus kontrak ini?">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white hover:bg-rose-700">
-                  Delete
-                </button>
+                <x-ui.icon-button action="delete" label="Hapus" type="submit" />
               </form>
             @endcan
           </div>
         </div>
       </div>
     @empty
-      <div class="rounded-2xl border p-6 text-center text-coal-500">
+      <div class="rounded-lg border p-6 text-center text-coal-500">
         Belum ada kontrak.
         @if($isSuper)
-          <a href="{{ route('admin.contracts.create') }}" class="text-[#bb9974] underline">Upload sekarang</a>.
+          <a href="{{ route('admin.contracts.create') }}" class="text-[#713F12] underline">Upload sekarang</a>.
         @endif
       </div>
     @endforelse

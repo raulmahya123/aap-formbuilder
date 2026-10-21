@@ -10,7 +10,7 @@
     ->toArray();
 
   // Pakai maroon sesuai swatch (#610E1C) sebagai fallback
-  $brandMaroon = 'var(--brand-maroon,#bb9974)';
+  $brandMaroon = 'var(--brand-maroon,#713F12)';
 @endphp
 
 <style>
@@ -32,50 +32,37 @@
   .card {
     background: #fff;
     border: 1px solid #e7e7ea;
-    border-radius: 16px;
-    box-shadow: 0 6px 24px rgba(0,0,0,.05);
+    border-radius: var(--radius);
+    box-shadow: none;
   }
 
   .chip {
     border: 1px solid #d8d8dd;
-    border-radius: 10px;
-    padding: 4px 10px;
+    border-radius: var(--radius);
+    padding: var(--space-1) var(--space-3);
     font-size: 12px;
     background: #fff;
     transition: background .2s ease, border-color .2s ease;
   }
   .chip:hover { background: #f7f7fb; }
 
-  .btn-primary {
-    background: var(--maroon);
-    color: #fff;
-    border-radius: 12px;
-    padding: 10px 16px;
-    transition: filter .15s ease, transform .02s ease, background .2s ease;
-  }
-  .btn-primary:hover { filter: brightness(1.08); }
 
-  .btn-outline {
-    border: 1px solid var(--maroon);
-    color: var(--maroon);
-    border-radius: 12px;
-    padding: 8px 14px;
-    background: color-mix(in oklab, var(--maroon) 10%, white);
-  }
+
+
 
   .section-title{
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .08em;
+    font-size: var(--type-section);
+    font-weight: 600;
+    letter-spacing: normal;
     color: #6b7280;
-    text-transform: uppercase;
+    text-transform: none;
   }
 
   /* Input base */
   .input {
     width: 100%;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: var(--radius);
     padding: 10px 12px;
     background: #fff;
     transition: box-shadow .2s ease, border-color .2s ease, background .2s ease;
@@ -87,30 +74,35 @@
   }
 </style>
 
-<div class="max-w-4xl mx-auto space-y-6" style="--brand-maroon:#bb9974;">
+<div class="max-w-4xl mx-auto space-y-5" style="--brand-maroon:#713F12;">
   {{-- Hero header --}}
-  <div class="card p-5">
-    <div class="flex items-start justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-extrabold tracking-tight" style="color: var(--maroon);">
-          📝 Input Catatan Harian
-        </h1>
-        <p class="text-sm text-slate-600 mt-1">
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+        <x-ui.page-title>Input Catatan Harian</x-ui.page-title>
+        <x-ui.page-description>
           Catat hal penting hari ini. <span class="font-medium">note_time</span> disimpan otomatis (WIB).
-        </p>
-      </div>
-      <a href="{{ route('user.daily_notes.index') }}" class="btn-outline">Kembali</a>
-    </div>
+        </x-ui.page-description>
+      </div></div>
+  <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('user.daily_notes.index') }}">Kembali</x-ui.link>
+<x-ui.button form="page-primary-form" variant="primary" type="submit" class="btn-primary inline-flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M17 8a1 1 0 0 1-1 1H7.414l3.293 3.293a1 1 0 1 1-1.414 1.414L4.586 9.707a1 1 0 0 1 0-1.414L9.293 3.586a1 1 0 1 1 1.414 1.414L7.414 8H16a1 1 0 0 1 1 1Z"/>
+        </svg>
+        Simpan
+      </x-ui.button>
+</x-ui.page-actions>
+</x-ui.page-header>
+<div class="card p-5">
     <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-      <div class="p-3 rounded-xl" style="background: var(--maroon-soft);">
+      <div class="p-3 rounded-lg" style="background: var(--maroon-soft);">
         <div class="font-semibold">Tanggal (WIB)</div>
         <div class="text-slate-700">{{ now('Asia/Jakarta')->format('d M Y') }}</div>
       </div>
-      <div class="p-3 rounded-xl" style="background: var(--maroon-soft);">
+      <div class="p-3 rounded-lg" style="background: var(--maroon-soft);">
         <div class="font-semibold">Waktu (WIB)</div>
         <div class="text-slate-700">{{ now('Asia/Jakarta')->format('H:i') }}</div>
       </div>
-      <div class="p-3 rounded-xl" style="background: var(--maroon-soft);">
+      <div class="p-3 rounded-lg" style="background: var(--maroon-soft);">
         <div class="font-semibold">Pengguna</div>
         <div class="text-slate-700">{{ auth()->user()->name ?? '—' }}</div>
       </div>
@@ -133,8 +125,8 @@
   @endif
 
   {{-- Form --}}
-  <form action="{{ route('user.daily_notes.store') }}" method="post" class="card p-6 space-y-6" x-data="noteForm()">
-    @csrf
+  <form id="page-primary-form" action="{{ route('user.daily_notes.store') }}" method="post" class="card p-6 space-y-5" x-data="noteForm()">
+  @csrf
 
     {{-- Section: Konteks --}}
     <div class="space-y-3">
@@ -217,8 +209,8 @@
         {{-- Quick tags --}}
         <div class="mt-2 flex flex-wrap gap-2">
           @foreach(['[Meeting]','[Follow-up]','[Issue]','[Decision]','[Reminder]','[Risk]','[Blocking]'] as $chip)
-            <button type="button" @click="append('{{ $chip }} ')"
-              class="chip">{{ $chip }}</button>
+            <x-ui.button variant="secondary" type="button" @click="append('{{ $chip }} ')"
+              class="chip">{{ $chip }}</x-ui.button>
           @endforeach
         </div>
       </div>
@@ -247,12 +239,7 @@
     {{-- Actions --}}
     <div class="flex items-center justify-end gap-3 pt-2">
       <a href="{{ route('user.daily_notes.index') }}" class="btn-outline">Batal</a>
-      <button type="submit" class="btn-primary inline-flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M17 8a1 1 0 0 1-1 1H7.414l3.293 3.293a1 1 0 1 1-1.414 1.414L4.586 9.707a1 1 0 0 1 0-1.414L9.293 3.586a1 1 0 1 1 1.414 1.414L7.414 8H16a1 1 0 0 1 1 1Z"/>
-        </svg>
-        Simpan
-      </button>
+
     </div>
   </form>
 </div>

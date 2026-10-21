@@ -1,38 +1,38 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-6xl p-6 mx-auto space-y-6">
+<x-ui.page class="max-w-6xl mx-auto">
 
     {{-- HEADER --}}
-    <div class="flex items-center justify-between">
-        <div>
-        <h1 class="flex items-center gap-2 text-2xl font-bold text-gray-800"><x-ui-icon name="shield" class="h-6 w-6 text-[#603813]" /> Detail CCM Report</h1>
-            <p class="text-sm font-medium text-gray-500">ID Laporan: #{{ $report->id }}</p>
-        </div>
-        <div class="flex gap-2">
-            <a href="{{ route('ccm-reports.edit', $report->id) }}" class="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700">📝 Edit Data</a>
-            <a href="{{ route('ccm-reports.index') }}" class="px-4 py-2 text-sm bg-white border rounded-lg hover:bg-gray-50">← Kembali</a>
-        </div>
-    </div>
+    <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+        <x-ui.page-title>Detail CCM Report</x-ui.page-title>
+            <x-ui.page-description>ID Laporan: #{{ $report->id }}</x-ui.page-description>
+        </div></div>
+  <x-ui.page-actions><div class="flex gap-2">
+            <x-ui.link variant="primary" href="{{ route('ccm-reports.edit', $report->id) }}" class="px-4 py-2 text-sm rounded-lg shadow-none">📝 Edit Data</x-ui.link>
+            <x-ui.link variant="secondary" href="{{ route('ccm-reports.index') }}" class="px-4 py-2 text-sm border rounded-lg">← Kembali</x-ui.link>
+        </div></x-ui.page-actions>
+</x-ui.page-header>
 
     {{-- INFO UMUM --}}
-    <div class="p-6 bg-white border shadow-sm rounded-xl">
-        <h2 class="pb-2 mb-4 font-bold text-gray-700 border-b">1. Informasi Umum</h2>
-        <div class="grid gap-6 text-sm md:grid-cols-3">
+    <x-ui.panel class="bg-white border shadow-none rounded-lg">
+        <x-ui.section-title class="pb-2 mb-4 font-bold text-gray-700 border-b">1. Informasi Umum</x-ui.section-title>
+        <div class="grid gap-5 text-sm md:grid-cols-3">
             <div>
-                <div class="text-xs font-bold tracking-wider text-gray-400 uppercase">Waktu Pelaporan</div>
+                <div class="text-xs font-bold tracking-normal text-gray-400 normal-case">Waktu Pelaporan</div>
                 <div class="text-base font-semibold text-gray-800">{{ $report->waktu_pelaporan->format('d M Y') }}</div>
             </div>
             <div>
-                <div class="text-xs font-bold tracking-wider text-gray-400 uppercase">Jobsite</div>
+                <div class="text-xs font-bold tracking-normal text-gray-400 normal-case">Jobsite</div>
                 <div class="text-base font-semibold text-gray-800">{{ $report->jobsite }}</div>
             </div>
             <div>
-                <div class="text-xs font-bold tracking-wider text-gray-400 uppercase">Nama Pelapor</div>
+                <div class="text-xs font-bold tracking-normal text-gray-400 normal-case">Nama Pelapor</div>
                 <div class="text-base font-semibold text-gray-800">{{ $report->nama_pelapor }}</div>
             </div>
         </div>
-    </div>
+    </x-ui.panel>
 
     {{-- ================= HELPER FUNCTIONS ================= --}}
     @php
@@ -94,11 +94,11 @@
             }
         @endphp
 
-        <div class="overflow-hidden bg-white border shadow-sm rounded-xl">
+        <x-ui.panel class="overflow-hidden bg-white border shadow-none rounded-lg">
             <div class="{{ $isAda ? 'bg-blue-50 border-blue-100' : 'bg-gray-50 border-gray-100' }} px-6 py-4 border-b">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-gray-800">{{ $title }}</h2>
-                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase {{ $isAda ? 'bg-blue-600 text-white' : 'bg-gray-400 text-white' }}">
+                    <x-ui.section-title class="text-lg font-bold text-gray-800">{{ $title }}</x-ui.section-title>
+                    <span class="px-3 py-1 rounded-full text-xs font-bold normal-case {{ $isAda ? 'bg-blue-600 text-white' : 'bg-gray-400 text-white' }}">
                         {{ $isAda ? 'Ada Kegiatan' : 'Tidak Ada' }}
                     </span>
                 </div>
@@ -117,7 +117,7 @@
 
                         {!! row('Potensi Pelanggaran', $report->{$key.'_pelanggaran'}) !!}
 
-                        <div class="mt-6 mb-2 text-xs font-bold tracking-widest text-blue-600 uppercase">
+                        <div class="mt-6 mb-2 text-xs font-bold tracking-normal text-blue-600 normal-case">
                             Pengendalian & Kontrol
                         </div>
 
@@ -140,8 +140,8 @@
 
                 @endif
             </div>
-        </div>
+        </x-ui.panel>
     @endforeach
 
-</div>
+</x-ui.page>
 @endsection

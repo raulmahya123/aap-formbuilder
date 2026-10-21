@@ -1,19 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6 max-w-6xl mx-auto">
+<x-ui.page class="max-w-6xl mx-auto">
 
-    <div class="flex items-center justify-between mb-4">
-        <h1 class="flex items-center gap-2 text-xl font-semibold"><x-ui-icon name="warning" class="h-5 w-5 text-[#603813]" /> Laporan HIPO / Nearmiss</h1>
+    <x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Laporan HIPO / Nearmiss</x-ui.page-title>
+<x-ui.page-description>Catat dan pantau laporan HIPO serta Nearmiss.</x-ui.page-description></div>
+  <x-ui.page-actions><x-ui.link icon="plus" variant="primary" href="{{ route('user.hipo.create') }}"
+           class="px-4 py-2 rounded-lg text-sm">Buat Laporan
+        </x-ui.link></x-ui.page-actions>
+</x-ui.page-header>
 
-        <a href="{{ route('user.hipo.create') }}"
-           class="px-4 py-2 rounded-lg bg-maroon-700 text-white text-sm hover:bg-maroon-800">
-            + Buat Laporan
-        </a>
-    </div>
-
-    <div class="bg-white border rounded-xl overflow-x-auto">
-        <table class="w-full text-sm">
+    <x-ui.panel :padded="false" class="bg-white border rounded-lg overflow-x-auto">
+        <x-ui.table class="w-full text-sm">
             <thead class="bg-ivory-100 border-b">
                 <tr>
                     <th class="px-4 py-2 text-left">Tanggal</th>
@@ -49,8 +48,8 @@
                     <td class="px-4 py-2">
                         <span class="px-2 py-1 rounded text-xs
                             {{ $r->jenis_hipo === 'HIPO'
-                                ? 'bg-red-100 text-red-700'
-                                : 'bg-blue-100 text-blue-700' }}">
+                                ? 'ui-status ui-status--danger'
+                                : 'ui-status ui-status--info' }}">
                             {{ $r->jenis_hipo }}
                         </span>
                     </td>
@@ -62,13 +61,7 @@
 
                     {{-- Risk Level --}}
                     <td class="px-4 py-2">
-                        <span class="px-2 py-1 rounded text-xs
-                            @class([
-                                'bg-green-100 text-green-700' => $r->risk_level === 'Low',
-                                'bg-yellow-100 text-yellow-700' => $r->risk_level === 'Medium',
-                                'bg-orange-100 text-orange-700' => $r->risk_level === 'High',
-                                'bg-red-100 text-red-700' => $r->risk_level === 'Extreme',
-                            ])">
+                        <span class="px-2 py-1 rounded-lg text-xs @class([ 'ui-status ui-status--success' => $r->risk_level === 'Low', 'ui-status ui-status--warning' => $r->risk_level === 'Medium', 'ui-status ui-status--warning' => $r->risk_level === 'High', 'ui-status ui-status--danger' => $r->risk_level === 'Extreme', ])">
                             {{ $r->risk_level }}
                         </span>
                     </td>
@@ -96,11 +89,11 @@
                     {{-- Stop Work --}}
                     <td class="px-4 py-2 text-center">
                         @if($r->stop_work)
-                            <span class="px-2 py-1 rounded text-xs bg-red-100 text-red-700">
+                            <x-ui.badge variant="danger" class="px-2 py-1 rounded-lg text-xs">
                                 Ya
-                            </span>
+                            </x-ui.badge>
                         @else
-                            <span class="px-2 py-1 rounded text-xs bg-gray-100 text-gray-600">
+                            <span class="px-2 py-1 rounded-lg text-xs bg-gray-100 text-gray-600">
                                 Tidak
                             </span>
                         @endif
@@ -108,24 +101,15 @@
 
                     {{-- Status --}}
                     <td class="px-4 py-2 text-center">
-                        <span class="px-2 py-1 rounded text-xs
-                            @class([
-                                'bg-red-100 text-red-700' => $r->status === 'Open',
-                                'bg-yellow-100 text-yellow-700' => $r->status === 'On Progress',
-                                'bg-green-100 text-green-700' => $r->status === 'Closed',
-                                'bg-gray-200 text-gray-700' => $r->status === 'Rejected',
-                            ])">
+                        <span class="px-2 py-1 rounded-lg text-xs @class([ 'ui-status ui-status--danger' => $r->status === 'Open', 'ui-status ui-status--warning' => $r->status === 'On Progress', 'ui-status ui-status--success' => $r->status === 'Closed', 'bg-gray-200 text-gray-700' => $r->status === 'Rejected', ])">
                             {{ $r->status }}
                         </span>
                     </td>
 
                     {{-- Aksi --}}
-                    <td class="px-4 py-2 text-center whitespace-nowrap">
-                        <a href="{{ route('admin.hipo.show', $r->id) }}"
-                           class="text-blue-600 hover:underline text-sm">
-                            Detail
-                        </a>
-                    </td>
+                    <td class="ui-action-cell px-4 py-2 text-center whitespace-nowrap"><x-ui.table-actions>
+                        <x-ui.icon-button action="view" label="Lihat detail" href="{{ route('admin.hipo.show', $r->id) }}" />
+                    </x-ui.table-actions></td>
                 </tr>
                 @empty
                 <tr>
@@ -136,11 +120,11 @@
                 </tr>
                 @endforelse
             </tbody>
-        </table>
-    </div>
+        </x-ui.table>
+    </x-ui.panel>
     @if($reports->hasPages())
       <div class="mt-4">{{ $reports->links() }}</div>
     @endif
 
-</div>
+</x-ui.page>
 @endsection

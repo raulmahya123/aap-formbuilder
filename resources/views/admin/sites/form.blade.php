@@ -3,9 +3,15 @@
 @section('title', $site->exists ? 'Edit Site' : 'Tambah Site')
 
 @section('content')
-<h1 class="text-2xl font-bold mb-6 text-[color:var(--brand-maroon,#bb9974)]">
-  {{ $site->exists ? 'Edit' : 'Tambah' }} Site
-</h1>
+<x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>{{ $site->exists ? 'Edit' : 'Tambah' }} Site</x-ui.page-title>
+<x-ui.page-description>Kelola identitas dan status site operasional.</x-ui.page-description></div>
+  <x-ui.page-actions>
+<x-ui.button form="page-primary-form" variant="primary" class="px-5 py-3 rounded-lg hover:brightness-105 shadow-none">
+      Simpan
+    </x-ui.button>
+</x-ui.page-actions>
+</x-ui.page-header>
 
 @if ($errors->any())
   <div class="mb-5 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800">
@@ -17,9 +23,9 @@
   </div>
 @endif
 
-<form method="POST"
+<form id="page-primary-form" method="POST"
       action="{{ $site->exists ? route('admin.sites.update',$site) : route('admin.sites.store') }}"
-      class="space-y-5 max-w-lg bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+      class="ui-card space-y-5 max-w-lg bg-white rounded-lg p-6 shadow-none border border-gray-200">
   @csrf
   @if($site->exists) @method('PUT') @endif
 
@@ -27,7 +33,7 @@
   <div>
     <label class="block mb-1 font-semibold text-gray-700">Perusahaan</label>
     <select name="company_id"
-            class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#bb9974)] focus:outline-none">
+            class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:outline-none">
       <option value="" {{ old('company_id', $site->company_id) ? '' : 'selected' }}>— (Tidak terkait perusahaan)</option>
       @foreach(($companies ?? []) as $c)
         <option value="{{ $c->id }}"
@@ -44,32 +50,30 @@
       Code <span class="text-sm text-gray-500">(mis: HO, BGG, SBS, DBK)</span>
     </label>
     <input name="code" value="{{ old('code',$site->code) }}"
-           class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#bb9974)] focus:outline-none"
+           class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:outline-none"
            required>
   </div>
 
   <div>
     <label class="block mb-1 font-semibold text-gray-700">Name</label>
     <input name="name" value="{{ old('name',$site->name) }}"
-           class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#bb9974)] focus:outline-none"
+           class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:outline-none"
            required>
   </div>
 
   <div>
     <label class="block mb-1 font-semibold text-gray-700">Description</label>
     <textarea name="description"
-              class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#bb9974)] focus:outline-none"
+              class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:outline-none"
               rows="3">{{ old('description',$site->description) }}</textarea>
   </div>
 
   <div class="flex gap-3">
-    <button class="px-5 py-2.5 rounded-lg bg-[color:var(--brand-maroon,#bb9974)] hover:brightness-105 text-white shadow">
-      Simpan
-    </button>
-    <a href="{{ route('admin.sites.index') }}"
-       class="px-5 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700">
+
+    <x-ui.link variant="secondary" href="{{ route('admin.sites.index') }}"
+       class="px-5 py-3 rounded-lg border">
       Batal
-    </a>
+    </x-ui.link>
   </div>
 </form>
 @endsection

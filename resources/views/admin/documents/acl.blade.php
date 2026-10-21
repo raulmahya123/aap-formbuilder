@@ -1,27 +1,27 @@
 @extends('layouts.app')
 
 @section('content')
-<div x-data="aclUI()" x-init="init()" class="max-w-7xl mx-auto p-6 space-y-6">
+<x-ui.page x-data="aclUI()" x-init="init()" class="max-w-7xl mx-auto">
 
   {{-- HEADER --}}
-  <div class="flex items-center justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-extrabold tracking-wide">Kelola Akses Dokumen</h1>
-      <p class="text-sm opacity-70">Tambah/hapus izin untuk user atau departemen ke banyak dokumen sekaligus.</p>
-    </div>
-    <a href="{{ route('admin.documents.index') }}"
-       class="px-3 py-2 rounded-xl border hover:bg-gray-50">← Kembali</a>
-  </div>
+  <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+      <x-ui.page-title>Kelola Akses Dokumen</x-ui.page-title>
+      <x-ui.page-description>Tambah/hapus izin untuk user atau departemen ke banyak dokumen sekaligus.</x-ui.page-description>
+    </div></div>
+  <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('admin.documents.index') }}"
+       class="px-3 py-2 rounded-lg border">← Kembali</x-ui.link></x-ui.page-actions>
+</x-ui.page-header>
 
   {{-- FLASH / ERRORS --}}
   @if(session('success'))
-    <div class="rounded-xl border border-green-200 bg-green-50 p-3 text-green-800">
+    <div class="rounded-lg border border-green-200 bg-green-50 p-3 text-green-800">
       {{ session('success') }}
     </div>
   @endif
   @if ($errors->any())
-    <div class="rounded-2xl border border-red-200 bg-red-50 p-3 text-red-800">
-      <ul class="list-disc pl-5 space-y-0.5">
+    <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-red-800">
+      <ul class="list-disc pl-5 space-y-1">
         @foreach ($errors->all() as $error)
           <li>{{ $error }}</li>
         @endforeach
@@ -30,26 +30,26 @@
   @endif
 
   {{-- CARD: FORM TAMBAH AKSES --}}
-  <div class="rounded-2xl border bg-white p-5 space-y-5">
+  <x-ui.panel class="rounded-lg border bg-white space-y-5">
     <div class="flex items-start gap-4 flex-col lg:flex-row">
 
       {{-- DOKUMEN PICKER --}}
       <div class="flex-1 min-w-[320px]">
         <label class="text-sm font-medium">Dokumen</label>
-        <div class="mt-2 rounded-xl border">
+        <div class="mt-2 rounded-lg border">
           <div class="p-3 flex items-center gap-3 border-b">
             <input x-model="query" type="text" placeholder="Cari judul dokumen…"
                    class="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring">
-            <button type="button" @click="selectAllFiltered()"
-                    class="text-sm px-3 py-2 rounded-lg border hover:bg-gray-50">
+            <x-ui.button variant="secondary" type="button" @click="selectAllFiltered()"
+                    class="text-sm px-3 py-2 rounded-lg border">
               Pilih Semua (terfilter)
-            </button>
+            </x-ui.button>
           </div>
           <div class="max-h-64 overflow-auto">
             <template x-for="doc in filteredDocs" :key="doc.id">
               <label class="flex items-center gap-3 px-3 py-2 border-b last:border-b-0 cursor-pointer hover:bg-gray-50">
                 <input type="checkbox" :value="doc.id" x-model="selectedIds"
-                       class="rounded border-gray-300">
+                       class="rounded-lg border-gray-300">
                 <span class="text-sm" x-text="doc.title"></span>
               </label>
             </template>
@@ -111,29 +111,27 @@
     </div>
 
     <div class="flex items-center gap-3 pt-2">
-      <button type="submit"
-              :disabled="selectedIds.length===0 || (!userId && !departmentId)"
-              class="px-4 py-2 rounded-xl text-white disabled:opacity-50"
-              :class="selectedIds.length>0 && (userId || departmentId)
-                      ? 'bg-[#bb9974] hover:opacity-90'
-                      : 'bg-[#bb9974]'">
+      <x-ui.button variant="primary" type="submit"
+              ::disabled="selectedIds.length===0 || (!userId && !departmentId)"
+              class="px-4 py-2 rounded-lg disabled:opacity-50"
+              ::class="selectedIds.length>0 && (userId || departmentId) ? 'bg-[#713F12] hover:opacity-90' : 'bg-[#713F12]'">
         Tambah Akses
-      </button>
-      <button type="button" @click="clearSelection()" class="px-3 py-2 rounded-xl border hover:bg-gray-50">
+      </x-ui.button>
+      <x-ui.button variant="secondary" type="button" @click="clearSelection()" class="px-3 py-2 rounded-lg border">
         Bersihkan pilihan
-      </button>
+      </x-ui.button>
     </div>
   </form>
 </div>
 
     </div>
-  </div>
+  </x-ui.panel>
 
   {{-- CARD: DAFTAR AKSES --}}
-  <div class="rounded-2xl border bg-white overflow-hidden">
+  <x-ui.panel :padded="false" class="rounded-lg border bg-white overflow-hidden">
     <div class="p-4 flex items-center justify-between">
       <div>
-        <h2 class="font-semibold">Daftar Akses</h2>
+        <x-ui.section-title class="font-semibold">Daftar Akses</x-ui.section-title>
         <p class="text-xs opacity-70">Menampilkan kombinasi ACL yang berlaku.</p>
       </div>
       <div class="flex items-center gap-2">
@@ -143,7 +141,7 @@
     </div>
 
     <div class="overflow-x-auto">
-      <table class="w-full text-sm">
+      <x-ui.table class="w-full text-sm">
         <thead class="bg-[#1D1C1A] text-white">
           <tr>
             <th class="p-3 text-left">Dokumen</th>
@@ -156,10 +154,10 @@
         <tbody class="divide-y">
           @php
             $permsColors = [
-              'view'   => 'bg-emerald-100 text-emerald-800',
-              'edit'   => 'bg-blue-100 text-blue-800',
-              'delete' => 'bg-rose-100 text-rose-800',
-              'share'  => 'bg-amber-100 text-amber-800',
+              'view'   => 'ui-status ui-status--success',
+              'edit'   => 'ui-status ui-status--info',
+              'delete' => 'ui-status ui-status--danger',
+              'share'  => 'ui-status ui-status--warning',
               'export' => 'bg-purple-100 text-purple-800',
             ];
           @endphp
@@ -189,16 +187,12 @@
                 {{ ucfirst($acl->perm) }}
               </span>
             </td>
-            <td class="p-3 align-top">
-              <form x-ref="del{{ $acl->id }}" method="POST" action="{{ route('admin.documents.acl.destroy',[$acl->document,$acl]) }}">
+            <td class="ui-action-cell p-3 align-top"><x-ui.table-actions>
+              <form x-ref="del{{ $acl->id }}" method="POST" action="{{ route('admin.documents.acl.destroy',[$acl->document,$acl]) }}" data-confirm="Hapus akses ini?">
                 @csrf @method('DELETE')
-                <button type="button"
-                        @click="confirmDelete($refs['del{{ $acl->id }}'])"
-                        class="text-rose-600 hover:underline">
-                  Hapus
-                </button>
+                <x-ui.icon-button action="delete" label="Hapus akses" ability="share" :subject="$acl->document" type="submit" />
               </form>
-            </td>
+            </x-ui.table-actions></td>
           </tr>
           @empty
           <tr>
@@ -208,10 +202,10 @@
           </tr>
           @endforelse
         </tbody>
-      </table>
+      </x-ui.table>
     </div>
-  </div>
-</div>
+  </x-ui.panel>
+</x-ui.page>
 
 {{-- Alpine Component --}}
 <script>

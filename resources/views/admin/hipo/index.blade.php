@@ -1,45 +1,44 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-4 sm:p-6">
+<x-ui.page class="">
 
     {{-- HEADER --}}
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <div>
-            <h1 class="flex items-center gap-2 text-2xl font-bold text-gray-800"><x-ui-icon name="warning" class="h-6 w-6 text-[#603813]" /> HIPO / Nearmiss</h1>
-            <p class="text-sm text-gray-500">Daftar laporan HIPO & Nearmiss</p>
-        </div>
-
-        <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+    <x-ui.page-header>
+  <div class="ui-page-header__copy"><div>
+            <x-ui.page-title>HIPO / Nearmiss</x-ui.page-title>
+            <x-ui.page-description>Daftar laporan HIPO & Nearmiss</x-ui.page-description>
+        </div></div>
+  <x-ui.page-actions><div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
 
             {{-- Search --}}
-            <form method="GET" action="" class="relative w-full sm:w-auto">
+
+
+            {{-- CREATE BUTTON --}}
+            <x-ui.link icon="plus" variant="primary" href="{{ route('admin.hipo.create') }}"
+               class="inline-flex justify-center px-4 py-2 rounded-lg text-sm font-semibold shadow-none transition duration-200">Tambah HIPO
+            </x-ui.link>
+        </div></x-ui.page-actions>
+</x-ui.page-header>
+<div class="ui-page-filters"><form method="GET" action="" class="relative w-full sm:w-auto">
                 <input type="text"
                        name="search"
                        placeholder="Cari jobsite / PIC..."
-                       class="w-full pl-4 pr-10 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none sm:w-64">
+                       class="w-full pl-4 pr-8 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none sm:w-64">
                 <svg class="w-4 h-4 absolute right-3 top-3 text-gray-400"
                      fill="none" stroke="currentColor" stroke-width="2"
                      viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
                           d="M21 21l-4.35-4.35m1.85-5.65a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z"/>
                 </svg>
-            </form>
-
-            {{-- CREATE BUTTON --}}
-            <a href="{{ route('admin.hipo.create') }}"
-               class="inline-flex justify-center bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition duration-200">
-                + Tambah HIPO
-            </a>
-        </div>
-    </div>
+            </form></div>
 
     {{-- TABLE CARD --}}
-    <div class="bg-white rounded-2xl shadow-md border overflow-hidden">
+    <x-ui.panel :padded="false" class="bg-white rounded-lg shadow-none border overflow-hidden">
 
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[760px] text-sm">
-                <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+            <x-ui.table class="w-full min-w-[760px] text-sm">
+                <thead class="bg-gray-100 text-gray-700 normal-case text-xs">
                     <tr>
                         <th class="text-left py-3 px-3">Tanggal</th>
                         <th class="text-left py-3 px-3">Jobsite</th>
@@ -71,8 +70,8 @@
                         <td class="py-3 px-3">
                             <span class="px-2 py-1 rounded-full text-xs font-semibold
                                 {{ $r->jenis_hipo === 'HIPO'
-                                    ? 'bg-red-100 text-red-700'
-                                    : 'bg-blue-100 text-blue-700' }}">
+                                    ? 'ui-status ui-status--danger'
+                                    : 'ui-status ui-status--info' }}">
                                 {{ $r->jenis_hipo }}
                             </span>
                         </td>
@@ -84,13 +83,7 @@
 
                         {{-- Risk --}}
                         <td class="py-3 px-3">
-                            <span class="px-2 py-1 rounded-full text-xs font-semibold
-                                @class([
-                                    'bg-green-100 text-green-700' => $r->risk_level === 'Low',
-                                    'bg-yellow-100 text-yellow-700' => $r->risk_level === 'Medium',
-                                    'bg-orange-100 text-orange-700' => $r->risk_level === 'High',
-                                    'bg-red-100 text-red-700' => $r->risk_level === 'Extreme',
-                                ])">
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold @class([ 'ui-status ui-status--success' => $r->risk_level === 'Low', 'ui-status ui-status--warning' => $r->risk_level === 'Medium', 'ui-status ui-status--warning' => $r->risk_level === 'High', 'ui-status ui-status--danger' => $r->risk_level === 'Extreme', ])">
                                 {{ $r->risk_level }}
                             </span>
                         </td>
@@ -103,9 +96,9 @@
                         {{-- Stop Work --}}
                         <td class="py-3 px-3 text-center">
                             @if($r->stop_work)
-                                <span class="px-2 py-1 rounded-full text-xs bg-red-100 text-red-700">
+                                <x-ui.badge variant="danger" class="px-2 py-1 rounded-full text-xs">
                                     YA
-                                </span>
+                                </x-ui.badge>
                             @else
                                 <span class="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600">
                                     TIDAK
@@ -115,54 +108,42 @@
 
                         {{-- Status --}}
                         <td class="py-3 px-3 text-center">
-                            <span class="px-2 py-1 rounded-full text-xs font-semibold
-                                @class([
-                                    'bg-red-100 text-red-700' => $r->status === 'Open',
-                                    'bg-yellow-100 text-yellow-700' => $r->status === 'On Progress',
-                                    'bg-green-100 text-green-700' => $r->status === 'Closed',
-                                    'bg-gray-200 text-gray-700' => $r->status === 'Rejected',
-                                ])">
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold @class([ 'ui-status ui-status--danger' => $r->status === 'Open', 'ui-status ui-status--warning' => $r->status === 'On Progress', 'ui-status ui-status--success' => $r->status === 'Closed', 'bg-gray-200 text-gray-700' => $r->status === 'Rejected', ])">
                                 {{ $r->status }}
                             </span>
                         </td>
 
                         {{-- Aksi --}}
-                        <td class="py-3 px-3 text-center whitespace-nowrap">
+                        <td class="ui-action-cell py-3 px-3 text-center whitespace-nowrap"><x-ui.table-actions>
                             <div class="flex justify-center gap-3">
-                                <a href="{{ route('admin.hipo.show', $r->id) }}"
-                                   class="action-icon" title="Lihat detail" aria-label="Lihat detail">
-                                    👁️
-                                </a>
+                                <x-ui.icon-button action="view" label="Lihat detail" href="{{ route('admin.hipo.show', $r->id) }}" />
 
                                 <form action="{{ route('admin.hipo.destroy', $r->id) }}"
                                       method="POST"
                                       data-confirm="Yakin ingin hapus data ini?">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit"
-                                            class="action-icon danger" title="Hapus" aria-label="Hapus">
-                                        <x-ui-icon name="trash" class="h-4 w-4" />
-                                    </button>
+                                    <x-ui.icon-button action="delete" label="Hapus" type="submit" />
                                 </form>
                             </div>
-                        </td>
+                        </x-ui.table-actions></td>
 
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" class="py-10 text-center text-gray-400">
+                        <td colspan="9" class="py-8 text-center text-gray-400">
                             Belum ada laporan HIPO / Nearmiss
                         </td>
                     </tr>
                     @endforelse
                 </tbody>
-            </table>
+            </x-ui.table>
         </div>
 
         @if($reports->hasPages())
           <div class="border-t border-gray-100 px-4 py-4">{{ $reports->withQueryString()->links() }}</div>
         @endif
 
-    </div>
-</div>
+    </x-ui.panel>
+</x-ui.page>
 @endsection

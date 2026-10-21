@@ -2,19 +2,19 @@
 @section('title','Indicators')
 
 @section('content')
-<div class="flex items-center justify-between mb-6">
-  <h1 class="text-2xl font-bold text-maroon-800">Indicators</h1>
-  <a href="{{ route('admin.indicators.create') }}"
-     class="px-4 py-2 rounded-lg bg-maroon-600 hover:bg-maroon-700 text-white shadow">
-     + New Indicator
-  </a>
-</div>
+<x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Indicators</x-ui.page-title>
+<x-ui.page-description>Kelola indikator dan aturan perhitungannya.</x-ui.page-description></div>
+  <x-ui.page-actions><x-ui.link icon="plus" variant="primary" href="{{ route('admin.indicators.create') }}"
+     class="px-4 py-2 rounded-lg shadow-none">New Indicator
+  </x-ui.link></x-ui.page-actions>
+</x-ui.page-header>
 
 @foreach($groups as $g)
   <div class="mb-8">
-    <h2 class="font-semibold text-lg mb-3 text-gray-800">{{ $g->name }}</h2>
-    <div class="overflow-hidden bg-white rounded-xl border border-gray-200 shadow-sm">
-      <table class="min-w-full divide-y divide-gray-200">
+    <x-ui.section-title class="font-semibold text-lg mb-3 text-gray-800">{{ $g->name }}</x-ui.section-title>
+    <x-ui.panel :padded="false" class="overflow-hidden bg-white rounded-lg border border-gray-200 shadow-none">
+      <x-ui.table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-maroon-700 text-white">
           <tr>
             <th class="px-3 py-3 text-left text-sm font-semibold">Order</th>
@@ -42,9 +42,9 @@
 
               <td class="px-3 py-2">
                 @if($i->is_derived)
-                  <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Yes</span>
+                  <x-ui.badge variant="success" class="px-2 py-1 text-xs font-semibold rounded-full">Yes</x-ui.badge>
                 @else
-                  <span class="px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">No</span>
+                  <x-ui.badge variant="danger" class="px-2 py-1 text-xs font-semibold rounded-full">No</x-ui.badge>
                 @endif
               </td>
 
@@ -60,19 +60,14 @@
                 </span>
               </td>
 
-              <td class="px-3 py-2 text-right space-x-2">
-                <a href="{{ route('admin.indicators.edit',$i) }}"
-                   class="inline-block px-3 py-1 rounded-lg bg-maroon-500 text-white hover:bg-maroon-600 shadow-sm">
-                   Edit
-                </a>
+              <td class="ui-action-cell px-3 py-2 text-right space-x-2"><x-ui.table-actions>
+                <x-ui.icon-button ability="update" :subject="$i" action="edit" label="Edit" href="{{ route('admin.indicators.edit',$i) }}" />
                 <form action="{{ route('admin.indicators.destroy',$i) }}" method="post" class="inline"
-                      onsubmit="return confirm('Delete this indicator?')">
+                      data-confirm="Delete this indicator?">
                   @csrf @method('delete')
-                  <button class="inline-block px-3 py-1 rounded-lg bg-maroon-700 text-white hover:bg-maroon-800 shadow-sm">
-                    Delete
-                  </button>
+                  <x-ui.icon-button ability="delete" :subject="$i" action="delete" label="Hapus" type="submit" />
                 </form>
-              </td>
+              </x-ui.table-actions></td>
             </tr>
           @empty
             <tr>
@@ -80,8 +75,8 @@
             </tr>
           @endforelse
         </tbody>
-      </table>
-    </div>
+      </x-ui.table>
+    </x-ui.panel>
   </div>
 @endforeach
 @endsection

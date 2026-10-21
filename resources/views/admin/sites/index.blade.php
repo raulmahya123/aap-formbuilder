@@ -3,24 +3,24 @@
 @section('title','Sites')
 
 @section('content')
-<div class="flex items-center justify-between mb-6">
-  <h1 class="text-2xl font-bold text-[color:var(--brand-maroon,#bb9974)]">Sites</h1>
-  <a href="{{ route('admin.sites.create') }}"
-     class="px-4 py-2 rounded-xl bg-[color:var(--brand-maroon,#bb9974)] hover:brightness-105 text-white shadow">
-     + Tambah
-  </a>
-</div>
+<x-ui.page-header>
+  <div class="ui-page-header__copy"><x-ui.page-title>Sites</x-ui.page-title>
+<x-ui.page-description>Kelola identitas dan status site operasional.</x-ui.page-description></div>
+  <x-ui.page-actions><x-ui.link icon="plus" variant="primary" href="{{ route('admin.sites.create') }}"
+     class="px-4 py-2 rounded-lg hover:brightness-105 shadow-none">Tambah
+  </x-ui.link></x-ui.page-actions>
+</x-ui.page-header>
 
 {{-- Filter & Search --}}
 <form class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-2"
       method="GET" action="{{ route('admin.sites.index') }}">
   <input
-    class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#bb9974)] focus:border-[color:var(--brand-maroon,#bb9974)]"
+    class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:border-[color:var(--brand-maroon,#713F12)]"
     type="text" name="q" value="{{ $q }}" placeholder="Cari name/code/deskripsi...">
 
   {{-- Filter perusahaan (opsional: kirimkan $companies dari controller) --}}
   <select name="company_id"
-          class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#bb9974)] focus:border-[color:var(--brand-maroon,#bb9974)]">
+          class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:border-[color:var(--brand-maroon,#713F12)]">
     <option value="">— Semua Perusahaan —</option>
     @foreach(($companies ?? []) as $c)
       <option value="{{ $c->id }}" @selected(request('company_id') == $c->id)>
@@ -30,13 +30,13 @@
   </select>
 
   <div class="flex gap-2">
-    <button class="px-4 py-2 rounded-lg bg-[color:var(--brand-maroon,#bb9974)] hover:brightness-105 text-white w-full md:w-auto">
+    <x-ui.button variant="primary" class="px-4 py-2 rounded-lg hover:brightness-105 w-full md:w-auto">
       Terapkan
-    </button>
-    <a href="{{ route('admin.sites.index') }}"
-       class="px-4 py-2 rounded-lg border w-full md:w-auto hover:bg-gray-50">
+    </x-ui.button>
+    <x-ui.link variant="secondary" href="{{ route('admin.sites.index') }}"
+       class="px-4 py-2 rounded-lg border w-full md:w-auto">
       Reset
-    </a>
+    </x-ui.link>
   </div>
 </form>
 
@@ -56,9 +56,9 @@
   </div>
 @endif
 
-<div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm bg-white">
-  <table class="w-full text-left text-sm">
-    <thead class="bg-[color:var(--brand-maroon,#bb9974)] text-white">
+<x-ui.panel :padded="false" class="overflow-x-auto rounded-lg border border-gray-200 shadow-none bg-white">
+  <x-ui.table class="w-full text-left text-sm">
+    <thead class="bg-[color:var(--brand-maroon,#713F12)] text-white">
       <tr>
         <th class="p-3 border-b">#</th>
         <th class="p-3 border-b">Code</th>
@@ -89,21 +89,16 @@
             {{ \Illuminate\Support\Str::limit((string)$s->description, 80) }}
           </td>
 
-          <td class="p-3">
-            <div class="flex flex-wrap gap-2">
+          <td class="ui-action-cell p-3"><x-ui.table-actions>
+            <div class="flex flex-nowrap gap-2">
               {{-- Tombol Edit --}}
-              <a href="{{ route('admin.sites.edit',$s) }}"
-                 class="px-3 py-1 rounded-lg bg-[color:var(--brand-maroon,#bb9974)] text-white hover:brightness-105 shadow-sm">
-                 Edit
-              </a>
+              <x-ui.icon-button ability="update" :subject="$s" action="edit" label="Edit" href="{{ route('admin.sites.edit',$s) }}" />
 
               {{-- Tombol Hapus --}}
               <form action="{{ route('admin.sites.destroy',$s) }}" method="POST"
-                    onsubmit="return confirm('Hapus site {{ $s->code }} ?')">
+                    data-confirm="Hapus site {{ $s->code }} ?">
                 @csrf @method('DELETE')
-                <button class="px-3 py-1 rounded-lg border border-rose-300 text-rose-700 hover:bg-rose-50 shadow-sm">
-                  Hapus
-                </button>
+                <x-ui.icon-button ability="delete" :subject="$s" action="delete" label="Hapus" type="submit" />
               </form>
 
               {{-- (Opsional) Switch Active Site jika route tersedia --}}
@@ -111,13 +106,11 @@
                 <form action="{{ route('admin.sites.switch') }}" method="POST">
                   @csrf
                   <input type="hidden" name="site_id" value="{{ $s->id }}">
-                  <button class="px-3 py-1 rounded-lg border hover:bg-gray-50">
-                    Jadikan Aktif
-                  </button>
+                  <x-ui.icon-button action="activate" label="Aktifkan" type="submit" />
                 </form>
               @endif
             </div>
-          </td>
+          </x-ui.table-actions></td>
         </tr>
       @empty
         <tr>
@@ -125,8 +118,8 @@
         </tr>
       @endforelse
     </tbody>
-  </table>
-</div>
+  </x-ui.table>
+</x-ui.panel>
 
 @if(method_exists($sites,'links'))
   <div class="mt-4">{{ $sites->appends(request()->except('page'))->links() }}</div>

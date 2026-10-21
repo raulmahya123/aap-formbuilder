@@ -1,8 +1,8 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
+        <x-ui.section-title class="text-lg font-medium text-gray-900">
             {{ __('Profile Information') }}
-        </h2>
+        </x-ui.section-title>
 
         <p class="mt-1 text-sm text-gray-600">
             {{ __("Update your account's profile information and email address.") }}
@@ -13,19 +13,19 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ secure_url(route('profile.update', [], false)) }}" enctype="multipart/form-data" class="mt-6 space-y-6">
+    <form method="post" action="{{ secure_url(route('profile.update', [], false)) }}" enctype="multipart/form-data" class="mt-6 space-y-5">
         @csrf
         @method('patch')
 
         <div class="flex items-center gap-4">
             @if($user->avatar_path)
-                <img src="{{ asset('storage/'.$user->avatar_path) }}" alt="Foto profil" class="h-20 w-20 rounded-2xl object-cover ring-2 ring-[#bb9974]/30">
+                <img src="{{ asset('storage/'.$user->avatar_path) }}" alt="Foto profil" class="h-20 w-20 rounded-lg object-cover ring-2 ring-[#713F12]/30">
             @else
-                <div class="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#bb9974] text-xl font-semibold text-white">{{ strtoupper(substr($user->name, 0, 2)) }}</div>
+                <div class="flex h-20 w-20 items-center justify-center rounded-lg bg-[#713F12] text-xl font-semibold text-white">{{ strtoupper(substr($user->name, 0, 2)) }}</div>
             @endif
             <div class="flex-1">
                 <x-input-label for="avatar" :value="__('Foto profil')" />
-                <input id="avatar" name="avatar" type="file" accept="image/*" class="mt-1 block w-full rounded-xl border border-gray-300 p-2 text-sm" />
+                <input id="avatar" name="avatar" type="file" accept="image/*" class="mt-1 block w-full rounded-lg border border-gray-300 p-2 text-sm" />
                 <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
             </div>
         </div>
@@ -46,9 +46,9 @@
                     <p class="text-sm mt-2 text-gray-800">
                         {{ __('Your email address is unverified.') }}
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <x-ui.button variant="secondary" form="send-verification" class="underline text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             {{ __('Click here to re-send the verification email.') }}
-                        </button>
+                        </x-ui.button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
@@ -60,7 +60,7 @@
             @endif
         </div>
 
-        <div class="grid gap-6 sm:grid-cols-2">
+        <div class="grid gap-5 sm:grid-cols-2">
             <div>
                 <x-input-label for="nik" :value="__('NIK')" />
                 <x-text-input id="nik" name="nik" type="text" class="mt-1 block w-full" :value="old('nik', $user->nik)" />
