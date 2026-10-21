@@ -8,16 +8,13 @@ class WellnessResponse extends Model
 {
     protected $fillable = [
         'name',
-        'email',
-        'department',
-        'mood',
-        'stress_level',
-        'sleep_hours',
-        'physical_activity',
-        'notes',
-    ];
-
-    protected $casts = [
-        'sleep_hours' => 'decimal:1',
+        'nik',
+        'position',
+        'site',
+        'shift',
+        'sleep_before_shift',
+        'health_complaint',
+        'drowsy_medication',
+        'work_readiness',
     ];
 }

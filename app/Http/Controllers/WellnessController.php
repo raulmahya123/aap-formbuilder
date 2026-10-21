@@ -18,13 +18,14 @@ class WellnessController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
-            'email' => ['nullable', 'email', 'max:160'],
-            'department' => ['nullable', 'string', 'max:120'],
-            'mood' => ['required', 'in:baik,cukup,kurang'],
-            'stress_level' => ['required', 'integer', 'between:1,5'],
-            'sleep_hours' => ['nullable', 'numeric', 'between:0,24'],
-            'physical_activity' => ['nullable', 'in:tidak_ada,ringan,sedang,aktif'],
-            'notes' => ['nullable', 'string', 'max:2000'],
+            'nik' => ['required', 'string', 'max:50'],
+            'position' => ['required', 'string', 'max:120'],
+            'site' => ['required', 'string', 'max:120'],
+            'shift' => ['required', 'in:pagi,malam'],
+            'sleep_before_shift' => ['required', 'in:lebih_6_jam,6_jam,kurang_6_jam'],
+            'health_complaint' => ['required', 'in:tidak_ada,ringan,berat'],
+            'drowsy_medication' => ['required', 'in:ya,tidak'],
+            'work_readiness' => ['required', 'in:ya,tidak,off_day'],
         ]);
 
         WellnessResponse::create($validated);
