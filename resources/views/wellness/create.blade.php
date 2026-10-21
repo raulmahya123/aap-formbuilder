@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}">
   <title>Wellness Check-in · {{ config('app.name', 'AAP Form Builder') }}</title>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

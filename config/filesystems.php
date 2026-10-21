@@ -1,5 +1,10 @@
 <?php
 
+$mandalaDriver = env('MANDALA_DISK_DRIVER', 'local');
+if ($mandalaDriver === 'ftp' && !class_exists(\League\Flysystem\Ftp\FtpAdapter::class)) {
+    $mandalaDriver = 'local';
+}
+
 return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
@@ -32,7 +37,7 @@ return [
 
         // === upload Mandala/FormBuilder ke NAS via FTP ===
         'mandala_uploads' => [
-            'driver' => env('MANDALA_DISK_DRIVER', 'local'),
+            'driver' => $mandalaDriver,
             'host' => env('NAS_FTP_HOST', '160.19.165.217'),
             'port' => (int) env('NAS_FTP_PORT', 21),
             'username' => env('NAS_FTP_USER', 'artha'),
