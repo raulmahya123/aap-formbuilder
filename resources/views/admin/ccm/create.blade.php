@@ -39,9 +39,9 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Jobsite</label>
-                    <select name="jobsite" class="w-full border-gray-300 rounded-lg shadow-none focus:ring-blue-500 focus:border-blue-500" required>
-                        <option value="">-- Pilih Jobsite --</option>
+                    <label for="ccm-jobsite" class="block text-sm font-medium text-gray-700 mb-1">Jobsite</label>
+                    <select id="ccm-jobsite" name="jobsite" class="w-full border-gray-300 rounded-lg shadow-none focus:ring-blue-500 focus:border-blue-500" required>
+                        <option value="">Pilih site</option>
                         @foreach(($jobsites ?? []) as $jobsite)
                             <option value="{{ $jobsite['value'] }}" {{ old('jobsite') == $jobsite['value'] ? 'selected' : '' }}>
                                 {{ $jobsite['label'] }}

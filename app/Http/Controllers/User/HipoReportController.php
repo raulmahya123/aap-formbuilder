@@ -17,7 +17,7 @@ class HipoReportController extends Controller
     {
         $siteId = \App\Support\SiteSelection::id($request);
         return view('user.hipo.index', [
-            'reports' => HipoReport::where('user_id', Auth::id())
+            'reports' => HipoReport::with('site:id,code,name')->where('user_id', Auth::id())
                 ->when($siteId, fn ($q) => $q->where('site_id', $siteId))
                 ->when($request->filled('q'), fn ($q) => $q->where('description','like','%'.$request->string('q').'%'))
                 ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()))
@@ -106,7 +106,7 @@ class HipoReportController extends Controller
             ->map(function (Site $site) {
                 return [
                     'id' => $site->id,
-                    'label' => $this->jobsiteLabel($site),
+                    'label' => $site->displayLabel(),
                 ];
             })
             ->values();

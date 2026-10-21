@@ -36,7 +36,7 @@
                         {{-- Jobsite --}}
                         <td class="p-4">
                             <span class="px-2 py-1 rounded-lg bg-gray-100 text-gray-700 font-bold text-xs border border-gray-200">
-                                {{ $r->jobsite }}
+                                {{ $jobsiteLabels->get($r->jobsite, $r->jobsite) }}
                             </span>
                         </td>
                         {{-- Pelapor --}}

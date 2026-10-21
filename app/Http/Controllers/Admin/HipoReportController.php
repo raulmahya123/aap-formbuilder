@@ -19,7 +19,7 @@ class HipoReportController extends Controller
     {
         $allowed = auth()->user()->allowedSiteIds();
         $siteId = \App\Support\SiteSelection::id($request);
-        $reports = HipoReport::when(is_array($allowed), fn ($q) => $q->whereIn('site_id', $allowed ?: [-1]))
+        $reports = HipoReport::with('site:id,code,name')->when(is_array($allowed), fn ($q) => $q->whereIn('site_id', $allowed ?: [-1]))
             ->when($siteId, fn ($q) => $q->where('site_id', $siteId))
             ->when($request->filled('search'), fn ($q) => $q->where(fn ($w) => $w->where('jobsite', 'like', '%'.$request->string('search').'%')->orWhere('reporter_name', 'like', '%'.$request->string('search').'%')->orWhere('description', 'like', '%'.$request->string('search').'%')))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()))
@@ -192,7 +192,7 @@ class HipoReportController extends Controller
             ->map(function (Site $site) {
                 return [
                     'id' => $site->id,
-                    'label' => $this->jobsiteLabel($site),
+                    'label' => $site->displayLabel(),
                 ];
             })
             ->values();

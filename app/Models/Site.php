@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Site extends Model
 {
+    public function displayLabel(): string
+    {
+        return $this->code ? $this->code.' — '.$this->name : $this->name;
+    }
+
     // Kolom yang boleh di-mass assign (WAJIB ada company_id)
     protected $fillable = [
         'code',

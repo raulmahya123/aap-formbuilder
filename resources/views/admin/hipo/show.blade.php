@@ -33,7 +33,7 @@
 <div class="grid md:grid-cols-4 gap-4 text-sm">
 @foreach([
     'Pelapor' => $hipo->reporter_name,
-    'Jobsite' => $hipo->jobsite,
+    'Jobsite' => $hipo->jobsite_display,
     'Waktu' => $hipo->report_time?->format('d M Y H:i'),
     'Shift' => $hipo->shift,
     'Sumber' => $hipo->source,

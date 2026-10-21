@@ -23,7 +23,8 @@ class CcmReportController extends Controller
     public function index(Request $request)
     {
         $request->validate(['date_from' => ['nullable','date'], 'date_to' => ['nullable','date']]);
-        $allowedJobsites = $this->jobsiteOptions()->pluck('value')->all();
+        $jobsiteLabels = $this->jobsiteOptions()->pluck('label', 'value');
+        $allowedJobsites = $jobsiteLabels->keys()->all();
         $siteId = \App\Support\SiteSelection::id($request);
         $site = $siteId ? Site::with('company:id,code,name')->findOrFail($siteId) : null;
         $jobsite = $site ? ($site->company ? (($site->company->code ?: $site->company->name).'-'.($site->code ?: $site->name)) : ($site->code ?: $site->name)) : null;
@@ -35,7 +36,7 @@ class CcmReportController extends Controller
             ->orderBy('waktu_pelaporan', 'desc')
             ->paginate(\App\Support\Listing::perPage())->withQueryString();
 
-        return view('admin.ccm.index', compact('reports'));
+        return view('admin.ccm.index', compact('reports', 'jobsiteLabels'));
     }
 
     /* =========================================================
@@ -80,7 +81,8 @@ class CcmReportController extends Controller
     {
         $report = CcmReport::findOrFail($id);
         $this->authorizeJobsite($report->jobsite);
-        return view('admin.ccm.show', compact('report'));
+        $jobsiteLabel = $this->jobsiteOptions()->firstWhere('value', $report->jobsite)['label'] ?? $report->jobsite;
+        return view('admin.ccm.show', compact('report', 'jobsiteLabel'));
     }
 
     /* =========================================================
@@ -285,7 +287,7 @@ class CcmReportController extends Controller
 
                 return [
                     'value' => $value,
-                    'label' => $value,
+                    'label' => $site->displayLabel(),
                 ];
             })
             ->values();

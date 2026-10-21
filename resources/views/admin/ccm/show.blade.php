@@ -25,7 +25,7 @@
             </div>
             <div>
                 <div class="text-xs font-bold tracking-normal text-gray-400 normal-case">Jobsite</div>
-                <div class="text-base font-semibold text-gray-800">{{ $report->jobsite }}</div>
+                <div class="text-base font-semibold text-gray-800">{{ $jobsiteLabel }}</div>
             </div>
             <div>
                 <div class="text-xs font-bold tracking-normal text-gray-400 normal-case">Nama Pelapor</div>

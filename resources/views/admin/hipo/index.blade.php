@@ -42,7 +42,7 @@
                         </td>
                         {{-- Jobsite --}}
                         <td class="py-3 px-3 font-medium text-gray-700">
-                            {{ $r->jobsite }}
+                            {{ $r->jobsite_display }}
                         </td>
                         {{-- Jenis --}}
                         <td class="py-3 px-3">

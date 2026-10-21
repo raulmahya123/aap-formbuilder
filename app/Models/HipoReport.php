@@ -59,4 +59,9 @@ class HipoReport extends Model
     {
         return $this->belongsTo(Site::class);
     }
+
+    public function getJobsiteDisplayAttribute(): string
+    {
+        return $this->site?->displayLabel() ?? $this->jobsite ?? '—';
+    }
 }

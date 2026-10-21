@@ -35,7 +35,7 @@
                     </td>
                     {{-- Jobsite --}}
                     <td class="px-4 py-2">
-                        {{ $r->jobsite }}
+                        {{ $r->jobsite_display }}
                     </td>
                     {{-- Jenis HIPO --}}
                     <td class="px-4 py-2">

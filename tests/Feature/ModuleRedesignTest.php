@@ -100,4 +100,34 @@ class ModuleRedesignTest extends TestCase
         \App\Models\WellnessResponse::forceCreate(['name'=>'Legacy QA','mood'=>'Tenang','stress_level'=>3]);
         $this->actingAs($this->administrator())->get(route('admin.wellness.index'))->assertOk()->assertSee('Belum tersedia')->assertSee('Pemeriksaan sebelumnya')->assertSee('Tenang');
     }
+
+    public function test_jobsite_options_display_master_sites_and_respect_site_permissions(): void
+    {
+        $user = User::factory()->create();
+        $department = Department::create(['name'=>'Jobsite Team','slug'=>'jobsite-team']);
+        $department->users()->attach($user->id, ['dept_role'=>'dept_admin']);
+        $company = \App\Models\Company::create(['code'=>'COMP','name'=>'Company','slug'=>'company']);
+        $allowed = Site::create(['code'=>'SITE-1','name'=>'Area Operasional','company_id'=>$company->id]);
+        Site::create(['code'=>'SITE-2','name'=>'Area Terlarang','company_id'=>$company->id]);
+        $user->sites()->attach($allowed->id);
+        $this->actingAs($user)->get(route('ccm-reports.create'))->assertOk()
+            ->assertViewHas('jobsites', fn ($options) => $options->count() === 1 && $options->first()['label'] === 'SITE-1 — Area Operasional' && $options->first()['value'] === 'COMP-SITE-1');
+        $this->get(route('admin.hipo.create'))->assertOk()
+            ->assertViewHas('sites', fn ($options) => $options->count() === 1 && $options->first()['id'] === $allowed->id && $options->first()['label'] === 'SITE-1 — Area Operasional');
+    }
+
+    public function test_report_lists_resolve_jobsite_from_master_site_without_rewriting_history(): void
+    {
+        $this->actingAs($this->administrator());
+        $company = \App\Models\Company::create(['code'=>'COMP','name'=>'Company','slug'=>'company']);
+        $site = Site::create(['code'=>'SITE-1','name'=>'Area Operasional','company_id'=>$company->id]);
+        $this->get(route('ccm-reports.index'))->assertOk()
+            ->assertViewHas('jobsiteLabels', fn ($labels) => $labels->get('COMP-SITE-1') === 'SITE-1 — Area Operasional');
+        $hipo = new \App\Models\HipoReport(['jobsite'=>'COMP-SITE-1']);
+        $hipo->setRelation('site', $site);
+        $this->assertSame('SITE-1 — Area Operasional', $hipo->jobsite_display);
+        $this->assertSame('COMP-SITE-1', $hipo->jobsite);
+        $hipo->setRelation('site', null);
+        $this->assertSame('COMP-SITE-1', $hipo->jobsite_display);
+    }
 }
