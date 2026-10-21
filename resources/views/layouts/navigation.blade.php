@@ -67,7 +67,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
         @endif
 
         @if(Route::has('admin.qa.index'))
-        <a title="Tanya Jawab" aria-label="Tanya Jawab" href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="chat"/><span class="ui-nav-label">Tanya Jawab</span></a>
+        <a title="Mandala Chat" aria-label="Mandala Chat" href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="message-circle"/><span class="ui-nav-label">Mandala Chat</span></a>
         @endif
 
         @if(Route::has('admin.contracts.index'))
@@ -161,7 +161,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
         @endif
 
         @if(Route::has('admin.qa.index'))
-        <a title="Tanya Jawab" aria-label="Tanya Jawab" href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="chat"/><span class="ui-nav-label">Tanya Jawab</span></a>
+        <a title="Mandala Chat" aria-label="Mandala Chat" href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="message-circle"/><span class="ui-nav-label">Mandala Chat</span></a>
         @endif
       </div>
     </div>

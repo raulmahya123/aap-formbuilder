@@ -471,17 +471,36 @@ Route::middleware('auth')->group(function () {
         });
 
         // ==============================
-        // QA
+        // MANDALA CHAT (FORMERLY QA)
         // ==============================
         Route::prefix('qa')->name('qa.')->group(function () {
             Route::get('/', [QaThreadController::class, 'index'])->name('index');
-            Route::get('/public', [QaThreadController::class, 'public'])->name('public');
-            Route::get('/create', [QaThreadController::class, 'create'])->name('create');
-            Route::post('/', [QaThreadController::class, 'store'])->name('store');
-            Route::get('/{thread}', [QaThreadController::class, 'show'])->name('show')->whereNumber('thread');
-            Route::post('/{thread}/messages', [QaMessageController::class, 'store'])->name('messages.store')->whereNumber('thread');
-            Route::get('/messages/{message}/attachments/{index}', [QaMessageController::class, 'downloadAttachment'])->name('messages.attachments.download')->whereNumber(['message', 'index']);
-            Route::post('/{thread}/resolve', [QaThreadController::class, 'resolve'])->name('resolve')->whereNumber('thread');
+            Route::get('/conversations', [QaThreadController::class, 'conversations'])->name('conversations');
+            Route::get('/employees/search', [QaThreadController::class, 'searchEmployees'])->name('employees.search');
+            Route::post('/personal', [QaThreadController::class, 'startPersonalChat'])->name('personal.start');
+            Route::post('/groups', [QaThreadController::class, 'createGroup'])->name('groups.create');
+            
+            Route::prefix('{thread}')->whereNumber('thread')->group(function () {
+                Route::get('/messages', [QaThreadController::class, 'showConversation'])->name('show');
+                Route::post('/messages', [QaMessageController::class, 'store'])->name('messages.store');
+                Route::post('/reports', [QaMessageController::class, 'createReport'])->name('reports.store');
+                Route::post('/settings', [QaThreadController::class, 'toggleConversationSetting'])->name('settings');
+                Route::post('/members', [QaThreadController::class, 'updateMembers'])->name('members.update');
+                Route::post('/leave', [QaThreadController::class, 'leaveGroup'])->name('leave');
+                Route::post('/resolve', [QaThreadController::class, 'resolve'])->name('resolve');
+            });
+
+            Route::prefix('messages/{message}')->whereNumber('message')->group(function () {
+                Route::put('/', [QaMessageController::class, 'update'])->name('messages.update');
+                Route::delete('/', [QaMessageController::class, 'destroy'])->name('messages.destroy');
+                Route::post('/pin', [QaMessageController::class, 'togglePin'])->name('messages.pin');
+                Route::post('/reactions', [QaMessageController::class, 'toggleReaction'])->name('messages.reactions');
+                Route::get('/attachments/{index}', [QaMessageController::class, 'downloadAttachment'])
+                    ->name('messages.attachments.download')->whereNumber('index');
+            });
+
+            Route::put('/reports/{report}/status', [QaMessageController::class, 'updateReportStatus'])
+                ->name('reports.status.update')->whereNumber('report');
         });
 
         // ==============================

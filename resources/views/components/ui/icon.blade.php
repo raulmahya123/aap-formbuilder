@@ -27,6 +27,18 @@
     'input' => '<path stroke-linecap="round" stroke-linejoin="round" d="M5 4h14v16H5V4Zm3 4h8M8 12h5m-5 4h8"/>',
     'eye' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/>',
     'edit' => '<path stroke-linecap="round" stroke-linejoin="round" d="m4 16.5-.8 4.3 4.3-.8L19 8.5a2.1 2.1 0 0 0-3-3L4 16.5Z"/><path stroke-linecap="round" d="m14.5 7.5 2 2"/>',
+    'message-circle' => '<path stroke-linecap="round" stroke-linejoin="round" d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+    'search' => '<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/>',
+    'more-vertical' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 12h.01M12 5h.01M12 19h.01"/>',
+    'pin' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 17v5m-7-9 3-3 7 7-3 3M9 6l6 6M15 3l6 6"/>',
+    'check' => '<path stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5"/>',
+    'check-check' => '<path stroke-linecap="round" stroke-linejoin="round" d="m18 6-9 9-4-4m13 0-9 9-2-2"/>',
+    'smile' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>',
+    'info' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01M22 12A10 10 0 1 1 2 12a10 10 0 0 1 20 0Z"/>',
+    'bell-off' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 0 .6 5M17 17H3l3.5-3.5A21.3 21.3 0 0 1 7 8.5M10.3 21a1.94 1.94 0 0 0 3.4 0M2 2l20 20"/>',
+    'arrow-down' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7-7 7-7-7"/>',
+    'reply' => '<path stroke-linecap="round" stroke-linejoin="round" d="m9 17-5-5 5-5m-5 5h12a4 4 0 0 1 4 4v2"/>',
+    'copy' => '<path stroke-linecap="round" stroke-linejoin="round" d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/>',
     'trash' => '<path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14m-9 4v6m4-6v6M9 7V4h6v3m-9 0 1 14h10l1-14"/>',
   ];
 @endphp
