@@ -10,7 +10,33 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'is_active', 'nik', 'birth_date', 'phone', 'avatar_path'];
+    protected $fillable = [
+        'name',
+        'nickname',
+        'email',
+        'password',
+        'is_active',
+        'nik',
+        'birth_place',
+        'birth_date',
+        'gender',
+        'phone',
+        'whatsapp',
+        'address',
+        'province',
+        'city',
+        'district',
+        'postal_code',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'role',
+        'position',
+        'division',
+        'department_id',
+        'joined_date',
+        'employee_status',
+        'avatar_path',
+    ];
     protected $hidden   = ['password', 'remember_token'];
 
     protected function casts(): array
@@ -20,6 +46,7 @@ class User extends Authenticatable
             'password'          => 'hashed',
             'is_active'         => 'boolean',
             'birth_date'        => 'date',
+            'joined_date'       => 'date',
         ];
     }
 

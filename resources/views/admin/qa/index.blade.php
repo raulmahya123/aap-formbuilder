@@ -45,6 +45,12 @@
 @endpush
 
 @section('content')
+<div class="sr-only">
+  <x-ui.page-header>
+    <x-ui.page-title>Mandala Chat</x-ui.page-title>
+    <x-ui.page-description>Sistem Komunikasi Internal Mandala</x-ui.page-description>
+  </x-ui.page-header>
+</div>
 <div x-data="mandalaChat({
     activeThreadId: {{ $activeThreadId ? (int)$activeThreadId : 'null' }},
     currentUserId: {{ auth()->id() }},
