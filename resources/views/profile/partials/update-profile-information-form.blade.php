@@ -13,9 +13,22 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
         @csrf
         @method('patch')
+
+        <div class="flex items-center gap-4">
+            @if($user->avatar_path)
+                <img src="{{ asset('storage/'.$user->avatar_path) }}" alt="Foto profil" class="h-20 w-20 rounded-2xl object-cover ring-2 ring-[#bb9974]/30">
+            @else
+                <div class="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#bb9974] text-xl font-semibold text-white">{{ strtoupper(substr($user->name, 0, 2)) }}</div>
+            @endif
+            <div class="flex-1">
+                <x-input-label for="avatar" :value="__('Foto profil')" />
+                <input id="avatar" name="avatar" type="file" accept="image/*" class="mt-1 block w-full rounded-xl border border-gray-300 p-2 text-sm" />
+                <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
+            </div>
+        </div>
 
         <div>
             <x-input-label for="name" :value="__('Name')" />
@@ -45,6 +58,25 @@
                     @endif
                 </div>
             @endif
+        </div>
+
+        <div class="grid gap-6 sm:grid-cols-2">
+            <div>
+                <x-input-label for="nik" :value="__('NIK')" />
+                <x-text-input id="nik" name="nik" type="text" class="mt-1 block w-full" :value="old('nik', $user->nik)" />
+                <x-input-error class="mt-2" :messages="$errors->get('nik')" />
+            </div>
+            <div>
+                <x-input-label for="birth_date" :value="__('Tanggal lahir')" />
+                <x-text-input id="birth_date" name="birth_date" type="date" class="mt-1 block w-full" :value="old('birth_date', optional($user->birth_date)->format('Y-m-d'))" />
+                <x-input-error class="mt-2" :messages="$errors->get('birth_date')" />
+            </div>
+        </div>
+
+        <div>
+            <x-input-label for="phone" :value="__('Nomor telepon')" />
+            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" />
+            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
         </div>
 
         <div class="flex items-center gap-4">

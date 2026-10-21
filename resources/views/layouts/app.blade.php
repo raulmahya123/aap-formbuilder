@@ -140,6 +140,17 @@
     {{-- ===== Konten ===== --}}
     <div class="min-h-screen min-w-0 flex flex-col">
 
+      @php
+        $navbarUser = auth()->user();
+        $navbarSites = collect();
+        if ($navbarUser) {
+            $navbarSites = $navbarUser->isSuperAdmin()
+                ? \App\Models\Site::select('id','code','name')->orderBy('code')->get()
+                : $navbarUser->sites()->select('sites.id','sites.code','sites.name')->orderBy('sites.code')->get();
+        }
+        $navbarActiveSite = session('active_site_id') ? $navbarSites->firstWhere('id', session('active_site_id')) : null;
+      @endphp
+
       {{-- Navbar --}}
       <header class="sticky top-0 z-30 border-b border-coal-200 bg-ivory-50/95 px-4 py-3 backdrop-blur lg:px-8">
         <div class="flex min-h-10 items-center justify-between gap-4">
@@ -158,9 +169,62 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 sm:gap-3">
+            @if($navbarUser && $navbarUser->isAdmin() && $navbarSites->count() > 0 && Route::has('admin.sites.switch'))
+              <div x-data="{open:false}" class="relative hidden md:block">
+                <button type="button" @click="open=!open" @click.outside="open=false" class="inline-flex max-w-[15rem] items-center gap-2 rounded-xl border border-coal-200 bg-white px-3 py-2 text-left text-sm hover:bg-ivory-100" aria-label="Pilih site">
+                  <svg class="h-4 w-4 shrink-0 text-maroon-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
+                  <span class="truncate font-medium">{{ $navbarActiveSite?->code ?? 'ALL SITES' }}</span>
+                  <svg class="h-4 w-4 text-coal-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-72 rounded-2xl border border-coal-200 bg-white p-2 shadow-xl">
+                  <div class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-coal-400">Active Site</div>
+                  <form method="POST" action="{{ route('admin.sites.switch') }}" class="grid gap-1">
+                    @csrf
+                    <button name="site_id" value="" class="flex items-center justify-between rounded-xl px-3 py-2 text-left text-sm hover:bg-ivory-100"><span>ALL SITES</span>@if(!$navbarActiveSite)<span class="text-maroon-700">✓</span>@endif</button>
+                    @foreach($navbarSites as $navbarSite)
+                      <button name="site_id" value="{{ $navbarSite->id }}" class="flex items-center justify-between rounded-xl px-3 py-2 text-left text-sm hover:bg-ivory-100"><span>{{ $navbarSite->code }} — {{ $navbarSite->name }}</span>@if($navbarActiveSite?->id === $navbarSite->id)<span class="text-maroon-700">✓</span>@endif</button>
+                    @endforeach
+                  </form>
+                </div>
+              </div>
+            @endif
+
             @hasSection('actions')
               @yield('actions')
+            @endif
+
+            @if($navbarUser)
+              <div x-data="{open:false}" class="relative">
+                <button type="button" @click="open=!open" @click.outside="open=false" class="inline-flex items-center gap-2 rounded-xl border border-coal-200 bg-white px-2 py-1.5 text-left hover:bg-ivory-100" aria-label="Buka profil akun">
+                  @if($navbarUser->avatar_path)
+                    <img src="{{ asset('storage/'.$navbarUser->avatar_path) }}" alt="" class="h-8 w-8 rounded-lg object-cover">
+                  @else
+                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-maroon-700 text-xs font-semibold text-white">{{ strtoupper(substr($navbarUser->name, 0, 2)) }}</span>
+                  @endif
+                  <span class="hidden max-w-[10rem] truncate text-sm font-medium sm:block">{{ $navbarUser->name }}</span>
+                  <svg class="hidden h-4 w-4 text-coal-400 sm:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-80 rounded-2xl border border-coal-200 bg-white p-4 shadow-xl">
+                  <div class="flex items-center gap-3 border-b border-coal-100 pb-4">
+                    @if($navbarUser->avatar_path)
+                      <img src="{{ asset('storage/'.$navbarUser->avatar_path) }}" alt="Foto {{ $navbarUser->name }}" class="h-14 w-14 rounded-2xl object-cover">
+                    @else
+                      <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-maroon-700 text-lg font-semibold text-white">{{ strtoupper(substr($navbarUser->name, 0, 2)) }}</span>
+                    @endif
+                    <div class="min-w-0"><div class="truncate font-semibold text-coal-900">{{ $navbarUser->name }}</div><div class="truncate text-xs text-coal-500">{{ $navbarUser->email }}</div></div>
+                  </div>
+                  <dl class="grid gap-2 py-4 text-sm">
+                    <div class="flex justify-between gap-3"><dt class="text-coal-500">NIK</dt><dd class="font-medium text-coal-800">{{ $navbarUser->nik ?: 'Belum diisi' }}</dd></div>
+                    <div class="flex justify-between gap-3"><dt class="text-coal-500">Tanggal lahir</dt><dd class="font-medium text-coal-800">{{ $navbarUser->birth_date?->format('d M Y') ?: 'Belum diisi' }}</dd></div>
+                    <div class="flex justify-between gap-3"><dt class="text-coal-500">Site</dt><dd class="max-w-[10rem] truncate text-right font-medium text-coal-800">{{ $navbarActiveSite?->name ?? 'Semua site' }}</dd></div>
+                  </dl>
+                  <div class="grid gap-2 border-t border-coal-100 pt-3">
+                    @if(Route::has('profile.edit'))<a href="{{ route('profile.edit') }}" class="rounded-xl bg-ivory-100 px-3 py-2 text-center text-sm font-medium text-coal-800 hover:bg-ivory-200">Kelola profil</a>@endif
+                    <form method="POST" action="{{ route('logout') }}">@csrf<button class="w-full rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50">Logout</button></form>
+                  </div>
+                </div>
+              </div>
             @endif
           </div>
         </div>

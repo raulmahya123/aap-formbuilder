@@ -43,17 +43,23 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
                flex flex-col">
 
   {{-- Icon rail ketika sidebar diciutkan --}}
-  <div x-show="sidebarCollapsed" x-cloak class="hidden lg:flex flex-col items-center gap-3 p-3">
+  <div x-show="sidebarCollapsed" x-cloak class="hidden h-full overflow-y-auto lg:flex flex-col items-center gap-2 p-3">
     <button type="button" @click="toggleSidebarCollapse()" class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-maroon-700 text-white shadow-sm hover:bg-maroon-800" title="Buka sidebar" aria-label="Buka sidebar">
       <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
     <a href="{{ route('admin.dashboard') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="Dashboard" aria-label="Dashboard"><x-ui-icon name="dashboard"/></a>
     @if(Route::has('admin.wellness.index'))<a href="{{ route('admin.wellness.index') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="Wellness" aria-label="Wellness"><x-ui-icon name="wellness"/></a>@endif
     @if(Route::has('admin.forms.index'))<a href="{{ route('admin.forms.index') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="Mandala" aria-label="Mandala"><x-ui-icon name="mandala"/></a>@endif
+    @if(Route::has('admin.hipo.index'))<a href="{{ route('admin.hipo.index') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="HIPO / Nearmiss" aria-label="HIPO / Nearmiss"><x-ui-icon name="warning"/></a>@endif
+    @if(Route::has('ccm-reports.index'))<a href="{{ route('ccm-reports.index') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="Critical Control" aria-label="Critical Control"><x-ui-icon name="shield"/></a>@endif
+    @if(Route::has('admin.sites.index'))<a href="{{ route('admin.sites.index') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="Sites" aria-label="Sites"><x-ui-icon name="location"/></a>@endif
+    @if(Route::has('admin.daily.create'))<a href="{{ route('admin.daily.create') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="Input Harian" aria-label="Input Harian"><x-ui-icon name="input"/></a>@endif
+    @if(Route::has('user.daily_notes.index'))<a href="{{ route('user.daily_notes.index') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="Catatan Harian" aria-label="Catatan Harian"><x-ui-icon name="note"/></a>@endif
+    @if(Route::has('admin.reports.monthly'))<a href="{{ route('admin.reports.monthly') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="Rekap Bulanan" aria-label="Rekap Bulanan"><x-ui-icon name="report"/></a>@endif
     @if($isSuper && Route::has('admin.site_access.index'))<a href="{{ route('admin.site_access.index') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl hover:bg-ivory-100" title="Site access" aria-label="Site access"><x-ui-icon name="access"/></a>@endif
   </div>
 
-  <div x-show="!sidebarCollapsed" x-cloak class="contents">
+  <div x-show="!sidebarCollapsed" x-cloak class="flex min-h-0 flex-1 flex-col">
 
   {{-- USER --}}
   @auth
@@ -132,7 +138,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
         @if(Route::has('ccm-reports.index'))
         <a href="{{ route('ccm-reports.index') }}"
           class="{{ $navItemClass(request()->routeIs('admin.ccm-reports.*')) }}">
-          🧯 Critical Control Management
+          <x-ui-icon name="shield"/> Critical Control Management
         </a>
         @endif
 
@@ -146,7 +152,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
         @endif
 
         @if(Route::has('admin.sites.index'))
-        <a href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}">📍 Sites</a>
+        <a href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}"><x-ui-icon name="location"/> Sites</a>
         @endif
 
         @if($isSuper && Route::has('admin.companies.index'))
@@ -162,7 +168,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
         @endif
 
         @if(Route::has('admin.daily.create'))
-        <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
+        <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}"><x-ui-icon name="input"/> Input Harian</a>
         @endif
 
         @if(Route::has('user.daily_notes.index'))
@@ -218,13 +224,13 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
         @if(Route::has('ccm-reports.create'))
         <a href="{{ route('ccm-reports.create') }}"
           class="{{ $navItemClass(request()->routeIs('.ccm-rebeports.create')) }}">
-          🧯 Input CCM
+          <x-ui-icon name="shield"/> Input CCM
         </a>
         @endif
 
 
         @if(Route::has('daily.index'))
-        <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>
+        <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}"><x-ui-icon name="input"/> Input Harian</a>
         @endif
 
         @if(Route::has('user.daily_notes.index'))
@@ -239,49 +245,6 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
     @endif
   </nav>
 
-
-  {{-- ACTIVE SITE (desktop) --}}
-  @if($sites->count() > 0)
-  <div class="px-4 py-3 border-t border-coal-200">
-    <div class="text-xs mb-2 text-coal-600 uppercase tracking-wider">Active Site</div>
-
-    <div class="mb-2">
-      <span class="inline-flex items-center gap-2 px-2 py-1 rounded-lg border border-maroon-700 text-maroon-800 bg-maroon-50/70">
-        📍 {{ $activeSite?->code ?? 'ALL' }}
-        @if($activeSite && $activeSite->name)
-        <span class="text-xs text-coal-500">— {{ $activeSite->name }}</span>
-        @endif
-      </span>
-    </div>
-
-    @if(Route::has('admin.sites.switch'))
-    <form method="POST" action="{{ route('admin.sites.switch') }}" class="grid gap-2">
-      @csrf
-      <select name="site_id" class="border rounded-lg px-3 py-2 bg-white">
-        <option value="">ALL SITES</option>
-        @foreach($sites as $s)
-        <option value="{{ $s->id }}" @selected($activeSiteId==$s->id)>{{ $s->code }} — {{ $s->name }}</option>
-        @endforeach
-      </select>
-      <button class="px-3 py-2 rounded-lg border border-coal-300 hover:bg-ivory-100">
-        Ganti Site
-      </button>
-    </form>
-    @endif
-  </div>
-  @endif
-
-
-  {{-- LOGOUT --}}
-  @auth
-  <div class="p-4 border-t border-coal-200 bg-ivory-100">
-    <form method="post" action="{{ route('logout') }}">@csrf
-      <button class="w-full text-center text-sm rounded-lg px-3 py-2 border border-maroon-700 text-maroon-700 hover:bg-maroon-50">
-        Logout
-      </button>
-    </form>
-  </div>
-  @endauth
 
   </div>
 
@@ -365,7 +328,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
             <div class="mt-2 grid gap-1" x-show="openHse" x-transition>
 
               @if(Route::has('admin.sites.index'))
-              <a href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}">📍 Sites</a>
+              <a href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}"><x-ui-icon name="location"/> Sites</a>
               @endif
 
               @if($isSuper && Route::has('admin.companies.index'))
@@ -381,7 +344,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
               @endif
 
               @if(Route::has('admin.daily.create'))
-              <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}">✍️ Input Harian</a>
+              <a href="{{ route('admin.daily.create') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}"><x-ui-icon name="input"/> Input Harian</a>
               @endif
 
               @if(Route::has('user.daily_notes.index'))
@@ -442,7 +405,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
               @endif
 
               @if(Route::has('daily.index'))
-              <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}">✍️ Input Harian</a>
+              <a href="{{ route('daily.index') }}" class="{{ $navItemClass(request()->routeIs('daily.*')) }}"><x-ui-icon name="input"/> Input Harian</a>
               @endif
 
               @if(Route::has('user.daily_notes.index'))
@@ -458,49 +421,6 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
           @endif
         </div>
 
-
-        {{-- ACTIVE SITE MOBILE --}}
-        @if($sites->count() > 0)
-        <div class="p-4 border-t border-coal-200">
-          <div class="text-xs mb-2 text-coal-600 uppercase tracking-wider">Active Site</div>
-
-          <div class="mb-2">
-            <span class="inline-flex items-center gap-2 px-2 py-1 rounded-lg border border-maroon-700 text-maroon-800 bg-maroon-50/70">
-              📍 {{ $activeSite?->code ?? 'ALL' }}
-              @if($activeSite && $activeSite->name)
-              <span class="text-xs text-coal-500">— {{ $activeSite->name }}</span>
-              @endif
-            </span>
-          </div>
-
-          @if(Route::has('admin.sites.switch'))
-          <form method="POST" action="{{ route('admin.sites.switch') }}" class="grid gap-2">
-            @csrf
-            <select name="site_id" class="border rounded-lg px-3 py-2 bg-white">
-              <option value="">ALL SITES</option>
-              @foreach($sites as $s)
-              <option value="{{ $s->id }}" @selected($activeSiteId==$s->id)>{{ $s->code }} — {{ $s->name }}</option>
-              @endforeach
-            </select>
-            <button class="px-3 py-2 rounded-lg border border-coal-300 hover:bg-ivory-100">
-              Ganti Site
-            </button>
-          </form>
-          @endif
-        </div>
-        @endif
-
-
-        {{-- LOGOUT MOBILE --}}
-        @auth
-        <div class="p-4 border-t border-coal-200 bg-ivory-100">
-          <form method="post" action="{{ route('logout') }}">@csrf
-            <button class="w-full text-center text-sm rounded-lg px-3 py-2 border border-maroon-700 text-maroon-700 hover:bg-maroon-50">
-              Logout
-            </button>
-          </form>
-        </div>
-        @endauth
 
       </aside>
 

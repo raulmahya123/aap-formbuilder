@@ -15,6 +15,9 @@
     'note' => '<path stroke-linecap="round" stroke-linejoin="round" d="M5 3h14v18H5V3Zm3 4h8M8 11h8m-8 4h5"/>',
     'report' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14M4 19h16M8 15v-3m4 3V8m4 7v-5"/>',
     'access' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 0v6m0-18V3m9 9h-3M6 12H3m15.36 6.36-2.12-2.12M7.76 7.76 5.64 5.64m12.72 0-2.12 2.12M7.76 16.24l-2.12 2.12"/>',
+    'shield' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3 20 6v5c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-3Zm-3 9 2 2 4-4"/>',
+    'location' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/>',
+    'input' => '<path stroke-linecap="round" stroke-linejoin="round" d="M5 4h14v16H5V4Zm3 4h8M8 12h5m-5 4h8"/>',
   ];
 @endphp
 <svg {{ $attributes->merge(['class' => $class]) }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
