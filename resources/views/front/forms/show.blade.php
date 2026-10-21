@@ -27,11 +27,7 @@
 </x-ui.page-header>
 
     {{-- Flash sukses --}}
-    @if(session('success'))
-    <div class="mb-4 rounded-lg border px-4 py-3 bg-maroon-50 text-maroon-700 border-maroon-200 dark:bg-maroon-900/20 dark:text-maroon-300 dark:border-maroon-900/30">
-      {{ session('success') }}
-    </div>
-    @endif
+
 
     {{-- Error global --}}
     @if ($errors->any())

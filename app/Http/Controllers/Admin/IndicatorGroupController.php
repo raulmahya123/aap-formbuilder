@@ -10,12 +10,12 @@ class IndicatorGroupController extends Controller
 {
     public function __construct() { $this->middleware(['auth']); }
 
-    public function index() {
-        $groups = IndicatorGroup::orderBy('order_index')->get();
+    public function index(Request $request) {
+        $groups = IndicatorGroup::query()->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', '%'.$request->string('q').'%')->orWhere('code', 'like', '%'.$request->string('q').'%')))->orderBy('order_index')->paginate(\App\Support\Listing::perPage())->withQueryString();
         return view('admin.indicator-groups.index', compact('groups'));
     }
 
-    public function create() { return view('admin.indicator-groups.create'); }
+    public function create() { return view('admin.indicator-groups.form', ['group' => new IndicatorGroup]); }
 
     public function store(Request $r) {
         $data = $r->validate([

@@ -1,7 +1,5 @@
 @extends('layouts.app')
-
 @section('title', 'Dashboard Operasional')
-
 @section('content')
 <x-ui.page class="">
   <x-ui.page-header>
@@ -13,8 +11,7 @@
       Site aktif: <span class="font-semibold text-coal-900">{{ $selectedSite?->name ?? 'Semua site yang diizinkan' }}</span>
     </div></x-ui.page-actions>
 </x-ui.page-header>
-
-  <form method="GET" class="ui-card flex flex-col gap-3 rounded-lg border border-coal-100 bg-white shadow-none sm:flex-row sm:items-end">
+  <x-ui.table-toolbar class="ui-card flex flex-col gap-3 rounded-lg border border-coal-100 bg-white shadow-none sm:flex-row sm:items-end">
     <div class="min-w-0 flex-1">
       <label for="site_id" class="mb-1 block text-xs font-semibold normal-case tracking-normal text-coal-500">Filter site</label>
       <select id="site_id" name="site_id" class="w-full rounded-lg border border-coal-200 bg-white px-3 py-2 text-sm">
@@ -31,8 +28,7 @@
     @if($selectedSiteId)
       <x-ui.link variant="secondary" href="{{ route('admin.dashboard') }}" class="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm">Reset</x-ui.link>
     @endif
-  </form>
-
+  </x-ui.table-toolbar>
   <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
     @foreach([
       ['Wellness', $metrics['wellness'], route('admin.wellness.index'), 'wellness'],
@@ -41,17 +37,9 @@
       ['Catatan Harian', $metrics['notes'], route('user.daily_notes.index'), 'note'],
       ['Critical Control', $metrics['ccm'], route('ccm-reports.index'), 'access'],
     ] as [$label, $value, $url, $icon])
-      <a href="{{ $url }}{{ $selectedSiteId && !str_contains($url, '?') ? '?site_id='.$selectedSiteId : '' }}" class="group rounded-lg border border-coal-100 bg-white p-5 shadow-none transition hover:-translate-y-0.5 hover:border-maroon-300">
-        <div class="flex items-start justify-between gap-3">
-          <span class="text-sm text-coal-500">{{ $label }}</span>
-          <span class="text-maroon-700" aria-hidden="true"><x-ui-icon name="{{ $icon }}" class="h-6 w-6"/></span>
-        </div>
-        <div class="mt-3 text-2xl font-semibold text-coal-900">{{ number_format($value, 0, ',', '.') }}</div>
-        <div class="mt-2 text-xs font-medium text-maroon-700 group-hover:underline">Buka fitur →</div>
-      </a>
+      <x-ui.metric-card :label="$label" :value="$value" :href="$url.($selectedSiteId ? '?site_id='.$selectedSiteId : '')" icon="circle-check" />
     @endforeach
   </div>
-
   <div class="grid gap-5 lg:grid-cols-2">
     <section class="ui-card rounded-lg border border-coal-100 bg-white shadow-none">
       <div class="flex items-start justify-between gap-4">
@@ -70,14 +58,7 @@
         @endif
       </div>
     </section>
-
-    <section class="ui-card rounded-lg border border-coal-100 bg-white shadow-none">
-      <x-ui.section-title class="font-semibold text-coal-900">Keterangan akses</x-ui.section-title>
-      <p class="mt-2 text-sm leading-6 text-coal-500">Data di dashboard mengikuti site yang ditugaskan ke akun. HO dapat memilih seluruh site, sedangkan akun site hanya dapat melihat data miliknya.</p>
-      <div class="mt-5 rounded-lg bg-ivory-100 p-4 text-sm text-coal-700">
-        <span class="font-semibold">{{ $sites->count() }}</span> site tersedia untuk akun ini.
-      </div>
-    </section>
+    <section class="ui-card rounded-lg border border-coal-100 bg-white"><x-ui.section-title>Data per modul</x-ui.section-title><p class="mt-1 mb-5 text-sm text-zinc-600">Jumlah data pada site yang dipilih.</p><x-ui.bar-chart :series="['Wellness'=>$metrics['wellness'],'HIPO / Nearmiss'=>$metrics['hipo'],'Input KPI'=>$metrics['kpi'],'Catatan Harian'=>$metrics['notes'],'Critical Control'=>$metrics['ccm']]" /></section>
   </div>
 </x-ui.page>
 @endsection

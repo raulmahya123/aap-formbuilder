@@ -31,7 +31,7 @@ class SiteController extends Controller
             })
             ->when($companyId, fn ($qq) => $qq->where('company_id', $companyId))
             ->orderBy('code')
-            ->paginate(max(1, $perPage))
+            ->paginate(\App\Support\Listing::perPage())->withQueryString()
             ->appends($request->only('q', 'company_id', 'per'));
 
         // dropdown filter perusahaan
@@ -122,7 +122,7 @@ class SiteController extends Controller
      */
     public function switch(Request $request)
     {
-        $request->validate([
+        $request->validateWithBag('siteSelection', [
             'site_id' => ['nullable','integer','exists:sites,id'],
         ]);
 
@@ -130,7 +130,17 @@ class SiteController extends Controller
             return back()->with('error','Kamu tidak punya akses ke site tersebut.');
         }
 
-        session(['active_site_id' => $request->site_id ?: null]);
-        return back()->with('ok','Active site updated.');
+        session(['active_site_id' => $request->filled('site_id') ? (int) $request->site_id : null]);
+        // Remove stale local site filters and page numbers when the global selection changes.
+        $previous = url()->previous();
+        $parts = parse_url($previous);
+        $current = parse_url($request->getSchemeAndHttpHost());
+        if (($parts['host'] ?? null) !== ($current['host'] ?? null) || ($parts['port'] ?? null) !== ($current['port'] ?? null)) {
+            return redirect()->route('dashboard')->with('ok', 'Site aktif diperbarui.');
+        }
+        parse_str($parts['query'] ?? '', $query);
+        unset($query['site_id'], $query['site'], $query['page']);
+        $target = '/'.ltrim($parts['path'] ?? '/', '/').($query ? '?'.http_build_query($query) : '');
+        return redirect($target)->with('ok', 'Site aktif diperbarui.');
     }
 }

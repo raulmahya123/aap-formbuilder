@@ -20,12 +20,20 @@ class CcmReportController extends Controller
     /* =========================================================
      * INDEX
      * ========================================================= */
-    public function index()
+    public function index(Request $request)
     {
+        $request->validate(['date_from' => ['nullable','date'], 'date_to' => ['nullable','date']]);
         $allowedJobsites = $this->jobsiteOptions()->pluck('value')->all();
+        $siteId = \App\Support\SiteSelection::id($request);
+        $site = $siteId ? Site::with('company:id,code,name')->findOrFail($siteId) : null;
+        $jobsite = $site ? ($site->company ? (($site->company->code ?: $site->company->name).'-'.($site->code ?: $site->name)) : ($site->code ?: $site->name)) : null;
         $reports = CcmReport::when(!auth()->user()->isSuperAdmin(), fn ($q) => $q->whereIn('jobsite', $allowedJobsites ?: ['__none__']))
+            ->when($jobsite, fn ($q) => $q->where('jobsite', $jobsite))
+            ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w->where('jobsite', 'like', '%'.$request->string('q').'%')->orWhere('nama_pelapor', 'like', '%'.$request->string('q').'%')))
+            ->when($request->filled('date_from'), fn ($q) => $q->whereDate('waktu_pelaporan', '>=', $request->date('date_from')))
+            ->when($request->filled('date_to'), fn ($q) => $q->whereDate('waktu_pelaporan', '<=', $request->date('date_to')))
             ->orderBy('waktu_pelaporan', 'desc')
-            ->paginate(10);
+            ->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         return view('admin.ccm.index', compact('reports'));
     }
@@ -179,12 +187,12 @@ class CcmReportController extends Controller
         ];
 
         foreach ($sections as $prefix => $controls) {
-            
+
             // LOGIC NAMA KOLOM FLAG (Kendaraan beda sendiri di DB)
             $flag = ($prefix === 'kendaraan') ? 'kendaraan_ada_kegiatan' : $prefix . '_ada';
 
             if ($request->boolean($flag)) {
-                
+
                 // 1. Validasi Kolom Deskripsi Teks (Menyesuaikan ENUM di Migrasi)
                 if ($prefix === 'kritis_baru') {
                     $rules[$prefix . '_pekerjaan']   = 'required|string';
@@ -200,7 +208,7 @@ class CcmReportController extends Controller
                 // 2. Validasi Kontrol & Evidence
                 foreach ($controls as $ctrl) {
                     $rules["{$prefix}_{$ctrl}"] = 'required|string';
-                    
+
                     $fileRule = $isCreate ? 'required' : 'nullable';
                     $rules["{$prefix}_{$ctrl}_evidence"] = "$fileRule|file|image|max:10240"; // Max 10MB
                 }
@@ -223,9 +231,9 @@ class CcmReportController extends Controller
         $manager = new ImageManager(new Driver());
 
         foreach ($request->allFiles() as $field => $file) {
-            
+
             if ($file && $file->isValid()) {
-                
+
                 // Hapus file lama jika proses Update
                 if ($existingReport && !empty($existingReport->$field)) {
                     if (Storage::disk('mandala_uploads')->exists($existingReport->$field)) {
@@ -235,7 +243,7 @@ class CcmReportController extends Controller
 
                 // Generate nama unik
                 $filename = 'ccm-evidence/' . Str::random(40) . '.jpg';
-                
+
                 try {
                     // Proses Kompresi Image Manager V3
                     $image = $manager->read($file);

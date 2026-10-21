@@ -16,8 +16,7 @@
 </x-ui.page-actions>
 </x-ui.page-header>
 
-    @if(session('success'))<div class="toast toast-success mb-5">{{ session('success') }}</div>@endif
-    @if($errors->any())<div class="toast toast-error mb-5">Mohon periksa kembali isian form.</div>@endif
+
 
     <form id="page-primary-form" method="POST" action="{{ route('wellness.store') }}" class="ui-card space-y-5 rounded-lg border border-[#D4D4D8] bg-white p-6 shadow-none sm:p-9">
   @csrf
@@ -25,7 +24,7 @@
         <x-ui.section-title class="mb-4 text-lg font-semibold text-[#713F12]">Data Karyawan</x-ui.section-title>
         <div class="grid gap-5 sm:grid-cols-2">
           @foreach([['name','Nama Lengkap','Nama lengkap'],['nik','NIK (Nomor Induk Karyawan)','Nomor induk karyawan'],['position','Jabatan','Jabatan'],['site','Site','Nama site']] as [$field,$label,$placeholder])
-          <div><label class="mb-2 block text-sm font-medium">{{ $label }} <span class="text-red-500">*</span></label><input name="{{ $field }}" value="{{ old($field) }}" required class="w-full rounded-lg border-[#D4D4D8] px-4 py-3" placeholder="{{ $placeholder }}">@error($field)<p class="form-error">{{ $message }}</p>@enderror</div>
+          <x-ui.form-field :name="$field" :label="$label" required><x-ui.form-input :id="$field" :name="$field" :value="old($field)" required :placeholder="$placeholder" /></x-ui.form-field>
           @endforeach
         </div>
       </section>
@@ -44,5 +43,6 @@
       <p class="text-center text-xs text-slate-400">Data digunakan untuk pemantauan kesiapan kerja oleh admin terkait.</p>
     </form>
   </main>
+  <x-ui.toast-provider />
 </body>
 </html>

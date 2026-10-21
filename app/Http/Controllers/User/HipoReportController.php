@@ -13,13 +13,16 @@ use Illuminate\Support\Facades\Storage;
 
 class HipoReportController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $siteId = \App\Support\SiteSelection::id($request);
         return view('user.hipo.index', [
             'reports' => HipoReport::where('user_id', Auth::id())
+                ->when($siteId, fn ($q) => $q->where('site_id', $siteId))
+                ->when($request->filled('q'), fn ($q) => $q->where('description','like','%'.$request->string('q').'%'))
+                ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()))
                 ->latest()
-                ->paginate(15)
-                ->withQueryString()
+                ->paginate(\App\Support\Listing::perPage())->withQueryString()
         ]);
     }
 

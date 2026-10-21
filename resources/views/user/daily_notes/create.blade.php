@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @section('title','Input Catatan Harian')
-
 @section('content')
 @php
   // Map sites per company -> untuk filter dropdown site
@@ -8,11 +7,9 @@
   $sitesByCompany = collect($sites ?? [])->groupBy(fn($s) => (string)$s->company_id)
     ->map(fn($rows) => $rows->map(fn($s)=>['id'=>$s->id,'name'=>$s->name,'company_id'=>$s->company_id])->values())
     ->toArray();
-
   // Pakai maroon sesuai swatch (#610E1C) sebagai fallback
   $brandMaroon = 'var(--brand-maroon,#713F12)';
 @endphp
-
 <style>
   /* Mini design tokens */
   :root{
@@ -20,14 +17,12 @@
     --maroon-weak: color-mix(in oklab, var(--maroon) 14%, white);
     --maroon-soft: color-mix(in oklab, var(--maroon) 10%, white);
   }
-
   /* Glowing focus */
   .focus-maroon:focus{
     outline: none;
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--maroon) 30%, transparent);
     border-color: var(--maroon) !important;
   }
-
   /* Subtle card */
   .card {
     background: #fff;
@@ -35,7 +30,6 @@
     border-radius: var(--radius);
     box-shadow: none;
   }
-
   .chip {
     border: 1px solid #d8d8dd;
     border-radius: var(--radius);
@@ -45,11 +39,6 @@
     transition: background .2s ease, border-color .2s ease;
   }
   .chip:hover { background: #f7f7fb; }
-
-
-
-
-
   .section-title{
     font-size: var(--type-section);
     font-weight: 600;
@@ -57,7 +46,6 @@
     color: #6b7280;
     text-transform: none;
   }
-
   /* Input base */
   .input {
     width: 100%;
@@ -67,13 +55,11 @@
     background: #fff;
     transition: box-shadow .2s ease, border-color .2s ease, background .2s ease;
   }
-
   .muted {
     color: #64748b;
     font-size: 12px;
   }
 </style>
-
 <div class="max-w-4xl mx-auto space-y-5" style="--brand-maroon:#713F12;">
   {{-- Hero header --}}
   <x-ui.page-header>
@@ -108,13 +94,7 @@
       </div>
     </div>
   </div>
-
   {{-- Alerts --}}
-  @if(session('success'))
-    <div class="card p-4 border-emerald-200" style="background: #ecfdf5;">
-      <div class="text-emerald-800">{{ session('success') }}</div>
-    </div>
-  @endif
   @if ($errors->any())
     <div class="card p-4 border-rose-200" style="background: #fff1f2;">
       <div class="font-semibold mb-1" style="color:#be123c;">Periksa kembali:</div>
@@ -123,11 +103,9 @@
       </ul>
     </div>
   @endif
-
   {{-- Form --}}
   <form id="page-primary-form" action="{{ route('user.daily_notes.store') }}" method="post" class="card p-6 space-y-5" x-data="noteForm()">
   @csrf
-
     {{-- Section: Konteks --}}
     <div class="space-y-3">
       <div class="section-title">Konteks</div>
@@ -145,7 +123,6 @@
           </select>
           @error('company_id')<p class="text-sm mt-1" style="color:#b91c1c;">{{ $message }}</p>@enderror
         </div>
-
         {{-- Site (terfilter by perusahaan) --}}
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Site (opsional)</label>
@@ -166,13 +143,10 @@
         </div>
       </div>
     </div>
-
     <hr class="border-t border-slate-200">
-
     {{-- Section: Konten --}}
     <div class="space-y-4">
       <div class="section-title">Konten</div>
-
       {{-- Judul --}}
       <div>
         <div class="flex items-center justify-between">
@@ -189,7 +163,6 @@
           class="input focus-maroon @error('title') border-rose-500 @enderror">
         @error('title')<p class="text-sm mt-1" style="color:#b91c1c;">{{ $message }}</p>@enderror
       </div>
-
       {{-- Isi Catatan --}}
       <div>
         <div class="flex items-center justify-between">
@@ -205,7 +178,6 @@
           placeholder="Tulis kronologi, keputusan, follow-up, atau highlight penting…"
           class="input focus-maroon font-[450] @error('content') border-rose-500 @enderror">{{ old('content') }}</textarea>
         @error('content')<p class="text-sm mt-1" style="color:#b91c1c;">{{ $message }}</p>@enderror
-
         {{-- Quick tags --}}
         <div class="mt-2 flex flex-wrap gap-2">
           @foreach(['[Meeting]','[Follow-up]','[Issue]','[Decision]','[Reminder]','[Risk]','[Blocking]'] as $chip)
@@ -215,9 +187,7 @@
         </div>
       </div>
     </div>
-
     <hr class="border-t border-slate-200">
-
     {{-- Section: Waktu --}}
     <div class="space-y-3">
       <div class="section-title">Waktu</div>
@@ -235,18 +205,14 @@
         * Catatan tersimpan atas nama <strong>{{ auth()->user()->name ?? 'Anda' }}</strong>.
       </div>
     </div>
-
     {{-- Actions --}}
     <div class="flex items-center justify-end gap-3 pt-2">
       <a href="{{ route('user.daily_notes.index') }}" class="btn-outline">Batal</a>
-
     </div>
   </form>
 </div>
-
 {{-- Dataset untuk JS filter site --}}
 <div id="dn-dataset" data-sites='@json($sitesByCompany)'></div>
-
 {{-- Alpine (CDN ringan jika belum ada) --}}
 <script>
   if (!window.alpineLoaded) {
@@ -261,7 +227,6 @@
     };
     document.head.appendChild(s);
   }
-
   function noteForm(){
     return {
       title: @json(old('title','')),
@@ -275,35 +240,27 @@
       }
     }
   }
-
   (function(){
     const meta   = document.getElementById('dn-dataset');
     const mapRaw = JSON.parse(meta.dataset.sites || '{}');
     const SITES_BY_COMPANY = {};
     Object.keys(mapRaw).forEach(k => SITES_BY_COMPANY[String(k)] = mapRaw[k]);
-
     const companySel = document.getElementById('company_id');
     const siteSel    = document.getElementById('site_id');
-
     function repopulateSites(companyId, keepSiteId){
       const rows = SITES_BY_COMPANY[String(companyId)] || [];
-
       // clear
       while (siteSel.options.length) siteSel.remove(0);
-
       // default
       siteSel.appendChild(new Option('— Pilih Site —',''));
-
       // fill
       rows.forEach(r => {
         const opt = new Option(r.name, r.id);
         if (keepSiteId && String(keepSiteId) === String(r.id)) opt.selected = true;
         siteSel.appendChild(opt);
       });
-
       siteSel.disabled = false;
     }
-
     if (companySel) {
       companySel.addEventListener('change', function(){
         repopulateSites(this.value, null);

@@ -9,10 +9,10 @@ use Illuminate\Support\Str;
 
 class DepartmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Department::class);
-        $departments = Department::orderBy('name')->paginate(20);
+        $departments = Department::query()->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))->withCount('users')->orderBy('name')->paginate(\App\Support\Listing::perPage())->withQueryString();
         return view('admin.departments.index', compact('departments'));
     }
 

@@ -38,12 +38,12 @@
   padding: var(--space-2) var(--space-4); gap: var(--space-2); border-radius: var(--radius);
   white-space: nowrap;
 }
-.ui-shell main input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='range']),
-.ui-shell main select:not([multiple]):not([size]),
-.ui-auth input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
-.ui-auth select:not([multiple]):not([size]),
-.ui-public input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='range']),
-.ui-public select:not([multiple]):not([size]), .ui-input {
+:where(.ui-shell main input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='range'])),
+:where(.ui-shell main select:not([multiple]):not([size])),
+:where(.ui-auth input:not([type='checkbox']):not([type='radio']):not([type='hidden'])),
+:where(.ui-auth select:not([multiple]):not([size])),
+:where(.ui-public input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='range'])),
+:where(.ui-public select:not([multiple]):not([size]), .ui-input) {
   height: var(--input-height); min-height: var(--input-height); padding-block: var(--space-2); padding-inline: var(--space-3); border-radius: var(--radius);
 }
 :where(main, .ui-auth) textarea { min-height: 96px; padding: var(--space-3); border-radius: var(--radius); }

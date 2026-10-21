@@ -1,5 +1,4 @@
 @props(['paginator', 'perPageOptions' => [10, 25, 50, 100], 'perPageParam' => 'per_page'])
-@if($paginator->hasPages())
 @php
   $currentPage = $paginator->currentPage();
   $lastPage = $paginator->lastPage();
@@ -19,7 +18,7 @@
 
   // Helper to build URL preserving query params
   $buildUrl = function ($page, $pp = null) use ($paginator, $perPageParam, $perPage) {
-    $params = request()->except(['page', $perPageParam]);
+    $params = request()->except(['page', $perPageParam, 'per', 'perPage']);
     $params['page'] = $page;
     $params[$perPageParam] = $pp ?? $perPage;
     return url()->current() . '?' . http_build_query($params);
@@ -31,12 +30,13 @@
   </div>
   <div class="ui-table-pagination__controls">
     <div class="ui-table-pagination__per-page">
-      <label for="dt-per-page">Rows per page:</label>
-      <select id="dt-per-page" onchange="window.location.href=this.value">
+      <label>Baris per halaman:
+      <select aria-label="Baris per halaman" onchange="window.location.href=this.value">
         @foreach($perPageOptions as $opt)
           <option value="{{ $buildUrl(1, $opt) }}" @selected($perPage == $opt)>{{ $opt }}</option>
         @endforeach
       </select>
+      </label>
     </div>
     <nav class="ui-table-pagination__pages" aria-label="Pagination">
       {{-- Previous --}}
@@ -69,4 +69,3 @@
     </nav>
   </div>
 </div>
-@endif

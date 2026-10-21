@@ -1,13 +1,10 @@
 @extends('layouts.app')
 @section('title','Kontrak')
-
 @section('content')
 @php
   $isSuper = auth()->check() && auth()->user()->isSuperAdmin();
 @endphp
-
-<div class="max-w-7xl mx-auto space-y-5">
-
+<div class="ui-module-stack w-full max-w-7xl mx-auto space-y-5">
   {{-- Header + Actions --}}
   <x-ui.page-header>
   <div class="ui-page-header__copy"><div>
@@ -16,35 +13,29 @@
     </div></div>
   <x-ui.page-actions>@if($isSuper)
       <div class="flex items-center gap-2">
-        <x-ui.link icon="plus" variant="primary" href="{{ route('admin.contracts.create') }}"
-           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:opacity-90"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+        <x-ui.link data-modal-form icon="plus" variant="primary" href="{{ route('admin.contracts.create') }}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:opacity-90">
           Upload Baru
         </x-ui.link>
       </div>
     @endif</x-ui.page-actions>
 </x-ui.page-header>
-
   {{-- Flash --}}
-  @if(session('ok'))
-    <div class="p-3 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">{{ session('ok') }}</div>
-  @endif
   @if(session('err'))
     <div class="p-3 rounded-lg bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>
   @endif
-
   {{-- Toolbar: Search + filter sederhana --}}
-  <form method="get" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+  <x-ui.table-toolbar class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
     <div class="relative flex-1">
-      <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari judul kontrak…"
-             class="w-full border rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-[#713F12]">
-      <span class="absolute right-3 top-2.5 text-coal-400">🔎</span>
+      <x-ui.table-search   name="q" value="{{ request('q') }}" placeholder="Cari judul kontrak…"
+             class="w-full border rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-[#713F12]" />
+
     </div>
     <x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border">Filter</x-ui.button>
     @if(request()->has('q') && request('q')!=='')
       <x-ui.link variant="secondary" href="{{ route('admin.contracts.index') }}" class="px-4 py-2 rounded-lg border">Reset</x-ui.link>
     @endif
-  </form>
-
+  </x-ui.table-toolbar>
   {{-- Desktop: Table --}}
   <div class="hidden md:block">
     <div class="overflow-hidden rounded-lg border shadow-none">
@@ -99,9 +90,7 @@
                   @if($isSuper)
                     <x-ui.icon-button action="view" label="Lihat detail" href="{{ route('admin.contracts.show',$c) }}" />
                   @endif
-
                   <x-ui.icon-button action="download" label="Unduh" href="{{ route('admin.contracts.download',$c) }}" />
-
                   @can('delete', $c)
                     <form action="{{ route('admin.contracts.destroy',$c) }}" method="POST" class="inline"
                           data-confirm="Yakin mau hapus kontrak ini? Tindakan ini tidak bisa dibatalkan.">
@@ -114,20 +103,12 @@
               </x-ui.table-actions></td>
             </tr>
           @empty
-            <tr>
-              <td colspan="6" class="p-6 text-center text-coal-500">
-                Belum ada kontrak.
-                @if($isSuper)
-                  <a href="{{ route('admin.contracts.create') }}" class="text-[#713F12] underline">Upload sekarang</a>.
-                @endif
-              </td>
-            </tr>
-          @endforelse
+<x-ui.table-empty-state colspan="6"></x-ui.table-empty-state>
+@endforelse
         </tbody>
       </x-ui.table>
     </div>
   </div>
-
   {{-- Mobile: Cards --}}
   <div class="grid gap-3 md:hidden">
     @forelse($contracts as $c)
@@ -146,7 +127,6 @@
             {{ method_exists($c,'viewers') ? $c->viewers->count() : ($c->viewers_count ?? 0) }} user
           </span>
         </div>
-
         <div class="mt-3 flex items-center gap-2">
           <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#713F12">
             {{ strtoupper(\Illuminate\Support\Str::of(optional($c->owner)->name)->explode(' ')->map(fn($s)=>\Illuminate\Support\Str::substr($s,0,1))->take(2)->implode('')) ?: 'U' }}
@@ -156,16 +136,13 @@
             <div class="text-xs text-coal-500 truncate">{{ optional($c->owner)->email ?? '' }}</div>
           </div>
         </div>
-
         <div class="mt-3 flex items-center justify-between text-sm text-coal-600">
           <div>{{ number_format(($c->size_bytes ?? 0)/1024,1) }} KB</div>
           <div class="flex flex-nowrap items-center gap-2">
             @if($isSuper)
               <x-ui.icon-button action="view" label="Lihat detail" href="{{ route('admin.contracts.show',$c) }}" />
             @endif
-
             <x-ui.icon-button action="download" label="Unduh" href="{{ route('admin.contracts.download',$c) }}" />
-
             @can('delete', $c)
               <form action="{{ route('admin.contracts.destroy',$c) }}" method="POST" class="inline"
                     data-confirm="Hapus kontrak ini?">
@@ -181,16 +158,14 @@
       <div class="rounded-lg border p-6 text-center text-coal-500">
         Belum ada kontrak.
         @if($isSuper)
-          <a href="{{ route('admin.contracts.create') }}" class="text-[#713F12] underline">Upload sekarang</a>.
+          <a data-modal-form href="{{ route('admin.contracts.create') }}" class="text-[#713F12] underline">Upload sekarang</a>.
         @endif
       </div>
     @endforelse
   </div>
-
   {{-- Pagination --}}
   <div>
     {{ $contracts->withQueryString()->links() }}
   </div>
-
 </div>
 @endsection

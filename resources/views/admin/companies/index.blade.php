@@ -1,51 +1,18 @@
 {{-- resources/views/admin/companies/index.blade.php --}}
 @extends('layouts.app')
-
 @section('title','Companies')
-
 @section('content')
 <x-ui.page class="max-w-7xl mx-auto">
   <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Companies</x-ui.page-title>
 <x-ui.page-description>Kelola data dan profil perusahaan.</x-ui.page-description></div>
   <x-ui.page-actions><div class="flex items-center gap-2">
-
-      <x-ui.link icon="plus" variant="primary" href="{{ route('admin.companies.create') }}"
+      <x-ui.link data-modal-form icon="plus" variant="primary" href="{{ route('admin.companies.create') }}"
          class="px-4 py-2 rounded-lg hover:brightness-105">Tambah
       </x-ui.link>
     </div></x-ui.page-actions>
 </x-ui.page-header>
-<div class="ui-page-filters"><form method="GET" action="{{ route('admin.companies.index') }}" class="hidden md:flex items-center gap-2">
-        <input
-          type="text"
-          name="q"
-          value="{{ request('q') }}"
-          placeholder="Cari nama/kode…"
-          class="rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)]"
-        >
-        <x-ui.button variant="primary"
-          class="px-3 py-2 rounded-lg border">
-          Cari
-        </x-ui.button>
-      </form></div>
-
-  {{-- Mobile search --}}
-  <form method="GET" action="{{ route('admin.companies.index') }}" class="md:hidden mb-4">
-    <div class="flex items-center gap-2">
-      <input
-        type="text"
-        name="q"
-        value="{{ request('q') }}"
-        placeholder="Cari nama/kode…"
-        class="min-w-0 flex-1 rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)]"
-      >
-      <x-ui.button variant="primary"
-        class="shrink-0 px-3 py-2 rounded-lg border">
-        Cari
-      </x-ui.button>
-    </div>
-  </form>
-
+<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari nama atau kode company…" aria-label="Cari company" /><x-ui.table-filter name="status" :options="['active'=>'Aktif','inactive'=>'Nonaktif','archived'=>'Arsip']" label="Status" placeholder="Semua status" /><x-ui.link variant="secondary" :href="route('admin.companies.index')">Reset</x-ui.link></x-ui.table-toolbar>
   <x-ui.panel :padded="false" class="rounded-lg border bg-white overflow-hidden">
     <div class="overflow-x-auto">
       <x-ui.table class="min-w-full text-sm">
@@ -94,7 +61,7 @@
               <td class="ui-action-cell px-4 py-3"><x-ui.table-actions>
                 <div class="flex justify-end gap-2">
                   <x-ui.icon-button action="view" label="Lihat detail" href="{{ route('admin.companies.show', $company) }}" />
-                  <x-ui.icon-button action="edit" label="Edit" href="{{ route('admin.companies.edit', $company) }}" />
+                  <x-ui.icon-button data-modal-form action="edit" label="Edit" href="{{ route('admin.companies.edit', $company) }}" />
                   <form action="{{ route('admin.companies.destroy', $company) }}" method="POST" data-confirm="Hapus perusahaan ini?">
                     @csrf @method('DELETE')
                     <x-ui.icon-button action="delete" label="Hapus" type="submit" />
@@ -103,14 +70,11 @@
               </x-ui.table-actions></td>
             </tr>
           @empty
-            <tr>
-              <td colspan="8" class="px-4 py-6 text-center text-coal-500">Belum ada data perusahaan.</td>
-            </tr>
-          @endforelse
+<x-ui.table-empty-state colspan="8"></x-ui.table-empty-state>
+@endforelse
         </tbody>
       </x-ui.table>
     </div>
-
     @if(method_exists($companies, 'links'))
       <div class="px-4 py-3 border-t">
         {{ $companies->withQueryString()->links() }}

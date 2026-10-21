@@ -18,8 +18,8 @@ class DailyNoteController extends Controller
         $q           = trim((string) $request->input('q', ''));
         $userId      = $request->input('user_id');          // opsional: filter penulis
         $companyId   = $request->input('company_id');       // opsional: filter perusahaan
-        $siteId      = $request->input('site_id');          // opsional: filter site
-        $perPageRaw  = $request->input('perPage', '25');    // 'all' atau angka
+        $siteId      = \App\Support\SiteSelection::id($request);
+        $perPageRaw  = $request->input('per_page', $request->input('perPage', '10')); // Keep the existing explicit "all" mode.
         $perPageInt  = is_numeric($perPageRaw) ? (int) $perPageRaw : null;
 
         if ($perPageInt !== null) {
@@ -56,7 +56,7 @@ class DailyNoteController extends Controller
 
         $notes = $perPageRaw === 'all'
             ? $query->get()
-            : $query->paginate($perPageInt ?? 25)->withQueryString();
+            : $query->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         // siapkan daftar perusahaan & site untuk filter di view
         $companies = Company::orderBy('code')->get(['id','code','name']);

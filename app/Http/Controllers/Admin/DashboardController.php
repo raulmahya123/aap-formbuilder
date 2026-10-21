@@ -20,9 +20,10 @@ class DashboardController extends Controller
         if (is_array($allowed)) $sitesQuery->whereIn('id', $allowed ?: [-1]);
         $sites = $sitesQuery->get(['id','code','name','company_id']);
 
-        $selectedSiteId = $r->integer('site_id') ?: null;
+        $selectedSiteId = \App\Support\SiteSelection::id($r);
         if ($selectedSiteId && !$r->user()->hasSiteAccess($selectedSiteId)) abort(403);
         $selectedSite = $selectedSiteId ? $sites->firstWhere('id', $selectedSiteId) : null;
+        abort_if($selectedSiteId && !$selectedSite, 404);
 
         $siteFilter = fn ($q, $column = 'site_id') => is_array($allowed)
             ? $q->whereIn($column, $allowed ?: [-1])

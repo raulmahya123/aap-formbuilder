@@ -23,7 +23,7 @@ class ReportController extends Controller
     public function report(Request $r)
     {
         $scope  = $r->string('scope')->lower()->value() ?: 'month'; // day|week|month|year
-        $siteId = $r->input('site_id'); // null = semua site
+        $siteId = \App\Support\SiteSelection::id($r);
         $allowedSiteIds = auth()->user()->allowedSiteIds();
         if ($siteId) Gate::authorize('site-access', (int) $siteId);
 

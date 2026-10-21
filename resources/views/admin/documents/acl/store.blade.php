@@ -1,7 +1,5 @@
 @extends('layouts.app')
-
 @section('title', 'Kelola Akses Dokumen')
-
 @section('content')
 <x-ui.page class="max-w-5xl mx-auto">
   <x-ui.page-header>
@@ -9,12 +7,7 @@
 <x-ui.page-description>Lihat informasi dan status operasional.</x-ui.page-description></div>
   <x-ui.page-actions><a href="{{ url()->previous() }}" class="text-sm underline">Kembali</a></x-ui.page-actions>
 </x-ui.page-header>
-
   {{-- Flash message --}}
-  @if(session('success'))
-    <div class="p-3 rounded-lg bg-green-100 text-green-800">{{ session('success') }}</div>
-  @endif
-
   {{-- Error --}}
   @if ($errors->any())
     <div class="p-3 rounded-lg bg-red-100 text-red-700">
@@ -25,7 +18,6 @@
       </ul>
     </div>
   @endif
-
   {{-- Form Tambah Akses --}}
   <form method="POST" action="{{ route('admin.documents.acl.store') }}" class="ui-card bg-white border rounded-lg space-y-4">
     @csrf
@@ -39,7 +31,6 @@
           @endforeach
         </select>
       </div>
-
       <div>
         <label class="text-sm font-medium">User</label>
         <select name="user_id" class="mt-1 w-full border rounded-lg px-2 py-2">
@@ -50,7 +41,6 @@
         </select>
         <p class="text-xs text-gray-500 mt-1">Pilih salah satu: User <em>atau</em> Departemen</p>
       </div>
-
       <div>
         <label class="text-sm font-medium">Departemen</label>
         <select name="department_id" class="mt-1 w-full border rounded-lg px-2 py-2">
@@ -60,7 +50,6 @@
           @endforeach
         </select>
       </div>
-
       <div>
         <label class="text-sm font-medium">Permission</label>
         <select name="perm" class="mt-1 w-full border rounded-lg px-2 py-2" required>
@@ -70,12 +59,10 @@
         </select>
       </div>
     </div>
-
     <div class="pt-2">
       <x-ui.button variant="primary" class="px-4 py-2 rounded-lg">Tambah</x-ui.button>
     </div>
   </form>
-
   {{-- Daftar Akses --}}
   <x-ui.panel :padded="false" class="bg-white border rounded-lg overflow-x-auto">
     <x-ui.table class="w-full text-sm">
@@ -104,10 +91,8 @@
             </x-ui.table-actions></td>
           </tr>
         @empty
-          <tr>
-            <td colspan="5" class="p-4 text-center text-gray-500">Belum ada akses.</td>
-          </tr>
-        @endforelse
+<x-ui.table-empty-state colspan="5"></x-ui.table-empty-state>
+@endforelse
       </tbody>
     </x-ui.table>
   </x-ui.panel>

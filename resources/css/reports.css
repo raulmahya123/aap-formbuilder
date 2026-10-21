@@ -1,0 +1,78 @@
+
+  .report-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: none;
+  }
+  .report-chart {
+    position: relative;
+    height: 320px;
+  }
+  .indicator-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    padding: 16px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .indicator-card:hover {
+    border-color: #cbb291;
+    box-shadow: none;
+  }
+  .kpi-meter {
+    position: relative;
+    height: 12px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    overflow: visible;
+  }
+  .kpi-meter__bar {
+    height: 100%;
+    min-width: 4px;
+    border-radius: inherit;
+    background: var(--blue);
+  }
+  .kpi-meter__bar.is-over {
+    background: #dc2626;
+  }
+  .kpi-meter__threshold {
+    position: absolute;
+    top: -7px;
+    bottom: -7px;
+    width: 2px;
+    border-radius: 999px;
+    background: #f59e0b;
+    transform: translateX(-1px);
+  }
+  .kpi-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .kpi-meta > div {
+    min-width: 0;
+    border-radius: 8px;
+    background: #f8fafc;
+    padding: 8px 10px;
+  }
+  .category-chart {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+  }
+  .mini-chart-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    padding: 12px;
+  }
+  .mini-chart {
+    position: relative;
+    height: 108px;
+  }
+  .mini-chart canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+  }

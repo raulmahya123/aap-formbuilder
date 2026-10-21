@@ -21,17 +21,7 @@ class IndicatorDailyController extends Controller
     {
         if (!$user) return [];
 
-        // Jika punya helper isAdmin() yang mencakup super_admin
-        if (method_exists($user, 'isAdmin') && $user->isAdmin()) {
-            return null; // semua site
-        }
-
-        // Ambil dari relasi pivot
-        if (method_exists($user, 'sites')) {
-            return $user->sites()->pluck('sites.id')->all();
-        }
-
-        return []; // kalau relasi tidak ada, berarti tidak punya akses
+        return $user->allowedSiteIds();
     }
 
     /**
@@ -43,6 +33,7 @@ class IndicatorDailyController extends Controller
     {
         $user           = $request->user();
         $allowedSiteIds = $this->allowedSiteIds($user);
+        $siteId = \App\Support\SiteSelection::id($request);
 
         Log::info('DAILY INDEX: listing data', [
             'user_id'         => optional($user)->id,
@@ -62,8 +53,8 @@ class IndicatorDailyController extends Controller
                 $q->whereIn('site_id', $allowedSiteIds)
             )
             // Filter tambahan dari UI
-            ->when($request->filled('site_id'), fn($q) =>
-                $q->where('site_id', (int) $request->site_id)
+            ->when($siteId, fn($q) =>
+                $q->where('site_id', $siteId)
             )
             ->when($request->filled('indicator_id'), fn($q) =>
                 $q->where('indicator_id', (int) $request->indicator_id)
@@ -85,7 +76,7 @@ class IndicatorDailyController extends Controller
             $sitesQ->whereIn('id', $allowedSiteIds ?: [-1]); // -1 agar hasil kosong jika tidak ada akses
         }
 
-        $rows = $query->paginate(20)->withQueryString();
+        $rows = $query->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         Log::info('DAILY INDEX: result summary', [
             'user_id'      => optional($user)->id,
@@ -99,7 +90,7 @@ class IndicatorDailyController extends Controller
             'indicators' => Indicator::orderBy('order_index')
                 ->orderBy('id')
                 ->get(['id', 'name', 'code', 'unit']),
-            'filters'    => $request->only(['site_id', 'indicator_id', 'date']),
+            'filters'    => array_merge($request->only(['indicator_id', 'date']), ['site_id' => $siteId]),
         ]);
     }
 

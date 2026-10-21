@@ -38,6 +38,11 @@ class QaThread extends Model
         return $this->hasMany(QaMessage::class, 'thread_id');
     }
 
+    public function latestMessage(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(QaMessage::class, 'thread_id')->latestOfMany();
+    }
+
     /** Peserta (untuk thread private) */
     public function participants(): BelongsToMany
     {

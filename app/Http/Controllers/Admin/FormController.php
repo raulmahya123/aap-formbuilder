@@ -28,6 +28,7 @@ class FormController extends Controller
         $q = Form::accessibleTo($r->user())
             ->with(['department:id,name', 'creator:id,name', 'company:id,code,name', 'site:id,name,company_id'])
             ->latest();
+        $q->when($r->filled('q'), fn ($query) => $query->where('title', 'like', '%'.$r->string('q').'%'));
 
         if ($r->filled('department_id')) {
             $q->where('department_id', (int) $r->department_id);
@@ -35,8 +36,9 @@ class FormController extends Controller
         if ($r->filled('company_id') && Schema::hasColumn('forms', 'company_id')) {
             $q->where('company_id', (int) $r->company_id);
         }
-        if ($r->filled('site_id') && Schema::hasColumn('forms', 'site_id')) {
-            $q->where('site_id', (int) $r->site_id);
+        $selectedSiteId = \App\Support\SiteSelection::id($r);
+        if ($selectedSiteId && Schema::hasColumn('forms', 'site_id')) {
+            $q->where('site_id', $selectedSiteId);
         }
         if ($r->filled('doc_type') && Schema::hasColumn('forms', 'doc_type')) {
             $docType = strtoupper((string) $r->doc_type);
@@ -45,11 +47,11 @@ class FormController extends Controller
             }
         }
 
-        $allowed = [10, 20, 50, 100];
+        $allowed = [10, 25, 50, 100];
         $perPage = (int) $r->input('per_page', 10);
         if (!in_array($perPage, $allowed, true)) $perPage = 10;
 
-        $forms       = $q->paginate($perPage)->appends($r->only('department_id','company_id','site_id','doc_type','per_page'));
+        $forms       = $q->paginate(\App\Support\Listing::perPage())->withQueryString();
         $departments = $this->availableDepartments($r);
         $companies   = Company::orderBy('code')->get(['id','code','name']);
         $sites       = $this->availableSites($r);
@@ -169,7 +171,7 @@ class FormController extends Controller
                 }
 
                 return redirect()
-                    ->route('admin.forms.edit', $form)
+                    ->route($r->filled('_ui_modal_url') ? 'admin.forms.index' : 'admin.forms.edit', $r->filled('_ui_modal_url') ? [] : $form)
                     ->with('ok', 'Form dibuat');
             });
         } catch (Throwable $e) {
@@ -181,7 +183,7 @@ class FormController extends Controller
             ]);
 
             return back()
-                ->withErrors(['general' => 'Terjadi kesalahan saat menyimpan: '.$e->getMessage()])
+                ->withErrors(['general' => 'Form belum dapat disimpan. Periksa isian atau lampiran, lalu coba lagi.'])
                 ->withInput();
         }
     }
@@ -296,7 +298,7 @@ class FormController extends Controller
 
                 Log::info('forms.update:done', ['id' => $form->id]);
 
-                return back()->with('ok', 'Form diperbarui');
+                return $r->filled('_ui_modal_url') ? redirect()->route('admin.forms.index')->with('ok', 'Form diperbarui') : back()->with('ok', 'Form diperbarui');
             });
         } catch (Throwable $e) {
             Log::error('forms.update:error', [
@@ -306,7 +308,7 @@ class FormController extends Controller
                 'line'  => $e->getLine(),
             ]);
             return back()
-                ->withErrors(['general' => 'Gagal update: '.$e->getMessage()])
+                ->withErrors(['general' => 'Form belum dapat diperbarui. Periksa isian atau lampiran, lalu coba lagi.'])
                 ->withInput();
         }
     }
@@ -325,7 +327,7 @@ class FormController extends Controller
             return redirect()->route('admin.forms.index')->with('ok', 'Form dihapus');
         } catch (Throwable $e) {
             Log::error('forms.destroy:error', ['id' => $form->id, 'msg' => $e->getMessage()]);
-            return back()->withErrors(['general' => 'Gagal hapus: '.$e->getMessage()]);
+            return back()->withErrors(['general' => 'Form belum dapat dihapus. Periksa relasi data atau hubungi administrator.']);
         }
     }
 

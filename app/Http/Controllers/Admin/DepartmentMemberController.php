@@ -8,10 +8,10 @@ use Illuminate\Http\Request;
 
 class DepartmentMemberController extends Controller
 {
-    public function index(Department $department)
+    public function index(Request $request, Department $department)
     {
         $this->authorize('update', $department); // optional kalau pakai DepartmentPolicy
-        $members = $department->users()->withPivot('dept_role')->get();
+        $members = $department->users()->withPivot('dept_role')->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w->where('users.name','like','%'.$request->string('q').'%')->orWhere('users.email','like','%'.$request->string('q').'%')))->paginate(\App\Support\Listing::perPage())->withQueryString();
         $users   = User::orderBy('name')->get();
         return view('admin.departments.members', compact('department','members','users'));
     }

@@ -1,12 +1,7 @@
 @extends('layouts.app')
-
 @section('content')
-<x-ui.page
-  x-data="{ dark: (localStorage.getItem('theme') ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark' }"
-  x-init="document.documentElement.classList.toggle('dark', dark)"
-  ::class="dark ? 'dark' : ''"
-  class="min-h-screen text-coal-800 dark:text-ivory-100">
-  <div class="max-w-6xl mx-auto">
+<x-ui.page>
+  <div class="w-full max-w-6xl mx-auto">
     <!-- HEADER -->
     <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Entries</x-ui.page-title>
@@ -16,18 +11,14 @@
         ⬇️ Export CSV
       </x-ui.link></x-ui.page-actions>
 </x-ui.page-header>
-
     <!-- FILTER FORM -->
-    <form method="get" class="mb-4 grid md:grid-cols-4 gap-3">
-      <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari data (contoh: nama)"
-        class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500">
-
+    <x-ui.table-toolbar class="mb-4 grid md:grid-cols-4 gap-3">
+      <x-ui.table-search   name="q" value="{{ request('q') }}" placeholder="Cari data (contoh: nama)"
+        class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500" />
       <input type="text" name="user" value="{{ request('user') }}" placeholder="Nama/Email user"
         class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500">
-
       <input type="number" name="form_id" value="{{ request('form_id') }}" placeholder="Form ID"
         class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500">
-
       <select name="status"
         class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500">
         <option value="">— Semua Status —</option>
@@ -36,7 +27,6 @@
         <option value="approved" @selected(request('status')==='approved' )>Approved</option>
         <option value="rejected" @selected(request('status')==='rejected' )>Rejected</option>
       </select>
-
       <div class="md:col-span-4">
         <x-ui.button variant="primary" class="px-4 py-2 rounded-lg text-ivory-50 transition text-sm w-full md:w-auto">
           Terapkan Filter
@@ -46,8 +36,7 @@
           📦 Export ZIP
         </x-ui.link>
       </div>
-    </form>
-
+    </x-ui.table-toolbar>
     <!-- TABLE -->
     <div class="rounded-lg border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 shadow-none overflow-x-auto">
       <x-ui.table class="w-full text-sm min-w-[800px]">
@@ -81,11 +70,9 @@
             <td class="ui-action-cell p-3"><x-ui.table-actions>
               <div class="flex flex-nowrap items-center gap-2">
                 <x-ui.icon-button ability="view" :subject="$e" action="view" label="Lihat detail" href="{{ route('admin.entries.show',$e) }}" />
-
                 @if($e->pdf_output_path)
                 <x-ui.icon-button ability="view" :subject="$e" action="download" label="Unduh" href="{{ route('admin.entries.download_pdf',$e) }}" />
                 @endif
-
                 <form action="{{ route('admin.entries.destroy',$e) }}" method="post"
                   data-confirm="Hapus entry?">
                   @csrf @method('DELETE')
@@ -95,14 +82,11 @@
             </x-ui.table-actions></td>
           </tr>
           @empty
-          <tr>
-            <td colspan="7" class="p-6 text-center text-coal-500 dark:text-coal-400">Belum ada entry.</td>
-          </tr>
-          @endforelse
+<x-ui.table-empty-state colspan="7"></x-ui.table-empty-state>
+@endforelse
         </tbody>
       </x-ui.table>
     </div>
-
     <!-- PAGINATION -->
     <div class="mt-4">
       {{ $entries->links() }}

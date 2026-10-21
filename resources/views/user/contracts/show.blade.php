@@ -1,19 +1,14 @@
 @extends('layouts.app')
 @section('title', $contract->title)
-
 @section('breadcrumbs')
-
     <a href="{{ route('admin.dashboard') }}" class="hover:underline">Dashboard</a>
     <span class="mx-2">/</span>
     <a href="{{ route('user.contracts.index') }}" class="hover:underline">Kontrak Saya</a>
     <span class="mx-2">/</span>
     <span>{{ $contract->title }}</span>
-
 @endsection
-
 @section('content')
 <x-ui.page class="max-w-6xl mx-auto">
-
   {{-- Header --}}
   <x-ui.page-header>
   <div class="ui-page-header__copy"><div>
@@ -33,15 +28,10 @@
       </x-ui.link>
     </div></x-ui.page-actions>
 </x-ui.page-header>
-
   {{-- Alerts --}}
-  @if(session('ok'))
-    <div class="p-3 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">{{ session('ok') }}</div>
-  @endif
   @if(session('err'))
     <div class="p-3 rounded-lg bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>
   @endif
-
   {{-- Info Card --}}
   <div class="rounded-lg border shadow-none overflow-hidden">
     <div class="px-4 py-3 bg-[#713F12] text-white">
@@ -76,13 +66,11 @@
       </div>
     </div>
   </div>
-
   {{-- Preview inline --}}
   <div class="rounded-lg border bg-ivory-50 p-4">
     <div class="text-sm text-coal-600 mb-2">
       Preview dokumen. Jika tidak tampil, gunakan tombol Unduh.
     </div>
-
     <x-ui.panel class="w-full aspect-[1/1.3] bg-white border rounded-lg overflow-hidden">
       {{-- Gunakan route preview untuk menampilkan PDF inline --}}
       <iframe
@@ -92,13 +80,11 @@
         style="border:0;"
       ></iframe>
     </x-ui.panel>
-
     <noscript>
       <div class="mt-3 text-sm">
         Browser kamu tidak mendukung preview. <a class="underline" href="{{ route('user.contracts.download', $contract) }}">Unduh PDF</a>.
       </div>
     </noscript>
   </div>
-
 </x-ui.page>
 @endsection

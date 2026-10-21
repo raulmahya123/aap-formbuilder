@@ -1,7 +1,5 @@
 @extends('layouts.app')
-
 @section('title', 'Tanya Jawab')
-
 @section('content')
 <x-ui.page class="mx-auto max-w-5xl">
   <x-ui.page-header>
@@ -9,24 +7,13 @@
       <x-ui.page-title>Tanya Jawab</x-ui.page-title>
       <x-ui.page-description>Kirim pertanyaan, laporan, dan balasan langsung di halaman ini.</x-ui.page-description>
     </div></div>
-  <x-ui.page-actions><x-ui.link icon="plus" variant="primary" href="{{ route('admin.qa.create', $selectedSiteId ? ['site_id' => $selectedSiteId] : []) }}" class="inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold shadow-none transition">Buat topik baru
+  <x-ui.page-actions><x-ui.link data-modal-form icon="plus" variant="primary" href="{{ route('admin.qa.create', $selectedSiteId ? ['site_id' => $selectedSiteId] : []) }}" class="inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold shadow-none transition">Buat topik baru
     </x-ui.link></x-ui.page-actions>
 </x-ui.page-header>
-
-  <x-ui.panel class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-coal-200 bg-white shadow-none">
-    <div class="flex items-center gap-2 text-sm font-medium text-coal-700"><x-ui-icon name="chat" class="h-5 w-5 text-maroon-700" /> Chat dan laporan site</div>
-    <form method="GET" action="{{ route('admin.qa.index') }}">
-      <label for="qa-site" class="sr-only">Pilih site</label>
-      <select id="qa-site" name="site_id" onchange="this.form.submit()" class="rounded-lg border-coal-200 bg-ivory-50 px-3 py-2 text-sm focus:border-maroon-500 focus:ring-maroon-500">
-        @if(auth()->user()->isSuperAdmin())<option value="">Semua site</option>@endif
-        @foreach($sites as $site)<option value="{{ $site->id }}" @selected((int) $selectedSiteId === (int) $site->id)>{{ $site->code }} — {{ $site->name }}</option>@endforeach
-      </select>
-    </form>
-  </x-ui.panel>
-
+<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari topik…" aria-label="Cari topik" /><x-ui.table-filter name="site_id" :options="$sites->pluck('name','id')" :value="$selectedSiteId" label="Site" placeholder="Semua site yang diizinkan" /><x-ui.table-filter name="status" :options="['open'=>'Terbuka','resolved'=>'Selesai']" label="Status" placeholder="Semua status" /><x-ui.link variant="secondary" :href="route('admin.qa.index')">Reset</x-ui.link></x-ui.table-toolbar>
   <div class="space-y-5">
     @forelse($threads as $thread)
-      @php($visibleMessages = $thread->messages->sortBy('created_at')->values())
+      @php($visibleMessages = collect([$thread->latestMessage])->filter()->values())
       <article class="overflow-hidden rounded-lg border border-coal-200 bg-white shadow-none">
         <div class="p-5 pb-3">
           <div class="flex items-start justify-between gap-3">
@@ -38,7 +25,6 @@
           </div>
           <x-ui.section-title class="mt-4 text-lg font-semibold text-coal-900">{{ $thread->subject }}</x-ui.section-title>
         </div>
-
         <div class="space-y-3 bg-ivory-50/60 px-5 py-4">
           @foreach($visibleMessages as $message)
             @php($mine = $message->user_id === auth()->id())
@@ -54,14 +40,13 @@
             </div>
           @endforeach
         </div>
-
         @can('reply', $thread)
           @if($thread->status !== 'resolved')
             <form method="POST" action="{{ route('admin.qa.messages.store', $thread) }}" enctype="multipart/form-data" class="border-t border-coal-100 p-4" x-data="{files: ''}">
               @csrf
               <div class="flex items-end gap-2">
                 <textarea name="body" rows="1" class="min-h-11 flex-1 resize-none rounded-lg border-coal-200 bg-ivory-50 px-4 py-3 text-sm focus:border-maroon-500 focus:ring-maroon-500" placeholder="Tulis balasan atau kirim laporan..."></textarea>
-                <label class="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-coal-200 text-coal-600 hover:bg-ivory-100" title="Lampirkan file"><x-ui-icon name="paperclip" class="h-5 w-5" /><input type="file" name="attachments[]" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt" class="hidden" @change="files = [...$event.target.files].map(f => f.name).join(', ')"></label>
+                <label class="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-coal-200 text-coal-600 hover:bg-ivory-100" title="Lampirkan file"><x-ui-icon name="paperclip" class="h-5 w-5" /><input type="file" name="attachments[]" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt" class="sr-only" aria-label="Lampirkan file" @change="files = [...$event.target.files].map(f => f.name).join(', ')"></label>
                 <x-ui.button variant="primary" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg" title="Kirim"><x-ui-icon name="send" class="h-5 w-5" /></x-ui.button>
               </div>
               <div x-show="files" x-text="files" class="mt-2 truncate text-xs text-coal-500"></div>
@@ -71,7 +56,7 @@
         <div class="flex items-center justify-between border-t border-coal-100 px-5 py-3 text-xs text-coal-500"><span>{{ $thread->messages_count }} pesan</span><a href="{{ route('admin.qa.show', $thread) }}" class="font-semibold text-maroon-700 hover:text-maroon-900">Buka chat penuh →</a></div>
       </article>
     @empty
-      <x-ui.panel class="rounded-lg border border-dashed border-coal-300 bg-white text-center shadow-none"><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-maroon-100 text-maroon-700"><x-ui-icon name="chat" class="h-7 w-7" /></div><x-ui.section-title class="mt-4 font-semibold text-coal-900">Belum ada percakapan di site ini</x-ui.section-title><p class="mt-1 text-sm text-coal-500">Buat topik pertama atau kirim laporan untuk memulai.</p><x-ui.link icon="plus" variant="primary" href="{{ route('admin.qa.create', $selectedSiteId ? ['site_id' => $selectedSiteId] : []) }}" class="mt-5 inline-flex rounded-lg px-4 py-2 text-sm font-semibold">Buat topik baru</x-ui.link></x-ui.panel>
+      <x-ui.empty-state :kind="request('q') ? 'search' : (request('status') || $selectedSiteId ? 'filter' : 'empty')" />
     @endforelse
   </div>
   <div>{{ $threads->withQueryString()->links() }}</div>

@@ -8,6 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // This repair uses MySQL DDL; fresh SQLite test schemas already define these relations.
+        if (DB::getDriverName() !== 'mysql') return;
+
         if (!Schema::hasTable('hipo_reports') || !Schema::hasColumn('hipo_reports', 'user_id') || !Schema::hasTable('users')) {
             return;
         }
@@ -33,6 +36,9 @@ return new class extends Migration
 
     public function down(): void
     {
+        // This repair uses MySQL DDL; fresh SQLite test schemas already define these relations.
+        if (DB::getDriverName() !== 'mysql') return;
+
         $current = $this->userIdForeignKey();
         if ($current) {
             DB::statement('ALTER TABLE `hipo_reports` DROP FOREIGN KEY `'.$current->CONSTRAINT_NAME.'`');

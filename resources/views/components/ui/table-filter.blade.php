@@ -1,5 +1,5 @@
 @props(['name', 'options' => [], 'placeholder' => 'Semua', 'value' => null, 'label' => null])
-@php $val = $value ?? request($name, ''); @endphp
+@php $val = $value ?? (request()->query->has($name) ? request($name, '') : ($name === 'site_id' ? session('active_site_id', '') : '')); @endphp
 @if($label)<label class="sr-only" for="filter-{{ $name }}">{{ $label }}</label>@endif
 <select
   id="filter-{{ $name }}"

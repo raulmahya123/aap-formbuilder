@@ -1,0 +1,1 @@
+<div {{ $attributes->class(['ui-skeleton-page']) }} role="status" aria-busy="true" aria-label="Memuat halaman"><span class="sr-only">Memuat halaman…</span><div class="ui-skeleton-page-header"><div class="ui-skeleton-bar ui-skeleton-value"></div><div class="ui-skeleton-bar"></div></div>@if($slot->isNotEmpty()){{ $slot }}@else<x-ui.detail-skeleton />@endif</div>

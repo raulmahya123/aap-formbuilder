@@ -61,8 +61,7 @@ class DocumentController extends Controller
                     });
             })
             ->latest()
-            ->paginate(20)
-            ->withQueryString();
+            ->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         return view('admin.documents.index', compact('docs'));
     }

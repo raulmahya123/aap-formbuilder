@@ -1,9 +1,7 @@
 @extends('layouts.app')
 @section('title', $contract->title)
-
 @section('content')
 <x-ui.page class="max-w-6xl mx-auto">
-
   {{-- Header --}}
   <x-ui.page-header>
   <div class="ui-page-header__copy"><div>
@@ -25,17 +23,10 @@
       </x-ui.link>
     </div></x-ui.page-actions>
 </x-ui.page-header>
-
   {{-- Alerts --}}
-  @if(session('ok'))
-    <div class="p-3 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">{{ session('ok') }}</div>
-  @endif
   @if(session('err'))
     <div class="p-3 rounded-lg bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>
   @endif
-
-
-
   {{-- Grid: Info + ACL --}}
   <div class="grid lg:grid-cols-3 gap-5">
     {{-- Left: Info Card --}}
@@ -55,7 +46,6 @@
               <div class="text-sm text-coal-500 truncate">{{ $contract->owner->email }}</div>
             </div>
           </div>
-
           <div class="grid grid-cols-2 gap-3 text-sm">
             <div class="space-y-1">
               <div class="text-coal-500">Ukuran</div>
@@ -77,7 +67,6 @@
         </div>
       </div>
     </div>
-
     {{-- Right: ACL Card --}}
     <div class="lg:col-span-2">
       <div class="rounded-lg border shadow-none overflow-hidden">
@@ -85,7 +74,6 @@
           <div class="font-semibold">Akses Viewer</div>
           <span class="text-xs bg-white/20 px-2 py-1 rounded-md">{{ $contract->viewers->count() }} user</span>
         </div>
-
         <div class="p-4">
           {{-- Form: tambah viewer --}}
           <div class="mb-4">
@@ -116,7 +104,6 @@
               @endisset
             </p>
           </div>
-
           {{-- Daftar viewers --}}
           <div class="rounded-lg border">
             @forelse($contract->viewers as $u)

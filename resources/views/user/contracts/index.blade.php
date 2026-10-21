@@ -1,9 +1,7 @@
 @extends('layouts.app')
 @section('title','Kontrak Saya')
-
 @section('content')
 <x-ui.page class="max-w-7xl mx-auto">
-
   {{-- Header --}}
   <x-ui.page-header>
   <div class="ui-page-header__copy"><div>
@@ -13,22 +11,17 @@
   <x-ui.page-actions>{{-- Search --}}
     </x-ui.page-actions>
 </x-ui.page-header>
-<div class="ui-page-filters"><form method="get" class="w-full md:w-auto">
+<div class="ui-page-filters"><x-ui.table-toolbar class="w-full md:w-auto">
       <div class="relative">
-        <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari judul kontrak…"
-               class="w-full md:w-80 border rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-[#713F12]">
-        <span class="absolute right-3 top-2.5 text-coal-400">🔎</span>
-      </div>
-    </form></div>
+        <x-ui.table-search   name="q" value="{{ request('q') }}" placeholder="Cari judul kontrak…"
+               class="w-full md:w-80 border rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-[#713F12]" />
 
+      </div>
+    </x-ui.table-toolbar></div>
   {{-- Flash --}}
-  @if(session('ok'))
-    <div class="p-3 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">{{ session('ok') }}</div>
-  @endif
   @if(session('err'))
     <div class="p-3 rounded-lg bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>
   @endif
-
   {{-- Desktop: Table --}}
   <div class="hidden md:block">
     <div class="overflow-hidden rounded-lg border shadow-none">
@@ -79,13 +72,12 @@
               </x-ui.table-actions></td>
             </tr>
           @empty
-            <tr><td colspan="6" class="p-6 text-center text-coal-500">Tidak ada kontrak untukmu.</td></tr>
-          @endforelse
+<x-ui.table-empty-state colspan="6"></x-ui.table-empty-state>
+@endforelse
         </tbody>
       </x-ui.table>
     </div>
   </div>
-
   {{-- Mobile: Cards --}}
   <div class="grid gap-3 md:hidden">
     @forelse($contracts as $c)
@@ -98,7 +90,6 @@
           <x-ui.link variant="primary" href="{{ route('user.contracts.download',$c) }}"
              class="shrink-0 px-3 py-2 rounded-lg">Download</x-ui.link>
         </div>
-
         <div class="mt-3 flex items-center gap-2">
           <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#713F12">
             {{ strtoupper(\Illuminate\Support\Str::of(optional($c->owner)->name)->explode(' ')->map(fn($s)=>\Illuminate\Support\Str::substr($s,0,1))->take(2)->implode('')) ?: 'U' }}
@@ -108,7 +99,6 @@
             <div class="text-xs text-coal-500 truncate">{{ optional($c->owner)->email ?? '' }}</div>
           </div>
         </div>
-
         <div class="mt-3 text-sm text-coal-600">
           {{ number_format(($c->size_bytes ?? 0)/1024,1) }} KB
         </div>
@@ -117,11 +107,9 @@
       <div class="rounded-lg border p-6 text-center text-coal-500">Tidak ada kontrak untukmu.</div>
     @endforelse
   </div>
-
   {{-- Pagination --}}
   <div>
     {{ $contracts->withQueryString()->links() }}
   </div>
-
 </x-ui.page>
 @endsection

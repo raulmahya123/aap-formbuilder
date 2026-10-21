@@ -4,9 +4,7 @@
     <x-ui.page-description>Lengkapi data Anda untuk mengakses sistem operasional.</x-ui.page-description></div>
   <x-ui.page-actions></x-ui.page-actions>
 </x-ui.page-header>
-  @if(session('status'))
-    <div class="toast toast-success mb-4" role="status">{{ session('status') }}</div>
-  @endif
+
   <form method="POST" action="{{ route('register') }}" class="space-y-5">
             @csrf
 

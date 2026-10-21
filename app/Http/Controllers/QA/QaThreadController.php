@@ -17,14 +17,14 @@ class QaThreadController extends Controller
     {
         $user = $request->user();
         $allowedSiteIds = $user->allowedSiteIds();
-        $selectedSiteId = $request->integer('site_id') ?: session('active_site_id');
+        $selectedSiteId = \App\Support\SiteSelection::id($request);
 
         abort_if($selectedSiteId && !$user->hasSiteAccess((int) $selectedSiteId), 403);
 
         $threads = QaThread::with([
                 'creator',
                 'site',
-                'messages' => fn ($q) => $q->with('user')->latest(),
+                'latestMessage.user',
             ])
             ->withCount('messages')
             ->where(function ($q) use ($user) {
@@ -35,8 +35,10 @@ class QaThreadController extends Controller
                 $siteQuery->whereNull('site_id')->orWhereIn('site_id', $allowedSiteIds ?: [-1]);
             }))
             ->when($selectedSiteId, fn ($q) => $q->where('site_id', $selectedSiteId))
+            ->when($request->filled('q'), fn ($q) => $q->where('subject', 'like', '%'.$request->string('q').'%'))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()))
             ->latest('last_message_at')
-            ->paginate(15);
+            ->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         $sites = $user->isSuperAdmin()
             ? Site::query()->orderBy('code')->get(['id', 'code', 'name'])

@@ -25,10 +25,18 @@ class UserActiveController extends Controller
     /**
      * Tampilkan daftar user beserta status aktifnya
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::orderBy('name')->paginate(20);
-        return view('admin.users.active', compact('users'));
+        $siteId = \App\Support\SiteSelection::id($request);
+        $users = User::query()->with('sites:id,code,name')
+            ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', '%'.$request->string('q').'%')->orWhere('email', 'like', '%'.$request->string('q').'%')))
+            ->when($request->filled('role'), fn ($q) => $q->where('role', $request->string('role')->toString()))
+            ->when($request->filled('status'), fn ($q) => $q->where('is_active', $request->input('status') === 'active'))
+            ->when($siteId, fn ($q) => $q->whereHas('sites', fn ($s) => $s->where('sites.id', $siteId)))
+            ->orderBy('name')->paginate(\App\Support\Listing::perPage())->withQueryString();
+        $sites = \App\Models\Site::orderBy('code')->get(['id','code','name']);
+        $roles = User::query()->distinct()->orderBy('role')->pluck('role', 'role');
+        return view('admin.users.active', compact('users', 'sites', 'roles'));
     }
 
     /**

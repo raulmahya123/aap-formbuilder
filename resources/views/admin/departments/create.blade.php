@@ -1,19 +1,5 @@
 @extends('layouts.app')
+@section('title','Tambah Department')
 @section('content')
-<x-ui.page class="max-w-xl mx-auto">
-  <x-ui.page-header>
-  <div class="ui-page-header__copy"><x-ui.page-title>Tambah Department</x-ui.page-title>
-<x-ui.page-description>Lengkapi informasi untuk menambahkan department dan anggota.</x-ui.page-description></div>
-  <x-ui.page-actions>
-<x-ui.button form="page-primary-form" variant="primary" class="px-4 py-2 rounded-lg">Simpan</x-ui.button>
-</x-ui.page-actions>
-</x-ui.page-header>
-  <form id="page-primary-form" method="post" action="{{ route('admin.departments.store') }}">
-  @csrf
-    <label class="block mb-2">Nama</label>
-    <input type="text" name="name" class="border rounded-lg w-full mb-3" required>
-
-
-  </form>
-</x-ui.page>
+<x-ui.page><x-ui.page-header><div class="ui-page-header__copy"><x-ui.page-title>Tambah Department</x-ui.page-title><x-ui.page-description>Atur nama department untuk pengelompokan anggota.</x-ui.page-description></div><x-ui.page-actions><x-ui.button form="page-primary-form" variant="primary">Simpan Data</x-ui.button></x-ui.page-actions></x-ui.page-header><form id="page-primary-form" method="POST" action="{{ route('admin.departments.store') }}" class="ui-card max-w-xl space-y-5">@csrf <x-ui.form-field name="name" label="Nama Department" required><x-ui.form-input id="name" name="name" :value="old('name')" maxlength="150" required autocomplete="off" /></x-ui.form-field></form></x-ui.page>
 @endsection

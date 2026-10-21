@@ -21,7 +21,7 @@
 
 
 <x-ui.page>
-  @if(session('ok'))<div class="toast toast-success" role="status">{{ session('ok') }}</div>@endif
+
   <x-ui.page-header>
     <div class="ui-page-header__copy">
       <x-ui.page-title>Terima kasih!</x-ui.page-title>

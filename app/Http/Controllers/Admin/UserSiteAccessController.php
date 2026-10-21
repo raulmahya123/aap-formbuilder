@@ -20,7 +20,7 @@ class UserSiteAccessController extends Controller
     {
         $this->authorize('manageSiteAccess', UserSiteAccess::class);
 
-        $siteId = $r->integer('site_id') ?: null;
+        $siteId = \App\Support\SiteSelection::id($r);
         $email  = trim((string) $r->get('email', ''));
 
         $q = UserSiteAccess::query()
@@ -35,7 +35,7 @@ class UserSiteAccessController extends Controller
             ->orderBy('id');
 
         return view('admin.site-access.index', [
-            'accesses' => $q->paginate(20)->withQueryString(),
+            'accesses' => $q->paginate(\App\Support\Listing::perPage())->withQueryString(),
             'sites'    => Site::orderBy('code')->get(['id','name','code']),
             'emails'   => User::orderBy('email')->pluck('email'),
             'siteId'   => $siteId,

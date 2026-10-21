@@ -1,8 +1,6 @@
 @extends('layouts.app')
-
 @section('content')
 <x-ui.page x-data="aclUI()" x-init="init()" class="max-w-7xl mx-auto">
-
   {{-- HEADER --}}
   <x-ui.page-header>
   <div class="ui-page-header__copy"><div>
@@ -12,13 +10,7 @@
   <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('admin.documents.index') }}"
        class="px-3 py-2 rounded-lg border">← Kembali</x-ui.link></x-ui.page-actions>
 </x-ui.page-header>
-
   {{-- FLASH / ERRORS --}}
-  @if(session('success'))
-    <div class="rounded-lg border border-green-200 bg-green-50 p-3 text-green-800">
-      {{ session('success') }}
-    </div>
-  @endif
   @if ($errors->any())
     <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-red-800">
       <ul class="list-disc pl-5 space-y-1">
@@ -28,11 +20,9 @@
       </ul>
     </div>
   @endif
-
   {{-- CARD: FORM TAMBAH AKSES --}}
   <x-ui.panel class="rounded-lg border bg-white space-y-5">
     <div class="flex items-start gap-4 flex-col lg:flex-row">
-
       {{-- DOKUMEN PICKER --}}
       <div class="flex-1 min-w-[320px]">
         <label class="text-sm font-medium">Dokumen</label>
@@ -61,18 +51,15 @@
             <span x-text="selectedIds.length"></span> dipilih dari {{ count($documents) }} dokumen
           </div>
         </div>
-
         {{-- Hidden inputs sinkron ke form --}}
         <template x-for="id in selectedIds" :key="'h-'+id">
           <input type="hidden" name="document_ids[]" :value="id" form="aclForm">
         </template>
       </div>
-
       {{-- TARGET & PERMISSION --}}
 <div class="w-full lg:w-96">
   <form id="aclForm" method="POST" action="{{ route('admin.documents.acl.store') }}" class="space-y-4">
     @csrf
-
     {{-- USER (opsional) --}}
     <div>
       <label class="text-sm font-medium">User (opsional)</label>
@@ -83,7 +70,6 @@
         @endforeach
       </select>
     </div>
-
     {{-- DEPARTEMEN (opsional) --}}
     <div>
       <label class="text-sm font-medium">Departemen (opsional)</label>
@@ -94,7 +80,6 @@
         @endforeach
       </select>
     </div>
-
     <div>
       <label class="text-sm font-medium">Permission</label>
       <select name="perm" class="w-full mt-1 border rounded-lg px-3 py-2" required>
@@ -105,11 +90,9 @@
         <option value="export">Export</option>
       </select>
     </div>
-
     <div class="pt-1 text-xs opacity-70">
       Boleh isi salah satu atau **keduanya** (User dan Departemen).
     </div>
-
     <div class="flex items-center gap-3 pt-2">
       <x-ui.button variant="primary" type="submit"
               ::disabled="selectedIds.length===0 || (!userId && !departmentId)"
@@ -123,10 +106,8 @@
     </div>
   </form>
 </div>
-
     </div>
   </x-ui.panel>
-
   {{-- CARD: DAFTAR AKSES --}}
   <x-ui.panel :padded="false" class="rounded-lg border bg-white overflow-hidden">
     <div class="p-4 flex items-center justify-between">
@@ -139,7 +120,6 @@
                class="border rounded-lg px-3 py-2 text-sm">
       </div>
     </div>
-
     <div class="overflow-x-auto">
       <x-ui.table class="w-full text-sm">
         <thead class="bg-[#1D1C1A] text-white">
@@ -161,7 +141,6 @@
               'export' => 'bg-purple-100 text-purple-800',
             ];
           @endphp
-
           @forelse($acls as $acl)
           <tr x-show="matchRow(@js($acl->document->title ?? '-'), @js($acl->user->name ?? '-'), @js($acl->department->name ?? '-'))">
             <td class="p-3 align-top">{{ $acl->document?->title ?? '-' }}</td>
@@ -195,18 +174,13 @@
             </x-ui.table-actions></td>
           </tr>
           @empty
-          <tr>
-            <td colspan="5" class="p-6 text-center text-sm opacity-60">
-              Belum ada ACL.
-            </td>
-          </tr>
-          @endforelse
+<x-ui.table-empty-state colspan="5"></x-ui.table-empty-state>
+@endforelse
         </tbody>
       </x-ui.table>
     </div>
   </x-ui.panel>
 </x-ui.page>
-
 {{-- Alpine Component --}}
 <script>
 function aclUI() {
@@ -218,9 +192,7 @@ function aclUI() {
     selectedIds: [],
     userId: '',
     departmentId: '',
-
     init() {},
-
     get filteredDocs() {
       const q = this.query.trim().toLowerCase();
       if (!q) return this.docs;
@@ -246,5 +218,4 @@ function aclUI() {
   }
 }
 </script>
-
 @endsection

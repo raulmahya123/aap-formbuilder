@@ -188,3 +188,6 @@
   .ui-detail-row { flex-direction: column; gap: 2px; }
   .ui-detail-row__label { flex: none; font-size: 12px; }
 }
+.ui-modal:not([open]) { display: none !important; }
+
+.ui-modal [hidden] { display: none !important; }

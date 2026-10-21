@@ -54,7 +54,7 @@ class FormEntryController extends Controller
             });
         }
 
-        $entries = $q->paginate(20)->withQueryString();
+        $entries = $q->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         return view('admin.entries.index', compact('entries'));
     }

@@ -20,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Pagination\Paginator::defaultView('pagination.standard');
         // SSL terminates at Apache/proxy in production. Keep generated form,
         // asset, and redirect URLs on HTTPS so uploads are not downgraded to HTTP.
         if ($this->app->environment('production')) {

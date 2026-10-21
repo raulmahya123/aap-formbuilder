@@ -1,0 +1,1 @@
+<div {{ $attributes->class(['ui-skeleton-card']) }} aria-busy="true" aria-label="Memuat ringkasan" role="status"><span class="sr-only">Memuat ringkasan…</span><div class="ui-skeleton-bar ui-skeleton-short"></div><div class="ui-skeleton-bar ui-skeleton-value"></div><div class="ui-skeleton-bar"></div></div>

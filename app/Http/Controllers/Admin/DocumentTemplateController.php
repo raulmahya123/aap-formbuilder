@@ -21,9 +21,9 @@ class DocumentTemplateController extends Controller
      * CRUD
      * ======================= */
 
-    public function index()
+    public function index(Request $request)
     {
-        $templates = DocumentTemplate::latest()->paginate(20);
+        $templates = DocumentTemplate::query()->when($request->filled('q'), fn ($q) => $q->where('name','like','%'.$request->string('q').'%'))->latest()->paginate(\App\Support\Listing::perPage())->withQueryString();
         return view('admin.document_templates.index', compact('templates'));
     }
 

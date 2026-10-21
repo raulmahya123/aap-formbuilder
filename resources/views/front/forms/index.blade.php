@@ -96,11 +96,11 @@
 </x-ui.page-header>
 
   {{-- Search --}}
-  <form method="get" class="mb-4 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+  <x-ui.table-toolbar class="mb-4 flex flex-col md:flex-row items-stretch md:items-center gap-3">
     <div class="flex-1">
-      <input type="search" name="q" value="{{ $q }}"
+      <x-ui.table-search   name="q" value="{{ $q }}"
              placeholder="Cari form (judul/deskripsi)…"
-             class="w-full px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 bg-white dark:bg-coal-900">
+             class="w-full px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 bg-white dark:bg-coal-900" />
     </div>
     @if($currentDocType)
       <input type="hidden" name="doc_type" value="{{ $currentDocType }}">
@@ -111,7 +111,7 @@
     <x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-900">
       Cari
     </x-ui.button>
-  </form>
+  </x-ui.table-toolbar>
 
   {{-- Tabs --}}
   <div class="flex flex-wrap items-center gap-2 mb-6 text-sm">

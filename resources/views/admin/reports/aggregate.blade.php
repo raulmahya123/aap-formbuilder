@@ -2,112 +2,15 @@
 @extends('layouts.app')
 @section('title', 'Rekap')
 
-@push('styles')
-<style>
-  .report-card {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, .05);
-  }
-
-  .report-chart {
-    position: relative;
-    height: 320px;
-  }
-
-  .indicator-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    background: #fff;
-    padding: 14px;
-    transition: border-color .15s ease, box-shadow .15s ease;
-  }
-
-  .indicator-card:hover {
-    border-color: #cbb291;
-    box-shadow: 0 10px 28px rgba(15, 23, 42, .07);
-  }
-
-  .kpi-meter {
-    position: relative;
-    height: 12px;
-    border-radius: 999px;
-    background: #f1f5f9;
-    overflow: visible;
-  }
-
-  .kpi-meter__bar {
-    height: 100%;
-    min-width: 4px;
-    border-radius: inherit;
-    background: #713F12;
-  }
-
-  .kpi-meter__bar.is-over {
-    background: #dc2626;
-  }
-
-  .kpi-meter__threshold {
-    position: absolute;
-    top: -7px;
-    bottom: -7px;
-    width: 2px;
-    border-radius: 999px;
-    background: #f59e0b;
-    transform: translateX(-1px);
-  }
-
-  .kpi-meta {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  .kpi-meta > div {
-    min-width: 0;
-    border-radius: 8px;
-    background: #f8fafc;
-    padding: 8px 10px;
-  }
-
-  .category-chart {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 10px;
-  }
-
-  .mini-chart-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    background: #fff;
-    padding: 10px;
-  }
-
-  .mini-chart {
-    position: relative;
-    height: 108px;
-  }
-
-  .mini-chart canvas {
-    display: block;
-    width: 100% !important;
-    height: 100% !important;
-  }
-</style>
-@endpush
-
 @section('content')
 @php
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-
 $u = Auth::user();
 $isSuperAdmin = $u && (
     (method_exists($u, 'hasRole') && $u->hasRole('super_admin')) ||
     (($u->role ?? $u->role_key ?? null) === 'super_admin')
 );
-
 $tz = 'Asia/Jakarta';
 $scopeNow = $scope ?? 'month';
 $today = now($tz);
@@ -116,21 +19,18 @@ $yearVal = isset($year) && $year ? (int) $year : (int) $today->year;
 $weekVal = isset($week) && $week ? (int) $week : (int) $today->isoWeek;
 $monthVal = isset($month) && $month ? (int) $month : (int) $today->month;
 $selectedSite = $siteId ? $sites->firstWhere('id', (int) $siteId) : null;
-
 $periodSafe = $period ?? match($scopeNow) {
     'day' => $dateObj->toDateString(),
     'week' => "Minggu {$weekVal}, {$yearVal}",
     'year' => (string) $yearVal,
     default => sprintf('%02d/%d', $monthVal, $yearVal),
 };
-
 $parseThreshold = function ($raw) {
     if ($raw === null) return null;
     $value = trim((string) $raw);
     if ($value === '' || $value === '-') return null;
     $value = preg_replace('/[^0-9,.\-]/', '', $value);
     if ($value === '' || $value === '-' || $value === null) return null;
-
     if (preg_match('/^-?\d{1,3}([.,]\d{3})+$/', $value)) {
         $value = str_replace(['.', ','], '', $value);
     } elseif (str_contains($value, ',') && str_contains($value, '.')) {
@@ -143,10 +43,8 @@ $parseThreshold = function ($raw) {
     } elseif (str_contains($value, ',')) {
         $value = str_replace(',', '.', $value);
     }
-
     return is_numeric($value) ? (float) $value : null;
 };
-
 $fmt = fn($value) => number_format((float) $value, fmod((float) $value, 1.0) === 0.0 ? 0 : 2, ',', '.');
 $fmtThreshold = function ($raw) use ($parseThreshold, $fmt) {
     $num = $parseThreshold($raw);
@@ -155,7 +53,6 @@ $fmtThreshold = function ($raw) use ($parseThreshold, $fmt) {
     if ($rawText !== '' && preg_match('/[%$]|(?:\bRp\b)|(?:\bIDR\b)/i', $rawText)) return $rawText;
     return $fmt($num);
 };
-
 $categoryCharts = [
     'lagging' => ['title' => 'Lagging Indicators', 'rows' => [], 'total' => 0, 'over' => 0],
     'leading' => ['title' => 'Leading Indicators', 'rows' => [], 'total' => 0, 'over' => 0],
@@ -165,10 +62,8 @@ $detailRows = [];
 $grandTotal = 0;
 $totalIndicators = 0;
 $overTargetCount = 0;
-
 foreach ($groups as $g) {
     $rows = collect($data[$g->code] ?? []);
-
     foreach ($rows as $row) {
         $ind = $row['indicator'];
         $value = (float) ($row['total'] ?? $row['value'] ?? 0);
@@ -194,18 +89,15 @@ foreach ($groups as $g) {
             'valuePct' => min(100, max(0, ($value / $meterMax) * 100)),
             'thresholdPct' => $threshold === null ? null : min(100, max(0, ($threshold / $meterMax) * 100)),
         ];
-
         $categoryCharts[$category]['rows'][] = $chartRow;
         $categoryCharts[$category]['total'] += $value;
         if ($isOver) $categoryCharts[$category]['over']++;
         $detailRows[] = $chartRow;
-
         $grandTotal += $value;
         $totalIndicators++;
         if ($isOver) $overTargetCount++;
     }
 }
-
 $categoryChartPayload = [];
 foreach ($categoryCharts as $key => $chart) {
     $categoryChartPayload[$key] = [
@@ -224,17 +116,15 @@ foreach ($categoryCharts as $key => $chart) {
     ];
 }
 @endphp
-
-<div class="space-y-5">
-  <div class="report-card p-5">
-    <x-ui.page-header>
+<x-ui.page>
+  <x-ui.page-header>
   <div class="ui-page-header__copy"><div>
         <x-ui.page-title>Rekap {{ $periodSafe }}</x-ui.page-title>
-        <x-ui.page-description>Rumus derived dihitung otomatis dari kode indikator, dan threshold dipakai konsisten di grafik serta tabel.</x-ui.page-description>
+        <x-ui.page-description>Rekap kinerja operasional berdasarkan site dan periode yang dipilih.</x-ui.page-description>
       </div></div>
   <x-ui.page-actions></x-ui.page-actions>
 </x-ui.page-header>
-<div class="ui-page-filters"><form method="get" class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6" x-data="{ scope: '{{ $scopeNow }}' }">
+<div class="ui-page-filters"><x-ui.table-toolbar class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6" x-data="{ scope: '{{ $scopeNow }}' }">
         <input type="hidden" name="scope" :value="scope">
         <select name="site_id" class="px-3 py-2 border rounded-lg bg-white">
           <option value="">Semua Site</option>
@@ -242,21 +132,17 @@ foreach ($categoryCharts as $key => $chart) {
             <option value="{{ $s->id }}" @selected(($siteId ?? null) == $s->id)>{{ $s->code }} - {{ $s->name }}</option>
           @endforeach
         </select>
-
         <select x-model="scope" class="px-3 py-2 border rounded-lg bg-white">
           <option value="day">Harian</option>
           <option value="week">Mingguan</option>
           <option value="month">Bulanan</option>
           <option value="year">Tahunan</option>
         </select>
-
         <input type="date" name="date" value="{{ $dateObj->toDateString() }}" class="px-3 py-2 border rounded-lg" x-show="scope === 'day'">
-
         <div class="flex gap-2" x-show="scope === 'week'">
           <input type="number" name="week" value="{{ $weekVal }}" class="w-20 px-3 py-2 border rounded-lg">
           <input type="number" name="year" value="{{ $yearVal }}" class="w-24 px-3 py-2 border rounded-lg">
         </div>
-
         <div class="flex gap-2" x-show="scope === 'month'">
           <select name="month" class="px-3 py-2 border rounded-lg bg-white">
             @for($m = 1; $m <= 12; $m++)
@@ -265,36 +151,10 @@ foreach ($categoryCharts as $key => $chart) {
           </select>
           <input type="number" name="year" value="{{ $yearVal }}" class="w-24 px-3 py-2 border rounded-lg">
         </div>
-
         <input type="number" name="year" value="{{ $yearVal }}" class="px-3 py-2 border rounded-lg" x-show="scope === 'year'">
-
         <x-ui.button variant="primary" class="px-4 py-2 font-semibold rounded-lg">Terapkan</x-ui.button>
-      </form></div>
-  </div>
-
-  <div class="grid grid-cols-2 gap-3 md:grid-cols-5">
-    <div class="report-card p-4">
-      <div class="text-xs text-coal-500">Groups</div>
-      <div class="mt-1 text-2xl font-bold">{{ $groups->count() }}</div>
-    </div>
-    <div class="report-card p-4">
-      <div class="text-xs text-coal-500">Indicators</div>
-      <div class="mt-1 text-2xl font-bold">{{ $totalIndicators }}</div>
-    </div>
-    <div class="report-card p-4">
-      <div class="text-xs text-coal-500">Over Threshold</div>
-      <div class="mt-1 text-2xl font-bold {{ $overTargetCount ? 'text-rose-600' : 'text-emerald-600' }}">{{ $overTargetCount }}</div>
-    </div>
-    <div class="report-card p-4">
-      <div class="text-xs text-coal-500">Grand Total</div>
-      <div class="mt-1 text-2xl font-bold">{{ number_format($grandTotal, 0, ',', '.') }}</div>
-    </div>
-    <div class="report-card p-4">
-      <div class="text-xs text-coal-500">Site</div>
-      <div class="mt-1 text-sm font-semibold">{{ $selectedSite ? $selectedSite->code.' - '.$selectedSite->name : 'Semua Site' }}</div>
-    </div>
-  </div>
-
+      </x-ui.table-toolbar></div>
+<div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-5"><x-ui.metric-card label="Grup" :value="$groups->count()" /><x-ui.metric-card label="Indikator" :value="$totalIndicators" /><x-ui.metric-card label="Melewati Threshold" :value="$overTargetCount" icon="alert-triangle" /><x-ui.metric-card label="Grand Total" :value="$grandTotal" /><x-ui.metric-card label="Site" :value="$selectedSite ? $selectedSite->code.' — '.$selectedSite->name : 'Semua site'" /></div>
   <div class="grid gap-4 xl:grid-cols-3">
     @foreach($categoryCharts as $key => $chart)
       @php
@@ -312,7 +172,6 @@ foreach ($categoryCharts as $key => $chart) {
             <div class="text-lg font-bold {{ $chart['over'] ? 'text-rose-600' : 'text-emerald-600' }}">{{ $chart['over'] }}</div>
           </div>
         </div>
-
         <div class="p-4">
           @if($rows->isNotEmpty())
             <div class="category-chart">
@@ -354,7 +213,6 @@ foreach ($categoryCharts as $key => $chart) {
       </section>
     @endforeach
   </div>
-
   <section class="report-card overflow-hidden">
     <div class="flex flex-col gap-2 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
@@ -362,12 +220,11 @@ foreach ($categoryCharts as $key => $chart) {
         <p class="text-xs text-coal-500">Data lengkap tetap tersedia tanpa membuat grafik memanjang.</p>
       </div>
       <div class="flex items-center gap-3 text-xs">
-        <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-[#713F12]"></span>Normal</span>
+        <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-[#1D4ED8]"></span>Normal</span>
         <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-rose-600"></span>Lewat threshold</span>
         <span class="inline-flex items-center gap-1"><span class="h-3 w-0.5 bg-amber-500"></span>Threshold</span>
       </div>
     </div>
-
     <div class="overflow-x-auto">
       <x-ui.table class="min-w-full text-sm">
         <thead class="bg-gray-50 text-xs normal-case text-coal-500">
@@ -433,7 +290,7 @@ foreach ($categoryCharts as $key => $chart) {
               @if($isSuperAdmin)
                 <td class="ui-action-cell px-3 py-2 text-center"><x-ui.table-actions>
                   <div class="flex flex-row items-center gap-2">
-                    <x-ui.icon-button action="edit" label="Edit indikator" href="{{ route('admin.indicators.edit', $ind->id) }}" />
+                    <x-ui.icon-button data-modal-form action="edit" label="Edit indikator" href="{{ route('admin.indicators.edit', $ind->id) }}" />
                     @if($siteId)
                       <x-ui.icon-button action="edit" label="Edit total" href="{{ route('admin.report-totals.edit', $editTotalParams) }}" />
                     @endif
@@ -446,38 +303,32 @@ foreach ($categoryCharts as $key => $chart) {
       </x-ui.table>
     </div>
   </section>
-</div>
+</x-ui.page>
 @endsection
-
 @push('scripts')
 <script>
 window.addEventListener('DOMContentLoaded', function () {
   const charts = @json($categoryChartPayload);
   const nf = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
-
   function shortText(ctx, text, maxWidth) {
     const value = String(text || '');
     if (ctx.measureText(value).width <= maxWidth) return value;
-
     let out = value;
     while (out.length > 4 && ctx.measureText(out + '...').width > maxWidth) {
       out = out.slice(0, -1);
     }
     return out + '...';
   }
-
   function drawIndicatorChart(canvas, row) {
     const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     const width = Math.max(150, Math.round(rect.width));
     const height = Math.max(92, Math.round(rect.height));
     const ctx = canvas.getContext('2d');
-
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, width, height);
-
     const value = Number(row.value || 0);
     const threshold = row.threshold === null || row.threshold === undefined ? null : Number(row.threshold);
     const maxValue = Math.max(1, value, Number.isFinite(threshold) ? threshold : 0);
@@ -489,16 +340,13 @@ window.addEventListener('DOMContentLoaded', function () {
     const plotH = Math.max(48, height - top - bottom);
     const x1 = left;
     const x2 = left + plotW;
-
     const yAt = (value) => top + plotH - (Math.max(0, Number(value || 0)) / maxValue) * plotH;
-
     ctx.strokeStyle = 'rgba(15, 23, 42, .10)';
     ctx.lineWidth = 1;
     ctx.fillStyle = '#64748b';
     ctx.font = '500 9px system-ui,-apple-system,Segoe UI,Roboto,Arial';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
-
     for (let i = 0; i <= 2; i++) {
       const gridValue = (maxValue / 2) * i;
       const y = yAt(gridValue);
@@ -508,19 +356,16 @@ window.addEventListener('DOMContentLoaded', function () {
       ctx.stroke();
       ctx.fillText(nf.format(gridValue), left - 5, y);
     }
-
     ctx.strokeStyle = '#cbd5e1';
     ctx.beginPath();
     ctx.moveTo(left, top);
     ctx.lineTo(left, top + plotH);
     ctx.lineTo(left + plotW, top + plotH);
     ctx.stroke();
-
-    drawFlatLine(value, row.isOver ? '#dc2626' : '#713F12', false, 3);
+    drawFlatLine(value, row.isOver ? '#dc2626' : '#1D4ED8', false, 3);
     if (threshold !== null && Number.isFinite(threshold)) {
       drawFlatLine(threshold, '#f59e0b', true, 2);
     }
-
     ctx.font = '600 9px system-ui,-apple-system,Segoe UI,Roboto,Arial';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
@@ -528,7 +373,6 @@ window.addEventListener('DOMContentLoaded', function () {
     ctx.fillText('Total', x1, height - 14);
     ctx.fillStyle = '#92400e';
     ctx.fillText('Threshold', x1 + 48, height - 14);
-
     function drawFlatLine(lineValue, color, dashed, lineWidth) {
       const y = yAt(lineValue);
       ctx.save();
@@ -543,7 +387,6 @@ window.addEventListener('DOMContentLoaded', function () {
       ctx.restore();
     }
   }
-
   function roundRect(ctx, x, y, width, height, radius) {
     const r = Math.min(radius, width / 2, height / 2);
     ctx.beginPath();
@@ -554,7 +397,6 @@ window.addEventListener('DOMContentLoaded', function () {
     ctx.arcTo(x, y, x + width, y, r);
     ctx.closePath();
   }
-
   function renderCharts() {
     Object.entries(charts).forEach(([key, config]) => {
       const rows = Array.isArray(config.rows) ? config.rows : [];
@@ -564,7 +406,6 @@ window.addEventListener('DOMContentLoaded', function () {
       });
     });
   }
-
   renderCharts();
   window.addEventListener('resize', renderCharts);
 });

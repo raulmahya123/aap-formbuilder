@@ -7,17 +7,14 @@ window.addEventListener('DOMContentLoaded', function () {
   const trendLabels  = @json($trendLabels ?? []);
   const trendValues  = @json($trendValues ?? []);
   const datasetLabel = @json($trendLabel ?? 'Trend');
-
   // ====== THEME & UTIL (tanpa hardcode warna) ======
   const isDark  = document.documentElement.classList.contains('dark');
   const gridCol = isDark ? 'rgba(255,255,255,.12)' : 'rgba(0,0,0,.08)';
   const textCol = isDark ? '#e5e7eb' : '#374151';
-
   Chart.defaults.color = textCol;
   Chart.defaults.font.family = "Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial";
   Chart.defaults.borderColor = gridCol;
   const destroyExistingChart = (el) => Chart.getChart(el)?.destroy();
-
   // Generator warna algoritmis (golden-angle)
   const hueAt = (i)=> (i*137.508) % 360;
   const hsl = (h,s,l,a=1)=>`hsl(${h} ${s}% ${l}% / ${a})`;
@@ -27,11 +24,9 @@ window.addEventListener('DOMContentLoaded', function () {
     const l = isDark ? 55 : 45;
     return hsl(h, s, l, a);
   };
-
   // Formatter angka Indonesia
   const nf0 = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 });
   const nf2 = new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
   const baseOptions = (o={}) => ({
     responsive:true, maintainAspectRatio:false,
     animation:{ duration:800, easing:'easeOutQuart' },
@@ -60,7 +55,6 @@ window.addEventListener('DOMContentLoaded', function () {
     },
     ...o
   });
-
   // Datalabel sederhana (tanpa plugin eksternal)
   const DataLabelPlugin = {
     id: 'valueLabels',
@@ -87,7 +81,6 @@ window.addEventListener('DOMContentLoaded', function () {
     }
   };
   Chart.register(DataLabelPlugin);
-
   // ========== TOP CHART (tanpa campur unit) ==========
   const flat = Object.values(payload || {}).flatMap(g => {
     const units = g.units || [];
@@ -96,7 +89,6 @@ window.addEventListener('DOMContentLoaded', function () {
   const unitCount = flat.reduce((m,r)=>((m[r.unit]=(m[r.unit]||0)+1),m),{});
   const dominantUnit = Object.entries(unitCount).sort((a,b)=>b[1]-a[1])[0]?.[0] ?? '';
   const top = flat.filter(r=>r.unit===dominantUnit).sort((a,b)=>b.val-a.val).slice(0,10);
-
   var topChartEl = document.getElementById('topChart');
   if (topChartEl && top.length) {
     destroyExistingChart(topChartEl);
@@ -123,20 +115,15 @@ window.addEventListener('DOMContentLoaded', function () {
       })
     });
   }
-
   // ========== TREND CHART (pakai data controller, no dummy) ==========
   var trendChartEl = document.getElementById('trendChart');
   if (trendChartEl && trendLabels.length) {
     destroyExistingChart(trendChartEl);
     const ctx = trendChartEl.getContext('2d');
     const lineColor = dynColor(0, 1);
-    const grad = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
-    grad.addColorStop(0, dynColor(0, .28));
-    grad.addColorStop(1, 'hsla(0 0% 0% / 0)');
-
+    const grad = '#1D4ED8';
     const first = trendValues.find(v => v != null) ?? 0;
     const allInt = Number.isInteger(first);
-
     new Chart(ctx, {
       type:'line',
       data:{
@@ -146,7 +133,7 @@ window.addEventListener('DOMContentLoaded', function () {
           label: datasetLabel,
           borderColor: lineColor,
           backgroundColor: grad,
-          fill: true,
+          fill: false,
           tension: .35,
           pointRadius: 3.5,
           pointHoverRadius: 6,
@@ -160,7 +147,6 @@ window.addEventListener('DOMContentLoaded', function () {
       })
     });
   }
-
   // ========== PER-GROUP (Horizontal bar, unit per bar) ==========
   if (payload && typeof payload === 'object') {
     Object.entries(payload).forEach(([code, cfg]) => {
@@ -168,7 +154,6 @@ window.addEventListener('DOMContentLoaded', function () {
       const n = (cfg.labels || []).length;
       const units = cfg.units || [];
       const allInt = cfg.all_int === true;
-
       destroyExistingChart(el);
       new Chart(el, {
         type:'bar',

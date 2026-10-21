@@ -22,6 +22,7 @@ class CompanyController extends Controller
         $per  = max(1, (int) $request->get('per', 15));
 
         $query = Company::query();
+        $query->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()));
 
         if ($q !== '') {
             $query->where(function ($w) use ($q) {
@@ -38,7 +39,7 @@ class CompanyController extends Controller
         $dir = $dir === 'desc' ? 'desc' : 'asc';
 
         $companies = $query->orderBy($sort, $dir)
-                           ->paginate($per)
+                           ->paginate(\App\Support\Listing::perPage())->withQueryString()
                            ->appends($request->query());
 
         return view('admin.companies.index', compact('companies', 'q', 'sort', 'dir', 'per'));

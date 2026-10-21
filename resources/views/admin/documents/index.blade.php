@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
 <x-ui.page class="max-w-7xl mx-auto min-w-0">
   <x-ui.page-header>
@@ -7,8 +6,7 @@
 <x-ui.page-description>Kelola dokumen, revisi, dan hak akses.</x-ui.page-description></div>
   <x-ui.page-actions><x-ui.link icon="plus" variant="primary" href="{{ route('admin.documents.create') }}"
        class="inline-flex justify-center px-4 py-2 rounded-lg hover:opacity-90">Buat Dokumen</x-ui.link></x-ui.page-actions>
-</x-ui.page-header>
-
+</x-ui.page-header><x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari judul atau nomor dokumen…" aria-label="Cari dokumen" /><x-ui.link variant="secondary" :href="route('admin.documents.index')">Reset</x-ui.link></x-ui.table-toolbar>
   <x-ui.panel :padded="false" class="max-w-full bg-white border rounded-lg overflow-x-auto">
     <x-ui.table class="w-full text-sm min-w-[980px]">
       <thead class="bg-[#1D1C1A] text-white">
@@ -27,7 +25,6 @@
           <th class="p-3 w-40 text-right">Actions</th>
         </tr>
       </thead>
-
       <tbody>
       @forelse($docs as $d)
         <tr class="border-b hover:bg-[#713F12]/5">
@@ -42,22 +39,16 @@
               {{ $tplLabel ?? '—' }}
             </div>
           </td>
-
           {{-- Doc.No --}}
           <td class="p-3 font-medium">{{ $d->doc_no ?? '—' }}</td>
-
           {{-- Dept --}}
           <td class="p-3">{{ $d->dept_code ?? '—' }}</td>
-
           {{-- Doc Type --}}
           <td class="p-3">{{ $d->doc_type ?? '—' }}</td>
-
           {{-- Project Code --}}
           <td class="p-3">{{ $d->project_code ?? '—' }}</td>
-
           {{-- Revision --}}
           <td class="p-3">{{ (int)($d->revision_no ?? 0) }}</td>
-
           {{-- Effective Date --}}
           <td class="p-3">
             @if(!empty($d->effective_date))
@@ -66,10 +57,8 @@
               —
             @endif
           </td>
-
           {{-- Title (wrap multiline kalau panjang) --}}
           <td class="p-3 whitespace-pre-line">{{ $d->title ?? '—' }}</td>
-
           {{-- Controlled Status (badge) --}}
           <td class="p-3">
             @php
@@ -83,20 +72,15 @@
             @endphp
             <span class="px-2 py-0.5 rounded text-xs {{ $badge }}">{{ $status }}</span>
           </td>
-
           {{-- Class --}}
           <td class="p-3">{{ $d->class ?? '—' }}</td>
-
           {{-- Owner --}}
           <td class="p-3">{{ $d->owner->name ?? '—' }}</td>
-
           {{-- Actions --}}
           <td class="ui-action-cell p-3 text-right"><x-ui.table-actions>
             <div class="inline-flex items-center gap-2">
               <x-ui.icon-button ability="view" :subject="$d" action="view" label="Lihat detail" href="{{ route('admin.documents.show',$d) }}" />
-
               <x-ui.icon-button ability="update" :subject="$d" action="edit" label="Edit" href="{{ route('admin.documents.edit',$d) }}" />
-
               <form action="{{ route('admin.documents.destroy',$d) }}" method="POST" data-confirm="Hapus dokumen ini?" class="inline">
                 @csrf @method('DELETE')
                 <x-ui.icon-button ability="delete" :subject="$d" action="delete" label="Hapus" type="submit" />
@@ -105,14 +89,11 @@
           </x-ui.table-actions></td>
         </tr>
       @empty
-        <tr>
-          <td colspan="12" class="p-6 text-center text-gray-500">Belum ada dokumen</td>
-        </tr>
-      @endforelse
+<x-ui.table-empty-state colspan="12"></x-ui.table-empty-state>
+@endforelse
       </tbody>
     </x-ui.table>
   </x-ui.panel>
-
   <div class="mt-4">{{ $docs->links() }}</div>
 </x-ui.page>
 @endsection

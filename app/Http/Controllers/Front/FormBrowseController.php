@@ -50,7 +50,7 @@ class FormBrowseController extends Controller
         'ALL'  => (clone $base)->count(),
     ];
 
-    $forms = $q->paginate(12)->appends($r->query());
+    $forms = $q->paginate(\App\Support\Listing::perPage())->withQueryString()->appends($r->query());
 
     return view('front.forms.index', compact('forms','counts','currentDocType'));
 }

@@ -1,18 +1,14 @@
 {{-- resources/views/admin/reports/edit_total.blade.php --}}
 @extends('layouts.app')
-
 @section('title', 'Edit Total Indikator')
-
 @section('content')
 @php
   /** @var \App\Models\Indicator|null $indicator */
   /** @var \App\Models\Site|null $site */
-
   $indName  = $indicator->name ?? ('Indikator #' . ($indicator->id ?? request('indicator_id')));
   $siteName = $site?->code
       ? $site->code . ' — ' . ($site->name ?? '')
       : 'Semua Site';
-
   // context periode & filter – pastikan nggak hilang
   $scope  = $scope  ?? request('scope', 'month');
   $date   = $date   ?? request('date');
@@ -20,13 +16,10 @@
   $month  = $month  ?? request('month');
   $year   = $year   ?? request('year');
   $siteId = $siteId ?? request('site_id');
-
   // nilai existing total (kalau ada), fallback 0
   $existingTotal = $existingTotal ?? 0;
 @endphp
-
 <div class="max-w-2xl mx-auto space-y-5">
-
   {{-- HEADER --}}
   <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Edit Total Indikator</x-ui.page-title>
@@ -36,7 +29,6 @@
     </x-ui.page-description></div>
   <x-ui.page-actions></x-ui.page-actions>
 </x-ui.page-header>
-
   {{-- INFO KONTEKS --}}
   <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
     <div class="font-semibold text-slate-900">{{ $indName }}</div>
@@ -59,14 +51,7 @@
       </div>
     </dl>
   </div>
-
   {{-- FLASH STATUS (kalau ada) --}}
-  @if (session('status'))
-    <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
-      {{ session('status') }}
-    </div>
-  @endif
-
   {{-- ERROR VALIDASI --}}
   @if ($errors->any())
     <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800">
@@ -78,14 +63,12 @@
       </ul>
     </div>
   @endif
-
   {{-- FORM --}}
   <form action="{{ route('admin.report-totals.update') }}" method="post"
         class="space-y-4 rounded-lg border border-slate-200 bg-white px-4 py-4 shadow-none">
     @csrf
     {{-- kalau route update kamu pakainya PUT/PATCH, aktifkan baris ini --}}
     {{-- @method('PUT') --}}
-
     {{-- HIDDEN CONTEXT (ini kunci supaya override-nya nyangkut di kombinasi yang tepat) --}}
     <input type="hidden" name="indicator_id" value="{{ $indicator->id ?? request('indicator_id') }}">
     <input type="hidden" name="group_code"   value="{{ $groupCode }}">
@@ -95,7 +78,6 @@
     <input type="hidden" name="month"        value="{{ $month }}">
     <input type="hidden" name="year"         value="{{ $year }}">
     <input type="hidden" name="site_id"      value="{{ $siteId }}">
-
     <div>
       <label class="block text-xs font-semibold text-slate-700 mb-1">
         Total Baru
@@ -116,14 +98,12 @@
         <p class="mt-1 text-[11px] text-rose-600">{{ $message }}</p>
       @enderror
     </div>
-
     <div class="flex items-center justify-between gap-3 pt-2">
       {{-- Kembali ke rekap: paling aman pakai URL sebelumnya --}}
       <x-ui.link variant="secondary" href="{{ url()->previous() }}"
          class="inline-flex items-center px-3 py-2 rounded-lg border text-xs font-semibold">
         ← Kembali ke Rekap
       </x-ui.link>
-
       <x-ui.button variant="primary" type="submit"
               class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-semibold shadow-none">
         Simpan Total

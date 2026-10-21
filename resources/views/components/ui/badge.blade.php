@@ -1,2 +1,2 @@
 @props(['variant' => 'neutral'])
-<span {{ $attributes->class(['ui-status', 'ui-status--'.$variant]) }}>{{ $slot }}</span>
+<x-ui.status-badge :variant="$variant" {{ $attributes }}>{{ $slot }}</x-ui.status-badge>

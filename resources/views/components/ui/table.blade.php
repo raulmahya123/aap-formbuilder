@@ -1,3 +1,3 @@
-<div class="ui-table-scroll" role="region" aria-label="Tabel data" tabindex="0">
+<x-ui.data-table><div class="ui-table-scroll" role="region" aria-label="Tabel data" tabindex="0">
     <table {{ $attributes->class(['ui-table']) }}>{{ $slot }}</table>
-</div>
+</div></x-ui.data-table>

@@ -19,7 +19,7 @@ class FormEntryController extends Controller
             ->with(['form:id,title,slug'])
             ->when(Auth::check(), fn($q) => $q->where('user_id', Auth::id()))
             ->latest()
-            ->paginate(15);
+            ->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         return view('front.forms.entries.index', compact('entries'));
     }

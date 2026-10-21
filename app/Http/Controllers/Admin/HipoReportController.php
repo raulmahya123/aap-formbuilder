@@ -15,11 +15,16 @@ class HipoReportController extends Controller
     // ==============================
     // INDEX
     // ==============================
-    public function index()
+    public function index(Request $request)
     {
         $allowed = auth()->user()->allowedSiteIds();
+        $siteId = \App\Support\SiteSelection::id($request);
         $reports = HipoReport::when(is_array($allowed), fn ($q) => $q->whereIn('site_id', $allowed ?: [-1]))
-            ->latest()->paginate(15)->withQueryString();
+            ->when($siteId, fn ($q) => $q->where('site_id', $siteId))
+            ->when($request->filled('search'), fn ($q) => $q->where(fn ($w) => $w->where('jobsite', 'like', '%'.$request->string('search').'%')->orWhere('reporter_name', 'like', '%'.$request->string('search').'%')->orWhere('description', 'like', '%'.$request->string('search').'%')))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()))
+            ->when($request->filled('risk_level'), fn ($q) => $q->where('risk_level', $request->string('risk_level')->toString()))
+            ->latest()->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         return view('admin.hipo.index', compact('reports'));
     }

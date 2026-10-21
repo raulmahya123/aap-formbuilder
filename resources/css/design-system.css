@@ -101,8 +101,8 @@ main .ui-table :is(th, td).text-center { text-align: center; }
 .ui-auth .ui-heading { margin-bottom: .5rem; }
 .ui-auth .ui-button svg { color: inherit; stroke: currentColor; }
 .ui-auth label { color: var(--text-secondary); }
-.ui-auth a:not(.ui-button):not(.ui-icon-button), main a:not(.ui-button):not(.action-icon):not(.ui-icon-button):not([class*='bg-']):not([class*='text-white']) { color: var(--blue); }
-.ui-auth a:not(.ui-button):not(.ui-icon-button):hover, main a:not(.ui-button):not(.action-icon):not(.ui-icon-button):not([class*='bg-']):not([class*='text-white']):hover { color: var(--action-primary-hover); }
+.ui-auth a:where(:not(.ui-button):not(.ui-icon-button)), main a:where(:not(.ui-button):not(.action-icon):not(.ui-icon-button):not([class*='bg-']):not([class*='text-white'])) { color: var(--blue); }
+.ui-auth a:where(:not(.ui-button):not(.ui-icon-button)):hover, main a:where(:not(.ui-button):not(.action-icon):not(.ui-icon-button):not([class*='bg-']):not([class*='text-white'])):hover { color: var(--action-primary-hover); }
 /* The specified red is AA on white; small red text on neutral surfaces needs this darker tone. */
 :is(.text-red-500, .text-red-600, .text-red-700, .text-red-800, .text-rose-500, .text-rose-600, .text-rose-700, .text-rose-800, .form-error) { color: var(--danger-text); }
 .ui-status { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .5rem; border: 1px solid var(--border); border-radius: .375rem; font-size: .75rem; font-weight: 600; line-height: 1.5; background: var(--surface-secondary); color: var(--gray); }

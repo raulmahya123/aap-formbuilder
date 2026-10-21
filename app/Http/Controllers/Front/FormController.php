@@ -72,7 +72,7 @@ class FormController extends Controller
 
         // ===== pagination
         $perPage = in_array((int)$r->per_page, [10,12,20,50,100], true) ? (int)$r->per_page : 12;
-        $forms = $q->latest()->paginate($perPage)->appends($r->query());
+        $forms = $q->latest()->paginate(\App\Support\Listing::perPage())->withQueryString()->appends($r->query());
 
         // ===== kirim semua departemen untuk grid tiles (color opsional)
         $departments = Department::orderBy('name')->get(['id','name','color']);
@@ -154,7 +154,7 @@ class FormController extends Controller
             $q->where('doc_type', $currentDocType);
         }
 
-        $entries = $q->latest()->paginate(15)->appends($r->query());
+        $entries = $q->latest()->paginate(\App\Support\Listing::perPage())->withQueryString()->appends($r->query());
 
         // counts per doc_type (mengikuti filter user_id)
         $baseForCount = FormEntry::query()

@@ -31,8 +31,7 @@ class ContractController extends Controller
                   });
             })
             ->latest()
-            ->paginate(20)
-            ->withQueryString();
+            ->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         return view('admin.contracts.index', compact('contracts'));
     }

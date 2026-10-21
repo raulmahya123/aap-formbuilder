@@ -1,9 +1,12 @@
 // Shared action controls preserve native forms, validation, named submitters and policy-gated markup.
 const originalButtonContent = new WeakMap();
+document.addEventListener('change', event => {
+    if (event.target.matches('[data-site-selector] select')) event.target.form.requestSubmit();
+});
 let pendingConfirmation = null;
 let resetTrigger = null;
 
-function isFormDirty(form) {
+export function isFormDirty(form) {
     if (!form || !(form instanceof HTMLFormElement)) return false;
     for (const el of form.elements) {
         if (!el.name || el.disabled || el.type === 'submit' || el.type === 'button' || el.type === 'hidden') continue;
@@ -11,12 +14,19 @@ function isFormDirty(form) {
             if (el.checked !== el.defaultChecked) return true;
         } else if (el.type === 'file') {
             if (el.files && el.files.length > 0) return true;
+        } else if (el instanceof HTMLSelectElement) {
+            if ([...el.options].some(option => option.selected !== option.defaultSelected)) return true;
         } else if (el.value !== el.defaultValue) {
             return true;
         }
     }
     return false;
 }
+
+document.addEventListener('cancel', event => {
+    const dialog = event.target;
+    if (dialog.matches?.('dialog[data-dirty-check="true"]') && isFormDirty(dialog.querySelector('form')) && !window.confirm('Ada perubahan yang belum disimpan. Yakin ingin menutup?')) event.preventDefault();
+}, true);
 
 document.addEventListener('submit', event => {
     const form = event.target;
@@ -53,7 +63,8 @@ document.addEventListener('submit', event => {
             const descEl = dialog.querySelector('[data-delete-desc]') || dialog.querySelector('#ui-confirm-message');
             if (descEl) {
                 if (destructive && objectName) {
-                    descEl.textContent = `${objectName.charAt(0).toUpperCase() + objectName.slice(1)} akan dihapus.`;
+                    const remaining = match ? confirmMsg.slice(match[0].length).trim() : '';
+                    descEl.textContent = `${objectName.charAt(0).toUpperCase() + objectName.slice(1)} akan dihapus.${remaining ? ' '+remaining : ''}`;
                 } else {
                     descEl.textContent = confirmMsg;
                 }

@@ -14,14 +14,15 @@ class IndicatorController extends Controller
         $this->middleware(['auth']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $groups = IndicatorGroup::query()
-            ->with(['indicators' => fn($q) => $q->orderBy('order_index')->orderBy('id')]) // urutkan indikator
-            ->orderBy('order_index')
-            ->get();
+        $groups = IndicatorGroup::orderBy('order_index')->get();
+        $indicators = Indicator::with('group')
+            ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', '%'.$request->string('q').'%')->orWhere('code', 'like', '%'.$request->string('q').'%')))
+            ->when($request->filled('indicator_group_id'), fn ($q) => $q->where('indicator_group_id', $request->integer('indicator_group_id')))
+            ->orderBy('order_index')->orderBy('id')->paginate(\App\Support\Listing::perPage())->withQueryString();
 
-        return view('admin.indicators.index', compact('groups'));
+        return view('admin.indicators.index', compact('groups', 'indicators'));
     }
 
     public function create()

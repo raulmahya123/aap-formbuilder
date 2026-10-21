@@ -102,23 +102,17 @@
 
           <div class="flex items-center gap-2 sm:gap-3">
             @if($navbarUser && $navbarUser->isAdmin() && $navbarSites->count() > 0 && Route::has('admin.sites.switch'))
-              <div x-data="{open:false}" class="relative hidden md:block">
-                <button type="button" @click="open=!open" @click.outside="open=false" class="inline-flex max-w-[15rem] items-center gap-2 rounded-lg border border-[#D4D4D8] bg-white px-3 py-2 text-left text-sm text-[#18181B] hover:bg-[#F4F4F5]" aria-label="Pilih site">
-                  <svg class="h-4 w-4 shrink-0 text-[#713F12]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
-                  <span class="truncate font-medium">{{ $navbarActiveSite?->code ?? 'ALL SITES' }}</span>
-                  <svg class="h-4 w-4 text-coal-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
-                </button>
-                <div x-show="open" x-transition x-cloak class="absolute right-0 mt-2 w-72 rounded-lg border border-[#D4D4D8] bg-white p-2 shadow-none">
-                  <div class="px-3 py-2 text-[11px] font-semibold normal-case tracking-normal text-[#52525B]">Active Site</div>
-                  <form method="POST" action="{{ route('admin.sites.switch') }}" class="grid gap-1">
-                    @csrf
-                    <button name="site_id" value="" class="flex items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-ivory-100"><span>ALL SITES</span>@if(!$navbarActiveSite)<span class="text-maroon-700">✓</span>@endif</button>
-                    @foreach($navbarSites as $navbarSite)
-                      <button name="site_id" value="{{ $navbarSite->id }}" class="flex items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-ivory-100"><span>{{ $navbarSite->code }} — {{ $navbarSite->name }}</span>@if($navbarActiveSite?->id === $navbarSite->id)<span class="text-maroon-700">✓</span>@endif</button>
-                    @endforeach
-                  </form>
-                </div>
-              </div>
+              <form method="POST" action="{{ route('admin.sites.switch') }}" class="flex min-w-0 items-center gap-2" data-site-selector data-error-bag="siteSelection">
+                @csrf
+                <label for="global-site" class="sr-only">Site aktif</label>
+                <x-ui.form-select id="global-site" name="site_id" class="max-w-[min(36vw,15rem)]" aria-label="Site aktif">
+                  <option value="">Semua site</option>
+                  @foreach($navbarSites as $navbarSite)
+                    <option value="{{ $navbarSite->id }}" @selected($navbarActiveSite?->id === $navbarSite->id)>{{ $navbarSite->code }} — {{ $navbarSite->name }}</option>
+                  @endforeach
+                </x-ui.form-select>
+                <noscript><x-ui.button type="submit" variant="secondary">Terapkan</x-ui.button></noscript>
+              </form>
             @endif
 
             @hasSection('actions')
@@ -168,26 +162,10 @@
     </div>
   </div>
 
-  @if(session('ok') || session('success') || session('error') || $errors->any())
-    <div x-data="{show:true}" x-show="show" x-transition class="toast fixed right-4 top-4 z-[100] w-[min(92vw,26rem)] {{ session('error') || $errors->any() ? 'toast-error' : 'toast-success' }}" role="status" aria-live="polite">
-      <div class="flex items-start gap-3">
-        <div class="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-current text-sm font-bold">
-          @if(session('error') || $errors->any()) ! @else ✓ @endif
-        </div>
-        <div class="min-w-0 flex-1 text-sm">
-          @if($errors->any())
-            <div class="font-semibold">Periksa input</div>
-            <div class="mt-1">{{ $errors->first() }}</div>
-          @else
-            {{ session('error') ?? session('ok') ?? session('success') }}
-          @endif
-        </div>
-        <button type="button" @click="show=false" class="text-lg leading-none text-coal-400 hover:text-coal-700" aria-label="Tutup">&times;</button>
-      </div>
-    </div>
-  @endif
+  <x-ui.toast-provider />
 
   <x-ui.action-dialogs />
+  <x-ui.remote-modal />
   @stack('modals')
   @stack('scripts')
 

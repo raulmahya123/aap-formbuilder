@@ -134,9 +134,10 @@ class DailyInputController extends Controller
 
     public function index(Request $r)
     {
+        $r->validate(['month' => ['nullable','integer','between:1,12'], 'year' => ['nullable','integer','between:2000,2100']]);
         $allowed = $this->allowedSiteIds($r->user());
 
-        $siteId = $r->integer('site_id');
+        $siteId = \App\Support\SiteSelection::id($r);
         $month  = (int) $r->input('month', now()->month);
         $year   = (int) $r->input('year',  now()->year);
 
@@ -159,7 +160,7 @@ class DailyInputController extends Controller
 
         if ($siteId) $rowsQ->where('site_id', $siteId);
 
-        $rows = $rowsQ->paginate(50)->withQueryString();
+        $rows = $rowsQ->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         return view('admin.daily.index', compact('rows', 'sites', 'siteId', 'month', 'year'));
     }

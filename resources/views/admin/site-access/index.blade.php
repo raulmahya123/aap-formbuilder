@@ -1,24 +1,15 @@
 @extends('layouts.app')
-
 @section('title', 'Kelola Akses Site')
-
-@section('breadcrumbs')
-  <x-ui.page-header>
-  <div class="ui-page-header__copy"><x-ui.page-title>Kelola Akses Site</x-ui.page-title>
-<x-ui.page-description>Atur akses pengguna berdasarkan site.</x-ui.page-description></div>
-  <x-ui.page-actions></x-ui.page-actions>
-</x-ui.page-header>
-@endsection
-
+@section('breadcrumbs')<a href="{{ route('dashboard') }}">Dashboard</a><span aria-hidden="true">/</span><span>Akses Site</span>@endsection
 @section('actions')
   @if(Route::has('admin.sites.index'))
     <x-ui.link variant="secondary" href="{{ route('admin.sites.index') }}" class="px-3 py-2 rounded-lg border text-sm">
-      📍 Kelola Sites
+      Kelola Sites
     </x-ui.link>
   @endif
 @endsection
-
 @section('content')
+<x-ui.page-header><div class="ui-page-header__copy"><x-ui.page-title>Kelola Akses Site</x-ui.page-title><x-ui.page-description>Atur akses pengguna berdasarkan site.</x-ui.page-description></div><x-ui.page-actions /></x-ui.page-header>
 @php
   // Controller menyediakan:
   // $accesses (Paginator)
@@ -27,18 +18,9 @@
   $siteId = $siteId ?? request('site_id');
   $email  = $email  ?? request('email');
 @endphp
-
 {{-- Flash message (opsional) --}}
-@if(session('ok') || session('info') || session('error'))
-  <div class="mb-4 rounded-lg border p-3 @if(session('ok')) border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 @endif @if(session('info')) border-amber-300 bg-amber-50 dark:bg-amber-900/20 @endif @if(session('error')) border-rose-300 bg-rose-50 dark:bg-rose-900/20 @endif">
-    <div class="text-sm">
-      {{ session('ok') ?? session('info') ?? session('error') }}
-    </div>
-  </div>
-@endif
-
 {{-- Filter --}}
-<form method="GET" class="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+<x-ui.table-toolbar class="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
   <div>
     <label class="block text-sm mb-1">Filter Site</label>
     <select name="site_id" class="w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-900">
@@ -48,7 +30,6 @@
       @endforeach
     </select>
   </div>
-
   <div>
     <label class="block text-sm mb-1">Filter Email</label>
     <select
@@ -61,22 +42,17 @@
       @endforeach
     </select>
   </div>
-
   <div class="flex items-end gap-2">
     <x-ui.button variant="secondary" class="px-3 py-2 rounded-lg border">Terapkan</x-ui.button>
     <x-ui.link variant="secondary" href="{{ route('admin.site_access.index') }}" class="px-3 py-2 rounded-lg border">Reset</x-ui.link>
   </div>
-</form>
-
+</x-ui.table-toolbar>
 <div class="grid lg:grid-cols-2 gap-5">
-
   {{-- Form Tambah Akses (per-site & per-email) --}}
   <div class="rounded-lg border p-4">
     <x-ui.section-title class="font-semibold mb-3">Tambah Akses (Email ↔ Site)</x-ui.section-title>
-
     <form method="POST" action="{{ route('admin.site_access.store') }}" class="grid gap-3">
       @csrf
-
       <div>
         <label class="block text-sm mb-1">Site</label>
         <select name="site_id" class="w-full rounded-lg border px-3 py-2 bg-white dark:bg-coal-900" required>
@@ -87,7 +63,6 @@
         </select>
         @error('site_id') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
       </div>
-
       <div>
         <label class="block text-sm mb-1">Email User</label>
         <select
@@ -102,15 +77,13 @@
         </select>
         @error('email') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
       </div>
-
       <div class="pt-2">
-        <x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-coal-900/20">
-          + Tambah Akses
+        <x-ui.button variant="primary" icon="user-round-plus" class="px-4 py-2 rounded-lg">
+          Tambah Akses
         </x-ui.button>
       </div>
     </form>
   </div>
-
   {{-- Info Panduan (opsional) --}}
   <div class="rounded-lg border p-4">
     <x-ui.section-title class="font-semibold mb-3">Panduan</x-ui.section-title>
@@ -120,15 +93,12 @@
       <li>Untuk mencabut akses, klik tombol <em>Hapus</em> pada baris yang diinginkan.</li>
     </ul>
   </div>
-
 </div>
-
 {{-- Daftar Akses --}}
 <div class="mt-8 rounded-lg border overflow-hidden">
   <div class="px-4 py-3 border-b">
     <x-ui.section-title class="font-semibold">Daftar Akses User ↔ Site</x-ui.section-title>
   </div>
-
   <div class="overflow-x-auto">
     <x-ui.table class="min-w-full text-sm">
       <thead class="bg-ivory-100 dark:bg-coal-900">
@@ -164,18 +134,13 @@
             </x-ui.table-actions></td>
           </tr>
         @empty
-          <tr>
-            <td colspan="5" class="px-4 py-6 text-center text-coal-500">Belum ada data akses.</td>
-          </tr>
-        @endforelse
+<x-ui.table-empty-state colspan="5"></x-ui.table-empty-state>
+@endforelse
       </tbody>
     </x-ui.table>
   </div>
-
-  @if($accesses->hasPages())
     <div class="px-4 py-3 border-t">
       {{ $accesses->withQueryString()->links() }}
     </div>
-  @endif
 </div>
 @endsection

@@ -26,5 +26,6 @@
                 {{ $slot }}
             </div>
         </div>
-    </body>
+      <x-ui.toast-provider />
+</body>
 </html>

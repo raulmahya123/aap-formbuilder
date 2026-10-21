@@ -1,6 +1,5 @@
 {{-- resources/views/admin/forms/builder.blade.php --}}
 @extends('layouts.app')
-
 @section('content')
 <x-ui.page class="max-w-6xl mx-auto"
      x-data="formBuilder({
@@ -13,7 +12,6 @@
 <x-ui.page-description>Kelola form, struktur isian, dan tipe dokumen.</x-ui.page-description></div>
   <x-ui.page-actions><a class="text-sm underline" href="{{ route('admin.forms.edit', $form) }}">← Kembali ke Edit</a></x-ui.page-actions>
 </x-ui.page-header>
-
   <div class="grid md:grid-cols-3 gap-5">
     {{-- PALETTE (kiri) --}}
     <x-ui.panel class="bg-white rounded-lg border">
@@ -28,19 +26,16 @@
         </template>
       </div>
     </x-ui.panel>
-
     {{-- CANVAS (tengah) --}}
     <x-ui.panel class="bg-white rounded-lg border">
       <div class="flex items-center justify-between mb-3">
         <x-ui.section-title class="font-medium">Form Fields</x-ui.section-title>
         <div class="text-xs text-slate-500">Drag untuk urutan</div>
       </div>
-
       <div id="canvas" class="space-y-3">
         <template x-if="fields.length===0">
           <div class="text-slate-500 text-sm">Belum ada field. Tambahkan dari palette.</div>
         </template>
-
         <template x-for="(f,idx) in fields" :key="f._key">
           <div class="p-3 border rounded-lg">
             <div class="flex items-center justify-between">
@@ -65,18 +60,15 @@
         </template>
       </div>
     </x-ui.panel>
-
     {{-- PROPERTIES (kanan) --}}
     <x-ui.panel class="bg-white rounded-lg border">
       <div class="flex items-center justify-between mb-3">
         <x-ui.section-title class="font-medium">Properties</x-ui.section-title>
         <x-ui.button variant="secondary" type="button" class="text-xs underline" @click.prevent="editIndex=null" x-show="editIndex!==null">Selesai</x-ui.button>
       </div>
-
       <template x-if="editIndex===null">
         <div class="text-slate-500 text-sm">Pilih field untuk mengedit.</div>
       </template>
-
       <template x-if="editIndex!==null">
         <div class="space-y-3" x-init="$nextTick(() => focusNameInput())">
           <div>
@@ -101,14 +93,12 @@
               <span class="text-sm">Required</span>
             </div>
           </div>
-
           {{-- RULES --}}
           <div>
             <label class="text-sm block">Rules (opsional, format Laravel: min:3|max:80|regex:...)</label>
             <input x-model="fields[editIndex].rules" @input="queueSave()" placeholder="mis. string|min:3|max:80"
                    class="border rounded-lg w-full px-2 py-1">
           </div>
-
           {{-- MIMES & MAX khusus file --}}
           <template x-if="fields[editIndex].type==='file'">
             <div class="grid grid-cols-2 gap-3">
@@ -122,7 +112,6 @@
               </div>
             </div>
           </template>
-
           {{-- OPTIONS untuk select/radio/checkbox --}}
           <template x-if="['select','radio','checkbox'].includes(fields[editIndex].type)">
             <div>
@@ -141,7 +130,6 @@
               </div>
             </div>
           </template>
-
           <div class="pt-2">
             <x-ui.button variant="secondary" type="button" class="px-3 py-2 rounded-lg" @click.prevent="editIndex=null">Selesai</x-ui.button>
           </div>
@@ -149,7 +137,6 @@
       </template>
     </x-ui.panel>
   </div>
-
   {{-- PREVIEW JSON + SAVE --}}
   <x-ui.panel class="mt-6 bg-white rounded-lg border">
     <div class="flex items-center justify-between mb-3">
@@ -163,11 +150,9 @@
       @csrf @method('PUT')
       <textarea name="schema" x-model="json" rows="10" class="w-full font-mono text-sm border rounded-lg p-2"></textarea>
     </form>
-
     <div class="text-xs mt-2" x-show="savedFlash" x-transition>✓ Tersimpan</div>
   </x-ui.panel>
 </x-ui.page>
-
 {{-- SortableJS --}}
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script>
@@ -184,12 +169,10 @@ function formBuilder({ initial, saveUrl, csrf }) {
       { type:'checkbox', label:'Checkbox', desc:'Bisa pilih banyak' },
       { type:'file',     label:'File',     desc:'Upload berkas' },
     ],
-
     fields: (initial || []).map((f) => ({ _key: cryptoRandom(), required:false, ...f })),
     editIndex: null,
     savedFlash: false,
     saveTimer: null,
-
     get json() { return JSON.stringify({ fields: this.fields.map(stripRuntime) }, null, 2); },
     set json(v) {
       try {
@@ -199,7 +182,6 @@ function formBuilder({ initial, saveUrl, csrf }) {
         this.queueSave();
       } catch(e) { /* ignore */ }
     },
-
     addField(type){
       const base = { type, label: type.toUpperCase(), name: uniqueName(this.fields, type), required:false };
       if (['select','radio','checkbox'].includes(type)) base.options = [['opt1','Opsi 1'],['opt2','Opsi 2']];
@@ -209,14 +191,12 @@ function formBuilder({ initial, saveUrl, csrf }) {
       queueMicrotask(() => focusNameInput());
       this.saveNow(); // real-time
     },
-
     async removeField(i){
       this.fields.splice(i,1);
       if (this.editIndex === i) this.editIndex = null;
       else if (this.editIndex !== null && this.editIndex > i) this.editIndex--;
       await this.saveNow(); // real-time
     },
-
     addOption(){
       if (this.editIndex===null) return;
       const f = this.fields[this.editIndex];
@@ -224,14 +204,11 @@ function formBuilder({ initial, saveUrl, csrf }) {
       f.options.push(['value','Label']);
       this.saveNow(); // real-time
     },
-
     pretty(){ this.json = this.json; },
-
     queueSave(){
       clearTimeout(this.saveTimer);
       this.saveTimer = setTimeout(() => this.saveNow(), 600); // debounce utk ketikan biasa
     },
-
     async saveNow(){
       try {
         const res = await fetch(saveUrl, {
@@ -244,14 +221,20 @@ function formBuilder({ initial, saveUrl, csrf }) {
           },
           body: JSON.stringify({ schema: this.json })
         });
-        // 200/302 dianggap sukses
+        if (!res.ok || res.redirected) {
+          const message = res.status === 401 || res.status === 419 ? 'Sesi telah berakhir. Masuk kembali sebelum menyimpan.'
+            : res.status === 403 ? 'Anda tidak memiliki izin untuk menyimpan form ini.'
+            : res.status === 422 ? 'Form belum dapat disimpan. Periksa kembali susunan dan isian form.'
+            : 'Form gagal disimpan. Silakan coba lagi.';
+          window.dispatchEvent(new CustomEvent('ui:toast', { detail: { type: 'error', message } }));
+          return;
+        }
         this.savedFlash = true;
         setTimeout(()=> this.savedFlash = false, 1200);
       } catch (e) {
-        console.error('Save failed', e);
+        window.dispatchEvent(new CustomEvent('ui:toast', { detail: { type: 'error', message: 'Koneksi terputus. Perubahan belum tersimpan. Periksa koneksi, lalu coba simpan kembali.' } }));
       }
     },
-
     init(){
       new Sortable(document.getElementById('canvas'), {
         handle: '.cursor-move',
@@ -274,7 +257,6 @@ function formBuilder({ initial, saveUrl, csrf }) {
     }
   }
 }
-
 function stripRuntime(f){ const { _key, ...rest } = f; return rest; }
 function cryptoRandom(){
   if (window.crypto?.getRandomValues) {

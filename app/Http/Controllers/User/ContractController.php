@@ -32,8 +32,7 @@ class ContractController extends Controller
             })
             ->withCount('viewers')
             ->latest()
-            ->paginate(12)
-            ->withQueryString();
+            ->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         return view('user.contracts.index', compact('contracts'));
     }

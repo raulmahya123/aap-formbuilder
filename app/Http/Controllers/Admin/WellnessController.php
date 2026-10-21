@@ -11,14 +11,21 @@ class WellnessController extends Controller
 {
     public function index(Request $request): View
     {
-        $responses = WellnessResponse::query()
+        $siteId = \App\Support\SiteSelection::id($request);
+        $allowed = $request->user()->allowedSiteIds();
+        $sites = \App\Models\Site::query()
+            ->when(is_array($allowed), fn ($q) => $q->whereIn('id', $allowed ?: [-1]))
+            ->when($siteId, fn ($q) => $q->where('id', $siteId))->get(['id', 'code', 'name']);
+        $labels = $sites->flatMap(fn ($site) => [$site->name, $site->code])->filter()->unique()->values()->all();
+        $base = WellnessResponse::query()
+            ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', '%'.$request->string('q').'%')->orWhere('nik', 'like', '%'.$request->string('q').'%')))
+            ->when($siteId || is_array($allowed), fn ($q) => $q->whereIn('site', $labels ?: ['__none__']))
             ->when($request->filled('site'), fn ($query) => $query->where('site', 'like', '%' . (string) $request->string('site') . '%'))
-            ->when($request->filled('work_readiness'), fn ($query) => $query->where('work_readiness', (string) $request->string('work_readiness')))
+            ->when($request->filled('work_readiness'), fn ($query) => $query->where('work_readiness', (string) $request->string('work_readiness')));
+        $responses = (clone $base)
             ->latest()
-            ->paginate(20)
-            ->withQueryString();
+            ->paginate(\App\Support\Listing::perPage())->withQueryString();
 
-        $base = WellnessResponse::query();
         $stats = [
             'total' => (clone $base)->count(),
             'today' => (clone $base)->whereDate('created_at', today())->count(),

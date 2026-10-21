@@ -1,11 +1,8 @@
 {{-- resources/views/admin/companies/show.blade.php --}}
 @extends('layouts.app')
-
 @section('title', 'Detail Perusahaan')
-
 @section('content')
 <x-ui.page class="max-w-6xl mx-auto">
-
   {{-- Header --}}
   @php
         // Pastikan logo aman tampil walau logo_path kadang punya prefix salah
@@ -29,7 +26,7 @@
 <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>{{ $company->name }}</x-ui.page-title><x-ui.page-description>Kelola profil perusahaan dan informasi operasionalnya.</x-ui.page-description></div>
   <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('admin.companies.index') }}">Kembali</x-ui.link><div class="flex items-center gap-2">
-      <x-ui.link variant="primary" href="{{ route('admin.companies.edit', $company) }}"
+      <x-ui.link data-modal-form variant="primary" href="{{ route('admin.companies.edit', $company) }}"
          class="rounded-lg px-4 py-2 border">
         Edit
       </x-ui.link>
@@ -48,7 +45,6 @@
   <span class="text-sm text-coal-500">Kode: {{ $company->code }}</span>
   <span class="{{ $badge }}">{{ ucfirst($company->status ?? 'active') }}</span>
 </div>
-
   {{-- Grid detail --}}
   <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
     {{-- Kolom kiri --}}
@@ -59,34 +55,26 @@
         <dl class="grid grid-cols-3 gap-2 text-sm">
           <dt class="text-coal-500">Nama</dt>
           <dd class="col-span-2">{{ $company->name }}</dd>
-
           <dt class="text-coal-500">Badan Hukum</dt>
           <dd class="col-span-2">{{ $company->legal_name ?: '—' }}</dd>
-
           <dt class="text-coal-500">Slug</dt>
           <dd class="col-span-2">{{ $company->slug ?: '—' }}</dd>
-
           <dt class="text-coal-500">Industri</dt>
           <dd class="col-span-2">{{ $company->industry ?: '—' }}</dd>
-
           <dt class="text-coal-500">NPWP</dt>
           <dd class="col-span-2">{{ $company->npwp ?: '—' }}</dd>
-
           <dt class="text-coal-500">NIB</dt>
           <dd class="col-span-2">{{ $company->nib ?: '—' }}</dd>
         </dl>
       </x-ui.panel>
-
       {{-- Kontak & Situs --}}
       <x-ui.panel class="rounded-lg border bg-white">
         <x-ui.section-title class="font-semibold mb-3 text-[color:var(--brand-maroon,#713F12)]">Kontak & Situs</x-ui.section-title>
         <dl class="grid grid-cols-3 gap-2 text-sm">
           <dt class="text-coal-500">Email</dt>
           <dd class="col-span-2">{{ $company->email ?: '—' }}</dd>
-
           <dt class="text-coal-500">Telepon</dt>
           <dd class="col-span-2">{{ $company->phone ?: '—' }}</dd>
-
           <dt class="text-coal-500">Website</dt>
           <dd class="col-span-2">
             @if($company->website)
@@ -101,29 +89,23 @@
           </dd>
         </dl>
       </x-ui.panel>
-
       {{-- Alamat --}}
       <x-ui.panel class="rounded-lg border bg-white">
         <x-ui.section-title class="font-semibold mb-3 text-[color:var(--brand-maroon,#713F12)]">Alamat</x-ui.section-title>
         <dl class="grid grid-cols-3 gap-2 text-sm">
           <dt class="text-coal-500">Alamat</dt>
           <dd class="col-span-2 whitespace-pre-line">{{ $company->hq_address ?: '—' }}</dd>
-
           <dt class="text-coal-500">Kota</dt>
           <dd class="col-span-2">{{ $company->city ?: '—' }}</dd>
-
           <dt class="text-coal-500">Provinsi</dt>
           <dd class="col-span-2">{{ $company->province ?: '—' }}</dd>
-
           <dt class="text-coal-500">Kode Pos</dt>
           <dd class="col-span-2">{{ $company->postal_code ?: '—' }}</dd>
-
           <dt class="text-coal-500">Negara</dt>
           <dd class="col-span-2">{{ $company->country ?: 'ID' }}</dd>
         </dl>
       </x-ui.panel>
     </div>
-
     {{-- Kolom kanan (meta) --}}
     <div class="space-y-4">
       <x-ui.panel class="rounded-lg border bg-white">
@@ -131,18 +113,15 @@
         <dl class="grid grid-cols-3 gap-2 text-sm">
           <dt class="text-coal-500">Zona Waktu</dt>
           <dd class="col-span-2">{{ $company->timezone ?: 'Asia/Jakarta' }}</dd>
-
           <dt class="text-coal-500">Mata Uang</dt>
           <dd class="col-span-2">{{ $company->currency ?: 'IDR' }}</dd>
         </dl>
       </x-ui.panel>
-
       <x-ui.panel class="rounded-lg border bg-white">
         <x-ui.section-title class="font-semibold mb-3 text-[color:var(--brand-maroon,#713F12)]">Metadata</x-ui.section-title>
         <dl class="grid grid-cols-3 gap-2 text-sm">
           <dt class="text-coal-500">Dibuat</dt>
           <dd class="col-span-2">{{ optional($company->created_at)->format('d M Y H:i') ?? '—' }}</dd>
-
           <dt class="text-coal-500">Diubah</dt>
           <dd class="col-span-2">{{ optional($company->updated_at)->format('d M Y H:i') ?? '—' }}</dd>
         </dl>

@@ -1,8 +1,6 @@
 @extends('layouts.app')
-
 @section('content')
 <x-ui.page class="">
-
     {{-- HEADER --}}
     <x-ui.page-header>
   <div class="ui-page-header__copy"><div>
@@ -13,7 +11,7 @@
            class="px-5 py-3 rounded-lg text-sm font-semibold shadow-none transition">Input CCM Baru
         </x-ui.link></x-ui.page-actions>
 </x-ui.page-header>
-
+<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari jobsite atau pelapor…" aria-label="Cari CCM" /><label for="ccm-from">Dari</label><x-ui.form-input id="ccm-from" type="date" name="date_from" :value="request('date_from')" /><label for="ccm-to">Sampai</label><x-ui.form-input id="ccm-to" type="date" name="date_to" :value="request('date_to')" /><x-ui.button variant="secondary" type="submit">Terapkan</x-ui.button><x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link></x-ui.table-toolbar>
     {{-- TABLE --}}
     <x-ui.panel :padded="false" class="bg-white rounded-lg border border-gray-200 shadow-none overflow-hidden">
         <div class="overflow-x-auto">
@@ -28,28 +26,23 @@
                         <th class="p-4 text-center">Aksi</th>
                     </tr>
                 </thead>
-
                 <tbody class="divide-y divide-gray-100">
                     @forelse($reports as $r)
                     <tr class="hover:bg-gray-50 transition">
-
                         {{-- Tanggal --}}
                         <td class="p-4 whitespace-nowrap font-medium text-gray-700">
                             {{ $r->waktu_pelaporan->format('d M Y') }}
                         </td>
-
                         {{-- Jobsite --}}
                         <td class="p-4">
                             <span class="px-2 py-1 rounded-lg bg-gray-100 text-gray-700 font-bold text-xs border border-gray-200">
                                 {{ $r->jobsite }}
                             </span>
                         </td>
-
                         {{-- Pelapor --}}
                         <td class="p-4 text-gray-600 font-medium">
                             {{ $r->nama_pelapor }}
                         </td>
-
                         {{-- KEGIATAN KRITIS (ICON) --}}
                         <td class="p-4 text-center text-lg">
                             <div class="flex items-center justify-center space-x-1">
@@ -62,13 +55,11 @@
                                 @if($r->lifting_ada) <span title="Lifting">🏗️</span> @endif
                                 @if($r->blasting_ada) <span title="Blasting">💥</span> @endif
                                 @if($r->kritis_baru_ada) <span title="Kritis Baru">🆕</span> @endif
-
                                 @if(!($r->kendaraan_ada_kegiatan || $r->izin_kerja_ada || $r->tebing_ada || $r->air_lumpur_ada || $r->chainsaw_ada || $r->loto_ada || $r->lifting_ada || $r->blasting_ada || $r->kritis_baru_ada))
                                     <span class="text-[10px] text-gray-400 italic">N/A</span>
                                 @endif
                             </div>
                         </td>
-
                         {{-- RINGKASAN PEKERJAAN --}}
                         <td class="p-4 text-xs text-gray-600 max-w-xs">
                             @php
@@ -87,14 +78,11 @@
                             @endphp
                             {{ Str::limit($ringkasan ?: 'Tidak ada deskripsi pekerjaan', 100) }}
                         </td>
-
                         {{-- AKSI --}}
                         <td class="ui-action-cell p-4 text-center"><x-ui.table-actions>
                             <div class="flex items-center justify-center gap-3">
-                                <x-ui.icon-button ability="view" :subject="$r" action="view" label="Lihat detail" href="{{ route('ccm-reports.show', $r->id) }}" />
-
+                                <x-ui.icon-button data-modal-detail ability="view" :subject="$r" action="view" label="Lihat detail" href="{{ route('ccm-reports.show', $r->id) }}" />
                                 <x-ui.icon-button ability="update" :subject="$r" action="edit" label="Ubah data" href="{{ route('ccm-reports.edit', $r->id) }}" />
-
                                 <form action="{{ route('ccm-reports.destroy', $r->id) }}" method="POST" data-confirm="Hapus laporan ini?">
                                     @csrf
                                     @method('DELETE')
@@ -104,24 +92,15 @@
                         </x-ui.table-actions></td>
                     </tr>
                     @empty
-                    <tr>
-                        <td colspan="6" class="p-8 text-center text-gray-500">
-                            <div class="flex flex-col items-center">
-                                <x-ui-icon name="file" class="mb-2 h-10 w-10 text-[#777777]" />
-                                <p>Belum ada data laporan CCM yang tersimpan.</p>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforelse
+<x-ui.table-empty-state colspan="6"></x-ui.table-empty-state>
+@endforelse
                 </tbody>
             </x-ui.table>
         </div>
     </x-ui.panel>
-
     {{-- PAGINATION --}}
     <div class="mt-4">
         {{ $reports->links() }}
     </div>
-
 </x-ui.page>
 @endsection

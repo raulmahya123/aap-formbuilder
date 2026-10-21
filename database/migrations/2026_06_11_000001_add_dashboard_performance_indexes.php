@@ -63,12 +63,6 @@ return new class extends Migration
 
     private function indexExists(string $table, string $name): bool
     {
-        $database = DB::getDatabaseName();
-
-        return DB::table('information_schema.statistics')
-            ->where('table_schema', $database)
-            ->where('table_name', $table)
-            ->where('index_name', $name)
-            ->exists();
+        return Schema::hasIndex($table, $name);
     }
 };

@@ -1,20 +1,15 @@
 {{-- resources/views/user/daily/index.blade.php --}}
 @extends('layouts.app')
-
 @section('title','Dashboard — Input Harian')
-
 @php
   use Illuminate\Support\Arr;
   use Illuminate\Support\Str;
   use Illuminate\Support\Carbon;
-
   // ===== Fallback agar view tidak error =====
   /** @var \Illuminate\Support\Collection $sites */
   $sites = ($sites ?? collect())->values();
-
   /** @var \Illuminate\Support\Collection|\Illuminate\Contracts\Pagination\Paginator $entries */
   $entries = $entries ?? collect();
-
   // KPI totals (bulan/period aktif)
   $kpis = array_merge([
     'FATALITY'        => 0,
@@ -23,16 +18,13 @@
     'PD'              => 0,
     'MAN_HOURS'       => 0,
   ], (array)($kpis ?? []));
-
   $today         = now();
   $period        = ($period ?? request('period')) ?: $today->format('Y-m'); // format input[type=month]
   $periodLabel   = Carbon::createFromFormat('Y-m', $period)->isoFormat('MMMM Y'); // ex: September 2025
   $activeSite    = $activeSite ?? null;
   $activeSiteTxt = $activeSite?->code ?? $activeSite?->name ?? 'ALL';
-
   // daftar indikator yg mau ditampilkan sebagai kolom tabel (kalau available)
   $indicatorColumns = $indicatorColumns ?? ['FATALITY','LTI','INJURY_NON_LTI','PD','MAN_HOURS'];
-
   // Helper untuk ambil angka dari entry yang mungkin bentuknya beragam
   $getVal = function ($entry, $key, $default = 0) {
       // coba beberapa tempat umum
@@ -42,17 +34,12 @@
       $v = $v ?? data_get($entry, Str::snake($key));
       return is_numeric($v) ? (int)$v : ($v ?: $default);
   };
-
 @endphp
-
 @section('breadcrumbs')
-
     <a href="{{ url('/') }}" class="hover:underline">Home</a>
     <span class="mx-1">/</span>
     <span class="font-medium">Input Harian</span>
-
 @endsection
-
 {{-- Aksi kanan di header --}}
 @section('actions')
   <div class="flex items-center gap-2">
@@ -67,7 +54,6 @@
         ✍️ Catat Hari Ini
       </x-ui.link>
     @endif
-
     @if(Route::has('admin.reports.monthly'))
       <x-ui.link variant="secondary" href="{{ route('admin.reports.monthly', ['period'=>$period]) }}"
          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-900 text-sm">
@@ -76,7 +62,6 @@
     @endif
   </div>
 @endsection
-
 @section('content')
   {{-- Header --}}
   <x-ui.page-header>
@@ -85,15 +70,13 @@
     {{-- actions dirender dari @section('actions') --}}</div>
   <x-ui.page-actions></x-ui.page-actions>
 </x-ui.page-header>
-
   {{-- Filter Bar --}}
-  <form method="get" class="mb-6 grid grid-cols-1 md:grid-cols-6 gap-3">
+  <x-ui.table-toolbar class="mb-6 grid grid-cols-1 md:grid-cols-6 gap-3">
     <div class="md:col-span-2">
       <label class="block text-xs mb-1 text-coal-600 dark:text-coal-300">Periode (Bulan)</label>
       <input type="month" name="period" value="{{ $period }}"
              class="w-full px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 bg-white dark:bg-coal-900">
     </div>
-
     <div class="md:col-span-2">
       <label class="block text-xs mb-1 text-coal-600 dark:text-coal-300">Site</label>
       <select name="site_id"
@@ -107,14 +90,12 @@
         @endforeach
       </select>
     </div>
-
     <div class="md:col-span-2 flex items-end">
       <x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-900 w-full">
         Terapkan
       </x-ui.button>
     </div>
-  </form>
-
+  </x-ui.table-toolbar>
   {{-- Badge konteks --}}
   <div class="mb-6 flex flex-wrap items-center gap-2 text-sm">
     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-maroon-700 text-maroon-800 dark:text-maroon-300 dark:border-maroon-600 bg-maroon-50/70 dark:bg-maroon-900/20">
@@ -124,7 +105,6 @@
       🗓️ {{ $periodLabel }}
     </span>
   </div>
-
   {{-- KPI Cards --}}
   <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
     <div class="rounded-lg border border-coal-200 dark:border-coal-800 bg-ivory-50 dark:bg-coal-950 p-4">
@@ -148,7 +128,6 @@
       <div class="mt-1 text-2xl font-bold">{{ number_format((int)$kpis['MAN_HOURS']) }}</div>
     </div>
   </div>
-
   {{-- Shortcuts --}}
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
     <x-ui.panel class="rounded-lg border border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-900">
@@ -162,7 +141,6 @@
            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20">✍️ Mulai</x-ui.link>
       @endif
     </x-ui.panel>
-
     <x-ui.panel class="rounded-lg border border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-900">
       <div class="font-semibold mb-1">Rekap Bulanan</div>
       <p class="text-sm text-coal-600 dark:text-coal-400 mb-3">Lihat ringkasan indikator per bulan.</p>
@@ -171,7 +149,6 @@
            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-800">📈 Buka</x-ui.link>
       @endif
     </x-ui.panel>
-
     <x-ui.panel class="rounded-lg border border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-900">
       <div class="font-semibold mb-1">Form</div>
       <p class="text-sm text-coal-600 dark:text-coal-400 mb-3">Kumpulkan data/permintaan dengan form.</p>
@@ -181,13 +158,11 @@
       @endif
     </x-ui.panel>
   </div>
-
   {{-- Tabel Entri Terbaru --}}
   <div class="rounded-lg border border-coal-200 dark:border-coal-800 overflow-hidden">
     <div class="px-4 py-3 border-b border-coal-200 dark:border-coal-800 bg-ivory-50 dark:bg-coal-950">
       <div class="font-semibold">Entri Terbaru</div>
     </div>
-
     <div class="overflow-auto">
       <x-ui.table class="min-w-full text-sm">
         <thead>
@@ -220,13 +195,11 @@
               <td class="px-4 py-2 whitespace-nowrap">{{ $date }}</td>
               <td class="px-4 py-2 whitespace-nowrap">{{ $siteCode }}</td>
               <td class="px-4 py-2 whitespace-nowrap">{{ $userName }}</td>
-
               @foreach($indicatorColumns as $col)
                 <td class="px-4 py-2">
                   {{ number_format($getVal($e, $col, 0)) }}
                 </td>
               @endforeach
-
               <td class="px-4 py-2">
                 @if(Str::startsWith($status, 'sub'))
                   <x-ui.badge variant="success" class="text-xs rounded-lg px-2 py-1 border">Submitted</x-ui.badge>
@@ -241,16 +214,11 @@
               </td>
             </tr>
           @empty
-            <tr>
-              <td class="px-4 py-6 text-center text-coal-600 dark:text-coal-400" colspan="{{ 5 + count($indicatorColumns) }}">
-                Belum ada entri pada periode ini.
-              </td>
-            </tr>
-          @endforelse
+<x-ui.table-empty-state :colspan="5 + count($indicatorColumns)"></x-ui.table-empty-state>
+@endforelse
         </tbody>
       </x-ui.table>
     </div>
-
     {{-- Pagination jika tersedia --}}
     @if(method_exists($entries, 'links'))
       <div class="px-4 py-3 border-t border-coal-200 dark:border-coal-800">
@@ -258,5 +226,4 @@
       </div>
     @endif
   </div>
-
 @endsection

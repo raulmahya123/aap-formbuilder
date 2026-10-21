@@ -9,7 +9,7 @@
 }
 @layer components {
   main input:disabled, main select:disabled, main textarea:disabled { cursor: not-allowed; }
-  main input[type='file'] { @apply block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:px-3 file:py-2 file:font-semibold; }
+  main input[type='file']:not(.hidden):not(.sr-only) { @apply block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:px-3 file:py-2 file:font-semibold; }
   main input[type='file']::file-selector-button { background: var(--surface-secondary); color: var(--text-primary); }
   .form-hint { @apply mt-1 text-xs; color: var(--gray); }
   .form-error { @apply mt-1 text-sm font-medium; color: var(--red); }

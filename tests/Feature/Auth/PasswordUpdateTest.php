@@ -18,16 +18,38 @@ class PasswordUpdateTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->from('/profile')
-            ->put('/password', [
+            ->post('/password', [
+                '_method' => 'put',
                 'current_password' => 'password',
                 'password' => 'new-password',
                 'password_confirmation' => 'new-password',
             ]);
 
         $response
+            ->assertStatus(303)
             ->assertSessionHasNoErrors()
             ->assertRedirect('/profile');
 
+        $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
+    }
+
+    public function test_password_form_uses_same_origin_action_and_put_method(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/profile')
+            ->assertOk()
+            ->assertSee('action="/password"', false)
+            ->assertSee('name="_method" value="put"', false);
+    }
+
+    public function test_password_update_without_referrer_returns_to_profile(): void
+    {
+        $this->actingAs($user = User::factory()->create())
+            ->put('/password', [
+                'current_password' => 'password',
+                'password' => 'new-password',
+                'password_confirmation' => 'new-password',
+            ])->assertStatus(303)->assertRedirect(route('profile.edit'));
         $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
     }
 

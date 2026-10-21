@@ -159,3 +159,13 @@ Unified modal dialogs built on native HTML `<dialog>` with standard styling (`re
   - Support for attachment and image preview slots.
   - Action footer with Close button and optional policy-gated Edit action link.
 - **`<x-ui.action-dialogs>`**: Global layout provider including universal confirmation and password-reset modal instances across the authenticated experience.
+
+## Phase 6: Shared feedback
+
+- One `x-ui.toast-provider` in application, guest and public HTML layouts; old per-page flash duplicates removed. Four semantic types, five-second normal lifetime paused on hover/focus, persistent errors, dismiss controls and live regions. Exception/SQL/credential diagnostics are sanitized through `App\Support\Feedback`. AJAX callers can dispatch `ui:toast`; Axios and builder saves report safe failures.
+- Shared form-field, form-label, form-input, form-select, form-textarea, form-error and form-helper-text. Existing input-label/text-input/input-error delegate to these. Public wellness fields use the complete field composition. Global validation connects inline errors and native constraints, focuses the first visible invalid field, clears locally validated errors, and isolates named Laravel error bags. Server-only business errors remain until the server validates a resubmission. Backend rules are unchanged.
+- Page/card/table/form/dashboard/detail skeletons have deterministic dimensions and reduced-motion support. Server-rendered pages do not introduce artificial loading delays. Skeletons are available to future async sections; existing table skeleton shares the same primitives.
+- Twenty table empty branches now use a shared empty state. Search, active filters and initial empty states differ; existing policy-gated CTAs are retained. Shared error state covers API/network/401/403/404/422/500/503 with recovery. HTTP error views avoid raw exception text.
+- Global site selection now feeds Dashboard, Wellness, HIPO, CCM and Input Harian queries; permissions remain checked. Wellness summary and rows share the same authorized filter. Switching sites removes stale local site/page filters; the header selector is usable at mobile widths. Contracts/documents have no site relationship in their current domain and retain their own ACL rules.
+
+Validation: 8 targeted tests / 30 assertions; Blade syntax and public-view rendering checks; production build; browser review of inline validation, error clearing, radio-group errors, notification dismissal and persistent error lifetime, with no console errors or desktop overflow. Authenticated role-by-role CRUD and full mobile visual regression are still separate QA work; this is not a claim that all redesign phases are complete.
