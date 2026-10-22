@@ -30,7 +30,8 @@ return new class extends Migration
         }
 
         $clauses = array_map(fn ($key) => 'DROP FOREIGN KEY `'.str_replace('`', '``', $key->CONSTRAINT_NAME).'`', $keys);
-        $clauses[] = 'ADD CONSTRAINT `user_site_access_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE';
+        // Use a new name: InnoDB can reject reusing the dropped name in the same ALTER.
+        $clauses[] = 'ADD CONSTRAINT `user_site_access_users_fk_20261022` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE';
         // One ALTER avoids leaving the table without its foreign key if adding the new key fails.
         DB::statement('ALTER TABLE `user_site_access` '.implode(', ', $clauses));
     }

@@ -22,7 +22,7 @@ class SiteAccessForeignKeyRepairTest extends TestCase
     public function test_repair_replaces_broken_reference_in_one_statement(): void
     {
         $migration = $this->prepareRepair(0);
-        DB::shouldReceive('statement')->once()->with('ALTER TABLE `user_site_access` DROP FOREIGN KEY `user_site_access_user_id_foreign`, ADD CONSTRAINT `user_site_access_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE')->andReturn(true);
+        DB::shouldReceive('statement')->once()->with('ALTER TABLE `user_site_access` DROP FOREIGN KEY `user_site_access_user_id_foreign`, ADD CONSTRAINT `user_site_access_users_fk_20261022` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE')->andReturn(true);
         $migration->up();
         $this->assertTrue(true);
     }
