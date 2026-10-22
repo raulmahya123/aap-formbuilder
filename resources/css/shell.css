@@ -28,6 +28,15 @@
 .ui-sidebar { scrollbar-width: none; }
 .ui-sidebar::-webkit-scrollbar { display: none; }
 .ui-drawer-close { position: absolute; top: 8px; right: 8px; }
+.ui-shell--chat { height: 100dvh; overflow: hidden; }
+.ui-shell--chat .ui-layout-grid { height: 100dvh; }
+.ui-shell--chat .ui-layout-grid > div { height: 100dvh; min-height: 0; }
+.ui-shell--chat #main-content { padding: 0; margin: 0; max-width: none; min-height: 0; height: calc(100dvh - 64px); flex: 1 1 0; gap: 0; }
+.ui-shell--chat .ui-sidebar { height: 100dvh; min-height: 0; overflow-y: auto; }
+.mandala-chat-container > aside,
+.mandala-chat-container > section,
+.mandala-chat-container [x-ref="messageList"] { min-height: 0; min-width: 0; }
+.mandala-chat-container textarea.chat-composer-input { display: block; height: 40px; min-height: 40px; max-height: 128px; padding: 10px 14px; font-size: 14px; line-height: 20px; overflow-y: auto; }
 .ui-sidebar nav { padding: 12px; }
 .ui-sidebar nav a { color: #18181B; }
 .ui-sidebar nav a.is-active { color: #fff; background: #713F12; }

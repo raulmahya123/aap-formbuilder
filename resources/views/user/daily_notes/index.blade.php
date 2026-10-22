@@ -144,7 +144,7 @@
     </div>
     {{-- Tabel --}}
     <div class="overflow-x-auto card">
-      <x-ui.table class="min-w-[760px] divide-y divide-gray-200">
+      <x-ui.table :paginator="$notes" class="min-w-[760px] divide-y divide-gray-200">
         <thead style="background: color-mix(in oklab, var(--maroon) 14%, white);">
           <tr class="text-left text-sm">
             <th class="px-4 py-3 font-semibold">Judul</th>
@@ -199,11 +199,7 @@
       </x-ui.table>
     </div>
   </div>
-  @if(method_exists($notes, 'links'))
-    <div>
-      {{ $notes->appends(request()->except('page'))->links() }}
-    </div>
-  @endif
+
 </div>
 {{-- Dataset untuk JS filter site (AMAN: JSON dipassing via data-* lalu diparse) --}}
 <div id="dn-dataset"

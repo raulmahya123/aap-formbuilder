@@ -17,7 +17,7 @@
       @endif
       <!-- TABLE -->
       <div class="rounded-lg border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 shadow-none overflow-x-auto">
-        <x-ui.table class="w-full text-sm min-w-[860px]">
+        <x-ui.table :paginator="$users" class="w-full text-sm min-w-[860px]">
           <thead class="bg-ivory-100 dark:bg-coal-800/60 text-coal-700 dark:text-coal-300">
             <tr>
               <th class="px-3 py-2 text-left">Nama</th>
@@ -60,9 +60,7 @@
         </x-ui.table>
       </div>
       <!-- PAGINATION -->
-      <div class="mt-4">
-        {{ $users->links() }}
-      </div>
+
     </div>
   </x-ui.page>
   @endsection

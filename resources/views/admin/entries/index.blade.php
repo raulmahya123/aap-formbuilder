@@ -39,7 +39,7 @@
     </x-ui.table-toolbar>
     <!-- TABLE -->
     <div class="rounded-lg border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 shadow-none overflow-x-auto">
-      <x-ui.table class="w-full text-sm min-w-[800px]">
+      <x-ui.table :paginator="$entries" class="w-full text-sm min-w-[800px]">
         <thead class="bg-ivory-100 dark:bg-coal-800/60 text-coal-700 dark:text-coal-300">
           <tr>
             <th class="text-left p-3">#</th>
@@ -88,9 +88,7 @@
       </x-ui.table>
     </div>
     <!-- PAGINATION -->
-    <div class="mt-4">
-      {{ $entries->links() }}
-    </div>
+
   </div>
 </x-ui.page>
 @endsection

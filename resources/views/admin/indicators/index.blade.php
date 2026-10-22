@@ -10,7 +10,7 @@
 </x-ui.page-header>
 <x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari indikator…" aria-label="Cari indikator" /><x-ui.table-filter name="indicator_group_id" :options="$groups->pluck('name','id')" label="Grup indikator" placeholder="Semua grup" /><x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link></x-ui.table-toolbar>
     <x-ui.panel :padded="false" class="overflow-hidden bg-white rounded-lg border border-gray-200 shadow-none">
-      <x-ui.table class="min-w-full divide-y divide-gray-200">
+      <x-ui.table :paginator="$indicators" class="min-w-full divide-y divide-gray-200">
         <thead class="bg-maroon-700 text-white">
           <tr>
             <th class="px-3 py-3 text-left text-sm font-semibold">Urutan</th>
@@ -67,5 +67,5 @@
         </tbody>
       </x-ui.table>
     </x-ui.panel>
-{{ $indicators->links() }}
+
 @endsection

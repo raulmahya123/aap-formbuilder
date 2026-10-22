@@ -35,7 +35,7 @@
   </div>
 </x-ui.table-toolbar>
 <x-ui.panel :padded="false" class="overflow-x-auto rounded-lg border border-gray-200 shadow-none bg-white">
-  <x-ui.table class="w-full text-left text-sm">
+  <x-ui.table :paginator="$sites" class="w-full text-left text-sm">
     <thead class="bg-[color:var(--brand-maroon,#713F12)] text-white">
       <tr>
         <th class="p-3 border-b">#</th>
@@ -91,7 +91,5 @@
     </tbody>
   </x-ui.table>
 </x-ui.panel>
-@if(method_exists($sites,'links'))
-  <div class="mt-4">{{ $sites->appends(request()->except('page'))->links() }}</div>
-@endif
+
 @endsection

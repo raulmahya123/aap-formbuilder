@@ -10,7 +10,7 @@
 </x-ui.page-header>
 <x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari grup indikator…" aria-label="Cari grup indikator" /><x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link></x-ui.table-toolbar>
 <x-ui.panel :padded="false" class="overflow-hidden rounded-lg border border-gray-200 shadow-none bg-white">
-  <x-ui.table class="min-w-full divide-y divide-gray-200">
+  <x-ui.table :paginator="$groups" class="min-w-full divide-y divide-gray-200">
     {{-- Header pakai maroon gelap agar tegas --}}
     <thead class="bg-maroon-700 text-white">
       <tr>
@@ -51,5 +51,5 @@
     </tbody>
   </x-ui.table>
 </x-ui.panel>
-{{ $groups->links() }}
+
 @endsection

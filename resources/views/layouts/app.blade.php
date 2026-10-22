@@ -63,11 +63,11 @@
 
 </head>
 
-<body class="ui-shell min-h-screen bg-white text-coal-900">
+<body class="ui-shell {{ request()->routeIs('admin.qa.index') ? 'ui-shell--chat' : '' }} min-h-screen bg-white text-coal-900">
   <a class="ui-skip" href="#main-content">Lewati ke konten</a>
 
   {{-- ===== Grid 2 kolom: Sidebar kiri + Konten kanan ===== --}}
-  <div class="max-w-[100vw] mx-auto lg:grid" :class="sidebarCollapsed ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[256px_minmax(0,1fr)]'">
+  <div class="ui-layout-grid max-w-[100vw] mx-auto lg:grid" :class="sidebarCollapsed ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[256px_minmax(0,1fr)]'">
 
     {{-- Sidebar (handle drawer di partial) --}}
     @include('layouts.navigation')

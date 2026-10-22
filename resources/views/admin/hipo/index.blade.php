@@ -19,7 +19,7 @@
 {{-- TABLE CARD --}}
     <x-ui.panel :padded="false" class="bg-white rounded-lg shadow-none border overflow-hidden">
         <div class="overflow-x-auto">
-            <x-ui.table class="w-full min-w-[760px] text-sm">
+            <x-ui.table :paginator="$reports" class="w-full min-w-[760px] text-sm">
                 <thead class="bg-gray-100 text-gray-700 normal-case text-xs">
                     <tr>
                         <th class="text-left py-3 px-3">Tanggal</th>
@@ -101,7 +101,7 @@
                 </tbody>
             </x-ui.table>
         </div>
-          <div class="border-t border-gray-100 px-4 py-4">{{ $reports->withQueryString()->links() }}</div>
+
     </x-ui.panel>
 </x-ui.page>
 @endsection

@@ -11,7 +11,7 @@
 </x-ui.page-header><x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari template…" aria-label="Cari template" /><x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link></x-ui.table-toolbar>
   {{-- LIST --}}
   <x-ui.panel :padded="false" class="bg-white border rounded-lg overflow-hidden">
-    <x-ui.table class="w-full text-sm">
+    <x-ui.table :paginator="$templates" class="w-full text-sm">
       <thead class="bg-[#1D1C1A] text-white">
         <tr>
           <th class="p-3 text-left">#</th>
@@ -108,6 +108,6 @@
     </x-ui.table>
   </x-ui.panel>
   {{-- PAGINATION --}}
-  <div>{{ $templates->links() }}</div>
+
 </x-ui.page>
 @endsection

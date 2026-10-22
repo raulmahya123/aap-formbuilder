@@ -16,8 +16,8 @@
   }
 
   .mandala-chat-container {
-    height: calc(100vh - 4.5rem);
-    min-height: 580px;
+    height: 100%;
+    min-height: 0;
   }
 
   .chat-scroll {
@@ -65,7 +65,7 @@
     }
   })" 
   x-init="initChat()" 
-  class="mandala-chat-container -mx-4 -my-6 lg:-mx-8 flex overflow-hidden bg-[#F8FAFC] border-t border-[#E2E8F0]"
+  class="mandala-chat-container flex overflow-hidden bg-[#F8FAFC] border-t border-[#E2E8F0]"
   @keydown.escape.window="closeAllModals()"
 >
 
@@ -311,7 +311,7 @@
   <!-- ======================================================== -->
   <!-- C. MAIN CONVERSATION PANEL                               -->
   <!-- ======================================================== -->
-  <main 
+  <section aria-label="Percakapan"
     class="flex-1 flex flex-col h-full bg-[#F8FAFC] relative overflow-hidden"
     :class="{'hidden md:flex': activeThread === null, 'flex': activeThread !== null}"
   >
@@ -725,9 +725,9 @@
                 x-ref="messageInput"
                 x-model="messageBody" 
                 @keydown.enter="handleEnterKey($event)"
-                rows="1"
+                rows="1" aria-label="Pesan" @input="$el.style.height = '40px'; $el.style.height = Math.min($el.scrollHeight, 128) + 'px'"
                 placeholder="Ketik pesan..."
-                class="w-full resize-none py-2.5 px-3.5 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[#111827] placeholder-[#94A3B8] focus:bg-white focus:border-[#1565D8] focus:ring-1 focus:ring-[#1565D8] transition max-h-32"
+                class="chat-composer-input w-full resize-none py-2.5 px-3.5 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[#111827] placeholder-[#94A3B8] focus:bg-white focus:border-[#1565D8] focus:ring-1 focus:ring-[#1565D8] transition max-h-32"
               ></textarea>
             </div>
 
@@ -746,7 +746,7 @@
 
       </div>
     </template>
-  </main>
+  </section>
 
   <!-- ======================================================== -->
   <!-- D. INFORMATION SIDEBAR (300px)                           -->

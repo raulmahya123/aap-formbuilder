@@ -18,7 +18,7 @@
   </div>
 
   <div class="mt-4">
-    {{ $entries->withQueryString()->links() }}
+
   </div>
 @else
   <div class="p-6 border rounded-lg text-center text-gray-600">Belum ada entri.</div>

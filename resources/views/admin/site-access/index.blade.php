@@ -100,7 +100,7 @@
     <x-ui.section-title class="font-semibold">Daftar Akses User ↔ Site</x-ui.section-title>
   </div>
   <div class="overflow-x-auto">
-    <x-ui.table class="min-w-full text-sm">
+    <x-ui.table :paginator="$accesses" class="min-w-full text-sm">
       <thead class="bg-ivory-100 dark:bg-coal-900">
         <tr>
           <th class="text-left px-4 py-2">#</th>
@@ -139,8 +139,6 @@
       </tbody>
     </x-ui.table>
   </div>
-    <div class="px-4 py-3 border-t">
-      {{ $accesses->withQueryString()->links() }}
-    </div>
+
 </div>
 @endsection

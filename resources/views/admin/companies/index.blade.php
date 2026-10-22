@@ -15,7 +15,7 @@
 <x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari nama atau kode company…" aria-label="Cari company" /><x-ui.table-filter name="status" :options="['active'=>'Aktif','inactive'=>'Nonaktif','archived'=>'Arsip']" label="Status" placeholder="Semua status" /><x-ui.link variant="secondary" :href="route('admin.companies.index')">Reset</x-ui.link></x-ui.table-toolbar>
   <x-ui.panel :padded="false" class="rounded-lg border bg-white overflow-hidden">
     <div class="overflow-x-auto">
-      <x-ui.table class="min-w-full text-sm">
+      <x-ui.table :paginator="$companies" class="min-w-full text-sm">
         <thead class="text-coal-700 bg-[color:var(--brand-maroon,#713F12)]/5">
           <tr>
             <th class="text-left px-4 py-3 w-14">Logo</th>
@@ -75,11 +75,7 @@
         </tbody>
       </x-ui.table>
     </div>
-    @if(method_exists($companies, 'links'))
-      <div class="px-4 py-3 border-t">
-        {{ $companies->withQueryString()->links() }}
-      </div>
-    @endif
+
   </x-ui.panel>
 </x-ui.page>
 @endsection

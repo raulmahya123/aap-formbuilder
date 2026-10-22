@@ -15,7 +15,7 @@
     {{-- TABLE --}}
     <x-ui.panel :padded="false" class="bg-white rounded-lg border border-gray-200 shadow-none overflow-hidden">
         <div class="overflow-x-auto">
-            <x-ui.table class="w-full text-sm text-left">
+            <x-ui.table :paginator="$reports" class="w-full text-sm text-left">
                 <thead class="bg-gray-50 border-b border-gray-200 text-gray-600 normal-case text-xs font-bold">
                     <tr>
                         <th class="p-4">Tanggal</th>
@@ -99,8 +99,6 @@
         </div>
     </x-ui.panel>
     {{-- PAGINATION --}}
-    <div class="mt-4">
-        {{ $reports->links() }}
-    </div>
+
 </x-ui.page>
 @endsection

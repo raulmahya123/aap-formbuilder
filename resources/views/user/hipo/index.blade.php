@@ -9,7 +9,7 @@
         </x-ui.link></x-ui.page-actions>
 </x-ui.page-header><x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari laporan HIPO…" aria-label="Cari laporan HIPO" /><x-ui.table-filter name="status" :options="['Open'=>'Open','On Progress'=>'On Progress','Closed'=>'Closed','Rejected'=>'Rejected']" label="Status" placeholder="Semua status" /><x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link></x-ui.table-toolbar>
     <x-ui.panel :padded="false" class="bg-white border rounded-lg overflow-x-auto">
-        <x-ui.table class="w-full text-sm">
+        <x-ui.table :paginator="$reports" class="w-full text-sm">
             <thead class="bg-ivory-100 border-b">
                 <tr>
                     <th class="px-4 py-2 text-left">Tanggal</th>
@@ -101,6 +101,6 @@
             </tbody>
         </x-ui.table>
     </x-ui.panel>
-      <div class="mt-4">{{ $reports->links() }}</div>
+
 </x-ui.page>
 @endsection

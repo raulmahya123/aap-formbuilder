@@ -164,7 +164,7 @@
       <div class="font-semibold">Entri Terbaru</div>
     </div>
     <div class="overflow-auto">
-      <x-ui.table class="min-w-full text-sm">
+      <x-ui.table :paginator="$entries" class="min-w-full text-sm">
         <thead>
           <tr class="text-left border-b border-coal-200 dark:border-coal-800">
             <th class="px-4 py-2">Tanggal</th>
@@ -220,10 +220,6 @@
       </x-ui.table>
     </div>
     {{-- Pagination jika tersedia --}}
-    @if(method_exists($entries, 'links'))
-      <div class="px-4 py-3 border-t border-coal-200 dark:border-coal-800">
-        {{ $entries->withQueryString()->links() }}
-      </div>
-    @endif
+
   </div>
 @endsection
