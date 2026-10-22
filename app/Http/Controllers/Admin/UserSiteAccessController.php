@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use App\Models\Department;
 use App\Models\DepartmentUserRole;
+use App\Support\FeatureAccess;
+use Illuminate\Validation\Rule;
 
 class UserSiteAccessController extends Controller
 {
@@ -29,7 +31,7 @@ class UserSiteAccessController extends Controller
         $search = trim((string) $r->get('q', ''));
 
         $q = UserSiteAccess::query()
-            ->with(['user:id,name,email,role,is_active', 'user.departments:id,name', 'site:id,name,code'])
+            ->with(['user:id,name,email,role,is_active,feature_access', 'user.departments:id,name', 'site:id,name,code'])
             ->when($search !== '', fn ($query) => $query->whereHas('user', fn ($users) =>
                 $users->where(fn ($fields) => $fields->where('name', 'like', '%'.$search.'%')->orWhere('email', 'like', '%'.$search.'%'))
             ))
@@ -46,7 +48,8 @@ class UserSiteAccessController extends Controller
             'accesses' => $q->paginate(\App\Support\Listing::perPage())->withQueryString(),
             'sites'    => Site::orderBy('code')->get(['id','name','code']),
             'emails'   => User::orderBy('email')->pluck('email'),
-            'users'    => User::orderBy('name')->get(['id', 'name', 'email', 'role']),
+            'users'    => User::with(['sites:id', 'departments:id,name'])->orderBy('name')->get(['id', 'name', 'email', 'role', 'feature_access']),
+            'features' => FeatureAccess::FEATURES,
             'departments' => Department::orderBy('name')->get(['id', 'name']),
             'siteId'   => $siteId,
             'email'    => $email,
@@ -64,11 +67,17 @@ class UserSiteAccessController extends Controller
         $this->authorize('manageSiteAccess', UserSiteAccess::class);
 
         $data = $r->validate([
-            'site_id' => ['required','integer','exists:sites,id'],
+            'site_id' => ['nullable','integer','exists:sites,id'],
+            'site_ids' => ['nullable', 'array'],
+            'site_ids.*' => ['integer', 'distinct', 'exists:sites,id'],
+            'site_selection' => ['nullable', 'in:replace'],
             'email'   => ['required','email','exists:users,email'],
-            'role' => ['nullable', 'in:user,super_admin'],
+            'role' => ['nullable', 'in:user,super_admin,admin_ho,admin_site'],
             'department_id' => ['nullable', 'required_with:dept_role', 'integer', 'exists:departments,id'],
-            'dept_role' => ['nullable', 'required_with:department_id', 'in:member,dept_admin'],
+            'dept_role' => ['nullable', 'in:member,dept_admin'],
+            'feature_mode' => ['nullable', 'in:keep,custom,default'],
+            'feature_access' => ['nullable', 'array'],
+            'feature_access.*' => ['string', Rule::in(array_keys(FeatureAccess::FEATURES))],
         ]);
 
         // Ambil user_id dari email
@@ -79,24 +88,40 @@ class UserSiteAccessController extends Controller
             $access = DB::transaction(function () use ($data, $userId, $r) {
                 $user = User::whereKey($userId)->lockForUpdate()->firstOrFail();
                 if (!empty($data['role']) && $data['role'] !== $user->role) {
-                    if ($user->id === $r->user()->id && $data['role'] !== 'super_admin') {
+                    if ($user->id === $r->user()->id && !in_array($data['role'], ['super_admin','admin_ho'], true)) {
                         throw ValidationException::withMessages(['role' => 'Role akun Anda sendiri tidak dapat diturunkan dari halaman ini.']);
                     }
                     $user->update(['role' => $data['role']]);
                 }
-                if (!empty($data['department_id']) && !empty($data['dept_role'])) {
+                if (!empty($data['department_id'])) {
                     DepartmentUserRole::updateOrCreate(
                         ['user_id' => $userId, 'department_id' => $data['department_id']],
-                        ['dept_role' => $data['dept_role']]
+                        ['dept_role' => $data['dept_role'] ?? 'member']
                     );
                 }
-                return UserSiteAccess::firstOrCreate(['user_id' => $userId, 'site_id' => (int) $data['site_id']]);
+                if (($data['feature_mode'] ?? 'keep') !== 'keep') {
+                    if ($user->isSuperAdmin() && $data['feature_mode'] === 'custom') {
+                        throw ValidationException::withMessages(['feature_mode' => 'Super Admin memiliki akses seluruh fitur. Gunakan role User untuk akses fitur terbatas.']);
+                    }
+                    $user->forceFill(['feature_access' => $data['feature_mode'] === 'custom' ? array_values(array_unique($data['feature_access'] ?? [])) : null])->save();
+                }
+                $siteIds = array_values(array_unique(array_map('intval', array_merge($data['site_ids'] ?? [], !empty($data['site_id']) ? [$data['site_id']] : []))));
+                if (!$user->isSuperAdmin() && !$siteIds) {
+                    throw ValidationException::withMessages(['site_ids'=>'Pilih minimal satu site untuk Admin Site atau User.']);
+                }
+                if (($data['site_selection'] ?? null) === 'replace') {
+                    $user->sites()->sync($siteIds);
+                    return null;
+                }
+                $lastAccess = null;
+                foreach ($siteIds as $siteId) $lastAccess = UserSiteAccess::firstOrCreate(['user_id'=>$userId, 'site_id'=>$siteId]);
+                return $lastAccess;
             });
 
-            $wasCreated = $access->wasRecentlyCreated;
+            $wasCreated = $access?->wasRecentlyCreated ?? false;
 
-            if (!empty($data['role']) || !empty($data['dept_role'])) {
-                return back()->with('success', 'Penugasan site dan role berhasil disimpan.');
+            if (!empty($data['site_selection']) || !empty($data['role']) || !empty($data['dept_role']) || ($data['feature_mode'] ?? 'keep') !== 'keep') {
+                return back()->with('success', 'Penugasan site, role, dan fitur berhasil disimpan.');
             }
             return back()->with(
                 $wasCreated ? 'ok' : 'info',

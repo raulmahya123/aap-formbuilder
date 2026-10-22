@@ -2,7 +2,7 @@
 import { openDialog } from './ui-dialogs';
 const originalButtonContent = new WeakMap();
 document.addEventListener('change', event => {
-    if (event.target.matches('[data-site-selector] select')) event.target.form.requestSubmit();
+    if (event.target.matches('[data-site-selector] select, select[data-submit-on-change]')) event.target.form.requestSubmit();
 });
 let pendingConfirmation = null;
 let resetTrigger = null;

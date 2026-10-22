@@ -40,7 +40,7 @@
                 <td class="px-3 py-2">
                   <span class="text-coal-700 dark:text-ivory-100"><x-ui.truncated-text :value="$user->email" /></span>
                 </td>
-                <td>{{ $user->role }}<div class="text-xs text-zinc-600">{{ $user->sites->pluck('code')->join(', ') ?: '—' }}</div></td><td class="px-3 py-2">
+                <td>{{ $user->roleLabel() }}<div class="text-xs text-zinc-600">{{ $user->isSuperAdmin() ? 'Seluruh site' : ($user->sites->pluck('code')->join(', ') ?: '—') }}</div></td><td class="px-3 py-2">
                   @if ($user->is_active)
                     <x-ui.badge variant="success" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium">
                       Aktif

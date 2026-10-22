@@ -45,6 +45,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
             'is_active'         => 'boolean',
+            'feature_access'    => 'array',
             'birth_date'        => 'date',
             'joined_date'       => 'date',
         ];
@@ -61,13 +62,38 @@ class User extends Authenticatable
 
     public function isSuperAdmin(): bool
     {
-        return $this->role === 'super_admin';
+        return in_array($this->role, ['super_admin', 'admin_ho'], true);
+    }
+
+    public function isSiteAdmin(): bool
+    {
+        return $this->role === 'admin_site';
+    }
+
+    public function roleLabel(): string
+    {
+        return match ($this->role) { 'super_admin'=>'Super Admin', 'admin_ho'=>'Admin HO', 'admin_site'=>'Admin Site', default=>'User' };
+    }
+
+    public function chatRoleLabel(): string
+    {
+        return $this->isSuperAdmin() ? 'super_admin' : ($this->isSiteAdmin() ? 'admin' : 'user');
+    }
+
+    public function canUseFeature(string $feature): bool
+    {
+        return $this->isSuperAdmin() || $this->feature_access === null || in_array($feature, $this->feature_access, true);
+    }
+
+    public function canUseFeatureRoute(?string $route): bool
+    {
+        $feature = \App\Support\FeatureAccess::forRoute($route);
+        return $feature === null || $this->canUseFeature($feature);
     }
 
     public function isAdmin(): bool
     {
-        return $this->isSuperAdmin()
-            || $this->departments()->wherePivot('dept_role', 'dept_admin')->exists();
+        return $this->isSuperAdmin() || $this->isSiteAdmin();
     }
 
     public function isUser(): bool
@@ -100,6 +126,7 @@ class User extends Authenticatable
 
     public function isDeptAdminOf(int $departmentId): bool
     {
+        if ($this->isSiteAdmin()) return in_array($departmentId, $this->departmentIds(), true);
         return $this->departments()
             ->where('department_id', $departmentId)
             ->wherePivot('dept_role', 'dept_admin')

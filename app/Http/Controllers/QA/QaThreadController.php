@@ -371,8 +371,8 @@ class QaThreadController extends Controller
                 ]);
 
                 $thread->participants()->attach([
-                    $user->id      => ['role_label' => $user->role, 'chat_role' => 'member', 'last_read_at' => now()],
-                    $recipient->id => ['role_label' => $recipient->role, 'chat_role' => 'member', 'last_read_at' => null],
+                    $user->id      => ['role_label' => $user->chatRoleLabel(), 'chat_role' => 'member', 'last_read_at' => now()],
+                    $recipient->id => ['role_label' => $recipient->chatRoleLabel(), 'chat_role' => 'member', 'last_read_at' => null],
                 ]);
             });
         }
@@ -428,7 +428,7 @@ class QaThreadController extends Controller
 
             // Pembuat sebagai owner
             $thread->participants()->attach($user->id, [
-                'role_label'   => $user->role,
+                'role_label'   => $user->chatRoleLabel(),
                 'chat_role'    => 'owner',
                 'last_read_at' => now(),
             ]);
@@ -440,7 +440,7 @@ class QaThreadController extends Controller
             foreach ($members as $m) {
                 $thread->participants()->syncWithoutDetaching([
                     $m->id => [
-                        'role_label' => $m->role,
+                        'role_label' => $m->chatRoleLabel(),
                         'chat_role'  => 'member',
                     ],
                 ]);
@@ -480,7 +480,7 @@ class QaThreadController extends Controller
         if ($data['action'] === 'add') {
             $thread->participants()->syncWithoutDetaching([
                 $targetUser->id => [
-                    'role_label' => $targetUser->role,
+                    'role_label' => $targetUser->chatRoleLabel(),
                     'chat_role'  => 'member',
                 ],
             ]);
@@ -540,7 +540,7 @@ class QaThreadController extends Controller
         $participant = $thread->participants()->where('users.id', $user->id)->first();
         if (!$participant) {
             // Jika belum ada di pivot (misal public channel), attach dulu
-            $thread->participants()->attach($user->id, ['role_label' => $user->role]);
+            $thread->participants()->attach($user->id, ['role_label' => $user->chatRoleLabel()]);
         }
 
         if ($data['action'] === 'pin') {

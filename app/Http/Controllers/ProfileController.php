@@ -125,10 +125,17 @@ class ProfileController extends Controller
             'department_id' => ['nullable', 'integer', 'exists:departments,id'],
             'site_ids'      => ['nullable', 'array'],
             'site_ids.*'    => ['integer', 'exists:sites,id'],
-            'role'          => ['required', 'in:user,admin,super_admin'],
+            'role'          => ['required', 'in:user,admin_ho,admin_site,super_admin'],
         ]);
 
         $targetUser = User::findOrFail($data['user_id']);
+        if ($targetUser->id === $currentUser->id && !in_array($data['role'], ['super_admin','admin_ho'], true)) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['role'=>'Role akun Anda sendiri tidak dapat diturunkan.']);
+        }
+        $siteIds = $data['site_ids'] ?? $targetUser->sites()->pluck('sites.id')->all();
+        if (!in_array($data['role'], ['super_admin','admin_ho'], true) && !$siteIds) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['site_ids'=>'Pilih minimal satu site untuk Admin Site atau User.']);
+        }
 
         DB::transaction(function () use ($targetUser, $data) {
             $targetUser->update([

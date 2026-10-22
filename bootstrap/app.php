@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [\App\Http\Middleware\EnsureFeatureAccess::class]);
         $middleware->alias([
             'api.auth' => \App\Http\Middleware\ApiAuth::class,
         ]);
@@ -58,4 +59,4 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->create();
-    
+

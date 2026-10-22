@@ -66,7 +66,7 @@ main .ui-table tbody tr:hover { background: var(--surface-secondary); }
 main .ui-table :is(th, td).text-right { text-align: right; }
 main .ui-table :is(th, td).text-center { text-align: center; }
 .ui-shell { background: var(--background); }
-.ui-shell main { width: 100%; max-width: 1480px; margin-inline: auto; padding: var(--page-padding); }
+.ui-shell main { width: 100%; min-width: 0; max-width: none; padding: var(--page-padding); }
 .ui-shell main > .ui-page > :first-child { margin-top: 0; }
 .ui-shell main :is(.rounded-2xl, .rounded-3xl) { border-radius: var(--radius); }
 .ui-shell main :is(.border-coal-100, .border-coal-200) { border-color: var(--border); }

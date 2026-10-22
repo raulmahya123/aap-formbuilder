@@ -489,7 +489,7 @@
                       <template x-if="!msg.is_mine && activeThread.type !== 'personal'">
                         <div class="font-bold text-[11px] text-[#0B4DB3] mb-1 flex items-center gap-1.5">
                           <span x-text="msg.user_name"></span>
-                          <template x-if="msg.user_role === 'super_admin' || msg.user_role === 'admin'">
+                          <template x-if="['super_admin','admin_ho','admin_site','admin'].includes(msg.user_role)">
                             <span class="text-[9px] px-1 rounded bg-[#DBEAFE] text-[#1E40AF]">Admin</span>
                           </template>
                         </div>

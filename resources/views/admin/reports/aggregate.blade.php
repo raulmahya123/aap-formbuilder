@@ -7,10 +7,7 @@
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 $u = Auth::user();
-$isSuperAdmin = $u && (
-    (method_exists($u, 'hasRole') && $u->hasRole('super_admin')) ||
-    (($u->role ?? $u->role_key ?? null) === 'super_admin')
-);
+$isSuperAdmin = $u?->isSuperAdmin() ?? false;
 $tz = 'Asia/Jakarta';
 $scopeNow = $scope ?? 'month';
 $today = now($tz);

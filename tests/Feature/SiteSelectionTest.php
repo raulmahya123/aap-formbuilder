@@ -35,6 +35,13 @@ class SiteSelectionTest extends TestCase
     public function test_site_without_permission_is_rejected(): void
     {
         $this->expectException(HttpException::class);
-        SiteSelection::id($this->selectionRequest([], false));
+        SiteSelection::id($this->selectionRequest(['site_id'=>7], false));
+    }
+
+    public function test_revoked_session_site_is_cleared(): void
+    {
+        $request = $this->selectionRequest([], false);
+        $this->assertNull(SiteSelection::id($request));
+        $this->assertFalse($request->session()->has('active_site_id'));
     }
 }

@@ -185,3 +185,5 @@
 }
 
 .ui-truncated-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; max-width: 24rem; max-height: 3em; }
+#grant-site-access .ui-modal__body { display: flex; flex-direction: column; gap: 16px; }
+#grant-site-access .ui-modal__body > :is(fieldset, p) { margin-block: 0; }

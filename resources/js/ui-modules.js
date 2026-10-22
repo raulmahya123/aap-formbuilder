@@ -25,6 +25,37 @@ function initMandalaForm(form, restoreSite = null) {
     }
 }
 document.querySelectorAll('form').forEach(form => initMandalaForm(form));
+document.addEventListener('change', event => {
+    const select = event.target;
+    if (select.matches('[data-assignment-role]')) {
+        const form = select.form;
+        const isHo = ['admin_ho', 'super_admin'].includes(select.value);
+        const sites = form.querySelector('[data-assignment-sites]');
+        if (sites) sites.disabled = isHo;
+        const customOption = form.querySelector('[name="feature_mode"] option[value="custom"]');
+        if (customOption) customOption.disabled = isHo;
+        if (isHo && form.elements.feature_mode) {
+            form.elements.feature_mode.value = 'keep';
+            form.elements.feature_mode.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        return;
+    }
+    if (!select.matches('[data-feature-user-select]')) return;
+    const form = select.form;
+    const settings = form?.querySelector('[data-feature-settings]');
+    if (!settings) return;
+    const allowed = JSON.parse(select.selectedOptions[0]?.dataset.features || 'null');
+    const mode = form.elements.feature_mode;
+    mode.value = allowed === null ? 'keep' : 'custom';
+    mode.dispatchEvent(new Event('change', { bubbles: true }));
+    form.querySelectorAll('input[name="feature_access[]"]').forEach(field => { field.checked = Array.isArray(allowed) && allowed.includes(field.value); });
+    const assigned = JSON.parse(select.selectedOptions[0]?.dataset.sites || '[]').map(String);
+    form.querySelectorAll('input[name="site_ids[]"]').forEach(field => { field.checked = assigned.includes(field.value); });
+    if (form.elements.role) {
+        form.elements.role.value = select.selectedOptions[0]?.dataset.role || '';
+        form.elements.role.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+});
 async function openRemote(url, restore = null) {
     if (!dialog) { location.assign(url); return; }
     const target = new URL(url, location.href);

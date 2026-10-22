@@ -77,7 +77,7 @@ class ModuleRedesignTest extends TestCase
 
     public function test_department_admin_only_sees_assigned_site_wellness_and_cannot_manage_users(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role'=>'admin_site']);
         $department = Department::create(['name'=>'Site Team','slug'=>'site-team']);
         $department->users()->attach($user->id, ['dept_role'=>'dept_admin']);
         $allowed = Site::create(['code'=>'ONE','name'=>'Assigned Site']);
@@ -103,7 +103,7 @@ class ModuleRedesignTest extends TestCase
 
     public function test_jobsite_options_display_master_sites_and_respect_site_permissions(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role'=>'admin_site']);
         $department = Department::create(['name'=>'Jobsite Team','slug'=>'jobsite-team']);
         $department->users()->attach($user->id, ['dept_role'=>'dept_admin']);
         $company = \App\Models\Company::create(['code'=>'COMP','name'=>'Company','slug'=>'company']);

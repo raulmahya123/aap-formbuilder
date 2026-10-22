@@ -31,7 +31,7 @@
       deleteAccount: '{{ route('profile.destroy') }}',
     }
   })" 
-  class="max-w-[1280px] mx-auto space-y-6"
+  class="ui-page min-w-0 space-y-6"
 >
 
   <!-- ========================================== -->
@@ -469,7 +469,7 @@
   <!-- ========================================== -->
   <div x-show="currentTab === 'security'" x-transition class="space-y-6">
     <!-- Form Update Password -->
-    <form method="POST" action="{{ route('password.update') }}" class="bg-white border border-[#E2E8F0] rounded-2xl p-6 sm:p-8 shadow-xs">
+    <form method="POST" action="{{ route('password.update', [], false) }}" class="bg-white border border-[#E2E8F0] rounded-2xl p-6 sm:p-8 shadow-xs">
       @csrf
       @method('put')
 
@@ -730,7 +730,8 @@
           <label class="block font-medium text-[#111827] mb-1">Role Akun</label>
           <select x-model="employmentForm.role" class="w-full h-10 px-3 border border-[#E2E8F0] rounded-xl">
             <option value="user">User</option>
-            <option value="admin">Admin</option>
+            <option value="admin_ho">Admin HO</option>
+            <option value="admin_site">Admin Site</option>
             <option value="super_admin">Super Admin</option>
           </select>
         </div>
