@@ -10,7 +10,7 @@
   <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Builder — {{ $form->title }}</x-ui.page-title>
 <x-ui.page-description>Kelola form, struktur isian, dan tipe dokumen.</x-ui.page-description></div>
-  <x-ui.page-actions><a class="text-sm underline" href="{{ route('admin.forms.edit', $form) }}">← Kembali ke Edit</a></x-ui.page-actions>
+  <x-ui.page-actions><x-ui.back-link href="{{ route('admin.forms.edit', $form) }}">Kembali ke Edit</x-ui.back-link></x-ui.page-actions>
 </x-ui.page-header>
   <div class="grid md:grid-cols-3 gap-5">
     {{-- PALETTE (kiri) --}}
@@ -40,7 +40,7 @@
           <div class="p-3 border rounded-lg">
             <div class="flex items-center justify-between">
               <div class="font-medium">
-                <span class="cursor-move">☰</span>
+                <span class="cursor-move"><x-ui.lucide name="grip-vertical" /></span>
                 <span x-text="f.label || f.name"></span>
                 <span class="text-xs text-slate-500">(<span x-text="f.type"></span>)</span>
                 <template x-if="f.required">
@@ -150,7 +150,7 @@
       @csrf @method('PUT')
       <textarea name="schema" x-model="json" rows="10" class="w-full font-mono text-sm border rounded-lg p-2"></textarea>
     </form>
-    <div class="text-xs mt-2" x-show="savedFlash" x-transition>✓ Tersimpan</div>
+    <div class="text-xs mt-2" x-show="savedFlash" x-transition><x-ui.lucide name="circle-check" /> Tersimpan</div>
   </x-ui.panel>
 </x-ui.page>
 {{-- SortableJS --}}

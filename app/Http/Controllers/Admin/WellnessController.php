@@ -30,7 +30,7 @@ class WellnessController extends Controller
             'total' => (clone $base)->count(),
             'today' => (clone $base)->whereDate('created_at', today())->count(),
             'not_ready' => (clone $base)->whereIn('work_readiness', ['tidak', 'off_day'])->count(),
-            'complaints' => (clone $base)->whereIn('health_complaint', ['ringan', 'berat'])->count(),
+            'complaints' => (clone $base)->whereIn('health_complaint', ['ya', 'ringan', 'berat'])->count(),
         ];
 
         return view('admin.wellness.index', compact('responses', 'stats'));

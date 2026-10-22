@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\Gate;
 use Tests\TestCase;
 class ExplicitRoleAssignmentTest extends TestCase {
  use RefreshDatabase;
- public function test_ho_assigns_site_admin_multiple_sites_and_department_member(): void {
-  $ho=User::factory()->create(['role'=>'admin_ho','is_active'=>true]);
+ public function test_super_admin_assigns_site_admin_multiple_sites_and_department_member(): void {
+  $ho=User::factory()->create(['role'=>'super_admin','is_active'=>true]);
   $user=User::factory()->create(['role'=>'user','is_active'=>true]);
   $a=Site::create(['code'=>'A','name'=>'Site A']);$b=Site::create(['code'=>'B','name'=>'Site B']);$c=Site::create(['code'=>'C','name'=>'Site C']);
   $department=Department::create(['name'=>'SHE','slug'=>'she']);
@@ -25,7 +25,7 @@ class ExplicitRoleAssignmentTest extends TestCase {
   $this->assertFalse($user->fresh()->isAdmin());$this->assertSame([$b->id],$user->fresh()->allowedSiteIds());
  }
  public function test_ho_does_not_need_sites_and_user_role_needs_one(): void {
-  $ho=User::factory()->create(['role'=>'admin_ho','is_active'=>true]);$user=User::factory()->create(['role'=>'user']);
+  $ho=User::factory()->create(['role'=>'super_admin','is_active'=>true]);$user=User::factory()->create(['role'=>'user']);
   $this->actingAs($ho)->post(route('admin.site_access.store'),['email'=>$user->email,'role'=>'admin_ho','site_selection'=>'replace'])->assertSessionHasNoErrors();
   $this->assertNull($user->fresh()->allowedSiteIds());
   $this->post(route('admin.site_access.store'),['email'=>$user->email,'role'=>'admin_site','site_selection'=>'replace'])->assertSessionHasErrors('site_ids');

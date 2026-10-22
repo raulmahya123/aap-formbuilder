@@ -11,10 +11,7 @@
             <x-ui.page-description>High Potential Hazard Report</x-ui.page-description>
         </div>
     </div></div>
-  <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('admin.hipo.index') }}"
-       class="text-sm px-4 py-2 rounded-lg border">
-        ← Kembali
-    </x-ui.link></x-ui.page-actions>
+  <x-ui.page-actions><x-ui.back-link href="{{ route('admin.hipo.index') }}">Kembali</x-ui.back-link></x-ui.page-actions>
 </x-ui.page-header>
 {{-- STATUS --}}
 <x-ui.panel class="flex items-center justify-between bg-white border rounded-lg">
@@ -51,7 +48,7 @@
 </div>
 {{-- RINCIAN KEJADIAN --}}
 <x-ui.panel class="bg-white border rounded-lg space-y-4">
-    <x-ui.card-title class="font-semibold">📝 Rincian Kejadian</x-ui.card-title>
+    <x-ui.card-title class="font-semibold"><x-ui.lucide name="pencil" /> Rincian Kejadian</x-ui.card-title>
     <div>
         <div class="text-xs font-semibold">KTA (Kondisi Tidak Aman)</div>
         <div class="text-sm whitespace-pre-line">{{ $hipo->kta }}</div>
@@ -82,7 +79,7 @@
         <a href="{{ route('pubfile.stream', ['path' => $hipo->{"evidence_$key"}]) }}"
            target="_blank"
            class="text-sm text-blue-600 underline">
-            📎 Lihat Evidence
+            <x-ui.lucide name="paperclip" /> Lihat Evidence
         </a>
     @endif
 </x-ui.panel>
@@ -94,13 +91,11 @@
       class="ui-card bg-white border rounded-lg space-y-4">
 @csrf
 @method('PUT')
-<x-ui.card-title class="font-semibold text-sm">🔧 Tindakan Admin</x-ui.card-title>
+<x-ui.card-title class="font-semibold text-sm"><x-ui.lucide name="wrench" /> Tindakan Admin</x-ui.card-title>
 <div class="grid md:grid-cols-2 gap-4">
     <div>
         <label class="text-xs">PIC Utama</label>
-        <input name="pic"
-               value="{{ old('pic',$hipo->pic) }}"
-               class="w-full border rounded-lg px-3 py-2">
+        <x-ui.user-name-select name="pic" :users="$picUsers" :value="old('pic', $hipo->pic)" aria-label="PIC Utama" />
     </div>
     <div>
         <label class="text-xs">Status</label>

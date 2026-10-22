@@ -55,6 +55,11 @@ class HipoReport extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function getPicAttribute(): ?string
+    {
+        return $this->attributes['pic'] ?? $this->pic_engineering ?? $this->pic_administrative ?? $this->pic_work_practice ?? $this->pic_ppe;
+    }
+
     public function site()
     {
         return $this->belongsTo(Site::class);

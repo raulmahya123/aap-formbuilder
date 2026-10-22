@@ -89,7 +89,7 @@
       @if(Route::has('front.forms.entries.index'))
         <x-ui.link variant="secondary" href="{{ route('front.forms.entries.index') }}"
            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-900 text-sm">
-          🗂️ Riwayat Saya
+          <x-ui.lucide name="folder-open" /> Riwayat Saya
         </x-ui.link>
       @endif
     @endsection</x-ui.page-actions>
@@ -245,12 +245,12 @@
             <div class="flex flex-wrap gap-2">
               @if($site)
                 <span class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-lg border border-maroon-700 text-maroon-800 dark:text-maroon-300 dark:border-maroon-600 bg-maroon-50/70 dark:bg-maroon-900/20">
-                  📍 {{ $site }}
+                  <x-ui.lucide name="map-pin" /> {{ $site }}
                 </span>
               @endif
               @if($dept)
                 <span class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-lg border border-coal-300 dark:border-coal-700">
-                  🏷️ {{ $dept }}
+                  <x-ui.lucide name="tag" /> {{ $dept }}
                 </span>
               @endif
             </div>
@@ -281,7 +281,7 @@
   @else
     <div class="rounded-lg border border-dashed border-coal-300 dark:border-coal-700 p-8 text-center">
       <div class="mx-auto w-12 h-12 mb-3 rounded-full border border-coal-300 dark:border-coal-700 flex items-center justify-center">
-        🧾
+        <x-ui.lucide name="file-text" />
       </div>
       <x-ui.card-title class="font-semibold mb-1">Belum ada FORM</x-ui.card-title>
       <p class="text-sm text-coal-600 dark:text-coal-400">Silakan kembali lagi nanti, atau gunakan kotak pencarian di atas.</p>

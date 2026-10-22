@@ -15,7 +15,7 @@ class UserActiveController extends Controller
     {
         // Middleware: hanya super admin yang boleh masuk
         $this->middleware(function ($request, $next) {
-            if (!Auth::check() || !Auth::user()->isSuperAdmin()) {
+            if (!Auth::check() || Auth::user()->role !== 'super_admin') {
                 abort(403, 'Hanya Super Admin yang bisa mengakses menu ini.');
             }
             return $next($request);

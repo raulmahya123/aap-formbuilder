@@ -171,7 +171,7 @@
       <div class="mt-3 flex flex-wrap gap-2">
         <x-ui.link variant="secondary" href="{{ $streamUrl }}" target="_blank" rel="noopener"
           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:hover:bg-coal-800">
-          🔎 Buka di Tab Baru
+          <x-ui.lucide name="search" /> Buka di Tab Baru
         </x-ui.link>
         <x-ui.link variant="primary" href="{{ route('pubfile.download', [
     'path' => $path,
@@ -195,7 +195,7 @@
         <div class="mt-3 flex flex-wrap gap-2">
           <x-ui.link variant="secondary" href="{{ $streamUrl }}" target="_blank" rel="noopener"
             class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:hover:bg-coal-800">
-            🔎 Buka di Tab Baru
+            <x-ui.lucide name="search" /> Buka di Tab Baru
           </x-ui.link>
           <x-ui.link variant="primary" href="{{ route('pubfile.download', [
     'path' => $path,

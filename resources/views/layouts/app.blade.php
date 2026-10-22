@@ -101,7 +101,7 @@
               <form method="POST" action="{{ route('admin.sites.switch') }}" class="flex min-w-0 items-center gap-2" data-site-selector data-error-bag="siteSelection">
                 @csrf
                 <label for="global-site" class="sr-only">Site aktif</label>
-                <x-ui.form-select id="global-site" name="site_id" class="max-w-[min(36vw,15rem)]" aria-label="Site aktif">
+                <x-ui.form-select id="global-site" name="site_id" aria-label="Site aktif">
                   <option value="">Semua site</option>
                   @foreach($navbarSites as $navbarSite)
                     <option value="{{ $navbarSite->id }}" @selected($navbarActiveSite?->id === $navbarSite->id)>{{ $navbarSite->code }} — {{ $navbarSite->name }}</option>

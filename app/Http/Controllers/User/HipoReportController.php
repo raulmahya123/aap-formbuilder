@@ -29,8 +29,9 @@ class HipoReportController extends Controller
     public function create()
     {
         $sites = $this->siteOptions();
+        $picUsers = \App\Models\User::orderBy('name')->get(['id', 'name']);
 
-        return view('user.hipo.create', compact('sites'));
+        return view('user.hipo.create', compact('sites', 'picUsers'));
     }
 
     public function store(Request $request)
@@ -38,7 +39,7 @@ class HipoReportController extends Controller
         // VALIDASI SESUAI FORM BARU
         $data = $request->validate([
             'site_id' => 'required|integer|exists:sites,id',
-            'pic' => 'required|string',
+            'pic' => 'required|string|max:255|exists:users,name',
 
             'report_time' => 'required|date',
             'shift' => 'required|string',

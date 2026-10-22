@@ -8,6 +8,6 @@ class UserSiteAccessPolicy
 {
     public function manageSiteAccess(User $user): bool
     {
-        return $user->isSuperAdmin();
+        return $user->role === 'super_admin';
     }
 }

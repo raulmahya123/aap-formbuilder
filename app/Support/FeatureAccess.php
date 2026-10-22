@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 class FeatureAccess
 {
     public const FEATURES = [
-        'dashboard'=>'Dashboard', 'wellness'=>'Wellness', 'departments'=>'Departments',
+        'dashboard'=>'Dashboard', 'wellness'=>'Health Assesment Checklist', 'departments'=>'Departments',
         'mandala'=>'Mandala / Form & Entries', 'chat'=>'Mandala Chat', 'contracts'=>'Contracts',
         'users'=>'Manage Users', 'ccm'=>'Critical Control Management', 'hipo'=>'HIPO / Nearmiss',
         'sites'=>'Sites', 'companies'=>'Companies', 'groups'=>'Indicator Groups', 'indicators'=>'Indicators',

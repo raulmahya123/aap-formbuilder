@@ -6,12 +6,9 @@
     <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Tambah HIPO / Nearmiss</x-ui.page-title>
 <x-ui.page-description>Lengkapi informasi untuk menambahkan laporan HIPO dan Nearmiss.</x-ui.page-description></div>
-  <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('admin.hipo.index') }}"
-            class="px-4 py-2 border rounded-lg">
-            ← Kembali
-        </x-ui.link>
+  <x-ui.page-actions><x-ui.back-link href="{{ route('admin.hipo.index') }}">Kembali</x-ui.back-link>
 <x-ui.button form="page-primary-form" variant="primary" class="px-6 py-2 rounded-lg transition">
-                💾 Simpan Laporan
+                <x-ui.lucide name="save" /> Simpan Laporan
             </x-ui.button>
 </x-ui.page-actions>
 </x-ui.page-header>
@@ -35,7 +32,7 @@
 
         {{-- ================= DATA UMUM ================= --}}
         <div>
-            <x-ui.card-title class="font-semibold text-sm mb-3">📋 Data Umum</x-ui.card-title>
+            <x-ui.card-title class="font-semibold text-sm mb-3"><x-ui.lucide name="clipboard-list" /> Data Umum</x-ui.card-title>
 
             <div class="grid md:grid-cols-3 gap-4">
 
@@ -144,7 +141,7 @@
 
         {{-- ================= RINCIAN ================= --}}
         <div>
-            <x-ui.card-title class="font-semibold text-sm mb-3">📝 Rincian Kejadian</x-ui.card-title>
+            <x-ui.card-title class="font-semibold text-sm mb-3"><x-ui.lucide name="pencil" /> Rincian Kejadian</x-ui.card-title>
 
             <div class="space-y-4">
 
@@ -198,7 +195,7 @@
 
         {{-- ================= KONTROL RISIKO ================= --}}
         <div>
-            <x-ui.card-title class="font-semibold text-sm mb-3">🛡️ Kontrol Risiko</x-ui.card-title>
+            <x-ui.card-title class="font-semibold text-sm mb-3"><x-ui.lucide name="shield" /> Kontrol Risiko</x-ui.card-title>
 
             <div class="grid md:grid-cols-2 gap-5">
 
@@ -218,11 +215,7 @@
                         class="w-full border rounded-lg px-3 py-2"
                         placeholder="Tindakan kontrol...">{{ old('control_'.$key) }}</textarea>
 
-                    <input type="text"
-                        name="pic_{{ $key }}"
-                        value="{{ old('pic_'.$key) }}"
-                        placeholder="PIC {{ $label }}"
-                        class="w-full border rounded-lg px-3 py-2">
+                    <x-ui.user-name-select name="pic_{{ $key }}" :users="$picUsers" :value="old('pic_'.$key)" aria-label="PIC {{ $label }}" />
 
                     <input type="file"
                         name="evidence_{{ $key }}"

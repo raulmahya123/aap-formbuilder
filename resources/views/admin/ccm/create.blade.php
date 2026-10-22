@@ -9,11 +9,9 @@
             <x-ui.page-title>Input CCM Report</x-ui.page-title>
             <x-ui.page-description>Critical Control Management</x-ui.page-description>
         </div></div>
-  <x-ui.page-actions><a href="{{ route('ccm-reports.index') }}" class="text-sm text-gray-600 hover:text-gray-900 underline">
-            &larr; Kembali ke List
-        </a>
+  <x-ui.page-actions><x-ui.back-link href="{{ route('ccm-reports.index') }}">Kembali ke daftar</x-ui.back-link>
 <x-ui.button form="ccmForm" variant="primary" type="submit" class="px-8 py-3 rounded-lg font-semibold shadow-none transition transform active:scale-95">
-                💾 Simpan Laporan CCM
+                <x-ui.lucide name="save" /> Simpan Laporan CCM
             </x-ui.button>
 </x-ui.page-actions>
 </x-ui.page-header>

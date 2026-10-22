@@ -617,8 +617,8 @@
                       class="absolute -top-3 right-2 hidden group-hover:flex items-center gap-0.5 bg-white border border-[#E2E8F0] rounded-lg shadow-sm px-1 py-0.5 z-20"
                     >
                       <!-- Quick reaction -->
-                      <button type="button" @click="toggleReaction(msg, '👍')" class="p-1 hover:bg-[#F1F5F9] rounded text-xs" title="Suka">👍</button>
-                      <button type="button" @click="toggleReaction(msg, '❤️')" class="p-1 hover:bg-[#F1F5F9] rounded text-xs" title="Love">❤️</button>
+                      <button type="button" @click="toggleReaction(msg, '👍')" class="p-1 hover:bg-[#F1F5F9] rounded text-xs" title="Suka" aria-label="Suka"><x-ui.lucide name="thumbs-up" /></button>
+                      <button type="button" @click="toggleReaction(msg, '❤️')" class="p-1 hover:bg-[#F1F5F9] rounded text-xs" title="Love" aria-label="Suka dengan hati"><x-ui.lucide name="heart" /></button>
                       
                       <!-- Reply -->
                       <button type="button" @click="setReplyTo(msg)" class="p-1 text-[#475569] hover:text-[#111827] hover:bg-[#F1F5F9] rounded" title="Balas">

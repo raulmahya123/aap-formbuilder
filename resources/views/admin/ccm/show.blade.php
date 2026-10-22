@@ -10,8 +10,8 @@
             <x-ui.page-description>ID Laporan: #{{ $report->id }}</x-ui.page-description>
         </div></div>
   <x-ui.page-actions><div class="flex gap-2">
-            <x-ui.link variant="primary" href="{{ route('ccm-reports.edit', $report->id) }}" class="px-4 py-2 text-sm rounded-lg shadow-none">📝 Edit Data</x-ui.link>
-            <x-ui.link variant="secondary" href="{{ route('ccm-reports.index') }}" class="px-4 py-2 text-sm border rounded-lg">← Kembali</x-ui.link>
+            <x-ui.link variant="primary" href="{{ route('ccm-reports.edit', $report->id) }}" class="px-4 py-2 text-sm rounded-lg shadow-none"><x-ui.lucide name="pencil" /> Edit Data</x-ui.link>
+            <x-ui.back-link href="{{ route('ccm-reports.index') }}">Kembali</x-ui.back-link>
         </div></x-ui.page-actions>
 </x-ui.page-header>
 
@@ -48,7 +48,7 @@
     function evidence($path, $label) {
         if (!$path) return "";
 
-        // 🔥 FIX UTAMA (ANTI ERROR NIAGAHOSTER)
+        // FIX UTAMA (ANTI ERROR NIAGAHOSTER)
         $url = route('pubfile.stream', ['path' => $path]);
 
         return "

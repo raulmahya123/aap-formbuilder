@@ -46,18 +46,18 @@
     @if(Route::has('daily.create'))
       <x-ui.link variant="secondary" href="{{ route('daily.create') }}"
          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20 text-sm">
-        ✍️ Catat Hari Ini
+        <x-ui.lucide name="pencil" /> Catat Hari Ini
       </x-ui.link>
     @elseif(Route::has('admin.daily.create'))
       <x-ui.link variant="secondary" href="{{ route('admin.daily.create') }}"
          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20 text-sm">
-        ✍️ Catat Hari Ini
+        <x-ui.lucide name="pencil" /> Catat Hari Ini
       </x-ui.link>
     @endif
     @if(Route::has('admin.reports.monthly'))
       <x-ui.link variant="secondary" href="{{ route('admin.reports.monthly', ['period'=>$period]) }}"
          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-900 text-sm">
-        📈 Rekap Bulanan
+        <x-ui.lucide name="chart-no-axes-combined" /> Rekap Bulanan
       </x-ui.link>
     @endif
   </div>
@@ -107,10 +107,10 @@
   {{-- Badge konteks --}}
   <div class="mb-6 flex flex-wrap items-center gap-2 text-sm">
     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-maroon-700 text-maroon-800 dark:text-maroon-300 dark:border-maroon-600 bg-maroon-50/70 dark:bg-maroon-900/20">
-      📍 {{ $activeSiteTxt }}
+      <x-ui.lucide name="map-pin" /> {{ $activeSiteTxt }}
     </span>
     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-coal-300 dark:border-coal-700">
-      🗓️ {{ $periodLabel }}
+      <x-ui.lucide name="calendar-days" /> {{ $periodLabel }}
     </span>
   </div>
   {{-- KPI Cards --}}
@@ -143,10 +143,10 @@
       <p class="text-sm text-coal-600 dark:text-coal-400 mb-3">Input data harian untuk periode aktif.</p>
       @if(Route::has('daily.create'))
         <x-ui.link variant="secondary" href="{{ route('daily.create') }}"
-           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20">✍️ Mulai</x-ui.link>
+           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20"><x-ui.lucide name="pencil" /> Mulai</x-ui.link>
       @elseif(Route::has('admin.daily.create'))
         <x-ui.link variant="secondary" href="{{ route('admin.daily.create') }}"
-           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20">✍️ Mulai</x-ui.link>
+           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20"><x-ui.lucide name="pencil" /> Mulai</x-ui.link>
       @endif
     </x-ui.panel>
     <x-ui.panel class="rounded-lg border border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-900">
@@ -154,7 +154,7 @@
       <p class="text-sm text-coal-600 dark:text-coal-400 mb-3">Lihat ringkasan indikator per bulan.</p>
       @if(Route::has('admin.reports.monthly'))
         <x-ui.link variant="secondary" href="{{ route('admin.reports.monthly', ['period'=>$period]) }}"
-           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-800">📈 Buka</x-ui.link>
+           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-800"><x-ui.lucide name="chart-no-axes-combined" /> Buka</x-ui.link>
       @endif
     </x-ui.panel>
     <x-ui.panel class="rounded-lg border border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-900">
@@ -162,7 +162,7 @@
       <p class="text-sm text-coal-600 dark:text-coal-400 mb-3">Kumpulkan data/permintaan dengan form.</p>
       @if(Route::has('front.forms.index'))
         <x-ui.link variant="secondary" href="{{ route('front.forms.index') }}"
-           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-800">🧾 Lihat Form</x-ui.link>
+           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-800"><x-ui.lucide name="file-text" /> Lihat Form</x-ui.link>
       @endif
     </x-ui.panel>
   </div>

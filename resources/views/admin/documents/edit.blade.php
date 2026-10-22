@@ -10,7 +10,7 @@
   <div class="ui-page-header__copy"><x-ui.page-title>Edit Dokumen</x-ui.page-title>
 <x-ui.page-description>Perbarui informasi dokumen.</x-ui.page-description></div>
   <x-ui.page-actions><div class="flex items-center gap-3">
-      <x-ui.link variant="secondary" href="{{ route('admin.documents.index') }}" class="px-4 py-2 rounded-lg border">← Kembali</x-ui.link>
+      <x-ui.back-link href="{{ route('admin.documents.index') }}">Kembali</x-ui.back-link>
       <x-ui.button variant="primary" form="docForm" class="px-4 py-2 rounded-lg hover:opacity-90">Update</x-ui.button>
     </div></x-ui.page-actions>
 </x-ui.page-header>

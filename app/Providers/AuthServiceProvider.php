@@ -37,6 +37,7 @@ class AuthServiceProvider extends ServiceProvider
 
         // Super Admin: auto-allow
         Gate::before(function ($user, $ability, $arguments) {
+            if ($ability === 'manageSiteAccess') return $user->role === 'super_admin';
             foreach ($arguments as $argument) {
                 $thread = $argument instanceof \App\Models\QaThread ? $argument : ($argument instanceof \App\Models\QaMessage ? $argument->thread : null);
                 if ($thread?->type === 'personal' && !$thread->participants()->where('users.id', $user->id)->exists()) return false;

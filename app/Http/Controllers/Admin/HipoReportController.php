@@ -35,8 +35,9 @@ class HipoReportController extends Controller
     public function create()
     {
         $sites = $this->siteOptions();
+        $picUsers = \App\Models\User::orderBy('name')->get(['id', 'name']);
 
-        return view('admin.hipo.create', compact('sites'));
+        return view('admin.hipo.create', compact('sites', 'picUsers'));
     }
 
     // ==============================
@@ -111,7 +112,8 @@ class HipoReportController extends Controller
     public function show(HipoReport $hipo)
     {
         Gate::authorize('site-access', (int) $hipo->site_id);
-        return view('admin.hipo.show', compact('hipo'));
+        $picUsers = \App\Models\User::orderBy('name')->get(['id', 'name']);
+        return view('admin.hipo.show', compact('hipo', 'picUsers'));
     }
 
     // ==============================
@@ -122,7 +124,8 @@ class HipoReportController extends Controller
         Gate::authorize('site-access', (int) $hipo->site_id);
         $validated = $request->validate([
             'status' => 'required|in:Open,On Progress,Closed,Rejected',
-            'description' => 'required|string',
+            'pic' => 'nullable|string|max:255',
+            'description' => 'sometimes|required|string',
 
             'control_engineering' => 'nullable|string',
             'control_administrative' => 'nullable|string',
@@ -141,6 +144,12 @@ class HipoReportController extends Controller
             'evidence_work_practice' => 'nullable|image|max:2048',
             'evidence_ppe' => 'nullable|image|max:2048',
         ]);
+
+        // Main PIC follows the existing per-control storage used by the reporting form.
+        if (array_key_exists('pic', $validated)) {
+            foreach (['engineering', 'administrative', 'work_practice', 'ppe'] as $key) $validated["pic_$key"] = $validated['pic'];
+            unset($validated['pic']);
+        }
 
         // HANDLE FILE UPDATE
         foreach (['engineering', 'administrative', 'work_practice', 'ppe'] as $key) {

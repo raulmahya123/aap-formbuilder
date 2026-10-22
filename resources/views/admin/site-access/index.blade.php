@@ -78,13 +78,14 @@
         <option value="default">Kembali mengikuti izin role</option>
       </x-ui.form-select>
     </x-ui.form-field>
-    <fieldset x-show="mode === 'custom'" class="mt-3 grid gap-3 sm:grid-cols-2">
+    <p class="mt-3 text-xs text-zinc-600" x-show="mode !== 'custom'">Untuk mengatur checkbox di bawah, pilih “Hanya fitur yang dipilih”.</p>
+    <fieldset :disabled="mode !== 'custom'" class="mt-3 grid gap-3 sm:grid-cols-2 disabled:opacity-60">
       <legend class="mb-3 text-sm font-medium">Fitur yang diizinkan</legend>
       @foreach($features as $key => $label)
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="feature_access[]" value="{{ $key }}" @checked(in_array($key, old('feature_access', [])))>{{ $label }}</label>
       @endforeach
     </fieldset>
-    <p class="mt-2 text-xs text-zinc-600">Jika tidak ada fitur dicentang pada mode terbatas, pengguna hanya dapat membuka akun dan keluar. Super Admin tetap memiliki seluruh fitur.</p>
+    <p class="mt-2 text-xs text-zinc-600">Centang modul yang boleh dibuka pengguna. Jika tidak ada fitur dicentang pada mode terbatas, pengguna hanya dapat membuka akun dan keluar. Admin HO dan Super Admin memiliki seluruh fitur.</p>
   </div>
   <p class="text-xs text-zinc-600">Penugasan yang sudah ada diperbarui tanpa duplikat. Status aktif akun tidak berubah.</p>
 </x-ui.modal-form>

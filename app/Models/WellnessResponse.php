@@ -13,7 +13,11 @@ class WellnessResponse extends Model
         'site',
         'shift',
         'sleep_before_shift',
+        'sleep_quality',
+        'sleep_quality_reason',
+        'heavy_drowsiness',
         'health_complaint',
+        'health_complaint_details',
         'drowsy_medication',
         'work_readiness',
     ];

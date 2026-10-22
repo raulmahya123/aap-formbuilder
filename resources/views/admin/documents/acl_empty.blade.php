@@ -11,6 +11,6 @@
     <p class="text-slate-600 mb-4">
       Dokumen yang kamu minta tidak ditemukan. Pilih dokumen lain atau buat dokumen baru.
     </p>
-    <x-ui.link variant="secondary" href="{{ route('admin.documents.index') }}" class="px-4 py-2 rounded-lg border">← Kembali ke daftar dokumen</x-ui.link>
+    <x-ui.back-link href="{{ route('admin.documents.index') }}">Kembali ke daftar dokumen</x-ui.back-link>
   </x-ui.page>
 @endsection

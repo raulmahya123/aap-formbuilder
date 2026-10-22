@@ -23,7 +23,7 @@
     @endphp
 
     <div class="flex items-center gap-3">
-      <x-ui.link variant="secondary" href="{{ route('admin.documents.index') }}" class="px-4 py-2 rounded-lg border">← Kembali</x-ui.link>
+      <x-ui.back-link href="{{ route('admin.documents.index') }}">Kembali</x-ui.back-link>
       @if($pdfRoute)
         <x-ui.link variant="secondary" href="{{ $pdfRoute }}" class="px-4 py-2 rounded-lg border" target="_blank" rel="noopener">Unduh PDF</x-ui.link>
       @endif

@@ -100,10 +100,7 @@
     </div>
     <div class="flex items-center justify-between gap-3 pt-2">
       {{-- Kembali ke rekap: paling aman pakai URL sebelumnya --}}
-      <x-ui.link variant="secondary" href="{{ url()->previous() }}"
-         class="inline-flex items-center px-3 py-2 rounded-lg border text-xs font-semibold">
-        ← Kembali ke Rekap
-      </x-ui.link>
+      <x-ui.back-link href="{{ url()->previous() }}">Kembali ke rekap</x-ui.back-link>
       <x-ui.button variant="primary" type="submit"
               class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-semibold shadow-none">
         Simpan Total

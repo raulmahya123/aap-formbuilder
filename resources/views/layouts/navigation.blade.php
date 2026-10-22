@@ -58,7 +58,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
 
         @if(Route::has('admin.wellness.index'))
         @if($user?->canUseFeatureRoute('admin.wellness.index'))
-<a title="Wellness" aria-label="Wellness" href="{{ route('admin.wellness.index') }}" class="{{ $navItemClass(request()->routeIs('admin.wellness.*')) }}"><x-ui-icon name="wellness"/><span class="ui-nav-label">Wellness</span></a>
+<a title="Health Assesment Checklist" aria-label="Health Assesment Checklist" href="{{ route('admin.wellness.index') }}" class="{{ $navItemClass(request()->routeIs('admin.wellness.*')) }}"><x-ui-icon name="wellness"/><span class="ui-nav-label">Health Assesment Checklist</span></a>
 @endif
         @endif
 

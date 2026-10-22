@@ -58,7 +58,7 @@
            class="btn text-center"
            style="border-color:var(--maroon); color:var(--maroon);
                   background: color-mix(in oklab, var(--maroon) 10%, white);">
-          ➕ Catatan Baru
+          <x-ui.lucide name="plus" /> Catatan Baru
         </a>
       @endif
     </div></x-ui.page-actions>

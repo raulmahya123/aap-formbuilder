@@ -16,7 +16,7 @@
         {{-- Tombol unduh semua (ZIP) --}}
         <x-ui.link variant="secondary" href="{{ route('admin.entries.download_all', $entry) }}"
            class="px-3 py-2 rounded-lg border dark:text-maroon-300 dark:border-maroon-400 dark:hover:bg-maroon-900/20 transition text-sm">
-          📦 Unduh Semua (ZIP)
+          <x-ui.lucide name="download" /> Unduh Semua (ZIP)
         </x-ui.link>
       </div></x-ui.page-actions>
 </x-ui.page-header>

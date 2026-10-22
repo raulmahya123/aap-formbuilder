@@ -17,10 +17,7 @@
         </svg>
         Download PDF
       </x-ui.link>
-      <x-ui.link variant="secondary" href="{{ route('admin.contracts.index') }}"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border">
-        ← Kembali
-      </x-ui.link>
+      <x-ui.back-link href="{{ route('admin.contracts.index') }}">Kembali</x-ui.back-link>
     </div></x-ui.page-actions>
 </x-ui.page-header>
   {{-- Alerts --}}

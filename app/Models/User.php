@@ -82,6 +82,7 @@ class User extends Authenticatable
 
     public function canUseFeature(string $feature): bool
     {
+        if (in_array($feature, ['users', 'site_access'], true)) return $this->role === 'super_admin';
         return $this->isSuperAdmin() || $this->feature_access === null || in_array($feature, $this->feature_access, true);
     }
 

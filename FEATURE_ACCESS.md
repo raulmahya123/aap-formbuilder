@@ -4,7 +4,8 @@ Super Admin mengatur daftar fitur di halaman Site, Role & Fitur Pengguna. Role, 
 
 ## Role akun dan multi-site
 
-- `admin_ho`: akses seluruh site dan fitur; mengelola penugasan. Akun `super_admin` lama tetap didukung. Kontrak Admin HO mengikuti pemilik/viewer, chat pribadi hanya dapat diakses peserta.
+- `super_admin`: satu-satunya role yang dapat membuka Manage Users dan Input Access serta mengelola penugasan akun.
+- `admin_ho`: akses seluruh site dan fitur operasional, kecuali Manage Users dan Input Access. Kontrak Admin HO mengikuti pemilik/viewer, chat pribadi hanya dapat diakses peserta. Centang izin fitur tidak dapat melewati pembatasan dua menu khusus `super_admin` tersebut.
 - `admin_site`: administrator operasional dengan cakupan site terpilih. Untuk dokumen Mandala tetap membutuhkan keanggotaan department dan akses site. Tidak boleh mengubah penugasan akun lain atau naik menjadi Admin HO.
 - `user`: tidak mendapat status admin hanya karena keanggotaan/peran department. Akses mengikuti site, fitur dan policy objek.
 

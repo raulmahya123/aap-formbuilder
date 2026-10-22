@@ -57,6 +57,30 @@ body { font-family: var(--font-sans); background: var(--background); color: var(
 :where(main, .ui-auth) :is(input, select, textarea):disabled { background: var(--surface-secondary); color: var(--text-muted); }
 :where(main, .ui-auth) :is(input, textarea)::placeholder { color: var(--gray); }
 :where(main, .ui-auth) :is(input[type='checkbox'], input[type='radio']) { accent-color: var(--blue); color: var(--blue); padding: 0; }
+/* File controls share one compact button and filename area, including modal forms. */
+.ui-shell input[type='file']:not(.hidden):not(.sr-only),
+.ui-public input[type='file']:not(.hidden):not(.sr-only),
+.ui-auth input[type='file']:not(.hidden):not(.sr-only) {
+  width: 100%; min-width: 0; max-width: 100%; height: 40px;
+  padding: 0; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-secondary);
+  font: 400 13px/38px var(--font-sans); overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; cursor: pointer;
+}
+.ui-shell input[type='file']::file-selector-button,
+.ui-public input[type='file']::file-selector-button,
+.ui-auth input[type='file']::file-selector-button {
+  height: 38px; margin: 0 12px 0 0; padding: 0 16px;
+  border: 0; border-right: 1px solid var(--border); border-radius: 0;
+  background: var(--surface-secondary); color: var(--text-primary);
+  font: 500 13px/1 var(--font-sans); cursor: pointer;
+  transition: background-color .15s;
+}
+.ui-shell input[type='file']:hover::file-selector-button,
+.ui-public input[type='file']:hover::file-selector-button,
+.ui-auth input[type='file']:hover::file-selector-button { background: var(--border); }
+.ui-shell input[type='file']:disabled { cursor: not-allowed; opacity: .6; }
+.ui-shell input[type='file']:disabled::file-selector-button { cursor: not-allowed; }
 .ui-table-scroll { width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
 main .ui-table { width: 100%; border-collapse: collapse; background: #fff; }
 main .ui-table thead th { padding: .75rem 1rem; border-top: 0; border-bottom: 1px solid var(--border); background: var(--surface-secondary); color: var(--text-primary); white-space: nowrap; }

@@ -57,7 +57,7 @@ class ModuleRedesignTest extends TestCase
 
     public function test_current_wellness_questionnaire_saves_without_fabricating_legacy_answers(): void
     {
-        $this->post(route('wellness.store'), ['name'=>'Contoh QA','nik'=>'QA-1','position'=>'Operator','site'=>'QA','shift'=>'pagi','sleep_before_shift'=>'lebih_6_jam','health_complaint'=>'tidak_ada','drowsy_medication'=>'tidak','work_readiness'=>'ya'])->assertRedirect(route('wellness.create'));
+        $this->post(route('wellness.store'), ['sleep_quality'=>'baik','heavy_drowsiness'=>'tidak','name'=>'Contoh QA','nik'=>'QA-1','position'=>'Operator','site'=>'QA','shift'=>'pagi','sleep_before_shift'=>'lebih_6_jam','health_complaint'=>'tidak','drowsy_medication'=>'tidak','work_readiness'=>'ya'])->assertRedirect(route('wellness.create'));
         $this->assertDatabaseHas('wellness_responses', ['nik'=>'QA-1','work_readiness'=>'ya','mood'=>null,'stress_level'=>null]);
     }
 
@@ -83,7 +83,7 @@ class ModuleRedesignTest extends TestCase
         $allowed = Site::create(['code'=>'ONE','name'=>'Assigned Site']);
         $other = Site::create(['code'=>'TWO','name'=>'Other Site']);
         $user->sites()->attach($allowed->id);
-        foreach ([$allowed, $other] as $site) \App\Models\WellnessResponse::create(['name'=>'QA '.$site->code,'nik'=>'QA-'.$site->id,'position'=>'Operator','site'=>$site->code,'shift'=>'pagi','sleep_before_shift'=>'lebih_6_jam','health_complaint'=>'tidak_ada','drowsy_medication'=>'tidak','work_readiness'=>'ya']);
+        foreach ([$allowed, $other] as $site) \App\Models\WellnessResponse::create(['name'=>'QA '.$site->code,'nik'=>'QA-'.$site->id,'position'=>'Operator','site'=>$site->code,'shift'=>'pagi','sleep_before_shift'=>'lebih_6_jam','health_complaint'=>'tidak','drowsy_medication'=>'tidak','work_readiness'=>'ya']);
         $this->actingAs($user)->get(route('admin.wellness.index'))->assertOk()
             ->assertViewHas('responses', fn ($rows) => $rows->total() === 1 && $rows->first()->site === 'ONE')
             ->assertViewHas('stats', fn ($stats) => $stats['total'] === 1);

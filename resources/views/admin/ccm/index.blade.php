@@ -53,15 +53,15 @@
                         {{-- KEGIATAN KRITIS (ICON) --}}
                         <td class="p-4 text-center text-lg">
                             <div class="flex items-center justify-center space-x-1">
-                                @if($r->kendaraan_ada_kegiatan) <span title="Kendaraan">🚚</span> @endif
+                                @if($r->kendaraan_ada_kegiatan) <span title="Kendaraan"><x-ui.lucide name="truck" /></span> @endif
                                 @if($r->izin_kerja_ada) <span title="Izin Kerja"><x-ui-icon name="file" class="h-5 w-5" /></span> @endif
-                                @if($r->tebing_ada) <span title="Tebing">⛰️</span> @endif
-                                @if($r->air_lumpur_ada) <span title="Air & Lumpur">💧</span> @endif
-                                @if($r->chainsaw_ada) <span title="Chainsaw">🪚</span> @endif
-                                @if($r->loto_ada) <span title="LOTO">🔒</span> @endif
-                                @if($r->lifting_ada) <span title="Lifting">🏗️</span> @endif
-                                @if($r->blasting_ada) <span title="Blasting">💥</span> @endif
-                                @if($r->kritis_baru_ada) <span title="Kritis Baru">🆕</span> @endif
+                                @if($r->tebing_ada) <span title="Tebing"><x-ui.lucide name="mountain" /></span> @endif
+                                @if($r->air_lumpur_ada) <span title="Air & Lumpur"><x-ui.lucide name="droplet" /></span> @endif
+                                @if($r->chainsaw_ada) <span title="Chainsaw"><x-ui.lucide name="wrench" /></span> @endif
+                                @if($r->loto_ada) <span title="LOTO"><x-ui.lucide name="lock-keyhole" /></span> @endif
+                                @if($r->lifting_ada) <span title="Lifting"><x-ui.lucide name="truck" /></span> @endif
+                                @if($r->blasting_ada) <span title="Blasting"><x-ui.lucide name="alert-triangle" /></span> @endif
+                                @if($r->kritis_baru_ada) <span title="Kritis Baru"><x-ui.lucide name="plus" /></span> @endif
                                 @if(!($r->kendaraan_ada_kegiatan || $r->izin_kerja_ada || $r->tebing_ada || $r->air_lumpur_ada || $r->chainsaw_ada || $r->loto_ada || $r->lifting_ada || $r->blasting_ada || $r->kritis_baru_ada))
                                     <span class="text-[10px] text-gray-400 italic">N/A</span>
                                 @endif

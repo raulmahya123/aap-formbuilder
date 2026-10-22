@@ -190,10 +190,7 @@
 {{-- PIC UMUM --}}
 <div>
     <label class="text-sm font-medium">PIC (Penanggung Jawab Utama)</label>
-    <input name="pic"
-           value="{{ old('pic') }}"
-           class="w-full border rounded-lg px-3 py-2"
-           required>
+    <x-ui.user-name-select name="pic" :users="$picUsers" :value="old('pic')" aria-label="PIC Utama" required />
 </div>
 
 <div class="pt-4 flex justify-end gap-2">

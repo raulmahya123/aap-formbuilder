@@ -35,7 +35,7 @@
         </x-ui.button>
         <x-ui.link variant="secondary" class="px-3 py-2 rounded-lg border dark:text-maroon-300 dark:border-maroon-400 dark:hover:bg-maroon-900/20 transition text-sm"
           href="{{ route('admin.entries.export_zip', request()->query()) }}">
-          📦 Export ZIP
+          <x-ui.lucide name="download" /> Export ZIP
         </x-ui.link>
       </div>
 

@@ -7,8 +7,7 @@
       <x-ui.page-title>Kelola Akses Dokumen</x-ui.page-title>
       <x-ui.page-description>Tambah/hapus izin untuk user atau departemen ke banyak dokumen sekaligus.</x-ui.page-description>
     </div></div>
-  <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('admin.documents.index') }}"
-       class="px-3 py-2 rounded-lg border">← Kembali</x-ui.link></x-ui.page-actions>
+  <x-ui.page-actions><x-ui.back-link href="{{ route('admin.documents.index') }}">Kembali</x-ui.back-link></x-ui.page-actions>
 </x-ui.page-header>
   {{-- FLASH / ERRORS --}}
   @if ($errors->any())
