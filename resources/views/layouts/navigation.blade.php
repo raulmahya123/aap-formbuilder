@@ -6,7 +6,12 @@
     };
 @endphp
 
-<nav class="ui-sidebar flex flex-col justify-between py-4" :class="sidebarCollapsed ? 'px-2' : 'px-4'" aria-label="Navigasi Utama">
+<aside id="app-sidebar" aria-label="Navigasi utama" x-show="isDesktop || sidebarOpen" x-cloak
+  :class="{ 'translate-x-0': sidebarOpen, 'ui-sidebar--collapsed': sidebarCollapsed && isDesktop }"
+  :inert="!isDesktop && !sidebarOpen"
+  class="ui-sidebar fixed inset-y-0 left-0 z-50 w-64 -translate-x-full bg-white border-r border-[#D4D4D8] transition-transform duration-200 lg:static lg:translate-x-0 lg:w-auto lg:block overflow-y-auto">
+  <button type="button" class="ui-drawer-close ui-shell-toggle lg:hidden" @click="sidebarOpen=false; $nextTick(() => document.getElementById('navigation-toggle').focus())" aria-label="Tutup navigasi"><x-ui.icon name="x" /></button>
+  <nav aria-label="Menu aplikasi">
   <div class="flex items-center justify-center border-b border-[#D4D4D8] bg-white px-4 py-5">
     <a href="{{ route('dashboard') }}" class="flex items-center justify-center">
       <img
@@ -17,7 +22,7 @@
       />
     </a>
   </div>
-  <div class="mt-4 grid gap-4 overflow-y-auto">
+  <div class="mt-4 grid gap-4">
     {{-- ================= ADMIN ================= --}}
     @if($isSuper || ($user && $user->isAdmin()))
 
@@ -36,13 +41,13 @@
       <div class="mt-2 grid gap-1">
         @if(Route::has('admin.daily.index'))
         @if($user?->canUseFeatureRoute('admin.daily.index'))
-<a title="Input Data Operasional" aria-label="Input Data Operasional" href="{{ route('admin.daily.index') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}"><x-ui-icon name="daily"/><span class="ui-nav-label">Input Data Operasional</span></a>
+<a title="Input Data Operasional" aria-label="Input Data Operasional" href="{{ route('admin.daily.index') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.*')) }}"><x-ui-icon name="input"/><span class="ui-nav-label">Input Data Operasional</span></a>
 @endif
         @endif
 
         @if(Route::has('admin.qa.index'))
         @if($user?->canUseFeatureRoute('admin.qa.index'))
-<a title="HIPO & Nearmiss" aria-label="HIPO & Nearmiss" href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="qa"/><span class="ui-nav-label">HIPO & Nearmiss</span></a>
+<a title="HIPO & Nearmiss" aria-label="HIPO & Nearmiss" href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="chat"/><span class="ui-nav-label">HIPO & Nearmiss</span></a>
 @endif
         @endif
 
@@ -84,7 +89,7 @@
 
         @if(Route::has('admin.daily.summary'))
         @if($user?->canUseFeatureRoute('admin.daily.summary'))
-<a title="Matriks Input" aria-label="Matriks Input" href="{{ route('admin.daily.summary') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.summary')) }}"><x-ui-icon name="daily"/><span class="ui-nav-label">Matriks Input</span></a>
+<a title="Matriks Input" aria-label="Matriks Input" href="{{ route('admin.daily.summary') }}" class="{{ $navItemClass(request()->routeIs('admin.daily.summary')) }}"><x-ui-icon name="input"/><span class="ui-nav-label">Matriks Input</span></a>
 @endif
         @endif
 
@@ -101,7 +106,7 @@
       <div class="mt-2 grid gap-1">
         @if(Route::has('admin.documents.index'))
         @if($user?->canUseFeatureRoute('admin.documents.index'))
-<a title="Dokumen Mandala" aria-label="Dokumen Mandala" href="{{ route('admin.documents.index') }}" class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}"><x-ui-icon name="document"/><span class="ui-nav-label">Dokumen Mandala</span></a>
+<a title="Dokumen Mandala" aria-label="Dokumen Mandala" href="{{ route('admin.documents.index') }}" class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}"><x-ui-icon name="mandala"/><span class="ui-nav-label">Dokumen Mandala</span></a>
 @endif
         @endif
 
@@ -113,37 +118,37 @@
 
         @if(Route::has('admin.sites.index'))
         @if($user?->canUseFeatureRoute('admin.sites.index'))
-<a title="Master Site" aria-label="Master Site" href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}"><x-ui-icon name="site"/><span class="ui-nav-label">Master Site</span></a>
+<a title="Master Site" aria-label="Master Site" href="{{ route('admin.sites.index') }}" class="{{ $navItemClass(request()->routeIs('admin.sites.*')) }}"><x-ui-icon name="location"/><span class="ui-nav-label">Master Site</span></a>
 @endif
         @endif
 
         @if(Route::has('admin.companies.index'))
         @if($user?->canUseFeatureRoute('admin.companies.index'))
-<a title="Master Perusahaan" aria-label="Master Perusahaan" href="{{ route('admin.companies.index') }}" class="{{ $navItemClass(request()->routeIs('admin.companies.*')) }}"><x-ui-icon name="site"/><span class="ui-nav-label">Master Perusahaan</span></a>
+<a title="Master Perusahaan" aria-label="Master Perusahaan" href="{{ route('admin.companies.index') }}" class="{{ $navItemClass(request()->routeIs('admin.companies.*')) }}"><x-ui-icon name="location"/><span class="ui-nav-label">Master Perusahaan</span></a>
 @endif
         @endif
 
         @if(Route::has('admin.groups.index'))
         @if($user?->canUseFeatureRoute('admin.groups.index'))
-<a title="Kelompok Indikator" aria-label="Kelompok Indikator" href="{{ route('admin.groups.index') }}" class="{{ $navItemClass(request()->routeIs('admin.groups.*')) }}"><x-ui-icon name="group"/><span class="ui-nav-label">Kelompok Indikator</span></a>
+<a title="Kelompok Indikator" aria-label="Kelompok Indikator" href="{{ route('admin.groups.index') }}" class="{{ $navItemClass(request()->routeIs('admin.groups.*')) }}"><x-ui-icon name="groups"/><span class="ui-nav-label">Kelompok Indikator</span></a>
 @endif
         @endif
 
         @if(Route::has('admin.indicators.index'))
         @if($user?->canUseFeatureRoute('admin.indicators.index'))
-<a title="Indikator" aria-label="Indikator" href="{{ route('admin.indicators.index') }}" class="{{ $navItemClass(request()->routeIs('admin.indicators.*')) }}"><x-ui-icon name="indicator"/><span class="ui-nav-label">Indikator</span></a>
+<a title="Indikator" aria-label="Indikator" href="{{ route('admin.indicators.index') }}" class="{{ $navItemClass(request()->routeIs('admin.indicators.*')) }}"><x-ui-icon name="chart"/><span class="ui-nav-label">Indikator</span></a>
 @endif
         @endif
 
         @if(Route::has('admin.forms.index'))
         @if($user?->canUseFeatureRoute('admin.forms.index'))
-<a title="Form Builder" aria-label="Form Builder" href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}"><x-ui-icon name="form"/><span class="ui-nav-label">Form Builder</span></a>
+<a title="Form Builder" aria-label="Form Builder" href="{{ route('admin.forms.index') }}" class="{{ $navItemClass(request()->routeIs('admin.forms.*')) }}"><x-ui-icon name="mandala"/><span class="ui-nav-label">Form Builder</span></a>
 @endif
         @endif
 
         @if(Route::has('user.forms.index'))
         @if($user?->canUseFeatureRoute('user.forms.index'))
-<a title="Formulir Publik" aria-label="Formulir Publik" href="{{ route('user.forms.index') }}" class="{{ $navItemClass(request()->routeIs('user.forms.*')) }}"><x-ui-icon name="form"/><span class="ui-nav-label">Formulir Publik</span></a>
+<a title="Formulir Publik" aria-label="Formulir Publik" href="{{ route('user.forms.index') }}" class="{{ $navItemClass(request()->routeIs('user.forms.*')) }}"><x-ui-icon name="mandala"/><span class="ui-nav-label">Formulir Publik</span></a>
 @endif
         @endif
 
@@ -193,19 +198,19 @@
 
         @if(Route::has('admin.qa.index'))
         @if($user?->canUseFeatureRoute('admin.qa.index'))
-<a title="HIPO & Nearmiss" aria-label="HIPO & Nearmiss" href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="qa"/><span class="ui-nav-label">HIPO & Nearmiss</span></a>
+<a title="HIPO & Nearmiss" aria-label="HIPO & Nearmiss" href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="chat"/><span class="ui-nav-label">HIPO & Nearmiss</span></a>
 @endif
         @endif
 
         @if(Route::has('admin.documents.index'))
         @if($user?->canUseFeatureRoute('admin.documents.index'))
-<a title="Dokumen Mandala" aria-label="Dokumen Mandala" href="{{ route('admin.documents.index') }}" class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}"><x-ui-icon name="document"/><span class="ui-nav-label">Dokumen Mandala</span></a>
+<a title="Dokumen Mandala" aria-label="Dokumen Mandala" href="{{ route('admin.documents.index') }}" class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}"><x-ui-icon name="mandala"/><span class="ui-nav-label">Dokumen Mandala</span></a>
 @endif
         @endif
 
         @if(Route::has('user.forms.index'))
         @if($user?->canUseFeatureRoute('user.forms.index'))
-<a title="Formulir Publik" aria-label="Formulir Publik" href="{{ route('user.forms.index') }}" class="{{ $navItemClass(request()->routeIs('user.forms.*')) }}"><x-ui-icon name="form"/><span class="ui-nav-label">Formulir Publik</span></a>
+<a title="Formulir Publik" aria-label="Formulir Publik" href="{{ route('user.forms.index') }}" class="{{ $navItemClass(request()->routeIs('user.forms.*')) }}"><x-ui-icon name="mandala"/><span class="ui-nav-label">Formulir Publik</span></a>
 @endif
         @endif
 
@@ -225,3 +230,4 @@
     @endif
   </div>
 </nav>
+</aside>

@@ -57,6 +57,17 @@
 .ui-sidebar nav { padding: 12px; }
 .ui-sidebar nav a { color: #18181B; }
 .ui-sidebar nav a.is-active { color: #fff; background: #713F12; }
+.ui-sidebar .ui-nav-item {
+  display: flex; align-items: center; gap: 12px; min-width: 0; min-height: 40px;
+  padding: 8px 12px; border: 1px solid transparent; border-radius: 8px;
+  color: #18181B; font-size: 13px; font-weight: 500; line-height: 1.5;
+  text-decoration: none; transition: background-color .15s, border-color .15s;
+}
+.ui-sidebar .ui-nav-item > svg { width: 20px; height: 20px; flex: 0 0 20px; }
+.ui-sidebar .ui-nav-label { min-width: 0; overflow-wrap: anywhere; }
+.ui-sidebar .ui-nav-item:hover { background: #F4F4F5; border-color: #D4D4D8; }
+.ui-sidebar .ui-nav-item.is-active,
+.ui-sidebar .ui-nav-item.is-active:hover { background: #713F12; border-color: #713F12; color: #fff; }
 .ui-nav-section { width: 100%; text-align: left; min-height: 28px; align-items: center; }
 .ui-sidebar--collapsed .ui-nav-label,
 .ui-sidebar--collapsed .ui-nav-section { display: none; }
