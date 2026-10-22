@@ -86,11 +86,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
 @endif
         @endif
 
-        @if($isSuper && Route::has('admin.users.active.index'))
-        @if($user?->canUseFeatureRoute('admin.users.active.index'))
-<a title="Manage Users" aria-label="Manage Users" href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}"><x-ui-icon name="users"/><span class="ui-nav-label">Manage Users</span></a>
-@endif
-        @endif
+
       </div>
     </div>
 
@@ -166,6 +162,22 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
 @endif
         @endif
 
+
+      </div>
+    </div>
+
+    @if($user?->role === 'super_admin')
+    <div x-data="{openAdministration:true}">
+      <button type="button" class="ui-nav-section flex cursor-pointer justify-between px-3 text-[11px] font-semibold normal-case tracking-normal text-[#52525B]" :aria-expanded="openAdministration" @click="openAdministration=!openAdministration">
+        Administrasi
+        <span aria-hidden="true" x-text="openAdministration ? '−' : '+'"></span>
+      </button>
+      <div class="mt-2 grid gap-1" x-show="sidebarCollapsed || openAdministration" x-transition>
+        @if($isSuper && Route::has('admin.users.active.index'))
+        @if($user?->canUseFeatureRoute('admin.users.active.index'))
+<a title="Manage Users" aria-label="Manage Users" href="{{ route('admin.users.active.index') }}" class="{{ $navItemClass(request()->routeIs('admin.users.active.*')) }}"><x-ui-icon name="users"/><span class="ui-nav-label">Manage Users</span></a>
+@endif
+        @endif
         @if(Route::has('admin.site_access.index'))
         @if($user?->canUseFeatureRoute('admin.site_access.index'))
 <a title="Input Access" aria-label="Input Access" href="{{ route('admin.site_access.index') }}" class="{{ $navItemClass(request()->routeIs('admin.site_access.*')) }}"><x-ui-icon name="access"/><span class="ui-nav-label">Input Access</span></a>
@@ -173,6 +185,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
         @endif
       </div>
     </div>
+    @endif
 
     {{-- ================= NON ADMIN ================= --}}
     @else
