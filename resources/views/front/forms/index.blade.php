@@ -201,7 +201,7 @@
 
   {{-- LIST FORM --}}
   @if($forms->count() > 0)
-    <div class="rounded-lg border border-coal-200 dark:border-coal-800 overflow-hidden">
+    <x-ui.data-table>
       <div class="hidden md:grid grid-cols-12 gap-3 px-4 py-3 text-xs font-semibold bg-ivory-100 dark:bg-coal-900/40 border-b border-coal-200 dark:border-coal-800">
         <div class="md:col-span-6">Info</div>
         <div class="md:col-span-4">Lokasi</div>
@@ -274,13 +274,10 @@
           </div>
         </x-ui.panel>
       @endforeach
-    </div>
-
-    @if(method_exists($forms, 'links'))
-      <div class="mt-6">
-        {{ $forms->withQueryString()->links() }}
-      </div>
-    @endif
+    <x-slot:pagination>
+      <x-ui.table-pagination :paginator="$forms" />
+    </x-slot:pagination>
+    </x-ui.data-table>
   @else
     <div class="rounded-lg border border-dashed border-coal-300 dark:border-coal-700 p-8 text-center">
       <div class="mx-auto w-12 h-12 mb-3 rounded-full border border-coal-300 dark:border-coal-700 flex items-center justify-center">

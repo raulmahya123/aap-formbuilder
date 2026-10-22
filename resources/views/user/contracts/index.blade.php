@@ -26,10 +26,7 @@
   @if(session('err'))
     <div class="p-3 rounded-lg bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>
   @endif
-  {{-- Desktop: Table --}}
-  <div class="hidden md:block">
-    <div class="overflow-hidden rounded-lg border shadow-none">
-      <x-ui.table class="w-full text-sm">
+  <x-ui.table :paginator="$contracts" class="w-full text-sm">
         <thead class="bg-ivory-100 text-left">
           <tr>
             <th class="p-3">Judul</th>
@@ -80,40 +77,6 @@
 @endforelse
         </tbody>
       </x-ui.table>
-    </div>
-  </div>
-  {{-- Mobile: Cards --}}
-  <div class="grid gap-3 md:hidden">
-    @forelse($contracts as $c)
-      <div class="rounded-lg border shadow-none p-4">
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <a href="{{ route('user.contracts.show',$c) }}" class="font-semibold hover:underline">{{ $c->title }}</a>
-            <div class="text-xs text-coal-500 mt-1">{{ optional($c->created_at)->format('d M Y H:i') }}</div>
-          </div>
-          <x-ui.link variant="primary" href="{{ route('user.contracts.download',$c) }}"
-             class="shrink-0 px-3 py-2 rounded-lg">Download</x-ui.link>
-        </div>
-        <div class="mt-3 flex items-center gap-2">
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style="background:#713F12">
-            {{ strtoupper(\Illuminate\Support\Str::of(optional($c->owner)->name)->explode(' ')->map(fn($s)=>\Illuminate\Support\Str::substr($s,0,1))->take(2)->implode('')) ?: 'U' }}
-          </div>
-          <div class="min-w-0">
-            <div class="text-sm truncate">{{ optional($c->owner)->name ?? '—' }}</div>
-            <div class="text-xs text-coal-500 truncate">{{ optional($c->owner)->email ?? '' }}</div>
-          </div>
-        </div>
-        <div class="mt-3 text-sm text-coal-600">
-          {{ number_format(($c->size_bytes ?? 0)/1024,1) }} KB
-        </div>
-      </div>
-    @empty
-      <div class="rounded-lg border p-6 text-center text-coal-500">Tidak ada kontrak untukmu.</div>
-    @endforelse
-  </div>
-  {{-- Pagination --}}
-  <div>
-    {{ $contracts->withQueryString()->links() }}
-  </div>
+
 </x-ui.page>
 @endsection

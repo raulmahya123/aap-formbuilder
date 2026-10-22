@@ -105,6 +105,8 @@
   border-bottom: 1px solid var(--border);
 }
 .ui-data-table .ui-table tbody tr:last-child td { border-bottom: 0; }
+.ui-table tbody tr.ui-table-empty-row > td { padding: 0; height: auto; }
+.ui-table-empty-row .ui-feedback-state { min-height: 180px; padding: 24px 16px; gap: 8px; }
 .ui-data-table .ui-table tbody tr:hover { background: var(--surface-secondary); }
 
 /* Line clamp helper for long content */

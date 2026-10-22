@@ -7,6 +7,10 @@ use App\Models\UserSiteAccess;
 use App\Models\User;
 use App\Models\Site;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use App\Models\Department;
+use App\Models\DepartmentUserRole;
 
 class UserSiteAccessController extends Controller
 {
@@ -25,7 +29,7 @@ class UserSiteAccessController extends Controller
         $search = trim((string) $r->get('q', ''));
 
         $q = UserSiteAccess::query()
-            ->with(['user:id,name,email,role,is_active', 'site:id,name,code'])
+            ->with(['user:id,name,email,role,is_active', 'user.departments:id,name', 'site:id,name,code'])
             ->when($search !== '', fn ($query) => $query->whereHas('user', fn ($users) =>
                 $users->where(fn ($fields) => $fields->where('name', 'like', '%'.$search.'%')->orWhere('email', 'like', '%'.$search.'%'))
             ))
@@ -43,6 +47,7 @@ class UserSiteAccessController extends Controller
             'sites'    => Site::orderBy('code')->get(['id','name','code']),
             'emails'   => User::orderBy('email')->pluck('email'),
             'users'    => User::orderBy('name')->get(['id', 'name', 'email', 'role']),
+            'departments' => Department::orderBy('name')->get(['id', 'name']),
             'siteId'   => $siteId,
             'email'    => $email,
         ]);
@@ -61,6 +66,9 @@ class UserSiteAccessController extends Controller
         $data = $r->validate([
             'site_id' => ['required','integer','exists:sites,id'],
             'email'   => ['required','email','exists:users,email'],
+            'role' => ['nullable', 'in:user,super_admin'],
+            'department_id' => ['nullable', 'required_with:dept_role', 'integer', 'exists:departments,id'],
+            'dept_role' => ['nullable', 'required_with:department_id', 'in:member,dept_admin'],
         ]);
 
         // Ambil user_id dari email
@@ -68,12 +76,28 @@ class UserSiteAccessController extends Controller
 
         try {
             // Idempotent: tidak membuat duplikat bila sudah ada
-            $access = UserSiteAccess::firstOrCreate(
-                ['user_id' => $userId, 'site_id' => (int) $data['site_id']]
-            );
+            $access = DB::transaction(function () use ($data, $userId, $r) {
+                $user = User::whereKey($userId)->lockForUpdate()->firstOrFail();
+                if (!empty($data['role']) && $data['role'] !== $user->role) {
+                    if ($user->id === $r->user()->id && $data['role'] !== 'super_admin') {
+                        throw ValidationException::withMessages(['role' => 'Role akun Anda sendiri tidak dapat diturunkan dari halaman ini.']);
+                    }
+                    $user->update(['role' => $data['role']]);
+                }
+                if (!empty($data['department_id']) && !empty($data['dept_role'])) {
+                    DepartmentUserRole::updateOrCreate(
+                        ['user_id' => $userId, 'department_id' => $data['department_id']],
+                        ['dept_role' => $data['dept_role']]
+                    );
+                }
+                return UserSiteAccess::firstOrCreate(['user_id' => $userId, 'site_id' => (int) $data['site_id']]);
+            });
 
             $wasCreated = $access->wasRecentlyCreated;
 
+            if (!empty($data['role']) || !empty($data['dept_role'])) {
+                return back()->with('success', 'Penugasan site dan role berhasil disimpan.');
+            }
             return back()->with(
                 $wasCreated ? 'ok' : 'info',
                 $wasCreated ? 'Akses site ditambahkan.' : 'Data akses sudah ada.'
