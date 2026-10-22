@@ -61,7 +61,7 @@ class DailyInputController extends Controller
             'date'  => $date,
             'groups' => $groups,
             'showLateWatermark' => $shiftInfo['is_late'],
-            'currentShift'      => $shiftInfo['shift'],
+            'currentShift'      => $shiftInfo['shift'] ?? $shiftInfo['closest_shift'],
             'shiftRanges'       => $shiftInfo['ranges'],
         ]);
     }

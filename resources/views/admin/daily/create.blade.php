@@ -3,16 +3,6 @@
 @section('title','Input Harian')
 
 @section('content')
-{{-- ===== Overlay Watermark TELAT (opsional, kirim $showLateWatermark dari controller) ===== --}}
-@if(!empty($showLateWatermark))
-<div class="pointer-events-none select-none fixed inset-0 flex items-center justify-center" style="z-index:0">
-  <div class="font-black tracking-normal normal-case"
-    style="color: rgba(220,38,38,.12); font-size: clamp(3rem,12vw,10rem); transform: rotate(-20deg);">
-    LATE INPUT
-  </div>
-</div>
-@endif
-
 @php
 // dari controller: $sites (sudah terfilter), $date, $groups
 $selectedSite = old('site_id', request('site_id'));
@@ -29,20 +19,17 @@ $computedReadonly = !$hasAnyAllowedSite;
 }
 @endphp
 <x-ui.page-header>
-  <div class="ui-page-header__copy"><x-ui.page-title>Input Harian Per Site
-  @isset($currentShift)
-  <span class="ml-2 text-sm px-2 py-1 rounded-lg bg-gray-100 border">
-    Shift {{ $currentShift ?? '—' }}
-  </span>
-  @endisset</x-ui.page-title>
-<x-ui.page-description>Lengkapi informasi untuk menambahkan input harian.</x-ui.page-description></div>
+  <div class="ui-page-header__copy">
+    <x-ui.page-title>Input Harian Per Site</x-ui.page-title>
+    <x-ui.page-description>Lengkapi data indikator harian sesuai shift dan site operasional.</x-ui.page-description>
+  </div>
   <x-ui.page-actions>
-<x-ui.button form="page-primary-form" variant="primary"
-      class="mt-6 px-6 py-3 rounded-lg shadow-none disabled:opacity-60 disabled:cursor-not-allowed"
+    <x-ui.button form="page-primary-form" variant="primary"
+      class="px-6 py-2.5 rounded-lg shadow-none disabled:opacity-60 disabled:cursor-not-allowed"
       :disabled="!$hasAnyAllowedSite || $computedReadonly">
-      Simpan
+      <x-ui.lucide name="save" /> Simpan Data
     </x-ui.button>
-</x-ui.page-actions>
+  </x-ui.page-actions>
 </x-ui.page-header>
 
 
@@ -122,18 +109,18 @@ $computedReadonly = !$hasAnyAllowedSite;
   <div class="absolute inset-0 rounded-lg" style="pointer-events: none;"></div>
   @endif
 
-  {{-- Header input: site & tanggal --}}
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  {{-- Header input: site, tanggal, & shift info --}}
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
     <div>
-      <label class="block text-sm font-semibold text-gray-700 mb-1">Site</label>
-      <select name="site_id"
-        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400 {{ $computedReadonly ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : '' }}"
+      <x-ui.form-label for="daily-site-id" required>Site Operasional</x-ui.form-label>
+      <select id="daily-site-id" name="site_id"
+        class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400 transition {{ $computedReadonly ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : 'bg-white' }}"
         @if($computedReadonly) disabled @endif required>
         @php $printed = false; @endphp
         @foreach($sites as $s)
         @can('daily.manage', $s->id)
         @php $printed = true; @endphp
-        <option value="{{ $s->id }}" @selected($selectedSite==$s->id)">
+        <option value="{{ $s->id }}" @selected($selectedSite == $s->id)>
           {{ $s->code }} — {{ $s->name }}
         </option>
         @endcan
@@ -143,17 +130,62 @@ $computedReadonly = !$hasAnyAllowedSite;
         <option value="">— Tidak ada site yang diizinkan —</option>
         @endunless
       </select>
-      @error('site_id') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
+      @error('site_id') <x-ui.form-error>{{ $message }}</x-ui.form-error> @enderror
     </div>
 
     <div>
-      <label class="block text-sm font-semibold text-gray-700 mb-1">Tanggal</label>
-      <input type="date" name="date" value="{{ old('date', $date) }}"
-        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400 {{ $computedReadonly ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : '' }}"
+      <x-ui.form-label for="daily-date" required>Tanggal Input</x-ui.form-label>
+      <input type="date" id="daily-date" name="date" value="{{ old('date', $date) }}"
+        class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400 transition {{ $computedReadonly ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : 'bg-white' }}"
         @if($computedReadonly) readonly disabled @endif required>
-      @error('date') <div class="text-sm text-rose-600 mt-1">{{ $message }}</div> @enderror
+      @error('date') <x-ui.form-error>{{ $message }}</x-ui.form-error> @enderror
+    </div>
+
+    <div>
+      <x-ui.form-label>Shift & Status Input</x-ui.form-label>
+      <div class="p-2.5 rounded-lg border {{ !empty($showLateWatermark) ? 'bg-amber-50/70 border-amber-200' : 'bg-emerald-50/70 border-emerald-200' }} flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-md flex items-center justify-center {{ !empty($showLateWatermark) ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' }}">
+            <x-ui.lucide name="{{ !empty($showLateWatermark) ? 'clock' : 'check-circle' }}" class="w-4 h-4" />
+          </div>
+          <div>
+            <div class="text-xs font-bold {{ !empty($showLateWatermark) ? 'text-amber-950' : 'text-emerald-950' }}">
+              Shift {{ $currentShift ?? '1' }}
+              @if(isset($shiftRanges) && isset($shiftRanges[$currentShift ?? 1]))
+                <span class="text-[11px] font-normal text-gray-500 font-mono">({{ $shiftRanges[$currentShift ?? 1][0]->format('H:i') }} - {{ $shiftRanges[$currentShift ?? 1][1]->format('H:i') }})</span>
+              @endif
+            </div>
+            <div class="text-[10px] text-gray-500">
+              Otomatis terdeteksi sistem
+            </div>
+          </div>
+        </div>
+        <div>
+          @if(!empty($showLateWatermark))
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-200/90 text-amber-900 border border-amber-300">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
+              Late Input
+            </span>
+          @else
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-200/90 text-emerald-900 border border-emerald-300">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+              On Time
+            </span>
+          @endif
+        </div>
+      </div>
     </div>
   </div>
+
+  @if(!empty($showLateWatermark))
+  <div class="flex items-start gap-3 p-3 rounded-lg border border-amber-200 bg-amber-50/80 text-amber-900 text-xs">
+    <x-ui.lucide name="alert-triangle" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+    <div class="leading-relaxed">
+      <span class="font-bold">Input Tercatat Terlambat (Late Input):</span>
+      Waktu pengisian berada di luar batas normal jendela shift. Data tetap berhasil disimpan dan otomatis ditandai keterlambatan untuk transparansi pelaporan.
+    </div>
+  </div>
+  @endif
 
   {{-- Per group indikator --}}
   @foreach($groups as $g)
