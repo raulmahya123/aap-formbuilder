@@ -10,8 +10,15 @@
   <x-ui.page-actions><x-ui.link icon="plus" variant="primary" href="{{ route('ccm-reports.create') }}"
            class="px-5 py-3 rounded-lg text-sm font-semibold shadow-none transition">Input CCM Baru
         </x-ui.link></x-ui.page-actions>
+
+<x-slot:filters>
+<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari jobsite atau pelapor…" aria-label="Cari CCM" /><label for="ccm-from">Dari</label><x-ui.form-input id="ccm-from" type="date" name="date_from" :value="request('date_from')" /><label for="ccm-to">Sampai</label><x-ui.form-input id="ccm-to" type="date" name="date_to" :value="request('date_to')" />
+<x-slot:actions>
+<x-ui.button variant="secondary" type="submit">Terapkan</x-ui.button><x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link>
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
 </x-ui.page-header>
-<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari jobsite atau pelapor…" aria-label="Cari CCM" /><label for="ccm-from">Dari</label><x-ui.form-input id="ccm-from" type="date" name="date_from" :value="request('date_from')" /><label for="ccm-to">Sampai</label><x-ui.form-input id="ccm-to" type="date" name="date_to" :value="request('date_to')" /><x-ui.button variant="secondary" type="submit">Terapkan</x-ui.button><x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link></x-ui.table-toolbar>
     {{-- TABLE --}}
     <x-ui.panel :padded="false" class="bg-white rounded-lg border border-gray-200 shadow-none overflow-hidden">
         <div class="overflow-x-auto">

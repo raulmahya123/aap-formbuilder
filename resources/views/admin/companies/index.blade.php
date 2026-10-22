@@ -11,8 +11,15 @@
          class="px-4 py-2 rounded-lg hover:brightness-105">Tambah
       </x-ui.link>
     </div></x-ui.page-actions>
+
+<x-slot:filters>
+<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari nama atau kode company…" aria-label="Cari company" /><x-ui.table-filter name="status" :options="['active'=>'Aktif','inactive'=>'Nonaktif','archived'=>'Arsip']" label="Status" placeholder="Semua status" />
+<x-slot:actions>
+<x-ui.link variant="secondary" :href="route('admin.companies.index')">Reset</x-ui.link>
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
 </x-ui.page-header>
-<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari nama atau kode company…" aria-label="Cari company" /><x-ui.table-filter name="status" :options="['active'=>'Aktif','inactive'=>'Nonaktif','archived'=>'Arsip']" label="Status" placeholder="Semua status" /><x-ui.link variant="secondary" :href="route('admin.companies.index')">Reset</x-ui.link></x-ui.table-toolbar>
   <x-ui.panel :padded="false" class="rounded-lg border bg-white overflow-hidden">
     <div class="overflow-x-auto">
       <x-ui.table :paginator="$companies" class="min-w-full text-sm">

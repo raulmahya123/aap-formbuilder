@@ -93,10 +93,9 @@
         </x-ui.link>
       @endif
     @endsection</x-ui.page-actions>
-</x-ui.page-header>
 
-  {{-- Search --}}
-  <x-ui.table-toolbar class="mb-4 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+<x-slot:filters>
+<x-ui.table-toolbar class="mb-4 flex flex-col md:flex-row items-stretch md:items-center gap-3">
     <div class="flex-1">
       <x-ui.table-search   name="q" value="{{ $q }}"
              placeholder="Cari form (judul/deskripsi)…"
@@ -108,10 +107,19 @@
     @if(request('department_id'))
       <input type="hidden" name="department_id" value="{{ request('department_id') }}">
     @endif
-    <x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-900">
+
+<x-slot:actions>
+<x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-900">
       Cari
     </x-ui.button>
-  </x-ui.table-toolbar>
+
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
+</x-ui.page-header>
+
+  {{-- Search --}}
+
 
   {{-- Tabs --}}
   <div class="flex flex-wrap items-center gap-2 mb-6 text-sm">

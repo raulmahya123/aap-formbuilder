@@ -14,8 +14,15 @@
                class="inline-flex justify-center px-4 py-2 rounded-lg text-sm font-semibold shadow-none transition duration-200">Tambah HIPO
             </x-ui.link>
         </div></x-ui.page-actions>
+
+<x-slot:filters>
+<x-ui.table-toolbar><x-ui.table-search name="search" placeholder="Cari jobsite, pelapor, atau laporan…" aria-label="Cari HIPO" /><x-ui.table-filter name="status" :options="['Open'=>'Open','On Progress'=>'On Progress','Closed'=>'Closed','Rejected'=>'Rejected']" label="Status" placeholder="Semua status" /><x-ui.table-filter name="risk_level" :options="['Low'=>'Low','Medium'=>'Medium','High'=>'High','Extreme'=>'Extreme']" label="Risiko" placeholder="Semua risiko" />
+<x-slot:actions>
+<x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link>
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
 </x-ui.page-header>
-<x-ui.table-toolbar><x-ui.table-search name="search" placeholder="Cari jobsite, pelapor, atau laporan…" aria-label="Cari HIPO" /><x-ui.table-filter name="status" :options="['Open'=>'Open','On Progress'=>'On Progress','Closed'=>'Closed','Rejected'=>'Rejected']" label="Status" placeholder="Semua status" /><x-ui.table-filter name="risk_level" :options="['Low'=>'Low','Medium'=>'Medium','High'=>'High','Extreme'=>'Extreme']" label="Risiko" placeholder="Semua risiko" /><x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link></x-ui.table-toolbar>
 {{-- TABLE CARD --}}
     <x-ui.panel :padded="false" class="bg-white rounded-lg shadow-none border overflow-hidden">
         <div class="overflow-x-auto">

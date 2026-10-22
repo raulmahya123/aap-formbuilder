@@ -123,8 +123,9 @@ foreach ($categoryCharts as $key => $chart) {
         <x-ui.page-description>Rekap kinerja operasional berdasarkan site dan periode yang dipilih.</x-ui.page-description>
       </div></div>
   <x-ui.page-actions></x-ui.page-actions>
-</x-ui.page-header>
-<div class="ui-page-filters"><x-ui.table-toolbar class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6" x-data="{ scope: '{{ $scopeNow }}' }">
+
+<x-slot:filters>
+<x-ui.table-toolbar class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6" x-data="{ scope: '{{ $scopeNow }}' }">
         <input type="hidden" name="scope" :value="scope">
         <select name="site_id" class="px-3 py-2 border rounded-lg bg-white">
           <option value="">Semua Site</option>
@@ -152,8 +153,15 @@ foreach ($categoryCharts as $key => $chart) {
           <input type="number" name="year" value="{{ $yearVal }}" class="w-24 px-3 py-2 border rounded-lg">
         </div>
         <input type="number" name="year" value="{{ $yearVal }}" class="px-3 py-2 border rounded-lg" x-show="scope === 'year'">
-        <x-ui.button variant="primary" class="px-4 py-2 font-semibold rounded-lg">Terapkan</x-ui.button>
-      </x-ui.table-toolbar></div>
+
+<x-slot:actions>
+<x-ui.button variant="primary" class="px-4 py-2 font-semibold rounded-lg">Terapkan</x-ui.button>
+
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
+</x-ui.page-header>
+
 <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-5"><x-ui.metric-card label="Grup" :value="$groups->count()" /><x-ui.metric-card label="Indikator" :value="$totalIndicators" /><x-ui.metric-card label="Melewati Threshold" :value="$overTargetCount" icon="alert-triangle" /><x-ui.metric-card label="Grand Total" :value="$grandTotal" /><x-ui.metric-card label="Site" :value="$selectedSite ? $selectedSite->code.' — '.$selectedSite->name : 'Semua site'" /></div>
   <div class="grid gap-4 xl:grid-cols-3">
     @foreach($categoryCharts as $key => $chart)

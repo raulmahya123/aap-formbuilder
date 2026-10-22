@@ -10,9 +10,9 @@
         href="{{ route('admin.entries.export', request()->query()) }}">
         ⬇️ Export CSV
       </x-ui.link></x-ui.page-actions>
-</x-ui.page-header>
-    <!-- FILTER FORM -->
-    <x-ui.table-toolbar class="mb-4 grid md:grid-cols-4 gap-3">
+
+<x-slot:filters>
+<x-ui.table-toolbar class="mb-4 grid md:grid-cols-4 gap-3">
       <x-ui.table-search   name="q" value="{{ request('q') }}" placeholder="Cari data (contoh: nama)"
         class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500" />
       <input type="text" name="user" value="{{ request('user') }}" placeholder="Nama/Email user"
@@ -27,7 +27,9 @@
         <option value="approved" @selected(request('status')==='approved' )>Approved</option>
         <option value="rejected" @selected(request('status')==='rejected' )>Rejected</option>
       </select>
-      <div class="md:col-span-4">
+
+<x-slot:actions>
+<div class="md:col-span-4">
         <x-ui.button variant="primary" class="px-4 py-2 rounded-lg text-ivory-50 transition text-sm w-full md:w-auto">
           Terapkan Filter
         </x-ui.button>
@@ -36,7 +38,13 @@
           📦 Export ZIP
         </x-ui.link>
       </div>
-    </x-ui.table-toolbar>
+
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
+</x-ui.page-header>
+    <!-- FILTER FORM -->
+
     <!-- TABLE -->
     <div class="rounded-lg border bg-ivory-50 dark:bg-coal-900 dark:border-coal-800 shadow-none overflow-x-auto">
       <x-ui.table :paginator="$entries" class="w-full text-sm min-w-[800px]">

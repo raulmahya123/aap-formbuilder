@@ -10,8 +10,9 @@
   <x-ui.page-actions><div class="rounded-lg bg-ivory-100 px-4 py-3 text-sm text-coal-600">
       Site aktif: <span class="font-semibold text-coal-900">{{ $selectedSite?->name ?? 'Semua site yang diizinkan' }}</span>
     </div></x-ui.page-actions>
-</x-ui.page-header>
-  <x-ui.table-toolbar class="ui-card flex flex-col gap-3 rounded-lg border border-coal-100 bg-white shadow-none sm:flex-row sm:items-end">
+
+<x-slot:filters>
+<x-ui.table-toolbar class="ui-card flex flex-col gap-3 rounded-lg border border-coal-100 bg-white shadow-none sm:flex-row sm:items-end">
     <div class="min-w-0 flex-1">
       <label for="site_id" class="mb-1 block text-xs font-semibold normal-case tracking-normal text-coal-500">Filter site</label>
       <select id="site_id" name="site_id" class="w-full rounded-lg border border-coal-200 bg-white px-3 py-2 text-sm">
@@ -21,14 +22,20 @@
         @endforeach
       </select>
     </div>
-    <x-ui.button variant="primary" class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium">
+
+<x-slot:actions>
+<x-ui.button variant="primary" class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium">
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M6 12h12M10 20h4"/></svg>
       Terapkan
     </x-ui.button>
     @if($selectedSiteId)
       <x-ui.link variant="secondary" href="{{ route('admin.dashboard') }}" class="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm">Reset</x-ui.link>
     @endif
-  </x-ui.table-toolbar>
+
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
+</x-ui.page-header>
   <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
     @foreach([
       ['Wellness', $metrics['wellness'], route('admin.wellness.index'), 'wellness'],

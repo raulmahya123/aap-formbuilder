@@ -7,7 +7,15 @@
   <x-ui.page-actions><x-ui.link icon="plus" variant="primary" href="{{ route('user.hipo.create') }}"
            class="px-4 py-2 rounded-lg text-sm">Buat Laporan
         </x-ui.link></x-ui.page-actions>
-</x-ui.page-header><x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari laporan HIPO…" aria-label="Cari laporan HIPO" /><x-ui.table-filter name="status" :options="['Open'=>'Open','On Progress'=>'On Progress','Closed'=>'Closed','Rejected'=>'Rejected']" label="Status" placeholder="Semua status" /><x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link></x-ui.table-toolbar>
+
+<x-slot:filters>
+<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari laporan HIPO…" aria-label="Cari laporan HIPO" /><x-ui.table-filter name="status" :options="['Open'=>'Open','On Progress'=>'On Progress','Closed'=>'Closed','Rejected'=>'Rejected']" label="Status" placeholder="Semua status" />
+<x-slot:actions>
+<x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link>
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
+</x-ui.page-header>
     <x-ui.panel :padded="false" class="bg-white border rounded-lg overflow-x-auto">
         <x-ui.table :paginator="$reports" class="w-full text-sm">
             <thead class="bg-ivory-100 border-b">

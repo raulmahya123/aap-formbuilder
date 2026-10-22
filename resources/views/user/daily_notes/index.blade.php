@@ -62,8 +62,9 @@
         </a>
       @endif
     </div></x-ui.page-actions>
-</x-ui.page-header>
-<div class="ui-page-filters"><x-ui.table-toolbar class="grid w-full grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center">
+
+<x-slot:filters>
+<x-ui.table-toolbar class="grid w-full grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center">
         {{-- Tanggal --}}
         <input type="date" name="date"
                value="{{ $targetDate ?? now('Asia/Jakarta')->format('Y-m-d') }}"
@@ -96,11 +97,18 @@
             <option value="{{ $opt }}" {{ ($perPage ?? 10) == $opt ? 'selected' : '' }}>{{ $opt }}/hal</option>
           @endforeach
         </select>
-        <x-ui.button variant="secondary" class="btn w-full sm:w-auto">Filter</x-ui.button>
+
+<x-slot:actions>
+<x-ui.button variant="secondary" class="btn w-full sm:w-auto">Filter</x-ui.button>
         @if(request()->hasAny(['date','q','perPage','company_id','site_id']))
           <a href="{{ route('user.daily_notes.index') }}" class="text-sm underline">Reset</a>
         @endif
-      </x-ui.table-toolbar></div>
+
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
+</x-ui.page-header>
+
   {{-- (Opsional) Alpine.js CDN jika belum ada --}}
   <script>
     if (!window.alpineLoaded) {

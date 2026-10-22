@@ -6,7 +6,15 @@
 <x-ui.page-description>Kelola dokumen, revisi, dan hak akses.</x-ui.page-description></div>
   <x-ui.page-actions><x-ui.link icon="plus" variant="primary" href="{{ route('admin.documents.create') }}"
        class="inline-flex justify-center px-4 py-2 rounded-lg hover:opacity-90">Buat Dokumen</x-ui.link></x-ui.page-actions>
-</x-ui.page-header><x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari judul atau nomor dokumen…" aria-label="Cari dokumen" /><x-ui.link variant="secondary" :href="route('admin.documents.index')">Reset</x-ui.link></x-ui.table-toolbar>
+
+<x-slot:filters>
+<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari judul atau nomor dokumen…" aria-label="Cari dokumen" />
+<x-slot:actions>
+<x-ui.link variant="secondary" :href="route('admin.documents.index')">Reset</x-ui.link>
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
+</x-ui.page-header>
   <x-ui.panel :padded="false" class="max-w-full bg-white border rounded-lg overflow-x-auto">
     <x-ui.table :paginator="$docs" class="w-full text-sm min-w-[980px]">
       <thead class="bg-[#1D1C1A] text-white">

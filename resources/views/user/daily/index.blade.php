@@ -69,9 +69,9 @@
 <x-ui.page-description>Pantau input harian berdasarkan periode dan site.</x-ui.page-description>
     {{-- actions dirender dari @section('actions') --}}</div>
   <x-ui.page-actions></x-ui.page-actions>
-</x-ui.page-header>
-  {{-- Filter Bar --}}
-  <x-ui.table-toolbar class="mb-6 grid grid-cols-1 md:grid-cols-6 gap-3">
+
+<x-slot:filters>
+<x-ui.table-toolbar class="mb-6 grid grid-cols-1 md:grid-cols-6 gap-3">
     <div class="md:col-span-2">
       <label class="block text-xs mb-1 text-coal-600 dark:text-coal-300">Periode (Bulan)</label>
       <input type="month" name="period" value="{{ $period }}"
@@ -90,12 +90,20 @@
         @endforeach
       </select>
     </div>
-    <div class="md:col-span-2 flex items-end">
+
+<x-slot:actions>
+<div class="md:col-span-2 flex items-end">
       <x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-900 w-full">
         Terapkan
       </x-ui.button>
     </div>
-  </x-ui.table-toolbar>
+
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
+</x-ui.page-header>
+  {{-- Filter Bar --}}
+
   {{-- Badge konteks --}}
   <div class="mb-6 flex flex-wrap items-center gap-2 text-sm">
     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-maroon-700 text-maroon-800 dark:text-maroon-300 dark:border-maroon-600 bg-maroon-50/70 dark:bg-maroon-900/20">

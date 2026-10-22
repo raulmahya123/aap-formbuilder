@@ -19,23 +19,31 @@
         </x-ui.link>
       </div>
     @endif</x-ui.page-actions>
+
+<x-slot:filters>
+<x-ui.table-toolbar class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+    <div class="relative flex-1">
+      <x-ui.table-search   name="q" value="{{ request('q') }}" placeholder="Cari judul kontrak…"
+             class="w-full border rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-[#713F12]" />
+
+    </div>
+
+<x-slot:actions>
+<x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border">Filter</x-ui.button>
+    @if(request()->has('q') && request('q')!=='')
+      <x-ui.link variant="secondary" href="{{ route('admin.contracts.index') }}" class="px-4 py-2 rounded-lg border">Reset</x-ui.link>
+    @endif
+
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
 </x-ui.page-header>
   {{-- Flash --}}
   @if(session('err'))
     <div class="p-3 rounded-lg bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>
   @endif
   {{-- Toolbar: Search + filter sederhana --}}
-  <x-ui.table-toolbar class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-    <div class="relative flex-1">
-      <x-ui.table-search   name="q" value="{{ request('q') }}" placeholder="Cari judul kontrak…"
-             class="w-full border rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-[#713F12]" />
 
-    </div>
-    <x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border">Filter</x-ui.button>
-    @if(request()->has('q') && request('q')!=='')
-      <x-ui.link variant="secondary" href="{{ route('admin.contracts.index') }}" class="px-4 py-2 rounded-lg border">Reset</x-ui.link>
-    @endif
-  </x-ui.table-toolbar>
   {{-- Desktop: Table --}}
   <div class="hidden md:block">
     <div class="overflow-hidden rounded-lg border shadow-none">

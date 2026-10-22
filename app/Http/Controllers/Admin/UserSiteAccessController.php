@@ -22,9 +22,13 @@ class UserSiteAccessController extends Controller
 
         $siteId = \App\Support\SiteSelection::id($r);
         $email  = trim((string) $r->get('email', ''));
+        $search = trim((string) $r->get('q', ''));
 
         $q = UserSiteAccess::query()
-            ->with(['user:id,name,email', 'site:id,name,code'])
+            ->with(['user:id,name,email,role,is_active', 'site:id,name,code'])
+            ->when($search !== '', fn ($query) => $query->whereHas('user', fn ($users) =>
+                $users->where(fn ($fields) => $fields->where('name', 'like', '%'.$search.'%')->orWhere('email', 'like', '%'.$search.'%'))
+            ))
             ->when($siteId, fn($qq) => $qq->where('site_id', $siteId))
             // karena email dipilih dari dropdown, pakai kecocokan eksak saja
             ->when($email !== '', function ($qq) use ($email) {
@@ -38,6 +42,7 @@ class UserSiteAccessController extends Controller
             'accesses' => $q->paginate(\App\Support\Listing::perPage())->withQueryString(),
             'sites'    => Site::orderBy('code')->get(['id','name','code']),
             'emails'   => User::orderBy('email')->pluck('email'),
+            'users'    => User::orderBy('name')->get(['id', 'name', 'email', 'role']),
             'siteId'   => $siteId,
             'email'    => $email,
         ]);

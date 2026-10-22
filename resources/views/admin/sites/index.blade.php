@@ -8,8 +8,8 @@
   <x-ui.page-actions>@if(auth()->user()->isSuperAdmin())<x-ui.link data-modal-form icon="plus" variant="primary" href="{{ route('admin.sites.create') }}"
      class="px-4 py-2 rounded-lg hover:brightness-105 shadow-none">Tambah
   </x-ui.link>@endif</x-ui.page-actions>
-</x-ui.page-header>
-{{-- Filter & Search --}}
+
+<x-slot:filters>
 <x-ui.table-toolbar class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-2" action="{{ route('admin.sites.index') }}">
   <x-ui.table-search
     class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:border-[color:var(--brand-maroon,#713F12)]"
@@ -24,7 +24,9 @@
       </option>
     @endforeach
   </select>
-  <div class="flex gap-2">
+
+<x-slot:actions>
+<div class="flex gap-2">
     <x-ui.button variant="primary" class="px-4 py-2 rounded-lg hover:brightness-105 w-full md:w-auto">
       Terapkan
     </x-ui.button>
@@ -33,7 +35,13 @@
       Reset
     </x-ui.link>
   </div>
+
+</x-slot:actions>
 </x-ui.table-toolbar>
+</x-slot:filters>
+</x-ui.page-header>
+{{-- Filter & Search --}}
+
 <x-ui.panel :padded="false" class="overflow-x-auto rounded-lg border border-gray-200 shadow-none bg-white">
   <x-ui.table :paginator="$sites" class="w-full text-left text-sm">
     <thead class="bg-[color:var(--brand-maroon,#713F12)] text-white">

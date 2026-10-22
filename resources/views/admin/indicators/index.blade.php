@@ -7,8 +7,15 @@
   <x-ui.page-actions><x-ui.link data-modal-form icon="plus" variant="primary" href="{{ route('admin.indicators.create') }}"
      class="px-4 py-2 rounded-lg shadow-none">Tambah Indikator
   </x-ui.link></x-ui.page-actions>
+
+<x-slot:filters>
+<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari indikator…" aria-label="Cari indikator" /><x-ui.table-filter name="indicator_group_id" :options="$groups->pluck('name','id')" label="Grup indikator" placeholder="Semua grup" />
+<x-slot:actions>
+<x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link>
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
 </x-ui.page-header>
-<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari indikator…" aria-label="Cari indikator" /><x-ui.table-filter name="indicator_group_id" :options="$groups->pluck('name','id')" label="Grup indikator" placeholder="Semua grup" /><x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link></x-ui.table-toolbar>
     <x-ui.panel :padded="false" class="overflow-hidden bg-white rounded-lg border border-gray-200 shadow-none">
       <x-ui.table :paginator="$indicators" class="min-w-full divide-y divide-gray-200">
         <thead class="bg-maroon-700 text-white">

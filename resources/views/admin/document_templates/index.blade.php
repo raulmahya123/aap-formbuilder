@@ -8,7 +8,15 @@
 <x-ui.page-description>Kelola template dan tata letak dokumen.</x-ui.page-description></div>
   <x-ui.page-actions><x-ui.link icon="plus" variant="primary" href="{{ route('admin.document_templates.create') }}"
        class="px-4 py-2 rounded-lg hover:opacity-90">Template</x-ui.link></x-ui.page-actions>
-</x-ui.page-header><x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari template…" aria-label="Cari template" /><x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link></x-ui.table-toolbar>
+
+<x-slot:filters>
+<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari template…" aria-label="Cari template" />
+<x-slot:actions>
+<x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link>
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
+</x-ui.page-header>
   {{-- LIST --}}
   <x-ui.panel :padded="false" class="bg-white border rounded-lg overflow-hidden">
     <x-ui.table :paginator="$templates" class="w-full text-sm">

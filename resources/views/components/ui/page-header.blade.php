@@ -7,4 +7,7 @@
         @endif
     @endisset
     <div class="ui-page-header__row">{{ $slot }}</div>
+    @isset($filters)
+        <div class="ui-page-header__filters">{{ $filters }}</div>
+    @endisset
 </header>

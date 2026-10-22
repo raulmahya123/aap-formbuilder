@@ -8,8 +8,15 @@
   <div class="ui-page-header__copy"><x-ui.page-title>Kelola Status User</x-ui.page-title>
         <x-ui.page-description>Aktif/nonaktifkan akun pengguna dan reset password saat dibutuhkan.</x-ui.page-description></div>
   <x-ui.page-actions></x-ui.page-actions>
+
+<x-slot:filters>
+<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari nama atau email…" aria-label="Cari pengguna" /><x-ui.table-filter name="role" :options="$roles" label="Role" placeholder="Semua role" /><x-ui.table-filter name="site_id" :options="$sites->pluck('name','id')" label="Site" placeholder="Semua site" /><x-ui.table-filter name="status" :options="['active'=>'Aktif','inactive'=>'Nonaktif']" label="Status" placeholder="Semua status" />
+<x-slot:actions>
+<x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link>
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
 </x-ui.page-header>
-<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari nama atau email…" aria-label="Cari pengguna" /><x-ui.table-filter name="role" :options="$roles" label="Role" placeholder="Semua role" /><x-ui.table-filter name="site_id" :options="$sites->pluck('name','id')" label="Site" placeholder="Semua site" /><x-ui.table-filter name="status" :options="['active'=>'Aktif','inactive'=>'Nonaktif']" label="Status" placeholder="Semua status" /><x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link></x-ui.table-toolbar>
       @if (isset($errors) && $errors->any())
         <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {{ $errors->first() }}

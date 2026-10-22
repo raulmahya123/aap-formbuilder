@@ -10,14 +10,18 @@
     </div></div>
   <x-ui.page-actions>{{-- Search --}}
     </x-ui.page-actions>
-</x-ui.page-header>
-<div class="ui-page-filters"><x-ui.table-toolbar class="w-full md:w-auto">
+
+<x-slot:filters>
+<x-ui.table-toolbar class="w-full md:w-auto">
       <div class="relative">
         <x-ui.table-search   name="q" value="{{ request('q') }}" placeholder="Cari judul kontrak…"
                class="w-full md:w-80 border rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-[#713F12]" />
 
       </div>
-    </x-ui.table-toolbar></div>
+    </x-ui.table-toolbar>
+</x-slot:filters>
+</x-ui.page-header>
+
   {{-- Flash --}}
   @if(session('err'))
     <div class="p-3 rounded-lg bg-rose-50 text-rose-800 border border-rose-200">{{ session('err') }}</div>

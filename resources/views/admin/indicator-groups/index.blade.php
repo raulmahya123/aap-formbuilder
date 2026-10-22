@@ -7,8 +7,15 @@
   <x-ui.page-actions><x-ui.link data-modal-form icon="plus" variant="primary" href="{{ route('admin.groups.create') }}"
      class="px-4 py-2 rounded-lg shadow-none">Tambah Grup
   </x-ui.link></x-ui.page-actions>
+
+<x-slot:filters>
+<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari grup indikator…" aria-label="Cari grup indikator" />
+<x-slot:actions>
+<x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link>
+</x-slot:actions>
+</x-ui.table-toolbar>
+</x-slot:filters>
 </x-ui.page-header>
-<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari grup indikator…" aria-label="Cari grup indikator" /><x-ui.link variant="secondary" :href="url()->current()">Reset</x-ui.link></x-ui.table-toolbar>
 <x-ui.panel :padded="false" class="overflow-hidden rounded-lg border border-gray-200 shadow-none bg-white">
   <x-ui.table :paginator="$groups" class="min-w-full divide-y divide-gray-200">
     {{-- Header pakai maroon gelap agar tegas --}}
