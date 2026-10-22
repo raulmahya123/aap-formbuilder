@@ -52,10 +52,13 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pelapor</label>
-                    <input type="text" name="nama_pelapor"
-                           class="w-full border-gray-300 rounded-lg shadow-none focus:ring-blue-500 focus:border-blue-500"
-                           value="{{ old('nama_pelapor') }}" placeholder="Nama Lengkap" required>
+                    <x-ui.form-label for="ccm-reporter" required>Nama Pelapor</x-ui.form-label>
+                    <x-ui.form-select id="ccm-reporter" name="nama_pelapor" required>
+                        <option value="">Pilih nama pelapor</option>
+                        @foreach($reporters as $reporter)
+                            <option value="{{ $reporter->name }}" @selected(old('nama_pelapor', auth()->user()->name) === $reporter->name)>{{ $reporter->name }}{{ $reporter->nik ? ' — '.$reporter->nik : '' }}</option>
+                        @endforeach
+                    </x-ui.form-select>
                     @error('nama_pelapor') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>

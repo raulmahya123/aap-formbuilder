@@ -924,10 +924,11 @@
       </div>
 
       <div class="flex-1 overflow-y-auto chat-scroll divide-y divide-[#F1F5F9] p-2">
+        <p x-show="personalChatError" x-text="personalChatError" role="alert" class="p-3 text-sm text-red-700"></p>
         <template x-for="emp in employeeList" :key="emp.id">
-          <div 
+          <button type="button" :disabled="startingPersonalChat" :aria-busy="startingPersonalChat"
             @click="startPersonalChatWith(emp)"
-            class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[#F8FAFC] cursor-pointer transition"
+            class="w-full text-left flex items-center gap-3 p-2.5 rounded-lg hover:bg-[#F8FAFC] cursor-pointer transition disabled:opacity-50"
           >
             <div class="w-9 h-9 rounded-full bg-[#E0E7FF] text-[#3730A3] flex items-center justify-center font-bold text-xs shrink-0">
               <span x-text="emp.initials"></span>
@@ -936,7 +937,7 @@
               <p class="text-xs font-semibold text-[#111827] truncate" x-text="emp.name"></p>
               <p class="text-[10px] text-[#475569] truncate" x-text="(emp.nik ? emp.nik + ' · ' : '') + emp.departments"></p>
             </div>
-          </div>
+          </button>
         </template>
         <template x-if="employeeList.length === 0">
           <p class="text-xs text-center py-6 text-[#94A3B8]">Pegawai tidak ditemukan.</p>
@@ -1289,6 +1290,8 @@ function mandalaChat(config) {
     messages: [],
     loadingMessages: false,
     loadingOlderMessages: false,
+    startingPersonalChat: false,
+    personalChatError: '',
     searchQuery: '',
     activeTab: 'all', // all, personal, group, unread
 
@@ -1408,8 +1411,10 @@ function mandalaChat(config) {
       this.loadingMessages = true;
       this.replyingTo = null;
       try {
-        const res = await fetch(`/admin/qa/${threadId}/messages`);
+        const res = await fetch(`/admin/qa/${threadId}/messages`, { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) throw new Error('Ruang chat gagal dimuat. Silakan coba lagi.');
         const data = await res.json();
+        if (!data.success || !data.thread) throw new Error('Ruang chat gagal dimuat. Silakan coba lagi.');
         if (data.success) {
           this.activeThread = data.thread;
           this.messages = data.messages;
@@ -1418,7 +1423,7 @@ function mandalaChat(config) {
           });
         }
       } catch (e) {
-        console.error(e);
+        throw e;
       } finally {
         this.loadingMessages = false;
       }
@@ -1609,6 +1614,7 @@ function mandalaChat(config) {
     // New Chat Modal
     openNewChatModal() {
       this.modalNewChat = true;
+      this.personalChatError = '';
       this.employeeSearchQuery = '';
       this.searchEmployees();
     },
@@ -1630,28 +1636,35 @@ function mandalaChat(config) {
     },
 
     async startPersonalChatWith(emp) {
-      this.modalNewChat = false;
+      if (this.startingPersonalChat) return;
+      this.startingPersonalChat = true;
+      this.personalChatError = '';
       try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const res = await fetch(this.routes.startPersonal, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
             'X-CSRF-TOKEN': csrfToken,
           },
           body: JSON.stringify({ recipient_id: emp.id }),
         });
+        if (!res.ok) throw new Error('Chat belum dapat dibuka. Muat ulang halaman dan coba lagi.');
         const data = await res.json();
         if (data.success && data.thread_id) {
           // Immediately set active thread info
           await this.loadThreadById(data.thread_id);
+          this.modalNewChat = false;
           await this.fetchConversations();
           this.$nextTick(() => {
             this.$refs.messageInput?.focus();
           });
-        }
+        } else throw new Error('Chat belum dapat dibuka. Silakan coba lagi.');
       } catch (e) {
-        console.error('Failed to start personal chat', e);
+        this.personalChatError = e.message || 'Chat belum dapat dibuka. Silakan coba lagi.';
+      } finally {
+        this.startingPersonalChat = false;
       }
     },
 

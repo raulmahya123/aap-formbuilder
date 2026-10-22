@@ -111,6 +111,8 @@ class ModuleRedesignTest extends TestCase
         Site::create(['code'=>'SITE-2','name'=>'Area Terlarang','company_id'=>$company->id]);
         $user->sites()->attach($allowed->id);
         $this->actingAs($user)->get(route('ccm-reports.create'))->assertOk()
+            ->assertSee('id="ccm-reporter"', false)
+            ->assertViewHas('reporters', fn ($reporters) => $reporters->contains('id', $user->id))
             ->assertViewHas('jobsites', fn ($options) => $options->count() === 1 && $options->first()['label'] === 'SITE-1 — Area Operasional' && $options->first()['value'] === 'COMP-SITE-1');
         $this->get(route('admin.hipo.create'))->assertOk()
             ->assertViewHas('sites', fn ($options) => $options->count() === 1 && $options->first()['id'] === $allowed->id && $options->first()['label'] === 'SITE-1 — Area Operasional');

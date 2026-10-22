@@ -25,7 +25,8 @@
 .ui-account-toggle:focus-visible,
 .ui-nav-section:focus-visible { outline: 2px solid #1D4ED8; outline-offset: 2px; }
 .ui-account-toggle { height: 40px; }
-.ui-sidebar { overscroll-behavior: contain; scrollbar-gutter: stable; }
+.ui-sidebar { scrollbar-width: none; }
+.ui-sidebar::-webkit-scrollbar { display: none; }
 .ui-drawer-close { position: absolute; top: 8px; right: 8px; }
 .ui-sidebar nav { padding: 12px; }
 .ui-sidebar nav a { color: #18181B; }

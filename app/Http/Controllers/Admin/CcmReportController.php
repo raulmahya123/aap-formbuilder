@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\CcmReport;
 use App\Models\Site;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -45,8 +46,14 @@ class CcmReportController extends Controller
     public function create()
     {
         $jobsites = $this->jobsiteOptions();
+        $allowedSiteIds = auth()->user()->allowedSiteIds();
+        $reporters = User::query()->select('id', 'name', 'nik')
+            ->when(is_array($allowedSiteIds), fn ($query) => $query->where(fn ($scope) =>
+                $scope->whereKey(auth()->id())->orWhereHas('sites', fn ($sites) => $sites->whereIn('sites.id', $allowedSiteIds))
+            ))
+            ->orderBy('name')->get();
 
-        return view('admin.ccm.create', compact('jobsites'));
+        return view('admin.ccm.create', compact('jobsites', 'reporters'));
     }
 
     /* =========================================================

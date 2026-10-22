@@ -25,7 +25,7 @@ elseif (Route::has('contracts.index')) $userContractsUrl = route('contracts.inde
   x-show="isDesktop || sidebarOpen" x-cloak
   :class="{ 'translate-x-0': sidebarOpen, 'ui-sidebar--collapsed': sidebarCollapsed && isDesktop }"
   id="app-sidebar" aria-label="Navigasi utama" :inert="!isDesktop && !sidebarOpen"
-  class="ui-sidebar nice-scroll fixed inset-y-0 left-0 z-50 w-64 -translate-x-full transition-transform duration-200 lg:static lg:translate-x-0 lg:w-auto lg:block overflow-y-auto bg-white border-r border-[#D4D4D8] flex flex-col">
+  class="ui-sidebar fixed inset-y-0 left-0 z-50 w-64 -translate-x-full transition-transform duration-200 lg:static lg:translate-x-0 lg:w-auto lg:block overflow-y-auto bg-white border-r border-[#D4D4D8] flex flex-col">
 
   <div class="flex min-h-0 flex-1 flex-col">
   <button type="button" class="ui-drawer-close ui-shell-toggle lg:hidden" @click="sidebarOpen=false; $nextTick(() => document.getElementById('navigation-toggle').focus())" aria-label="Tutup navigasi"><x-ui.icon name="x" /></button>

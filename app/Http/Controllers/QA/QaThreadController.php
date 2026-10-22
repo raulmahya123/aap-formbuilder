@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\QA;
 
 use App\Http\Controllers\Controller;
-use App\Models\{ChatReport, ChatReportStatusHistory, QaMessage, QaThread, Site, User};
+use App\Models\{ChatReport, ChatReportStatusHistory, Department, QaMessage, QaThread, Site, User};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -176,6 +176,9 @@ class QaThreadController extends Controller
      */
     public function showConversation(Request $request, QaThread $thread)
     {
+        if ($thread->type === 'personal') {
+            abort_unless($thread->participants()->where('users.id', $request->user()->id)->exists(), 403);
+        }
         $this->authorize('view', $thread);
         $user = $request->user();
 
@@ -343,7 +346,7 @@ class QaThreadController extends Controller
     public function startPersonalChat(Request $request)
     {
         $data = $request->validate([
-            'recipient_id' => ['required', 'integer', 'exists:users,id', 'different:' . $request->user()->id],
+            'recipient_id' => ['required', 'integer', 'exists:users,id', Rule::notIn([$request->user()->id])],
         ]);
 
         $user = $request->user();
@@ -369,7 +372,7 @@ class QaThreadController extends Controller
 
                 $thread->participants()->attach([
                     $user->id      => ['role_label' => $user->role, 'chat_role' => 'member', 'last_read_at' => now()],
-                    $recipient->id => ['role_label' => $recipient->role, 'chat_role' => 'member'],
+                    $recipient->id => ['role_label' => $recipient->role, 'chat_role' => 'member', 'last_read_at' => null],
                 ]);
             });
         }
