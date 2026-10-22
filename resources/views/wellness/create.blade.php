@@ -25,21 +25,8 @@
     <div class="pwa-container">
       <!-- Hero Banner -->
       <div class="pwa-hero">
-        <div class="pwa-hero__eyebrow">
-          <x-ui.lucide name="shield-check" />
-          <span>Pemeriksaan Mandiri</span>
-        </div>
         <h1>Health Assesment Checklist</h1>
         <p>Awali shift dengan mengenali kondisi fisik & mental Anda hari ini. Isi sesuai keadaan yang sebenarnya.</p>
-        
-        <div class="pwa-hero__chips">
-          <span class="pwa-chip">
-            <x-ui.lucide name="clipboard-check" /> Tanpa Login
-          </span>
-          <span class="pwa-chip pwa-chip--amber">
-            <x-ui.lucide name="alert-circle" /> Wajib Lengkap
-          </span>
-        </div>
       </div>
 
       <!-- Form -->
@@ -215,8 +202,10 @@
 
     <!-- Footer Branding -->
     <footer class="pwa-footer">
-      <div class="pwa-footer__brand">MANDALA</div>
-      <div class="pwa-footer__sub">Management System Andalan Nusantara Pratama</div>
+      <div class="pwa-footer__powered">
+        <span class="pwa-footer__powered-label">Powered by</span>
+        <img src="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}" alt="Andalan" class="pwa-footer__logo">
+      </div>
     </footer>
   </div>
 
