@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Kelola Akses Dokumen')
 @section('content')
-<x-ui.page class="max-w-5xl mx-auto">
+<x-ui.page class="w-full min-w-0 ">
   <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Kelola Akses Dokumen</x-ui.page-title>
 <x-ui.page-description>Lihat informasi dan status operasional.</x-ui.page-description></div>

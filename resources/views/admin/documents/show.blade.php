@@ -4,7 +4,7 @@
 @section('title','Detail Dokumen')
 
 @section('content')
-<x-ui.page x-data="docShow()" x-init="init()" class="max-w-7xl mx-auto">
+<x-ui.page x-data="docShow()" x-init="init()" class="w-full min-w-0 ">
   {{-- HEADER --}}
   <x-ui.page-header>
   <div class="ui-page-header__copy"><div>

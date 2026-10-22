@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-<x-ui.page class="max-w-6xl mx-auto">
+<x-ui.page class="w-full min-w-0 ">
     <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Laporan HIPO / Nearmiss</x-ui.page-title>
 <x-ui.page-description>Catat dan pantau laporan HIPO serta Nearmiss.</x-ui.page-description></div>

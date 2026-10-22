@@ -16,7 +16,7 @@
     return $rows->map(fn($s)=>['id'=>$s->id,'name'=>$s->name,'company_id'=>$s->company_id])->values();
   })->toArray();
 @endphp
-<div class="max-w-3xl mx-auto bg-white rounded-lg">
+<div class="w-full min-w-0 bg-white rounded-lg">
   <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Buat Form</x-ui.page-title>
 <x-ui.page-description>Lengkapi informasi untuk menambahkan form dan dokumen.</x-ui.page-description></div>

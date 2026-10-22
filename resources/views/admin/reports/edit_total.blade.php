@@ -19,7 +19,7 @@
   // nilai existing total (kalau ada), fallback 0
   $existingTotal = $existingTotal ?? 0;
 @endphp
-<div class="max-w-2xl mx-auto space-y-5">
+<div class="w-full min-w-0 space-y-5">
   {{-- HEADER --}}
   <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Edit Total Indikator</x-ui.page-title>

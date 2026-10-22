@@ -4,7 +4,7 @@
 @php
   $isSuper = auth()->check() && auth()->user()->isSuperAdmin();
 @endphp
-<div class="ui-module-stack w-full max-w-7xl mx-auto space-y-5">
+<div class="w-full min-w-0 ui-module-stack space-y-5">
   {{-- Header + Actions --}}
   <x-ui.page-header>
   <div class="ui-page-header__copy"><div>

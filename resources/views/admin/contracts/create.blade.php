@@ -23,7 +23,7 @@
 @endif
 
 <form id="page-primary-form" method="post" action="{{ route('admin.contracts.store') }}" enctype="multipart/form-data"
-      class="ui-card space-y-4 max-w-xl bg-white p-6 rounded shadow border-t-4 border-[#713F12]">
+      class="w-full min-w-0 ui-card space-y-4 bg-white p-6 rounded shadow border-t-4 border-[#713F12]">
   @csrf
   <div>
     <label class="block mb-1 font-medium text-[#713F12]">Judul</label>

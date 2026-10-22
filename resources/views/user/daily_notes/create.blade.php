@@ -60,7 +60,7 @@
     font-size: 12px;
   }
 </style>
-<div class="max-w-4xl mx-auto space-y-5" style="--brand-maroon:#713F12;">
+<div class="w-full min-w-0 space-y-5" style="--brand-maroon:#713F12;">
   {{-- Hero header --}}
   <x-ui.page-header>
   <div class="ui-page-header__copy"><div>

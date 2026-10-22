@@ -1,7 +1,7 @@
 {{-- resources/views/admin/forms/builder.blade.php --}}
 @extends('layouts.app')
 @section('content')
-<x-ui.page class="max-w-6xl mx-auto"
+<x-ui.page class="w-full min-w-0 "
      x-data="formBuilder({
         initial: @js($schema['fields'] ?? []),
         saveUrl: @js(route('admin.forms.builder.save', $form)),

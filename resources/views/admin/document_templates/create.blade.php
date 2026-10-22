@@ -51,7 +51,7 @@
 @endpush
 
 @section('content')
-<x-ui.page x-data="docDesigner()" x-init="init()" class="max-w-6xl mx-auto select-none">
+<x-ui.page x-data="docDesigner()" x-init="init()" class="w-full min-w-0 select-none">
   {{-- HEADER --}}
   <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Buat Template — Drag, Drop, Resize & Custom Page</x-ui.page-title>

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page class="max-w-7xl mx-auto">
+<x-ui.page class="w-full min-w-0 ">
 
     {{-- Header --}}
     <x-ui.page-header>

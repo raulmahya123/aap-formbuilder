@@ -2,7 +2,7 @@
 @section('title','Dokumen Tidak Ditemukan')
 
 @section('content')
-  <x-ui.page class="max-w-2xl mx-auto">
+  <x-ui.page class="w-full min-w-0 ">
     <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Belum ada document</x-ui.page-title>
 <x-ui.page-description>Kelola dokumen, revisi, dan hak akses.</x-ui.page-description></div>

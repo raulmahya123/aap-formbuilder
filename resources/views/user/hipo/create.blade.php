@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page class="max-w-4xl mx-auto">
+<x-ui.page class="w-full min-w-0 ">
 
 <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Form Laporan HIPO / Nearmiss</x-ui.page-title>

@@ -8,7 +8,7 @@
     <span>{{ $contract->title }}</span>
 @endsection
 @section('content')
-<x-ui.page class="max-w-6xl mx-auto">
+<x-ui.page class="w-full min-w-0 ">
   {{-- Header --}}
   <x-ui.page-header>
   <div class="ui-page-header__copy"><div>

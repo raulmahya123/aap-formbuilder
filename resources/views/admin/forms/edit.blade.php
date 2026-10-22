@@ -15,7 +15,7 @@
     return $rows->map(fn($s)=>['id'=>$s->id,'name'=>$s->name,'company_id'=>$s->company_id])->values();
   })->toArray();
 @endphp
-<div class="max-w-4xl mx-auto">
+<div class="w-full min-w-0 ">
   <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Edit Form</x-ui.page-title>
 <x-ui.page-description>Perbarui informasi form dan dokumen.</x-ui.page-description></div>

@@ -31,7 +31,7 @@ class UserSiteAccessController extends Controller
         $search = trim((string) $r->get('q', ''));
 
         $q = UserSiteAccess::query()
-            ->with(['user:id,name,email,role,is_active,feature_access', 'user.departments:id,name', 'site:id,name,code'])
+            ->with(['user:id,name,email,role,is_active,feature_access', 'user.departments:departments.id,departments.name', 'site:id,name,code'])
             ->when($search !== '', fn ($query) => $query->whereHas('user', fn ($users) =>
                 $users->where(fn ($fields) => $fields->where('name', 'like', '%'.$search.'%')->orWhere('email', 'like', '%'.$search.'%'))
             ))
@@ -48,7 +48,7 @@ class UserSiteAccessController extends Controller
             'accesses' => $q->paginate(\App\Support\Listing::perPage())->withQueryString(),
             'sites'    => Site::orderBy('code')->get(['id','name','code']),
             'emails'   => User::orderBy('email')->pluck('email'),
-            'users'    => User::with(['sites:id', 'departments:id,name'])->orderBy('name')->get(['id', 'name', 'email', 'role', 'feature_access']),
+            'users'    => User::with(['sites:sites.id', 'departments:departments.id,departments.name'])->orderBy('name')->get(['id', 'name', 'email', 'role', 'feature_access']),
             'features' => FeatureAccess::FEATURES,
             'departments' => Department::orderBy('name')->get(['id', 'name']),
             'siteId'   => $siteId,

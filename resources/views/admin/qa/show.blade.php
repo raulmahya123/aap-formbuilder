@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', $thread->subject)
 @section('content')
-<x-ui.page class="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
+<x-ui.page class="w-full min-w-0 grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
   <x-ui.page-header class="lg:col-span-2">
   <div class="ui-page-header__copy"><x-ui.page-title>{{ $thread->subject }}</x-ui.page-title><x-ui.page-description>{{ $thread->site?->code ?? 'Semua site' }} · dibuat oleh {{ $thread->creator->name }}</x-ui.page-description></div>
 <x-ui.page-actions><a href="{{ route('admin.qa.index', $thread->site_id ? ['site_id' => $thread->site_id] : []) }}" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-coal-200 text-coal-600 hover:bg-ivory-100" aria-label="Kembali"><x-ui-icon name="arrow-left" class="h-4 w-4" /></a>@can('resolve', $thread)

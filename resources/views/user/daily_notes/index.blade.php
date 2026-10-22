@@ -43,7 +43,7 @@
     border-color: var(--maroon);
   }
 </style>
-<div class="w-full max-w-6xl mx-auto space-y-5">
+<div class="w-full min-w-0 space-y-5">
   {{-- Header --}}
   <x-ui.page-header>
   <div class="ui-page-header__copy"><div>

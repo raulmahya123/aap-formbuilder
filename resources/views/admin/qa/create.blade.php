@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page class="mx-auto max-w-2xl">
+<x-ui.page class="w-full min-w-0 ">
   <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Buat postingan baru</x-ui.page-title>
     <x-ui.page-description>Postingan hanya akan terlihat oleh pengguna yang memiliki akses ke site yang dipilih.</x-ui.page-description></div>

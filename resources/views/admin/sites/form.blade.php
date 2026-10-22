@@ -25,7 +25,7 @@
 
 <form id="page-primary-form" method="POST"
       action="{{ $site->exists ? route('admin.sites.update',$site) : route('admin.sites.store') }}"
-      class="ui-card space-y-5 max-w-lg bg-white rounded-lg p-6 shadow-none border border-gray-200">
+      class="w-full min-w-0 ui-card space-y-5 bg-white rounded-lg p-6 shadow-none border border-gray-200">
   @csrf
   @if($site->exists) @method('PUT') @endif
 

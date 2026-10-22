@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 <x-ui.page>
-  <div class="max-w-6xl mx-auto">
+  <div class="w-full min-w-0 ">
     <!-- HEADER -->
     <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>{{ $entry->form->title }} <span class="text-coal-500 dark:text-coal-400 text-sm">#{{ $entry->id }}</span></x-ui.page-title>

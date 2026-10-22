@@ -19,7 +19,7 @@
 @endif
 
 <form action="{{ route('admin.groups.store') }}" method="post"
-      class="ui-card space-y-5 max-w-xl bg-white rounded-lg shadow-none border border-gray-200">
+      class="w-full min-w-0 ui-card space-y-5 bg-white rounded-lg shadow-none border border-gray-200">
   @csrf
 
   <div>

@@ -55,7 +55,7 @@
     photoUrl: @js($photoUrl),
   })"
   x-init="init()"
-  class="max-w-6xl mx-auto space-y-5 select-none"
+  class="w-full min-w-0 space-y-5 select-none"
 >
   {{-- HEADER --}}
   <x-ui.page-header>

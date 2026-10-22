@@ -3,7 +3,7 @@
 @section('title', 'Edit Perusahaan')
 
 @section('content')
-<x-ui.page class="max-w-5xl mx-auto">
+<x-ui.page class="w-full min-w-0 ">
   <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Edit Perusahaan</x-ui.page-title>
 <x-ui.page-description>Perbarui informasi perusahaan.</x-ui.page-description></div>

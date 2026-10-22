@@ -2,7 +2,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page x-data="docBuilder()" x-init="init()" class="max-w-7xl mx-auto">
+<x-ui.page x-data="docBuilder()" x-init="init()" class="w-full min-w-0 ">
   <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Buat Dokumen</x-ui.page-title>
 <x-ui.page-description>Lengkapi informasi untuk menambahkan dokumen.</x-ui.page-description></div>

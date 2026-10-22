@@ -48,13 +48,13 @@ $computedReadonly = !$hasAnyAllowedSite;
 
 
 @if($computedReadonly)
-<div class="max-w-6xl mb-4 p-3 rounded-lg border border-blue-200 bg-blue-50 text-blue-900 text-sm">
+<div class="w-full min-w-0 mb-4 p-3 rounded-lg border border-blue-200 bg-blue-50 text-blue-900 text-sm">
   Mode tampilan saja. Kamu tidak dapat mengubah data pada halaman ini.
 </div>
 @endif
 
 @if(!$hasAnyAllowedSite)
-<div class="max-w-6xl mb-6 p-4 rounded-lg border border-amber-200 bg-amber-50 text-amber-900">
+<div class="w-full min-w-0 mb-6 p-4 rounded-lg border border-amber-200 bg-amber-50 text-amber-900">
   Kamu belum memiliki akses ke site mana pun untuk input harian.
   Hubungi admin untuk diberikan akses site.
 </div>
@@ -114,7 +114,7 @@ $computedReadonly = !$hasAnyAllowedSite;
           requestAnimationFrame(() => this.sanitize(e.target));
         }
       }"
-  class="ui-card relative space-y-5 max-w-6xl bg-white rounded-lg border border-gray-200 shadow-none p-6 {{ $computedReadonly ? 'opacity-95' : '' }}">
+  class="w-full min-w-0 ui-card relative space-y-5 bg-white rounded-lg border border-gray-200 shadow-none p-6 {{ $computedReadonly ? 'opacity-95' : '' }}">
   @csrf
 
   {{-- Jika readonly total, blok pointer supaya benar2 tidak bisa edit --}}

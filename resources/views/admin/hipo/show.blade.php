@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-<x-ui.page class="max-w-6xl mx-auto text-black">
+<x-ui.page class="w-full min-w-0 text-black">
 {{-- FLASH MESSAGE --}}
 {{-- HEADER --}}
 <x-ui.page-header>

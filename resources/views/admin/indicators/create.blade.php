@@ -9,7 +9,7 @@
 </x-ui.page-header>
 
 <form action="{{ route('admin.indicators.store') }}" method="post"
-  class="ui-card space-y-5 max-w-2xl bg-white rounded-lg border border-gray-200 shadow-none">
+  class="w-full min-w-0 ui-card space-y-5 bg-white rounded-lg border border-gray-200 shadow-none">
   @csrf
 
   <div>

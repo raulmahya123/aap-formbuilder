@@ -2,7 +2,7 @@
 @extends('layouts.app')
 
 @section('content')
-<x-ui.page class="max-w-2xl mx-auto">
+<x-ui.page class="w-full min-w-0 ">
   <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Buat Thread Q&A</x-ui.page-title>
 <x-ui.page-description>Kelola percakapan dan tindak lanjut laporan.</x-ui.page-description></div>

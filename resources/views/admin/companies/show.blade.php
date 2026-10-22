@@ -2,7 +2,7 @@
 @extends('layouts.app')
 @section('title', 'Detail Perusahaan')
 @section('content')
-<x-ui.page class="max-w-6xl mx-auto">
+<x-ui.page class="w-full min-w-0 ">
   {{-- Header --}}
   @php
         // Pastikan logo aman tampil walau logo_path kadang punya prefix salah
