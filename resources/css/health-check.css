@@ -1,33 +1,454 @@
-.health-check-page { background: #F4F4F5; color: #18181B; }
-.health-check { width: 100%; max-width: 528px; margin: 0 auto; padding: 24px 16px; }
-.health-check__header { padding: 8px 8px 24px; }
-.health-check__brand { display: inline-flex; margin-bottom: 24px; }
-.health-check__brand img { width: 144px; height: 64px; object-fit: contain; }
-.health-check__eyebrow { display: flex; align-items: center; gap: 8px; color: #713F12; font-size: 12px; font-weight: 600; }
-.health-check__header h1 { margin: 12px 0; font-size: 24px; line-height: 1.25; font-weight: 600; letter-spacing: -.5px; }
-.health-check__header > p { font-size: 14px; line-height: 1.6; color: #52525B; }
-.health-check__meta { display: flex; gap: 20px; margin-top: 20px; color: #52525B; font-size: 12px; }
-.health-check__meta > span { display: inline-flex; align-items: center; gap: 6px; }
-.health-check__required { color: #DC2626; }
-.health-check__form { display: flex; flex-direction: column; gap: 16px; }
-.health-check__section { padding: 20px; border: 1px solid #D4D4D8; border-radius: 12px; background: #fff; min-width: 0; }
-.health-check__section-heading { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 24px; }
-.health-check__step { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; border-radius: 8px; background: #713F12; color: #fff; font-size: 12px; font-weight: 600; }
-.health-check__section-heading h2 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
-.health-check__section-heading p { margin: 0; font-size: 12px; line-height: 1.6; color: #52525B; }
-.health-check__fields { display: grid; gap: 20px; }
-.health-check .ui-input { width: 100%; min-width: 0; min-height: 44px; font-size: 16px; border-color: #D4D4D8; }
-.health-check .ui-input[aria-invalid='true'] { border-color: #DC2626; }
-.health-check textarea.ui-input { min-height: 104px; resize: vertical; }
-.health-check__choices { display: grid; grid-template-columns: 1fr; gap: 8px; }
-.health-check__choices > label { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 12px; text-align: left; font-size: 14px; border: 1px solid #D4D4D8; border-radius: 8px; line-height: 1.5; }
-.health-check__choices > label:has(:checked) { border-color: #713F12; background: #fff; box-shadow: inset 0 0 0 1px #713F12; color: #713F12; }
-.health-check__choices > label:has(:focus-visible) { outline: 2px solid #713F12; outline-offset: 2px; }
-.health-check__choices input[type='radio'] { width: 18px; height: 18px; margin: 0; flex-shrink: 0; color: #713F12; accent-color: #713F12; }
-.health-check__submit { padding: 8px 4px; text-align: center; }
-.health-check__submit p { margin: 0 0 12px; color: #52525B; font-size: 12px; }
-.health-check__submit .ui-button { width: 100%; min-height: 48px; font-size: 14px; }
-.health-check__submit > span { display: block; margin-top: 12px; font-size: 12px; color: #52525B; }
-.health-check__footer { margin: 24px 0 8px; text-align: center; font-size: 12px; color: #713F12; font-weight: 600; }
-.health-check__footer span { display: block; margin-top: 4px; color: #52525B; font-size: 11px; font-weight: 400; }
-@media (max-width: 359px) { .health-check { padding-inline: 12px; } .health-check__section { padding: 16px; } }
+/* Mobile PWA & Modern App UI for Health Assessment Checklist */
+.health-check-page {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(219, 234, 254, 0.4) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(254, 243, 199, 0.25) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(241, 245, 249, 0.6) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: #0f172a;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.health-check-app {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+  position: relative;
+}
+
+@media (min-width: 520px) {
+  .health-check-page {
+    padding: 24px 16px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .health-check-app {
+    border-radius: 28px;
+    overflow: hidden;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 20px 35px -8px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+    min-height: auto;
+  }
+}
+
+/* App Bar / Top Navigation Header */
+.pwa-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #f1f5f9;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pwa-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.pwa-brand img {
+  height: 34px;
+  width: auto;
+  object-fit: contain;
+}
+
+.pwa-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 9999px;
+  border: 1px solid #dbeafe;
+}
+
+.pwa-status-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* Hero / Header Card */
+.pwa-hero {
+  padding: 20px 20px 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pwa-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #854d0e; /* warm amber brown accent */
+  margin-bottom: 8px;
+}
+
+.pwa-hero__eyebrow svg {
+  width: 14px;
+  height: 14px;
+}
+
+.pwa-hero h1 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.pwa-hero p {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+
+.pwa-hero__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pwa-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.pwa-chip svg {
+  width: 13px;
+  height: 13px;
+  color: #64748b;
+}
+
+.pwa-chip--amber {
+  background: #fefce8;
+  color: #854d0e;
+  border: 1px solid #fef08a;
+  font-weight: 600;
+}
+
+/* Form Container */
+.pwa-form {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+/* Sections as clean modern cards */
+.pwa-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px 16px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.pwa-card:focus-within {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.pwa-card__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pwa-card__number {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.25);
+  flex-shrink: 0;
+}
+
+.pwa-card__title h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.pwa-card__title p {
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+
+/* Fields & Inputs */
+.pwa-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.health-check-app .ui-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.health-check-app .ui-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.health-check-app .ui-required {
+  color: #ef4444;
+}
+
+.health-check-app .ui-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  transition: all 0.15s ease-in-out;
+  box-sizing: border-box;
+}
+
+.health-check-app .ui-input:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  background: #ffffff;
+}
+
+.health-check-app textarea.ui-input {
+  min-height: 85px;
+  resize: vertical;
+}
+
+/* Question Blocks & Option Grids */
+.pwa-question-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pwa-question {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pwa-question-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
+}
+
+/* Mobile-first interactive pills / cards */
+.pwa-pill-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.pwa-pill-grid--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.pwa-pill-grid--stack {
+  grid-template-columns: 1fr;
+}
+
+.pwa-pill-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+}
+
+.pwa-pill-option:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.pwa-pill-option:active {
+  transform: scale(0.98);
+}
+
+.pwa-pill-option input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #2563eb;
+  flex-shrink: 0;
+}
+
+/* Active State for Pill Option: subtle blue tint with sharp blue border */
+.pwa-pill-option:has(input[type="radio"]:checked) {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+}
+
+/* Subtle Brown Highlight variant for shift or specific options if needed */
+.pwa-pill-option--amber:has(input[type="radio"]:checked) {
+  border-color: #854d0e;
+  background: #fefce8;
+  color: #713f12;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(133, 77, 14, 0.12);
+}
+.pwa-pill-option--amber input[type="radio"] {
+  accent-color: #854d0e;
+}
+
+/* Alert / Warning nested boxes */
+.pwa-subfield-box {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 6px;
+  animation: pwaSlideDown 0.2s ease-out;
+}
+
+@keyframes pwaSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Footer / Sticky Action Bar */
+.pwa-submit-section {
+  margin-top: 8px;
+  padding: 14px 4px 8px;
+}
+
+.pwa-submit-btn {
+  width: 100%;
+  min-height: 50px;
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  color: #ffffff !important;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  transition: all 0.2s ease;
+}
+
+.pwa-submit-btn:hover {
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+  transform: translateY(-1px);
+}
+
+.pwa-submit-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.pwa-submit-hint {
+  text-align: center;
+  font-size: 12px;
+  color: #64748b;
+  margin: 10px 0 0;
+}
+
+/* Footer Branding */
+.pwa-footer {
+  text-align: center;
+  padding: 18px 16px 28px;
+  background: #ffffff;
+  border-top: 1px solid #f1f5f9;
+}
+
+.pwa-footer__brand {
+  font-size: 12px;
+  font-weight: 700;
+  color: #713f12; /* Subtle brown accent as requested */
+  letter-spacing: 0.05em;
+}
+
+.pwa-footer__sub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}

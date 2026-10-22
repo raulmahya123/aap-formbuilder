@@ -1,89 +1,223 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="icon" type="image/png" href="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}">
   <title>Health Assesment Checklist · {{ config('app.name', 'AAP Form Builder') }}</title>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="health-check-page">
-  <main class="health-check">
-    <header class="health-check__header">
-      <a href="{{ route('wellness.create') }}" aria-label="Health Assesment Checklist" class="health-check__brand">
-        <img src="{{ asset('assets/images/logomandala.png') }}" alt="Mandala Management System Andalan" width="144" height="64">
+  <div class="health-check-app">
+    <!-- Mobile PWA Top App Bar -->
+    <header class="pwa-topbar">
+      <a href="{{ route('wellness.create') }}" aria-label="Health Assesment Checklist" class="pwa-brand">
+        <img src="{{ asset('assets/images/logomandala.png') }}" alt="Mandala Management System Andalan">
       </a>
-      <span class="health-check__eyebrow"><x-ui.lucide name="shield" /> Pemeriksaan sebelum shift</span>
-      <h1>Health Assesment<br>Checklist</h1>
-      <p>Awali shift dengan mengenali kondisi Anda.<br>Isi sesuai keadaan yang Anda rasakan saat ini.</p>
-      <div class="health-check__meta"><span><x-ui.lucide name="clipboard-list" /> Tanpa login</span><span><span class="health-check__required">*</span> Wajib diisi</span></div>
+      <div class="pwa-status-badge">
+        <span>Pre-Shift</span>
+      </div>
     </header>
-    <form id="page-primary-form" method="POST" action="{{ route('wellness.store') }}" class="health-check__form">
-  @csrf
-      <section class="health-check__section">
-        <div class="health-check__section-heading"><span class="health-check__step">01</span><div><h2>Data karyawan</h2><p>Lengkapi identitas dan lokasi kerja Anda.</p></div></div>
-        <div class="health-check__fields">
-          @foreach([['name','Nama Lengkap','Nama lengkap'],['nik','NIK (Nomor Induk Karyawan)','Nomor induk karyawan'],['position','Jabatan','Jabatan'],['site','Site','Nama site']] as [$field,$label,$placeholder])
-          <x-ui.form-field :name="$field" :label="$label" required><x-ui.form-input :id="$field" :name="$field" :value="old($field)" required :placeholder="$placeholder" /></x-ui.form-field>
-          @endforeach
+
+    <!-- Hero Card Header -->
+    <div class="pwa-hero">
+      <div class="pwa-hero__eyebrow">
+        <x-ui.lucide name="shield-check" />
+        <span>Pemeriksaan Mandiri</span>
+      </div>
+      <h1>Health Assesment Checklist</h1>
+      <p>Awali shift dengan mengenali kondisi fisik & mental Anda hari ini.</p>
+      
+      <div class="pwa-hero__chips">
+        <span class="pwa-chip">
+          <x-ui.lucide name="clipboard-check" /> Tanpa Login
+        </span>
+        <span class="pwa-chip pwa-chip--amber">
+          <x-ui.lucide name="alert-circle" /> Wajib Lengkap
+        </span>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form id="page-primary-form" method="POST" action="{{ route('wellness.store') }}" class="pwa-form">
+      @csrf
+
+      <!-- Section 1: Data Karyawan -->
+      <section class="pwa-card">
+        <div class="pwa-card__header">
+          <div class="pwa-card__number">01</div>
+          <div class="pwa-card__title">
+            <h2>Data Karyawan</h2>
+            <p>Identitas & lokasi penugasan kerja</p>
+          </div>
+        </div>
+        
+        <div class="pwa-fields">
+          <x-ui.form-field name="name" label="Nama Lengkap" required>
+            <x-ui.form-input id="name" name="name" :value="old('name')" required placeholder="Masukkan nama lengkap Anda" />
+          </x-ui.form-field>
+
+          <x-ui.form-field name="nik" label="NIK (Nomor Induk Karyawan)" required>
+            <x-ui.form-input id="nik" name="nik" :value="old('nik')" required placeholder="Contoh: 12345678" />
+          </x-ui.form-field>
+
+          <x-ui.form-field name="position" label="Jabatan" required>
+            <x-ui.form-input id="position" name="position" :value="old('position')" required placeholder="Contoh: Operator / Pengawas / Mekanik" />
+          </x-ui.form-field>
+
+          <x-ui.form-field name="site" label="Site / Lokasi Kerja" required>
+            <x-ui.form-input id="site" name="site" :value="old('site')" required placeholder="Contoh: Site Mandala / Muara Enim" />
+          </x-ui.form-field>
         </div>
       </section>
 
-      <section class="health-check__section">
-        <div class="health-check__section-heading"><span class="health-check__step">02</span><div><h2>Kondisi sebelum shift</h2><p>Setiap jawaban membantu pemantauan kesiapan kerja.</p></div></div>
-        <div class="space-y-5">
-          <div><div class="mb-3 block text-sm font-medium">Shift <span class="text-red-500">*</span></div><div class="health-check__choices">@foreach(['pagi'=>'Shift Pagi','malam'=>'Shift Malam'] as $value=>$label)<label class="cursor-pointer rounded-lg border border-slate-200 p-3 has-[:checked]:border-[#8d624f] has-[:checked]:bg-[#faf3ee]"><input type="radio" name="shift" value="{{ $value }}" class="mr-2" @checked(old('shift') === $value) required>{{ $label }}</label>@endforeach</div></div>
-          <div><div class="mb-3 block text-sm font-medium">Berapa lama Anda tidur sebelum shift ini? <span class="text-red-500">*</span></div><div class="health-check__choices">@foreach(['lebih_6_jam'=>'Lebih dari 6 jam','6_jam'=>'6 jam','kurang_6_jam'=>'Kurang dari 6 jam'] as $value=>$label)<label class="cursor-pointer rounded-lg border border-slate-200 p-3 text-center text-sm has-[:checked]:border-[#8d624f] has-[:checked]:bg-[#faf3ee]"><input type="radio" name="sleep_before_shift" value="{{ $value }}" class="health-check__radio" @checked(old('sleep_before_shift') === $value) required>{{ $label }}</label>@endforeach</div></div>
-          <div x-data="{ quality: @js(old('sleep_quality', '')) }" class="space-y-4">
+      <!-- Section 2: Kondisi Sebelum Shift -->
+      <section class="pwa-card">
+        <div class="pwa-card__header">
+          <div class="pwa-card__number">02</div>
+          <div class="pwa-card__title">
+            <h2>Kesiapan Sebelum Shift</h2>
+            <p>Jawab sesuai kondisi nyata yang Anda rasakan</p>
+          </div>
+        </div>
+
+        <div class="pwa-question-group">
+          <!-- Shift -->
+          <div class="pwa-question">
+            <span class="pwa-question-label">Jadwal Shift Anda <span class="text-red-500">*</span></span>
+            <div class="pwa-pill-grid">
+              @foreach(['pagi' => ['Shift Pagi', 'sun'], 'malam' => ['Shift Malam', 'moon']] as $value => [$label, $icon])
+                <label class="pwa-pill-option">
+                  <input type="radio" name="shift" value="{{ $value }}" @checked(old('shift') === $value) required>
+                  <x-ui.lucide :name="$icon" class="w-4 h-4 text-slate-500" />
+                  <span>{{ $label }}</span>
+                </label>
+              @endforeach
+            </div>
+          </div>
+
+          <!-- Durasi Tidur -->
+          <div class="pwa-question">
+            <span class="pwa-question-label">Berapa lama Anda tidur sebelum shift? <span class="text-red-500">*</span></span>
+            <div class="pwa-pill-grid pwa-pill-grid--stack">
+              @foreach(['lebih_6_jam' => 'Lebih dari 6 jam (Cukup)', '6_jam' => 'Pas 6 jam', 'kurang_6_jam' => 'Kurang dari 6 jam (Kurang)'] as $value => $label)
+                <label class="pwa-pill-option" style="justify-content: flex-start; text-align: left;">
+                  <input type="radio" name="sleep_before_shift" value="{{ $value }}" @checked(old('sleep_before_shift') === $value) required>
+                  <span>{{ $label }}</span>
+                </label>
+              @endforeach
+            </div>
+          </div>
+
+          <!-- Kualitas Tidur -->
+          <div x-data="{ quality: @js(old('sleep_quality', '')) }" class="pwa-question">
             <x-ui.form-field name="sleep_quality" label="Bagaimana kualitas tidur Anda?" required>
               <x-ui.form-select id="sleep_quality" name="sleep_quality" x-model="quality" required :invalid="$errors->has('sleep_quality')">
-                <option value="">Pilih kualitas tidur</option>
-                @foreach(['baik'=>'Baik','cukup'=>'Cukup','buruk'=>'Buruk'] as $value=>$label)
-                  <option value="{{ $value }}" @selected(old('sleep_quality') === $value)>{{ $label }}</option>
-                @endforeach
+                <option value="">Pilih kualitas tidur...</option>
+                <option value="baik" @selected(old('sleep_quality') === 'baik')>Nyenyak & Segar (Baik)</option>
+                <option value="cukup" @selected(old('sleep_quality') === 'cukup')>Cukup Baik</option>
+                <option value="buruk" @selected(old('sleep_quality') === 'buruk')>Sering Terbangun / Gelisah (Buruk)</option>
               </x-ui.form-select>
             </x-ui.form-field>
-            <div x-show="quality === 'buruk'" x-cloak>
-              <x-ui.form-field name="sleep_quality_reason" label="Alasan kualitas tidur buruk" required>
-                <x-ui.form-textarea id="sleep_quality_reason" name="sleep_quality_reason" rows="3" maxlength="2000" x-bind:required="quality === 'buruk'" x-bind:disabled="quality !== 'buruk'" :invalid="$errors->has('sleep_quality_reason')" placeholder="Ceritakan penyebab tidur Anda kurang baik.">{{ old('sleep_quality_reason') }}</x-ui.form-textarea>
+
+            <div x-show="quality === 'buruk'" x-cloak class="pwa-subfield-box">
+              <x-ui.form-field name="sleep_quality_reason" label="Apa penyebab tidur kurang baik?" required>
+                <x-ui.form-textarea id="sleep_quality_reason" name="sleep_quality_reason" rows="2" maxlength="2000" x-bind:required="quality === 'buruk'" x-bind:disabled="quality !== 'buruk'" :invalid="$errors->has('sleep_quality_reason')" placeholder="Contoh: kebisingan, cemas, atau suhu ruangan panas.">{{ old('sleep_quality_reason') }}</x-ui.form-textarea>
               </x-ui.form-field>
             </div>
           </div>
-          <x-ui.form-field name="heavy_drowsiness" label="Apakah Anda merasa mengantuk berat atau sulit berkonsentrasi?" required>
-            <x-ui.form-select id="heavy_drowsiness" name="heavy_drowsiness" required :invalid="$errors->has('heavy_drowsiness')">
-              <option value="">Pilih jawaban</option>
-              <option value="ya" @selected(old('heavy_drowsiness') === 'ya')>Ya</option>
-              <option value="tidak" @selected(old('heavy_drowsiness') === 'tidak')>Tidak</option>
-            </x-ui.form-select>
-          </x-ui.form-field>
-          <div x-data="{ complaint: @js(old('health_complaint', '')) }" class="space-y-4">
-            <x-ui.form-field name="health_complaint" label="Apakah Anda sedang mengalami keluhan kesehatan saat ini?" required>
-              <div class="health-check__choices">
-                @foreach(['tidak'=>'Tidak','ya'=>'Iya'] as $value=>$label)
-                  <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 p-3 text-sm has-[:checked]:border-[#713F12]">
-                    <input type="radio" name="health_complaint" value="{{ $value }}" x-model="complaint" @checked(old('health_complaint') === $value) required> {{ $label }}
-                  </label>
-                @endforeach
-              </div>
-            </x-ui.form-field>
-            <div x-show="complaint === 'ya'" x-cloak>
-              <x-ui.form-field name="health_complaint_details" label="Keterangan keluhan / gejala" required helper="Jelaskan keluhan, gejala, dan penyebabnya jika diketahui.">
-                <x-ui.form-textarea id="health_complaint_details" name="health_complaint_details" rows="3" maxlength="2000" x-bind:required="complaint === 'ya'" x-bind:disabled="complaint !== 'ya'" :invalid="$errors->has('health_complaint_details')" placeholder="Contoh: sakit kepala sejak pagi dan badan terasa lemas.">{{ old('health_complaint_details') }}</x-ui.form-textarea>
+
+          <!-- Mengantuk Berat -->
+          <div class="pwa-question">
+            <span class="pwa-question-label">Apakah Anda merasa mengantuk berat atau sulit berkonsentrasi? <span class="text-red-500">*</span></span>
+            <div class="pwa-pill-grid">
+              <label class="pwa-pill-option">
+                <input type="radio" name="heavy_drowsiness" value="tidak" @checked(old('heavy_drowsiness') === 'tidak') required>
+                <span>Tidak Mengantuk</span>
+              </label>
+              <label class="pwa-pill-option">
+                <input type="radio" name="heavy_drowsiness" value="ya" @checked(old('heavy_drowsiness') === 'ya') required>
+                <span>Ya, Mengantuk</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Keluhan Kesehatan -->
+          <div x-data="{ complaint: @js(old('health_complaint', '')) }" class="pwa-question">
+            <span class="pwa-question-label">Apakah Anda sedang mengalami keluhan kesehatan? <span class="text-red-500">*</span></span>
+            <div class="pwa-pill-grid">
+              <label class="pwa-pill-option">
+                <input type="radio" name="health_complaint" value="tidak" x-model="complaint" @checked(old('health_complaint') === 'tidak') required>
+                <span>Tidak Ada (Sehat)</span>
+              </label>
+              <label class="pwa-pill-option">
+                <input type="radio" name="health_complaint" value="ya" x-model="complaint" @checked(old('health_complaint') === 'ya') required>
+                <span>Ada Keluhan</span>
+              </label>
+            </div>
+
+            <div x-show="complaint === 'ya'" x-cloak class="pwa-subfield-box">
+              <x-ui.form-field name="health_complaint_details" label="Rincian Keluhan / Gejala" required helper="Jelaskan bagian tubuh atau gejala yang dirasakan.">
+                <x-ui.form-textarea id="health_complaint_details" name="health_complaint_details" rows="2" maxlength="2000" x-bind:required="complaint === 'ya'" x-bind:disabled="complaint !== 'ya'" :invalid="$errors->has('health_complaint_details')" placeholder="Contoh: pusing, flu, atau nyeri otot.">{{ old('health_complaint_details') }}</x-ui.form-textarea>
               </x-ui.form-field>
             </div>
           </div>
-          <div><div class="mb-3 block text-sm font-medium">Apakah sedang mengonsumsi obat dengan efek samping kantuk / menurunkan konsentrasi? <span class="text-red-500">*</span></div><div class="health-check__choices">@foreach(['ya'=>'Ya','tidak'=>'Tidak'] as $value=>$label)<label class="cursor-pointer rounded-lg border border-slate-200 p-3 has-[:checked]:border-[#8d624f] has-[:checked]:bg-[#faf3ee]"><input type="radio" name="drowsy_medication" value="{{ $value }}" class="mr-2" @checked(old('drowsy_medication') === $value) required>{{ $label }}</label>@endforeach</div></div>
-          <div><div class="mb-3 block text-sm font-medium">Apakah Anda siap untuk bekerja? <span class="text-red-500">*</span></div><div class="health-check__choices">@foreach(['ya'=>'Ya, siap bekerja','tidak'=>'Tidak siap bekerja','off_day'=>'Off day'] as $value=>$label)<label class="cursor-pointer rounded-lg border border-slate-200 p-3 has-[:checked]:border-[#8d624f] has-[:checked]:bg-[#faf3ee]"><input type="radio" name="work_readiness" value="{{ $value }}" class="mr-2" @checked(old('work_readiness') === $value) required>{{ $label }}</label>@endforeach</div></div>
+
+          <!-- Obat Berefek Kantuk -->
+          <div class="pwa-question">
+            <span class="pwa-question-label">Apakah sedang minum obat berefek samping mengantuk? <span class="text-red-500">*</span></span>
+            <div class="pwa-pill-grid">
+              <label class="pwa-pill-option">
+                <input type="radio" name="drowsy_medication" value="tidak" @checked(old('drowsy_medication') === 'tidak') required>
+                <span>Tidak Minum Obat</span>
+              </label>
+              <label class="pwa-pill-option">
+                <input type="radio" name="drowsy_medication" value="ya" @checked(old('drowsy_medication') === 'ya') required>
+                <span>Ya, Sedang Minum</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Kesiapan Bekerja -->
+          <div class="pwa-question">
+            <span class="pwa-question-label">Apakah Anda siap dan fit untuk bekerja? <span class="text-red-500">*</span></span>
+            <div class="pwa-pill-grid pwa-pill-grid--stack">
+              @foreach([
+                'ya' => ['Ya, Siap & Fit Bekerja', 'check-circle-2'],
+                'tidak' => ['Tidak Siap Bekerja (Kondisi Kurang Sehat)', 'alert-triangle'],
+                'off_day' => ['Off Day / Jadwal Libur', 'calendar']
+              ] as $value => [$label, $icon])
+                <label class="pwa-pill-option" style="justify-content: flex-start; text-align: left;">
+                  <input type="radio" name="work_readiness" value="{{ $value }}" @checked(old('work_readiness') === $value) required>
+                  <x-ui.lucide :name="$icon" class="w-4 h-4 text-slate-500" />
+                  <span>{{ $label }}</span>
+                </label>
+              @endforeach
+            </div>
+          </div>
         </div>
       </section>
 
-      <footer class="health-check__submit">
-        <p>Pastikan jawaban sesuai kondisi Anda sebelum dikirim.</p>
-        <x-ui.button type="submit" variant="primary" icon="circle-check">Kirim checklist</x-ui.button>
-        <span>Data digunakan untuk pemantauan kesiapan kerja.</span>
+      <!-- Submit Section -->
+      <footer class="pwa-submit-section">
+        <button type="submit" class="pwa-submit-btn">
+          <x-ui.lucide name="send" class="w-4 h-4" />
+          <span>Kirim Health Assessment</span>
+        </button>
+        <p class="pwa-submit-hint">Pastikan semua data diisi dengan jujur demi keselamatan kerja bersama.</p>
       </footer>
     </form>
-    <p class="health-check__footer">MANDALA <span>Management System Andalan</span></p>
-  </main>
+
+    <!-- Footer Branding -->
+    <footer class="pwa-footer">
+      <div class="pwa-footer__brand">MANDALA</div>
+      <div class="pwa-footer__sub">Management System Andalan Nusantara Pratama</div>
+    </footer>
+  </div>
+
   <x-ui.toast-provider />
 </body>
 </html>
