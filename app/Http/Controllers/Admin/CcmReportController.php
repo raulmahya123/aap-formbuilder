@@ -309,9 +309,10 @@ class CcmReportController extends Controller
             ->values();
     }
 
-    private function authorizeJobsite(string $jobsite): void
+    private function authorizeJobsite(?string $jobsite): void
     {
         if (auth()->user()->isSuperAdmin()) return;
+        if (empty($jobsite)) abort(403);
         abort_unless($this->jobsiteOptions()->pluck('value')->contains($jobsite), 403);
     }
 

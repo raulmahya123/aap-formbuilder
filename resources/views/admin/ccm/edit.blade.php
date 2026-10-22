@@ -30,35 +30,40 @@
             <x-ui.section-title class="font-bold text-lg mb-4 text-gray-700 border-b pb-2">1. Informasi Umum</x-ui.section-title>
             <div class="grid md:grid-cols-3 gap-5">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Waktu Pelaporan</label>
-                    <input type="date" name="waktu_pelaporan"
-                           class="w-full border-gray-300 rounded-lg shadow-none focus:ring-blue-500 focus:border-blue-500"
-                           value="{{ old('waktu_pelaporan', $report->waktu_pelaporan->format('Y-m-d')) }}" required>
-                    @error('waktu_pelaporan') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    <x-ui.form-label for="ccm-waktu" required>Waktu Pelaporan</x-ui.form-label>
+                    <x-ui.form-input type="date" id="ccm-waktu" name="waktu_pelaporan"
+                           value="{{ old('waktu_pelaporan', $report->waktu_pelaporan ? ($report->waktu_pelaporan instanceof \Carbon\CarbonInterface ? $report->waktu_pelaporan->format('Y-m-d') : \Carbon\Carbon::parse($report->waktu_pelaporan)->format('Y-m-d')) : '') }}" required />
+                    @error('waktu_pelaporan') <x-ui.form-error>{{ $message }}</x-ui.form-error> @enderror
                 </div>
 
                 <div>
-                    <label for="ccm-jobsite" class="block text-sm font-medium text-gray-700 mb-1">Jobsite</label>
-                    <select id="ccm-jobsite" name="jobsite" class="w-full border-gray-300 rounded-lg shadow-none focus:ring-blue-500 focus:border-blue-500" required>
+                    <x-ui.form-label for="ccm-jobsite" required>Jobsite</x-ui.form-label>
+                    <x-ui.form-select id="ccm-jobsite" name="jobsite" required>
                         <option value="">Pilih site</option>
+                        @if($report->jobsite && !collect($jobsites ?? [])->contains('value', $report->jobsite))
+                            <option value="{{ $report->jobsite }}" selected>{{ $report->jobsite }}</option>
+                        @endif
                         @foreach(($jobsites ?? []) as $jobsite)
                             <option value="{{ $jobsite['value'] }}" {{ old('jobsite', $report->jobsite) == $jobsite['value'] ? 'selected' : '' }}>
                                 {{ $jobsite['label'] }}
                             </option>
                         @endforeach
-                    </select>
-                    @error('jobsite') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </x-ui.form-select>
+                    @error('jobsite') <x-ui.form-error>{{ $message }}</x-ui.form-error> @enderror
                 </div>
 
                 <div>
                     <x-ui.form-label for="ccm-reporter" required>Nama Pelapor</x-ui.form-label>
                     <x-ui.form-select id="ccm-reporter" name="nama_pelapor" required>
                         <option value="">Pilih nama pelapor</option>
-                        @foreach($reporters as $reporter)
+                        @if($report->nama_pelapor && !collect($reporters ?? [])->contains('name', $report->nama_pelapor))
+                            <option value="{{ $report->nama_pelapor }}" selected>{{ $report->nama_pelapor }}</option>
+                        @endif
+                        @foreach(($reporters ?? []) as $reporter)
                             <option value="{{ $reporter->name }}" @selected(old('nama_pelapor', $report->nama_pelapor) === $reporter->name)>{{ $reporter->name }}{{ $reporter->nik ? ' — '.$reporter->nik : '' }}</option>
                         @endforeach
                     </x-ui.form-select>
-                    @error('nama_pelapor') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    @error('nama_pelapor') <x-ui.form-error>{{ $message }}</x-ui.form-error> @enderror
                 </div>
             </div>
         </x-ui.panel>
