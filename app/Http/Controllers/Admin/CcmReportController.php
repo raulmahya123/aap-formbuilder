@@ -99,7 +99,16 @@ class CcmReportController extends Controller
     {
         $report = CcmReport::findOrFail($id);
         $this->authorizeJobsite($report->jobsite);
-        return view('admin.ccm.edit', compact('report'));
+
+        $jobsites = $this->jobsiteOptions();
+        $allowedSiteIds = auth()->user()->allowedSiteIds();
+        $reporters = User::query()->select('id', 'name', 'nik')
+            ->when(is_array($allowedSiteIds), fn ($query) => $query->where(fn ($scope) =>
+                $scope->whereKey(auth()->id())->orWhereHas('sites', fn ($sites) => $sites->whereIn('sites.id', $allowedSiteIds))
+            ))
+            ->orderBy('name')->get();
+
+        return view('admin.ccm.edit', compact('report', 'jobsites', 'reporters'));
     }
 
     /* =========================================================

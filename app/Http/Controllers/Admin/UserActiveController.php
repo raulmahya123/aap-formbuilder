@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
+use App\Models\Site;
 use App\Models\User;
+use App\Support\FeatureAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -28,15 +31,20 @@ class UserActiveController extends Controller
     public function index(Request $request)
     {
         $siteId = \App\Support\SiteSelection::id($request);
-        $users = User::query()->with('sites:id,code,name')
+        $users = User::query()->with(['sites:id,code,name', 'departments:departments.id,departments.name'])
             ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', '%'.$request->string('q').'%')->orWhere('email', 'like', '%'.$request->string('q').'%')))
             ->when($request->filled('role'), fn ($q) => $q->where('role', $request->string('role')->toString()))
             ->when($request->filled('status'), fn ($q) => $q->where('is_active', $request->input('status') === 'active'))
             ->when($siteId, fn ($q) => $q->whereHas('sites', fn ($s) => $s->where('sites.id', $siteId)))
             ->orderBy('name')->paginate(\App\Support\Listing::perPage())->withQueryString();
-        $sites = \App\Models\Site::orderBy('code')->get(['id','code','name']);
+            
+        $sites = Site::orderBy('code')->get(['id','code','name']);
         $roles = User::query()->distinct()->orderBy('role')->pluck('role', 'role');
-        return view('admin.users.active', compact('users', 'sites', 'roles'));
+        $allUsers = User::with(['sites:sites.id', 'departments:departments.id,departments.name'])->orderBy('name')->get(['id', 'name', 'email', 'role', 'feature_access']);
+        $departments = Department::orderBy('name')->get(['id', 'name']);
+        $features = FeatureAccess::FEATURES;
+
+        return view('admin.users.active', compact('users', 'sites', 'roles', 'allUsers', 'departments', 'features'));
     }
 
     /**

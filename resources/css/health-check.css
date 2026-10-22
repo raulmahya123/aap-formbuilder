@@ -1,11 +1,6 @@
-/* Mobile PWA & Modern App UI for Health Assessment Checklist */
+/* Responsive Modern UI for Health Assessment Checklist (Adapts smoothly from Mobile to Desktop) */
 .health-check-page {
   background-color: #f8fafc;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(219, 234, 254, 0.4) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(254, 243, 199, 0.25) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(241, 245, 249, 0.6) 0px, transparent 50%);
-  background-attachment: fixed;
   color: #0f172a;
   min-height: 100vh;
   min-height: 100dvh;
@@ -14,47 +9,40 @@
   font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  display: flex;
+  flex-direction: column;
 }
 
 .health-check-app {
   width: 100%;
-  max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background: #ffffff;
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
   position: relative;
 }
 
-@media (min-width: 520px) {
-  .health-check-page {
-    padding: 24px 16px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-  }
-  .health-check-app {
-    border-radius: 28px;
-    overflow: hidden;
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    box-shadow: 0 20px 35px -8px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
-    min-height: auto;
-  }
-}
-
-/* App Bar / Top Navigation Header */
+/* App Bar / Top Navigation Header (Full width) */
 .pwa-topbar {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid #f1f5f9;
-  padding: 12px 18px;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pwa-topbar__inner {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -63,12 +51,12 @@
 .pwa-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   text-decoration: none;
 }
 
 .pwa-brand img {
-  height: 34px;
+  height: 38px;
   width: auto;
   object-fit: contain;
 }
@@ -79,9 +67,9 @@
   gap: 6px;
   background: #eff6ff;
   color: #1d4ed8;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 5px 10px;
+  padding: 6px 12px;
   border-radius: 9999px;
   border: 1px solid #dbeafe;
 }
@@ -95,11 +83,32 @@
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
-/* Hero / Header Card */
+/* Page Content Container - Responsive fluid max-width */
+.pwa-container {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
+@media (min-width: 640px) {
+  .pwa-container {
+    padding: 28px 24px 48px;
+    gap: 24px;
+  }
+}
+
+/* Hero Banner */
 .pwa-hero {
-  padding: 20px 20px 16px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  border-bottom: 1px solid #f1f5f9;
+  padding: 24px 20px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .pwa-hero__eyebrow {
@@ -115,23 +124,29 @@
 }
 
 .pwa-hero__eyebrow svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
 }
 
 .pwa-hero h1 {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
   color: #0f172a;
   line-height: 1.25;
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   letter-spacing: -0.02em;
 }
 
+@media (min-width: 640px) {
+  .pwa-hero h1 {
+    font-size: 28px;
+  }
+}
+
 .pwa-hero p {
-  font-size: 13.5px;
+  font-size: 14px;
   color: #64748b;
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   line-height: 1.5;
 }
 
@@ -144,18 +159,18 @@
 .pwa-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
+  gap: 6px;
+  font-size: 12px;
   font-weight: 500;
   color: #475569;
   background: #f1f5f9;
-  padding: 4px 10px;
-  border-radius: 6px;
+  padding: 5px 12px;
+  border-radius: 8px;
 }
 
 .pwa-chip svg {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   color: #64748b;
 }
 
@@ -166,42 +181,34 @@
   font-weight: 600;
 }
 
-/* Form Container */
+/* Form Layout */
 .pwa-form {
-  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  flex: 1;
+  gap: 20px;
 }
 
-/* Sections as clean modern cards */
+/* Section Cards */
 .pwa-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
-  padding: 18px 16px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.pwa-card:focus-within {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  padding: 24px 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .pwa-card__header {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
   border-bottom: 1px solid #f1f5f9;
 }
 
 .pwa-card__number {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 10px;
   background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
   color: #ffffff;
@@ -215,7 +222,7 @@
 }
 
 .pwa-card__title h2 {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: #0f172a;
   margin: 0;
@@ -223,26 +230,34 @@
 }
 
 .pwa-card__title p {
-  font-size: 12px;
+  font-size: 12.5px;
   color: #64748b;
   margin: 2px 0 0;
 }
 
-/* Fields & Inputs */
+/* Fields & Responsive Grid */
 .pwa-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .pwa-fields {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
 }
 
 .health-check-app .ui-form-field {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 
 .health-check-app .ui-label {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   color: #1e293b;
 }
@@ -257,7 +272,7 @@
   background: #ffffff;
   color: #0f172a;
   border-radius: 10px;
-  padding: 10px 14px;
+  padding: 11px 14px;
   font-size: 14px;
   line-height: 1.5;
   transition: all 0.15s ease-in-out;
@@ -272,7 +287,7 @@
 }
 
 .health-check-app textarea.ui-input {
-  min-height: 85px;
+  min-height: 90px;
   resize: vertical;
 }
 
@@ -280,31 +295,27 @@
 .pwa-question-group {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .pwa-question {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .pwa-question-label {
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 600;
   color: #1e293b;
   line-height: 1.4;
 }
 
-/* Mobile-first interactive pills / cards */
+/* Mobile & Desktop Flexible Pill Grid */
 .pwa-pill-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 10px;
-}
-
-.pwa-pill-grid--3 {
-  grid-template-columns: repeat(3, 1fr);
 }
 
 .pwa-pill-grid--stack {
@@ -315,9 +326,9 @@
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 14px;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
   border-radius: 12px;
@@ -327,7 +338,6 @@
   cursor: pointer;
   user-select: none;
   transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-  text-align: center;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
 }
 
@@ -337,7 +347,7 @@
 }
 
 .pwa-pill-option:active {
-  transform: scale(0.98);
+  transform: scale(0.99);
 }
 
 .pwa-pill-option input[type="radio"] {
@@ -348,7 +358,7 @@
   flex-shrink: 0;
 }
 
-/* Active State for Pill Option: subtle blue tint with sharp blue border */
+/* Active State for Pill Option: subtle blue tint with crisp blue border */
 .pwa-pill-option:has(input[type="radio"]:checked) {
   border-color: #2563eb;
   background: #eff6ff;
@@ -357,25 +367,13 @@
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
 }
 
-/* Subtle Brown Highlight variant for shift or specific options if needed */
-.pwa-pill-option--amber:has(input[type="radio"]:checked) {
-  border-color: #854d0e;
-  background: #fefce8;
-  color: #713f12;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(133, 77, 14, 0.12);
-}
-.pwa-pill-option--amber input[type="radio"] {
-  accent-color: #854d0e;
-}
-
-/* Alert / Warning nested boxes */
+/* Warning & Clarification nested boxes */
 .pwa-subfield-box {
   background: #f8fafc;
   border: 1px dashed #cbd5e1;
   border-radius: 12px;
-  padding: 12px 14px;
-  margin-top: 6px;
+  padding: 14px 16px;
+  margin-top: 8px;
   animation: pwaSlideDown 0.2s ease-out;
 }
 
@@ -390,14 +388,18 @@
   }
 }
 
-/* Footer / Sticky Action Bar */
+/* Submit Section */
 .pwa-submit-section {
-  margin-top: 8px;
-  padding: 14px 4px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-top: 10px;
 }
 
 .pwa-submit-btn {
   width: 100%;
+  max-width: 420px;
   min-height: 50px;
   background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
   color: #ffffff !important;
@@ -429,26 +431,27 @@
   text-align: center;
   font-size: 12px;
   color: #64748b;
-  margin: 10px 0 0;
+  margin: 0;
 }
 
 /* Footer Branding */
 .pwa-footer {
   text-align: center;
-  padding: 18px 16px 28px;
+  padding: 24px 20px 36px;
   background: #ffffff;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+  margin-top: auto;
 }
 
 .pwa-footer__brand {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  color: #713f12; /* Subtle brown accent as requested */
+  color: #713f12; /* Subtle brown accent */
   letter-spacing: 0.05em;
 }
 
 .pwa-footer__sub {
-  font-size: 11px;
+  font-size: 11.5px;
   color: #94a3b8;
-  margin-top: 2px;
+  margin-top: 3px;
 }
