@@ -114,6 +114,80 @@
             @hasSection('actions')
             @endif
 
+            {{-- Notification Bell --}}
+            @if($navbarUser)
+              @php
+                $topbarUnreadCount = \App\Models\SheNotification::where('user_id', $navbarUser->id)->where('is_read', false)->count();
+                $topbarNotifications = \App\Models\SheNotification::where('user_id', $navbarUser->id)->latest()->limit(5)->get();
+              @endphp
+              <div x-data="{ openNotif: false }" class="relative">
+                <button type="button" @click="openNotif = !openNotif" @click.outside="openNotif = false" class="relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#D4D4D8] bg-white text-slate-700 hover:bg-[#F4F4F5] transition" aria-label="Notifikasi">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                  </svg>
+                  @if($topbarUnreadCount > 0)
+                    <span class="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white shadow-sm">
+                      {{ $topbarUnreadCount > 9 ? '9+' : $topbarUnreadCount }}
+                    </span>
+                  @endif
+                </button>
+
+                {{-- Notification Dropdown --}}
+                <div x-show="openNotif" x-cloak x-transition class="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl border border-slate-200 bg-white p-0 shadow-xl z-50 overflow-hidden">
+                  <div class="flex items-center justify-between border-b border-slate-100 bg-slate-50/70 p-3.5">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-slate-900">Notifikasi</span>
+                      @if($topbarUnreadCount > 0)
+                        <span class="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-700">{{ $topbarUnreadCount }} Baru</span>
+                      @endif
+                    </div>
+                    <a href="{{ route('hse.dashboard.notifications.index') }}" class="text-[11px] font-semibold text-[#1646A0] hover:underline">
+                      Lihat Semua
+                    </a>
+                  </div>
+
+                  <div class="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                    @forelse($topbarNotifications as $notif)
+                      <div class="p-3 hover:bg-slate-50 transition {{ $notif->is_read ? 'opacity-70' : 'bg-blue-50/20' }}">
+                        <div class="flex items-start justify-between gap-2">
+                          <div class="space-y-0.5">
+                            <div class="flex items-center gap-1.5">
+                              @if(!$notif->is_read)
+                                <span class="h-1.5 w-1.5 rounded-full bg-[#1646A0]"></span>
+                              @endif
+                              <h4 class="text-xs font-bold text-slate-800">{{ $notif->title }}</h4>
+                            </div>
+                            <p class="text-[11px] text-slate-600 line-clamp-2">{{ $notif->message }}</p>
+                            <span class="text-[10px] text-slate-400 block">{{ $notif->created_at->diffForHumans() }}</span>
+                          </div>
+                          @if($notif->link)
+                            <a href="{{ $notif->link }}" class="text-[10px] font-semibold text-[#1646A0] bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded flex-shrink-0">
+                              Buka
+                            </a>
+                          @endif
+                        </div>
+                      </div>
+                    @empty
+                      <div class="p-6 text-center text-xs text-slate-400">
+                        Tidak ada notifikasi baru.
+                      </div>
+                    @endforelse
+                  </div>
+
+                  @if($topbarUnreadCount > 0)
+                    <div class="border-t border-slate-100 p-2.5 bg-slate-50/50 text-center">
+                      <form action="{{ route('hse.dashboard.notifications.markAllRead') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="text-xs font-semibold text-slate-600 hover:text-slate-900">
+                          Tandai Semua Sudah Dibaca
+                        </button>
+                      </form>
+                    </div>
+                  @endif
+                </div>
+              </div>
+            @endif
+
             @if($navbarUser)
               <div x-data="{open:false}" class="relative">
                 <button type="button" @click="open=!open" @click.outside="open=false" class="ui-account-toggle inline-flex items-center gap-2 rounded-lg border border-[#D4D4D8] bg-white px-2 text-left text-[#18181B] hover:bg-[#F4F4F5]" aria-label="Buka profil akun" x-ref="accountButton" aria-controls="account-dropdown" :aria-expanded="open" @keydown.escape.stop="open=false; $el.focus()">

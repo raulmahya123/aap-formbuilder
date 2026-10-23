@@ -157,16 +157,19 @@ class HseDashboardController extends Controller
     private function reportTitle(string $report): string
     {
         return match ($report) {
-            'safety' => 'Safety Performance Report',
-            'incidents' => 'Incident & Near Miss Report',
+            'safety' => 'Monthly Performance',
+            'incidents' => 'Incident Report',
+            'sap' => 'SAP Achievement Report',
             'inspections' => 'Inspection Summary',
             'audit' => 'Audit Finding Report',
             'training' => 'Training Compliance Report',
             'environment' => 'Environmental Performance Report',
-            'risk' => 'Risk Assessment Summary',
-            'actions' => 'Corrective Action Report',
-            'sites' => 'Site Performance Comparison',
-            default => 'HSE Executive Monthly Report',
+            'risk' => 'Risk Register Report',
+            'actions' => 'PICA Report',
+            'sites' => 'Site Comparison Report',
+            'manhours' => 'Manhours Report',
+            'property_damage' => 'Property Damage Report',
+            default => 'Executive SHE Report',
         };
     }
 }

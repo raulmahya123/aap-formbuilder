@@ -235,23 +235,46 @@ class HseDashboardService
         $exposure = $this->exposureHours($f);
         $lostDays = $this->sum(HseIncident::class, 'lost_time_days', 'occurred_at', $f['from'], $f['to'], $f);
 
-        $ltifr = $exposure > 0 ? ($current['Lost Time Injuries'] / $exposure) * self::LTIFR_MULTIPLIER : null;
-        $trir = $exposure > 0 ? ($current['Total Recordable Cases'] / $exposure) * self::TRIR_MULTIPLIER : null;
+        // Indikator tambahan sesuai spesifikasi SHE MANDALA
+        $pdCount = $this->count(HseIncident::class, 'occurred_at', $f['from'], $f['to'], $f, fn ($q) => $q->where('type', 'Property Damage'));
+        $pdfr = $exposure > 0 ? ($pdCount / $exposure) * self::LTIFR_MULTIPLIER : null;
+        $pdCost = 0.0;
+        $pdCostInd = \App\Models\Indicator::where('code', 'PD_COST')->first();
+        if ($pdCostInd) {
+            $pdCost = (float) \App\Models\IndicatorDaily::where('indicator_id', $pdCostInd->id)->whereBetween('date', [$f['from']->toDateString(), $f['to']->toDateString()])->sum('value');
+        }
+
+        $enviroCount = $this->count(HseIncident::class, 'occurred_at', $f['from'], $f['to'], $f, fn ($q) => $q->where('type', 'Environmental'));
+        $pakCount = $this->count(HseIncident::class, 'occurred_at', $f['from'], $f['to'], $f, fn ($q) => $q->where('type', 'PAK'));
+        $kaptkCount = $this->count(HseIncident::class, 'occurred_at', $f['from'], $f['to'], $f, fn ($q) => $q->where('type', 'KAPTK'));
+        $nearMissCount = $this->count(HseIncident::class, 'occurred_at', $f['from'], $f['to'], $f, fn ($q) => $q->where('category', 'Near Miss'));
+        if ($nearMissCount == 0) {
+            $nearMissCount = \App\Models\HipoReport::whereBetween('report_time', [$f['from'], $f['to']])->count();
+        }
+        $hipoCount = \App\Models\HipoReport::whereBetween('report_time', [$f['from'], $f['to']])->whereIn('risk_level', ['High', 'Critical'])->count();
+
+        $ltifr = $exposure > 0 ? (($current['Lost Time Injuries'] + $current['Fatalities']) / $exposure) * self::LTIFR_MULTIPLIER : null;
         $severityRate = $exposure > 0 ? ($lostDays / $exposure) * self::LTIFR_MULTIPLIER : null;
 
         $kpis = [
-            $this->kpi('recordable', 'Total Recordable Cases', $current['Total Recordable Cases'], $previous['Total Recordable Cases'], 'lower', null, 'record', null, 'Insiden dengan flag recordable = true.'),
-            $this->kpi('lti', 'Lost Time Injuries', $current['Lost Time Injuries'], $previous['Lost Time Injuries'], 'lower', 0, 'record', null, 'Insiden tipe Lost Time Injury.'),
-            $this->kpi('rwc', 'Restricted Work Cases', $current['Restricted Work Cases'], $previous['Restricted Work Cases'], 'lower', null, 'record', null, 'Insiden tipe Restricted Work Case.'),
-            $this->kpi('mtc', 'Medical Treatment Cases', $current['Medical Treatment Cases'], $previous['Medical Treatment Cases'], 'lower', null, 'record', null, 'Insiden tipe Medical Treatment Case.'),
-            $this->kpi('fac', 'First Aid Cases', $current['First Aid Cases'], $previous['First Aid Cases'], 'lower', null, 'record', null, 'Insiden tipe First Aid Case.'),
-            $this->kpi('fatality', 'Fatalities', $current['Fatalities'], $previous['Fatalities'], 'lower', 0, 'record', null, 'Insiden tipe Fatality.'),
-            $this->kpi('exposure', 'Total Exposure Hours', $exposure, null, 'higher', null, 'jam', route('hse.dashboard.reports', $this->query($f)), 'Jumlah jam paparan kerja pada periode terpilih (hse_exposure_hours).'),
-            $this->kpi('safe_hours', 'Safe Man-Hours', max(0, $exposure - ($lostDays * 8)), null, 'higher', null, 'jam', null, 'Exposure hours dikurangi (lost time days × 8 jam).'),
-            $this->kpi('days_without_lti', 'Days Without LTI', $this->daysWithoutLti($f), null, 'higher', null, 'hari', null, 'Jarak hari sejak LTI terakhir.'),
-            $this->kpi('ltifr', 'LTIFR', $ltifr, null, 'lower', 0, 'rate', null, 'LTI / Exposure Hours × 1.000.000. N/A bila exposure hours = 0.', 2),
-            $this->kpi('trir', 'TRIR', $trir, null, 'lower', 0, 'rate', null, 'Recordable Cases / Exposure Hours × 200.000. N/A bila exposure hours = 0.', 2),
-            $this->kpi('severity_rate', 'Severity Rate', $severityRate, null, 'lower', 0, 'rate', null, 'Lost Time Days / Exposure Hours × 1.000.000. N/A bila exposure hours = 0.', 2),
+            $this->kpi('fatality', 'Total Fatality', $current['Fatalities'], $previous['Fatalities'], 'lower', 0, 'kasus', null, 'Insiden kategori/tipe Fatality.'),
+            $this->kpi('lti', 'Total Lost Time Injury (LTI)', $current['Lost Time Injuries'], $previous['Lost Time Injuries'], 'lower', 0, 'kasus', null, 'Insiden tipe Lost Time Injury.'),
+            $this->kpi('ltifr', 'LTIFR', $ltifr, null, 'lower', 0, 'rate', null, '((LTI + Fatality) × 1.000.000) / Manhours. N/A bila manhours = 0.', 2),
+            $this->kpi('ltisr', 'LTISR', $severityRate, null, 'lower', 0, 'rate', null, '(Total Lost Days × 1.000.000) / Manhours. N/A bila manhours = 0.', 2),
+            $this->kpi('injury_non_lti', 'Injury Non-LTI', $current['Restricted Work Cases'] + $current['Medical Treatment Cases'] + $current['First Aid Cases'], null, 'lower', 0, 'kasus', null, 'First Aid + Medical Treatment + Restricted Work.'),
+            $this->kpi('property_damage', 'Property Damage', $pdCount, null, 'lower', 0, 'kasus', null, 'Insiden Property Damage.'),
+            $this->kpi('pdfr', 'PDFR', $pdfr, null, 'lower', 0, 'rate', null, '(Total Property Damage × 1.000.000) / Manhours.', 2),
+            $this->kpi('pd_cost', 'Property Damage Cost', $pdCost, null, 'lower', 0, 'Rp', null, 'Total biaya kerusakan aset akibat insiden.'),
+            $this->kpi('enviro_accident', 'Environmental Accident', $enviroCount, null, 'lower', 0, 'kasus', null, 'Insiden pencemaran lingkungan.'),
+            $this->kpi('pak', 'Penyakit Akibat Kerja (PAK)', $pakCount, null, 'lower', 0, 'kasus', null, 'Diagnosa Penyakit Akibat Kerja tervalidasi.'),
+            $this->kpi('kaptk', 'KAPTK', $kaptkCount, null, 'lower', 0, 'kasus', null, 'Kejadian Akibat Penyakit Tenaga Kerja.'),
+            $this->kpi('near_miss', 'Near Miss', $nearMissCount, null, 'higher', null, 'laporan', null, 'Total laporan hampir celaka (Nearmiss).'),
+            $this->kpi('hipo', 'HIPO Near Miss', $hipoCount, null, 'lower', 0, 'laporan', null, 'High Potential Incident / Near Miss.'),
+            $this->kpi('exposure', 'Total Manhours', $exposure, null, 'higher', null, 'jam', null, 'Total jam kerja tervalidasi.'),
+            $this->kpi('days_without_lti', 'Days Without Accident', $this->daysWithoutLti($f) ?? 0, null, 'higher', null, 'hari', null, 'Hari kerja selamat tanpa kecelakaan.'),
+            $this->kpi('fac', 'First Aid Cases', $current['First Aid Cases'], $previous['First Aid Cases'], 'lower', null, 'kasus', null, 'Pertolongan pertama.'),
+            $this->kpi('mtc', 'Medical Treatment Cases', $current['Medical Treatment Cases'], $previous['Medical Treatment Cases'], 'lower', null, 'kasus', null, 'Perawatan medis lanjutan.'),
+            $this->kpi('rwc', 'Restricted Work Cases', $current['Restricted Work Cases'], $previous['Restricted Work Cases'], 'lower', null, 'kasus', null, 'Kasus kerja terbatas.'),
         ];
 
         return [
@@ -1239,16 +1262,15 @@ class HseDashboardService
     public function reports(array $f): array
     {
         $catalog = [
-            ['key' => 'executive', 'title' => 'HSE Executive Monthly Report', 'description' => 'Ringkasan KPI eksekutif, tren insiden, dan status kepatuhan.', 'route' => 'hse.dashboard.overview'],
-            ['key' => 'safety', 'title' => 'Safety Performance Report', 'description' => 'LTI, TRIR, LTIFR, exposure hours, dan detail safety.', 'route' => 'hse.dashboard.safety'],
-            ['key' => 'incidents', 'title' => 'Incident & Near Miss Report', 'description' => 'Distribusi insiden, near miss, investigasi, dan root cause.', 'route' => 'hse.dashboard.incidents'],
-            ['key' => 'inspections', 'title' => 'Inspection Summary', 'description' => 'Jadwal, skor, temuan, dan closure inspeksi.', 'route' => 'hse.dashboard.inspections'],
-            ['key' => 'audit', 'title' => 'Audit Finding Report', 'description' => 'Temuan audit berdasarkan severity dan status.', 'route' => 'hse.dashboard.inspections'],
-            ['key' => 'training', 'title' => 'Training Compliance Report', 'description' => 'Matriks training, sertifikasi kedaluwarsa, dan compliance.', 'route' => 'hse.dashboard.training'],
-            ['key' => 'environment', 'title' => 'Environmental Performance Report', 'description' => 'Waste, recycling, energy, water, dan fuel.', 'route' => 'hse.dashboard.environment'],
-            ['key' => 'risk', 'title' => 'Risk Assessment Summary', 'description' => 'Matriks risiko, inherent vs residual, dan treatment.', 'route' => 'hse.dashboard.risk'],
-            ['key' => 'actions', 'title' => 'Corrective Action Report', 'description' => 'Status action, overdue, SLA, dan closure.', 'route' => 'hse.dashboard.actions'],
-            ['key' => 'sites', 'title' => 'Site Performance Comparison', 'description' => 'Perbandingan KPI antar site.', 'route' => 'hse.dashboard.sites'],
+            ['key' => 'executive', 'title' => 'Executive SHE Report', 'description' => 'Ringkasan komprehensif indikator SHE eksekutif, status kepatuhan, dan pencapaian target.', 'route' => 'hse.dashboard.overview'],
+            ['key' => 'safety', 'title' => 'Monthly Performance', 'description' => 'Kinerja bulanan LTI, TRIR, LTIFR, Jam Kerja Aman (Manhours), dan Severity Rate.', 'route' => 'hse.dashboard.safety'],
+            ['key' => 'incidents', 'title' => 'Incident Report', 'description' => 'Laporan insiden, kecelakaan kerja, near miss, kategori, dan investigasi.', 'route' => 'hse.dashboard.incidents'],
+            ['key' => 'sap', 'title' => 'SAP Achievement Report', 'description' => 'Pencapaian target Safety Accountability Program (Inspeksi, PTO, Hazard Report).', 'route' => 'hse.dashboard.sap.index'],
+            ['key' => 'risk', 'title' => 'Risk Register Report', 'description' => 'Daftar asesmen risiko operasional, matriks 5x5, dan pemantauan kontrol kritis.', 'route' => 'hse.dashboard.risk.dashboard'],
+            ['key' => 'actions', 'title' => 'PICA Report', 'description' => 'Tindakan korektif & preventif (PICA), status verifikasi, SLA closure, dan overdue.', 'route' => 'hse.dashboard.pica.dashboard'],
+            ['key' => 'sites', 'title' => 'Site Comparison Report', 'description' => 'Benchmarking dan perbandingan kinerja SHE lintas jobsite.', 'route' => 'hse.dashboard.sites'],
+            ['key' => 'manhours', 'title' => 'Manhours Report', 'description' => 'Rekapitulasi jam kerja orang (manhours), headcount karyawan, dan safe manhours.', 'route' => 'hse.dashboard.manhours.index'],
+            ['key' => 'property_damage', 'title' => 'Property Damage Report', 'description' => 'Kerusakan aset/properti, estimasi kerugian biaya, dan kategori insiden.', 'route' => 'hse.dashboard.incidents'],
         ];
 
         $history = \App\Models\HseReportRun::query()
@@ -1274,14 +1296,74 @@ class HseDashboardService
         return match ($key) {
             'safety' => $this->safety($f),
             'incidents' => $this->incidents($f),
+            'sap' => $this->sapSummaryData($f),
             'inspections', 'audit' => $this->inspections($f),
             'training' => $this->training($f),
             'environment' => $this->environment($f),
             'risk' => $this->riskCompliance($f),
             'actions' => $this->actions($f),
             'sites' => $this->sites($f),
+            'manhours' => $this->manhoursSummaryData($f),
+            'property_damage' => $this->propertyDamageData($f),
             default => $this->overview($f),
         };
+    }
+
+    private function sapSummaryData(array $f): array
+    {
+        $insp = $this->count(HseInspection::class, 'scheduled_date', $f['from'], $f['to'], $f);
+        $pto = $this->count(HseInspection::class, 'scheduled_date', $f['from'], $f['to'], $f, fn ($q) => $q->where('type', 'PTO'));
+        $hazard = $this->count(HipoReport::class, 'report_time', $f['from'], $f['to'], $f);
+
+        return [
+            'kpis' => [
+                $this->kpi('sap_total', 'Total SAP Activities', $insp + $hazard, null, 'higher', null, 'aktivitas'),
+                $this->kpi('sap_insp', 'Inspeksi Selesai', $insp, null, 'higher', null, 'inspeksi'),
+                $this->kpi('sap_pto', 'PTO Selesai', $pto, null, 'higher', null, 'observasi'),
+                $this->kpi('sap_hazard', 'Hazard Report Disubmit', $hazard, null, 'higher', null, 'laporan'),
+            ],
+            'table' => [],
+        ];
+    }
+
+    private function manhoursSummaryData(array $f): array
+    {
+        $manhours = SheManhour::whereBetween('date', [$f['from'], $f['to']])
+            ->where('status', 'Validated')
+            ->sum('manhours');
+        $headcount = SheManhour::whereBetween('date', [$f['from'], $f['to']])
+            ->where('status', 'Validated')
+            ->avg('employee_count');
+
+        return [
+            'kpis' => [
+                $this->kpi('total_manhours', 'Total Validated Manhours', (float) $manhours, null, 'higher', null, 'jam'),
+                $this->kpi('avg_headcount', 'Average Headcount', (float) round($headcount ?? 0), null, 'higher', null, 'karyawan'),
+            ],
+            'table' => [],
+        ];
+    }
+
+    private function propertyDamageData(array $f): array
+    {
+        $rows = $this->scoped(HseIncident::class, $f)
+            ->whereBetween('occurred_at', [$f['from'], $f['to']])
+            ->where('type', 'Property Damage')
+            ->get();
+
+        return [
+            'kpis' => [
+                $this->kpi('pd_count', 'Total Property Damage Incidents', $rows->count(), null, 'lower', 0, 'kasus'),
+            ],
+            'table' => $rows->map(fn ($r) => [
+                'incident_no' => $r->incident_no,
+                'occurred_at' => $r->occurred_at?->format('d M Y H:i'),
+                'site' => $r->site?->name ?? '—',
+                'severity' => $r->severity,
+                'description' => $r->description,
+                'status' => $r->status,
+            ])->all(),
+        ];
     }
 
     /* =========================================================
@@ -1457,6 +1539,20 @@ class HseDashboardService
 
     private function exposureHours(array $f): float
     {
+        // 1. Cek dari SheManhour (manhours tervalidasi)
+        $manhourQuery = \App\Models\SheManhour::query()->where('status', 'Validated');
+        if (($f['scope_site_ids'] ?? null) !== null) {
+            $manhourQuery->whereIn('site_id', $f['scope_site_ids'] ?: [-1]);
+        }
+        if (! empty($f['department_id'])) {
+            $manhourQuery->where('department_id', $f['department_id']);
+        }
+        $manhourSum = (float) $manhourQuery->whereBetween('date', [$f['from']->toDateString(), $f['to']->toDateString()])->sum('manhours');
+        if ($manhourSum > 0) {
+            return $manhourSum;
+        }
+
+        // 2. Cek dari HseExposureHour
         $query = HseExposureHour::query();
         if (($f['scope_site_ids'] ?? null) !== null) {
             $query->whereIn('site_id', $f['scope_site_ids'] ?: [-1]);
@@ -1468,10 +1564,28 @@ class HseDashboardService
         $fromYm = (int) $f['from']->format('Ym');
         $toYm = (int) $f['to']->format('Ym');
 
-        return (float) $query
+        $hseHours = (float) $query
             ->whereRaw('(period_year * 100 + period_month) >= ?', [$fromYm])
             ->whereRaw('(period_year * 100 + period_month) <= ?', [$toYm])
             ->sum('hours');
+        if ($hseHours > 0) {
+            return $hseHours;
+        }
+
+        // 3. Cek dari IndicatorDaily (MAN_HOURS)
+        $manHoursInd = \App\Models\Indicator::where('code', 'MAN_HOURS')->first();
+        if ($manHoursInd) {
+            $indQuery = \App\Models\IndicatorDaily::query()->where('indicator_id', $manHoursInd->id);
+            if (($f['scope_site_ids'] ?? null) !== null) {
+                $indQuery->whereIn('site_id', $f['scope_site_ids'] ?: [-1]);
+            }
+            $indHours = (float) $indQuery->whereBetween('date', [$f['from']->toDateString(), $f['to']->toDateString()])->sum('value');
+            if ($indHours > 0) {
+                return $indHours;
+            }
+        }
+
+        return 0.0;
     }
 
     private function daysWithoutLti(array $f): ?int

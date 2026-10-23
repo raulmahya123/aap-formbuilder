@@ -571,5 +571,55 @@ Route::middleware('auth')->group(function () {
             Route::get('sites', [HseDashboardController::class, 'sites'])->name('sites');
             Route::get('reports', [HseDashboardController::class, 'reports'])->name('reports');
             Route::get('reports/{report}/export', [HseDashboardController::class, 'export'])->name('reports.export');
+
+            // SHE Operations & Modules
+            Route::get('performance/{indicator}', [\App\Http\Controllers\Hse\SheOperationsController::class, 'performanceIndicator'])->name('performance.indicator');
+            Route::get('manhours', [\App\Http\Controllers\Hse\SheOperationsController::class, 'manhoursIndex'])->name('manhours.index');
+            Route::post('manhours', [\App\Http\Controllers\Hse\SheOperationsController::class, 'manhoursStore'])->name('manhours.store');
+            Route::post('manhours/import', [\App\Http\Controllers\Hse\SheOperationsController::class, 'manhoursImport'])->name('manhours.import');
+            Route::post('manhours/{manhour}/validate', [\App\Http\Controllers\Hse\SheOperationsController::class, 'manhoursValidate'])->name('manhours.validate');
+
+            Route::get('targets', [\App\Http\Controllers\Hse\SheOperationsController::class, 'targetsIndex'])->name('targets.index');
+            Route::post('targets', [\App\Http\Controllers\Hse\SheOperationsController::class, 'targetsStore'])->name('targets.store');
+
+            Route::get('sap', [\App\Http\Controllers\Hse\SheOperationsController::class, 'sapDashboard'])->name('sap.index');
+            Route::get('sap/achievement/{type}', [\App\Http\Controllers\Hse\SheOperationsController::class, 'sapAchievement'])->name('sap.achievement');
+            Route::get('sap/employee-performance', [\App\Http\Controllers\Hse\SheOperationsController::class, 'sapEmployeePerformance'])->name('sap.employee');
+            Route::get('sap/department-performance', [\App\Http\Controllers\Hse\SheOperationsController::class, 'sapDepartmentPerformance'])->name('sap.department');
+            Route::get('sap/targets', [\App\Http\Controllers\Hse\SheOperationsController::class, 'sapTargetsIndex'])->name('sap.targets.index');
+            Route::post('sap/targets', [\App\Http\Controllers\Hse\SheOperationsController::class, 'sapTargetsStore'])->name('sap.targets.store');
+
+            Route::post('actions/{pica}/update', [\App\Http\Controllers\Hse\SheOperationsController::class, 'picaUpdate'])->name('actions.update');
+
+            Route::get('notifications', [\App\Http\Controllers\Hse\SheOperationsController::class, 'notificationsIndex'])->name('notifications.index');
+            Route::post('notifications/{notification}/read', [\App\Http\Controllers\Hse\SheOperationsController::class, 'notificationsMarkRead'])->name('notifications.read');
+            Route::post('notifications/mark-all-read', [\App\Http\Controllers\Hse\SheOperationsController::class, 'notificationsMarkAllRead'])->name('notifications.markAllRead');
+
+            // FASE 3: Risk Register
+            Route::get('risk-register', [\App\Http\Controllers\Hse\SheOperationsController::class, 'riskDashboard'])->name('risk.dashboard');
+            Route::get('risk-register/list', [\App\Http\Controllers\Hse\SheOperationsController::class, 'riskList'])->name('risk.list');
+            Route::get('risk-register/high-activities', [\App\Http\Controllers\Hse\SheOperationsController::class, 'riskHighActivities'])->name('risk.high_activities');
+            Route::post('risk-register/assessment', [\App\Http\Controllers\Hse\SheOperationsController::class, 'riskAssessmentStore'])->name('risk.assessment.store');
+            Route::get('risk-register/controls', [\App\Http\Controllers\Hse\SheOperationsController::class, 'riskControlMonitoring'])->name('risk.controls');
+
+            // FASE 4: PICA Management
+            Route::get('pica', [\App\Http\Controllers\Hse\SheOperationsController::class, 'picaDashboard'])->name('pica.dashboard');
+            Route::get('pica/list/{source?}', [\App\Http\Controllers\Hse\SheOperationsController::class, 'picaList'])->name('pica.list');
+            Route::get('pica/{pica}/detail', [\App\Http\Controllers\Hse\SheOperationsController::class, 'picaDetail'])->name('pica.detail');
+            Route::post('pica', [\App\Http\Controllers\Hse\SheOperationsController::class, 'picaStore'])->name('pica.store');
+            Route::post('pica/{pica}/verify', [\App\Http\Controllers\Hse\SheOperationsController::class, 'picaVerify'])->name('pica.verify');
+
+            // FASE 5: Document Management (SOP, IK, Policy Repository)
+            Route::prefix('documents')->name('documents.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Hse\SheDocumentController::class, 'dashboard'])->name('dashboard');
+                Route::get('/list/{category?}', [\App\Http\Controllers\Hse\SheDocumentController::class, 'index'])->name('index');
+                Route::post('/', [\App\Http\Controllers\Hse\SheDocumentController::class, 'store'])->name('store');
+                Route::get('/{document}', [\App\Http\Controllers\Hse\SheDocumentController::class, 'show'])->name('show');
+                Route::post('/{document}/revise', [\App\Http\Controllers\Hse\SheDocumentController::class, 'revise'])->name('revise');
+                Route::post('/{document}/approve', [\App\Http\Controllers\Hse\SheDocumentController::class, 'approve'])->name('approve');
+                Route::post('/{document}/obsolete', [\App\Http\Controllers\Hse\SheDocumentController::class, 'obsolete'])->name('obsolete');
+                Route::get('/{document}/download', [\App\Http\Controllers\Hse\SheDocumentController::class, 'download'])->name('download');
+                Route::get('/{document}/preview', [\App\Http\Controllers\Hse\SheDocumentController::class, 'preview'])->name('preview');
+            });
         });
 }); // end middleware auth

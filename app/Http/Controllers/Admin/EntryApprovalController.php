@@ -60,6 +60,11 @@ class EntryApprovalController extends Controller
             // Update status entry (hindari mass assignment issues)
             $entry->status = $newStatus;
             $entry->save();
+
+            // Integrasi ke SHE jika berstatus approved
+            if ($newStatus === 'approved') {
+                app(\App\Services\Hse\SheFormIntegrationService::class)->syncEntryToShe($entry);
+            }
         });
 
         // Kirim email notifikasi (opsional)

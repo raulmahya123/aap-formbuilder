@@ -60,6 +60,11 @@ class User extends Authenticatable
             ->withPivot('dept_role')->withTimestamps();
     }
 
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
     public function isSuperAdmin(): bool
     {
         return in_array($this->role, ['super_admin', 'admin_ho'], true);

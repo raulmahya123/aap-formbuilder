@@ -16,6 +16,7 @@ class HseCorrectiveAction extends Model
         'action_no', 'source_type', 'source_id', 'source_module', 'site_id', 'department_id',
         'assigned_to', 'verified_by', 'title', 'description', 'priority', 'due_date',
         'status', 'evidence_path', 'verified_at', 'closed_at',
+        'root_cause', 'corrective_action', 'preventive_action', 'rejection_reason', 'progress_notes',
     ];
 
     protected $casts = [
@@ -23,6 +24,11 @@ class HseCorrectiveAction extends Model
         'verified_at' => 'datetime',
         'closed_at' => 'datetime',
     ];
+
+    public function verifier()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
+    }
 
     public const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
 
