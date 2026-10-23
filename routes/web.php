@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\DepartmentMemberController;
 use App\Http\Controllers\Admin\FormController as AdminFormController;
 use App\Http\Controllers\Admin\FormEntryController as AdminEntryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Hse\HseDashboardController;
 use App\Http\Controllers\Admin\EntryApprovalController;
 use App\Http\Controllers\Admin\DocumentAclController;
 use App\Http\Controllers\Admin\UserActiveController;
@@ -551,4 +552,24 @@ Route::middleware('auth')->group(function () {
                 Route::delete('/{hipo}', [AdminHipoReportController::class, 'destroy'])->name('destroy');
             });
     }); // end prefix admin
+
+    // ==============================
+    // HSE DASHBOARD (10 submenu)
+    // ==============================
+    Route::middleware(['auth', 'can:is-admin'])
+        ->prefix('hse/dashboard')
+        ->name('hse.dashboard.')
+        ->group(function () {
+            Route::get('overview', [HseDashboardController::class, 'overview'])->name('overview');
+            Route::get('safety', [HseDashboardController::class, 'safety'])->name('safety');
+            Route::get('incidents', [HseDashboardController::class, 'incidents'])->name('incidents');
+            Route::get('inspections', [HseDashboardController::class, 'inspections'])->name('inspections');
+            Route::get('training', [HseDashboardController::class, 'training'])->name('training');
+            Route::get('environment', [HseDashboardController::class, 'environment'])->name('environment');
+            Route::get('risk-compliance', [HseDashboardController::class, 'risk'])->name('risk');
+            Route::get('actions', [HseDashboardController::class, 'actions'])->name('actions');
+            Route::get('sites', [HseDashboardController::class, 'sites'])->name('sites');
+            Route::get('reports', [HseDashboardController::class, 'reports'])->name('reports');
+            Route::get('reports/{report}/export', [HseDashboardController::class, 'export'])->name('reports.export');
+        });
 }); // end middleware auth

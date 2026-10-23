@@ -13,6 +13,7 @@ class FeatureAccess
         'sites'=>'Sites', 'companies'=>'Companies', 'groups'=>'Indicator Groups', 'indicators'=>'Indicators',
         'daily'=>'Input Harian', 'notes'=>'Catatan Harian', 'reports'=>'Rekap / Laporan',
         'site_access'=>'Assign Site, Role & Fitur', 'documents'=>'Documents & Templates',
+        'hse'=>'HSE Dashboard',
     ];
 
     public static function forRoute(?string $route): ?string
@@ -28,6 +29,7 @@ class FeatureAccess
             'indicators'=>['admin.indicators.*','api.admin.indicators.*'], 'daily'=>['admin.daily.*','daily.*','api.admin.daily.*'],
             'notes'=>['user.daily_notes.*'], 'reports'=>['admin.reports.*'], 'site_access'=>['admin.site_access.*'],
             'documents'=>['admin.documents.*','admin.document_templates.*'],
+            'hse'=>['hse.dashboard.*'],
         ];
         foreach ($patterns as $feature => $names) if (Str::is($names, $route)) return $feature;
         return null;

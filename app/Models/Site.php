@@ -17,11 +17,15 @@ class Site extends Model
         'name',
         'description',
         'company_id',
+        'latitude',
+        'longitude',
     ];
 
     // (Opsional) casting dasar
     protected $casts = [
         'company_id' => 'integer',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     /* ======================

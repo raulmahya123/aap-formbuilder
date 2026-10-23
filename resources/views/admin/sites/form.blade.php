@@ -61,6 +61,24 @@
            required>
   </div>
 
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <label class="block mb-1 font-semibold text-gray-700">Latitude</label>
+      <input name="latitude" type="number" step="any" min="-90" max="90"
+             value="{{ old('latitude',$site->latitude) }}"
+             class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:outline-none"
+             placeholder="-6.2000000">
+      <p class="text-xs text-slate-500 mt-1">Opsional. Digunakan untuk peta sebaran site HSE.</p>
+    </div>
+    <div>
+      <label class="block mb-1 font-semibold text-gray-700">Longitude</label>
+      <input name="longitude" type="number" step="any" min="-180" max="180"
+             value="{{ old('longitude',$site->longitude) }}"
+             class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:outline-none"
+             placeholder="106.8166667">
+    </div>
+  </div>
+
   <div>
     <label class="block mb-1 font-semibold text-gray-700">Description</label>
     <textarea name="description"

@@ -101,6 +101,31 @@
       </div>
     </div>
 
+    @if(Route::has('hse.dashboard.overview'))
+    @if($user?->canUseFeatureRoute('hse.dashboard.overview'))
+    <div>
+      <div x-data="{openHseDashboard:true}">
+        <button type="button" class="ui-nav-section flex w-full cursor-pointer justify-between px-3 text-[11px] font-semibold normal-case tracking-normal text-[#52525B]" :aria-expanded="openHseDashboard" @click="openHseDashboard=!openHseDashboard">
+          HSE Dashboard
+          <span aria-hidden="true" x-text="openHseDashboard ? '−' : '+'"></span>
+        </button>
+        <div class="mt-2 grid gap-1" x-show="sidebarCollapsed || openHseDashboard" x-transition>
+          <a title="HSE Overview" aria-label="HSE Overview" href="{{ route('hse.dashboard.overview') }}" class="{{ $navItemClass(request()->routeIs('hse.dashboard.overview')) }}"><x-ui-icon name="dashboard"/><span class="ui-nav-label">Overview</span></a>
+          <a title="Safety Performance" aria-label="Safety Performance" href="{{ route('hse.dashboard.safety') }}" class="{{ $navItemClass(request()->routeIs('hse.dashboard.safety')) }}"><x-ui-icon name="report"/><span class="ui-nav-label">Safety Performance</span></a>
+          <a title="Incident & Nearmiss" aria-label="Incident & Nearmiss" href="{{ route('hse.dashboard.incidents') }}" class="{{ $navItemClass(request()->routeIs('hse.dashboard.incidents')) }}"><x-ui-icon name="note"/><span class="ui-nav-label">Incident & Nearmiss</span></a>
+          <a title="Inspection" aria-label="Inspection" href="{{ route('hse.dashboard.inspections') }}" class="{{ $navItemClass(request()->routeIs('hse.dashboard.inspections')) }}"><x-ui-icon name="input"/><span class="ui-nav-label">Inspection</span></a>
+          <a title="Training & Competency" aria-label="Training & Competency" href="{{ route('hse.dashboard.training') }}" class="{{ $navItemClass(request()->routeIs('hse.dashboard.training')) }}"><x-ui-icon name="users"/><span class="ui-nav-label">Training & Competency</span></a>
+          <a title="Environmental" aria-label="Environmental" href="{{ route('hse.dashboard.environment') }}" class="{{ $navItemClass(request()->routeIs('hse.dashboard.environment')) }}"><x-ui-icon name="location"/><span class="ui-nav-label">Environmental</span></a>
+          <a title="Risk & Compliance" aria-label="Risk & Compliance" href="{{ route('hse.dashboard.risk') }}" class="{{ $navItemClass(request()->routeIs('hse.dashboard.risk')) }}"><x-ui-icon name="chart"/><span class="ui-nav-label">Risk & Compliance</span></a>
+          <a title="Corrective Action" aria-label="Corrective Action" href="{{ route('hse.dashboard.actions') }}" class="{{ $navItemClass(request()->routeIs('hse.dashboard.actions')) }}"><x-ui-icon name="folder"/><span class="ui-nav-label">Corrective Action</span></a>
+          <a title="Site Performance" aria-label="Site Performance" href="{{ route('hse.dashboard.sites') }}" class="{{ $navItemClass(request()->routeIs('hse.dashboard.sites')) }}"><x-ui-icon name="location"/><span class="ui-nav-label">Site Performance</span></a>
+          <a title="Reports" aria-label="Reports" href="{{ route('hse.dashboard.reports') }}" class="{{ $navItemClass(request()->routeIs('hse.dashboard.reports')) }}"><x-ui-icon name="report"/><span class="ui-nav-label">Reports</span></a>
+        </div>
+      </div>
+    </div>
+    @endif
+    @endif
+
     <div>
       <div class="ui-nav-section px-3 text-[11px] font-semibold normal-case tracking-normal text-[#52525B]">Dokumen & Master Data</div>
       <div class="mt-2 grid gap-1">

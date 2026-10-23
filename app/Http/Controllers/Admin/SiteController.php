@@ -65,6 +65,8 @@ class SiteController extends Controller
             'name'        => ['required','string','max:150'],
             'description' => ['nullable','string'],
             'company_id'  => ['nullable','integer','exists:companies,id'], // jadikan 'required' kalau wajib
+            'latitude'    => ['nullable','numeric','between:-90,90'],
+            'longitude'   => ['nullable','numeric','between:-180,180'],
         ]);
 
         $site = Site::create($data);
@@ -98,6 +100,8 @@ class SiteController extends Controller
             'name'        => ['required','string','max:150'],
             'description' => ['nullable','string'],
             'company_id'  => ['nullable','integer','exists:companies,id'], // jadikan 'required' kalau wajib
+            'latitude'    => ['nullable','numeric','between:-90,90'],
+            'longitude'   => ['nullable','numeric','between:-180,180'],
         ]);
 
         $site->update($data);

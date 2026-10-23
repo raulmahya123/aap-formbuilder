@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\HseDashboardApiController;
 use App\Http\Controllers\Api\PublicDataController;
 use App\Http\Middleware\ApiAuth;
 use Illuminate\Support\Facades\Route;
@@ -29,4 +30,18 @@ Route::prefix('v1')->middleware(ApiAuth::class)->group(function () {
     // Forms (Mandala)
     Route::get('/forms', [PublicDataController::class, 'forms'])->name('api.forms.index');
     Route::get('/forms/{form}', [PublicDataController::class, 'form'])->name('api.forms.show');
+
+    // HSE Dashboard
+    Route::prefix('hse/dashboard')->name('api.hse.dashboard.')->group(function () {
+        Route::get('/overview', [HseDashboardApiController::class, 'overview'])->name('overview');
+        Route::get('/safety', [HseDashboardApiController::class, 'safety'])->name('safety');
+        Route::get('/incidents', [HseDashboardApiController::class, 'incidents'])->name('incidents');
+        Route::get('/inspections', [HseDashboardApiController::class, 'inspections'])->name('inspections');
+        Route::get('/training', [HseDashboardApiController::class, 'training'])->name('training');
+        Route::get('/environment', [HseDashboardApiController::class, 'environment'])->name('environment');
+        Route::get('/risk-compliance', [HseDashboardApiController::class, 'risk'])->name('risk');
+        Route::get('/actions', [HseDashboardApiController::class, 'actions'])->name('actions');
+        Route::get('/sites', [HseDashboardApiController::class, 'sites'])->name('sites');
+        Route::get('/reports', [HseDashboardApiController::class, 'reports'])->name('reports');
+    });
 });
