@@ -1,8 +1,8 @@
 @extends('layouts.app')
-@section('title', 'Management Form')
+@section('title', 'Dokumen Mandala')
 @section('content')
 <x-ui.page>
-<x-ui.page-header><div class="ui-page-header__copy"><x-ui.page-title>Management Form</x-ui.page-title><x-ui.page-description>Kelola SOP, instruksi kerja, dan form berdasarkan perusahaan, department, serta site.</x-ui.page-description></div><x-ui.page-actions>@can('create', [App\Models\Form::class, request('department_id') ? (int) request('department_id') : null])<x-ui.link data-modal-form icon="plus" variant="primary" :href="route('admin.forms.create', request()->only(['company_id','department_id','site_id','doc_type']))">Tambah Dokumen</x-ui.link>@endcan</x-ui.page-actions>
+<x-ui.page-header><div class="ui-page-header__copy"><x-ui.page-title>Dokumen Mandala</x-ui.page-title><x-ui.page-description>Kelola SOP, instruksi kerja, dan form berdasarkan perusahaan, department, serta site.</x-ui.page-description></div><x-ui.page-actions>@can('create', [App\Models\Form::class, request('department_id') ? (int) request('department_id') : null])<x-ui.link data-modal-form icon="plus" variant="primary" :href="route('admin.forms.create', request()->only(['company_id','department_id','site_id','doc_type']))">Tambah Dokumen</x-ui.link>@endcan</x-ui.page-actions>
 <x-slot:filters>
 <x-ui.table-toolbar>
 <x-ui.table-search name="q" placeholder="Cari judul dokumen…" aria-label="Cari dokumen" />

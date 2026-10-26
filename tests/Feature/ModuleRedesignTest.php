@@ -20,12 +20,13 @@ class ModuleRedesignTest extends TestCase
     public function test_module_index_pages_render_shared_header_and_pagination(): void
     {
         $this->actingAs($this->administrator());
-        foreach (['admin.dashboard','admin.wellness.index','admin.departments.index','admin.forms.index','admin.qa.index','admin.contracts.index','admin.users.active.index','admin.sites.index','admin.companies.index','admin.groups.index','admin.indicators.index','admin.daily.index','admin.documents.index','admin.document_templates.index','admin.entries.index','admin.site_access.index','admin.reports.monthly','user.daily_notes.index','ccm-reports.index','admin.hipo.index'] as $route) {
+        foreach (['admin.dashboard','admin.wellness.index','admin.departments.index','admin.forms.index','admin.qa.index','admin.contracts.index','admin.users.active.index','admin.sites.index','admin.companies.index','admin.groups.index','admin.indicators.index','admin.daily.index','admin.document_templates.index','admin.entries.index','admin.site_access.index','admin.reports.monthly','user.daily_notes.index','ccm-reports.index','admin.hipo.index'] as $route) {
             $response = $this->get(route($route));
             $response->assertOk();
             $response->assertSee('ui-page-header', false);
             $response->assertSee('data-toast-provider', false);
         }
+        $this->get(route('admin.documents.index'))->assertRedirect(route('admin.forms.index'));
     }
 
     public function test_department_search_pagination_and_modal_crud_keep_validation(): void

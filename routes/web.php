@@ -408,11 +408,8 @@ Route::middleware('auth')->group(function () {
         Route::post('reports/totals/update', [AdminReportController::class, 'updateTotal'])
             ->name('report-totals.update'); // → admin.report-totals.update
 
-        // ==============================
-        // DOCUMENTS
-        // ==============================
         Route::prefix('documents')->name('documents.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\DocumentController::class, 'index'])->name('index');
+            Route::get('/', fn() => redirect()->route('admin.forms.index'))->name('index');
             Route::get('/create', [\App\Http\Controllers\Admin\DocumentController::class, 'create'])
                 ->name('create')->middleware('can:create,App\Models\Document');
             Route::post('/', [\App\Http\Controllers\Admin\DocumentController::class, 'store'])

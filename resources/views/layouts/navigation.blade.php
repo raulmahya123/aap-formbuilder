@@ -309,9 +309,9 @@
       </button>
 
       <div x-show="sidebarCollapsed || openMaster" x-collapse x-cloak class="mt-1 pl-7 pr-2 grid gap-1 border-l-2 border-slate-200 ml-5 py-1">
-        @if(Route::has('admin.documents.index'))
-        @if($user?->canUseFeatureRoute('admin.documents.index'))
-          <a href="{{ route('admin.documents.index') }}" class="{{ $subItemClass(request()->routeIs('admin.documents.*')) }}">Dokumen Mandala</a>
+        @if(Route::has('admin.forms.index'))
+        @if($user?->canUseFeatureRoute('admin.forms.index'))
+          <a href="{{ route('admin.forms.index') }}" class="{{ $subItemClass(request()->routeIs('admin.forms.*')) }}">Dokumen Mandala</a>
         @endif
         @endif
 
@@ -342,12 +342,6 @@
         @if(Route::has('admin.indicators.index'))
         @if($user?->canUseFeatureRoute('admin.indicators.index'))
           <a href="{{ route('admin.indicators.index') }}" class="{{ $subItemClass(request()->routeIs('admin.indicators.*')) }}">Indikator</a>
-        @endif
-        @endif
-
-        @if(Route::has('admin.forms.index'))
-        @if($user?->canUseFeatureRoute('admin.forms.index'))
-          <a href="{{ route('admin.forms.index') }}" class="{{ $subItemClass(request()->routeIs('admin.forms.*')) }}">Form Builder (Digital)</a>
         @endif
         @endif
 
@@ -403,11 +397,6 @@
         @endif
         @endif
 
-        @if(Route::has('admin.documents.index'))
-        @if($user?->canUseFeatureRoute('admin.documents.index'))
-          <a href="{{ route('admin.documents.index') }}" class="{{ $navItemClass(request()->routeIs('admin.documents.*')) }}"><x-ui-icon name="mandala"/><span class="ui-nav-label">Dokumen Mandala</span></a>
-        @endif
-        @endif
 
         @if(Route::has('user.forms.index'))
         @if($user?->canUseFeatureRoute('user.forms.index'))
