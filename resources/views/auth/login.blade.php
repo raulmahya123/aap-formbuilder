@@ -173,10 +173,9 @@
 
     <!-- Footer Branding -->
     <div class="mt-10 pt-6 border-t border-[#E2E8F0] flex flex-col items-center justify-center gap-2 text-center text-xs text-[#94A3B8]">
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2.5">
         <span>Powered by</span>
-        <img src="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}" alt="Andalan Group" class="h-4 w-auto object-contain" />
-        <span class="font-bold text-[#111827]">Andalan Group</span>
+        <img src="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}" alt="Andalan Group" class="h-8 w-auto object-contain" />
       </div>
     </div>
   </div>
