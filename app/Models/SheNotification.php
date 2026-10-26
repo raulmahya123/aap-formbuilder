@@ -50,7 +50,9 @@ class SheNotification extends Model
      */
     public static function notifyRole(string $role, string $title, string $message, string $type = 'general', string $priority = 'medium', ?string $link = null): int
     {
-        $users = User::where('role', $role)->orWhere('is_admin', true)->get(['id']);
+        $users = User::where('role', $role)
+            ->orWhereIn('role', ['super_admin', 'admin_ho', 'admin_site'])
+            ->get(['id']);
         $count = 0;
         foreach ($users as $user) {
             self::notify($user->id, $title, $message, $type, $priority, $link);

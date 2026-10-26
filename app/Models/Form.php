@@ -26,6 +26,7 @@ class Form extends Model
         'schema',      // JSON
         'pdf_path',    // nullable
         'is_active',
+        'she_integration_type', // 'incident' | 'inspection' | 'pto' | 'hazard' | 'audit' | 'risk' | 'ccm' | 'none'
         'description', // opsional (pastikan kolom ada jika dipakai scopeSearch)
     ];
 

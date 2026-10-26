@@ -71,6 +71,7 @@
                         <th>Treatment</th>
                         <th>Status</th>
                         <th>PIC</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -107,9 +108,31 @@
                             <td class="text-xs text-slate-600 max-w-xs truncate" title="{{ $r->treatment }}">{{ $r->treatment ?: '—' }}</td>
                             <td><x-hse.status :value="$r->status" /></td>
                             <td class="text-xs font-medium text-slate-800">{{ $r->owner?->name ?? '—' }}</td>
+                            <td>
+                                <div class="flex items-center gap-1">
+                                    @if($r->status !== 'Approved' && $r->status !== 'Archived')
+                                        <form action="{{ route('hse.dashboard.risk.review', $r->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 text-[10px] font-semibold">Review</button>
+                                        </form>
+                                        <form action="{{ route('hse.dashboard.risk.approve', $r->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[10px] font-semibold">Approve</button>
+                                        </form>
+                                    @endif
+                                    @if($r->status !== 'Archived')
+                                        <form action="{{ route('hse.dashboard.risk.close', $r->id) }}" method="POST" onsubmit="return confirm('Arsipkan asesmen risiko ini?')">
+                                            @csrf
+                                            <button type="submit" class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 text-[10px] font-semibold">Archive</button>
+                                        </form>
+                                    @else
+                                        <span class="text-[10px] text-slate-400">Archived</span>
+                                    @endif
+                                </div>
+                            </td>
                         </tr>
                     @empty
-                        <x-ui.table-empty-state :colspan="12" title="Belum ada data Risk Assessment" message="Silakan tambahkan data asesmen baru atau ubah filter pencarian." />
+                        <x-ui.table-empty-state :colspan="13" title="Belum ada data Risk Assessment" message="Silakan tambahkan data asesmen baru atau ubah filter pencarian." />
                     @endforelse
                 </tbody>
             </table>

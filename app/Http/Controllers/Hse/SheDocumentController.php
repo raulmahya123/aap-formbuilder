@@ -36,8 +36,9 @@ class SheDocumentController extends Controller
         if ($filters['site_id']) {
             $query->where('site_id', $filters['site_id']);
         }
-        if ($filters['dept_id']) {
-            $query->where('department_id', $filters['dept_id']);
+        $deptId = $filters['department_id'] ?? $filters['dept_id'] ?? null;
+        if (!empty($deptId)) {
+            $query->where('department_id', $deptId);
         }
 
         $allDocs = (clone $query)->get();
@@ -101,8 +102,9 @@ class SheDocumentController extends Controller
         if ($filters['site_id']) {
             $query->where('site_id', $filters['site_id']);
         }
-        if ($filters['dept_id']) {
-            $query->where('department_id', $filters['dept_id']);
+        $deptId = $filters['department_id'] ?? $filters['dept_id'] ?? null;
+        if (!empty($deptId)) {
+            $query->where('department_id', $deptId);
         }
 
         // Submenu Mapping
@@ -155,6 +157,11 @@ class SheDocumentController extends Controller
      */
     public function show(Request $request, SheDocument $document)
     {
+        $user = $request->user();
+        if ($user && !$this->canAccessDocument($user, $document)) {
+            abort(403, 'Anda tidak memiliki hak akses untuk melihat dokumen ini.');
+        }
+
         $document->load(['department', 'site', 'uploader', 'approver', 'revisions.revisor']);
         $departments = Department::orderBy('name')->get(['id', 'name']);
 
@@ -189,9 +196,9 @@ class SheDocumentController extends Controller
             'document_code' => $data['document_code'],
             'title' => $data['title'],
             'category' => $data['category'],
-            'description' => $data['description'],
+            'description' => $data['description'] ?? null,
             'department_id' => $data['department_id'],
-            'site_id' => $data['site_id'],
+            'site_id' => $data['site_id'] ?? null,
             'uploaded_by' => $request->user()?->id,
             'version' => $data['version'],
             'revision_number' => 0,
@@ -324,8 +331,13 @@ class SheDocumentController extends Controller
     /**
      * Download Document File
      */
-    public function download(SheDocument $document)
+    public function download(Request $request, SheDocument $document)
     {
+        $user = $request->user();
+        if ($user && !$this->canAccessDocument($user, $document)) {
+            abort(403, 'Akses unduh ditolak untuk dokumen ini.');
+        }
+
         if (!$document->file_path || !Storage::disk('public')->exists($document->file_path)) {
             abort(404, 'File dokumen tidak ditemukan di server.');
         }
@@ -337,8 +349,13 @@ class SheDocumentController extends Controller
     /**
      * Preview Document (Inline)
      */
-    public function preview(SheDocument $document)
+    public function preview(Request $request, SheDocument $document)
     {
+        $user = $request->user();
+        if ($user && !$this->canAccessDocument($user, $document)) {
+            abort(403, 'Akses pratinjau ditolak untuk dokumen ini.');
+        }
+
         if (!$document->file_path || !Storage::disk('public')->exists($document->file_path)) {
             abort(404, 'File dokumen tidak ditemukan.');
         }
@@ -350,5 +367,27 @@ class SheDocumentController extends Controller
             'Content-Type' => $mime,
             'Content-Disposition' => 'inline; filename="' . ($document->file_name ?: 'document.pdf') . '"',
         ]);
+    }
+
+    private function canAccessDocument(User $user, SheDocument $doc): bool
+    {
+        if (in_array($user->role, ['super_admin', 'admin_ho'])) {
+            return true;
+        }
+
+        // Draft check: only uploader or admin can access
+        if ($doc->status === 'Draft' && $doc->uploaded_by !== $user->id) {
+            return false;
+        }
+
+        // Site check: if document belongs to a specific site, user must have access to that site
+        if ($doc->site_id) {
+            $hasSite = $user->sites()->where('sites.id', $doc->site_id)->exists();
+            if (!$hasSite) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

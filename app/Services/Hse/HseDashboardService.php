@@ -74,9 +74,9 @@ class HseDashboardService
         $prevTo = $from->copy()->subDay()->endOfDay();
         $prevFrom = $prevTo->copy()->subDays($days - 1)->startOfDay();
 
-        $siteId = $request->filled('site_id') ? (int) $request->input('site_id') : null;
+        $siteId = $request->filled('site_id') ? (int) $request->input('site_id') : \App\Support\SiteSelection::id($request);
         $companyId = $request->filled('company_id') ? (int) $request->input('company_id') : null;
-        $departmentId = $request->filled('department_id') ? (int) $request->input('department_id') : null;
+        $departmentId = $request->filled('department_id') ? (int) $request->input('department_id') : ($request->filled('dept_id') ? (int) $request->input('dept_id') : null);
 
         $allowed = $request->user()?->allowedSiteIds();
 
@@ -106,6 +106,7 @@ class HseDashboardService
             'site_id' => $siteId,
             'company_id' => $companyId,
             'department_id' => $departmentId,
+            'dept_id' => $departmentId,
             'scope_site_ids' => $scopeSiteIds,
             'allowed_site_ids' => $allowed,
         ];
@@ -127,6 +128,8 @@ class HseDashboardService
             'companies' => Company::query()->orderBy('name')->get(['id', 'code', 'name']),
             'departments' => $departmentsQuery->get(['id', 'name']),
             'years' => range((int) now(self::TZ)->year, (int) now(self::TZ)->year - 4),
+            'users' => \App\Models\User::where('is_active', true)->orderBy('name')->limit(200)->get(['id', 'name', 'email']),
+            'training_courses' => \App\Models\HseTrainingCourse::orderBy('title')->get(['id', 'title']),
         ];
     }
 
@@ -238,39 +241,83 @@ class HseDashboardService
         // Indikator tambahan sesuai spesifikasi SHE MANDALA
         $pdCount = $this->count(HseIncident::class, 'occurred_at', $f['from'], $f['to'], $f, fn ($q) => $q->where('type', 'Property Damage'));
         $pdfr = $exposure > 0 ? ($pdCount / $exposure) * self::LTIFR_MULTIPLIER : null;
-        $pdCost = 0.0;
+
+        // PD Cost: sum from HseIncident property_damage_cost or scoped IndicatorDaily
+        $incidentPdCost = (float) $this->sum(HseIncident::class, 'property_damage_cost', 'occurred_at', $f['from'], $f['to'], $f);
+        $indicatorPdCost = 0.0;
         $pdCostInd = \App\Models\Indicator::where('code', 'PD_COST')->first();
         if ($pdCostInd) {
-            $pdCost = (float) \App\Models\IndicatorDaily::where('indicator_id', $pdCostInd->id)->whereBetween('date', [$f['from']->toDateString(), $f['to']->toDateString()])->sum('value');
+            $indQuery = \App\Models\IndicatorDaily::where('indicator_id', $pdCostInd->id)
+                ->whereBetween('date', [$f['from']->toDateString(), $f['to']->toDateString()]);
+            if (($f['scope_site_ids'] ?? null) !== null) {
+                $indQuery->whereIn('site_id', $f['scope_site_ids'] ?: [-1]);
+            }
+            $indicatorPdCost = (float) $indQuery->sum('value');
         }
+        $pdCost = $incidentPdCost > 0 ? $incidentPdCost : $indicatorPdCost;
 
         $enviroCount = $this->count(HseIncident::class, 'occurred_at', $f['from'], $f['to'], $f, fn ($q) => $q->where('type', 'Environmental'));
         $pakCount = $this->count(HseIncident::class, 'occurred_at', $f['from'], $f['to'], $f, fn ($q) => $q->where('type', 'PAK'));
         $kaptkCount = $this->count(HseIncident::class, 'occurred_at', $f['from'], $f['to'], $f, fn ($q) => $q->where('type', 'KAPTK'));
-        $nearMissCount = $this->count(HseIncident::class, 'occurred_at', $f['from'], $f['to'], $f, fn ($q) => $q->where('category', 'Near Miss'));
-        if ($nearMissCount == 0) {
-            $nearMissCount = \App\Models\HipoReport::whereBetween('report_time', [$f['from'], $f['to']])->count();
+
+        // Near Miss: from Incident category/type Near Miss, with site-scoped HipoReport fallback
+        $nearMissCount = $this->count(HseIncident::class, 'occurred_at', $f['from'], $f['to'], $f, fn ($q) => $q->where(function ($sub) {
+            $sub->where('category', 'Near Miss')->orWhere('type', 'Near Miss');
+        }));
+        if ($nearMissCount === 0) {
+            $nearMissHipoQuery = \App\Models\HipoReport::whereBetween('report_time', [$f['from'], $f['to']])
+                ->where(function ($q) {
+                    $q->where('jenis_hipo', 'like', '%near%miss%')
+                      ->orWhere('category', 'like', '%near%miss%');
+                });
+            if (($f['scope_site_ids'] ?? null) !== null) {
+                $nearMissHipoQuery->whereIn('site_id', $f['scope_site_ids'] ?: [-1]);
+            }
+            $nearMissCount = $nearMissHipoQuery->count();
         }
-        $hipoCount = \App\Models\HipoReport::whereBetween('report_time', [$f['from'], $f['to']])->whereIn('risk_level', ['High', 'Critical'])->count();
+
+        // HIPO: High, Extreme, Critical from HipoReport scoped to site
+        $hipoQuery = \App\Models\HipoReport::whereBetween('report_time', [$f['from'], $f['to']])
+            ->whereIn('risk_level', ['High', 'Extreme', 'Critical']);
+        if (($f['scope_site_ids'] ?? null) !== null) {
+            $hipoQuery->whereIn('site_id', $f['scope_site_ids'] ?: [-1]);
+        }
+        $hipoCount = $hipoQuery->count();
 
         $ltifr = $exposure > 0 ? (($current['Lost Time Injuries'] + $current['Fatalities']) / $exposure) * self::LTIFR_MULTIPLIER : null;
         $severityRate = $exposure > 0 ? ($lostDays / $exposure) * self::LTIFR_MULTIPLIER : null;
 
+        // Dynamic targets from SheKpiTarget / HseKpiTarget
+        $fatalityTarget = $this->resolveTargetValue('fatality', $f, 0);
+        $ltiTarget = $this->resolveTargetValue('lti', $f, 0);
+        $ltifrTarget = $this->resolveTargetValue('ltifr', $f, 0);
+        $ltisrTarget = $this->resolveTargetValue('ltisr', $f, 0);
+        $nonLtiTarget = $this->resolveTargetValue('injury_non_lti', $f, 0);
+        $pdTarget = $this->resolveTargetValue('property_damage', $f, 0);
+        $pdfrTarget = $this->resolveTargetValue('pdfr', $f, 0);
+        $pdCostTarget = $this->resolveTargetValue('pd_cost', $f, 0);
+        $enviroTarget = $this->resolveTargetValue('environmental', $f, 0);
+        $pakTarget = $this->resolveTargetValue('pak', $f, 0);
+        $kaptkTarget = $this->resolveTargetValue('kaptk', $f, 0);
+        $nearMissTarget = $this->resolveTargetValue('near_miss', $f, null);
+        $hipoTarget = $this->resolveTargetValue('hipo', $f, 0);
+        $exposureTarget = $this->resolveTargetValue('manhours', $f, null);
+
         $kpis = [
-            $this->kpi('fatality', 'Total Fatality', $current['Fatalities'], $previous['Fatalities'], 'lower', 0, 'kasus', null, 'Insiden kategori/tipe Fatality.'),
-            $this->kpi('lti', 'Total Lost Time Injury (LTI)', $current['Lost Time Injuries'], $previous['Lost Time Injuries'], 'lower', 0, 'kasus', null, 'Insiden tipe Lost Time Injury.'),
-            $this->kpi('ltifr', 'LTIFR', $ltifr, null, 'lower', 0, 'rate', null, '((LTI + Fatality) × 1.000.000) / Manhours. N/A bila manhours = 0.', 2),
-            $this->kpi('ltisr', 'LTISR', $severityRate, null, 'lower', 0, 'rate', null, '(Total Lost Days × 1.000.000) / Manhours. N/A bila manhours = 0.', 2),
-            $this->kpi('injury_non_lti', 'Injury Non-LTI', $current['Restricted Work Cases'] + $current['Medical Treatment Cases'] + $current['First Aid Cases'], null, 'lower', 0, 'kasus', null, 'First Aid + Medical Treatment + Restricted Work.'),
-            $this->kpi('property_damage', 'Property Damage', $pdCount, null, 'lower', 0, 'kasus', null, 'Insiden Property Damage.'),
-            $this->kpi('pdfr', 'PDFR', $pdfr, null, 'lower', 0, 'rate', null, '(Total Property Damage × 1.000.000) / Manhours.', 2),
-            $this->kpi('pd_cost', 'Property Damage Cost', $pdCost, null, 'lower', 0, 'Rp', null, 'Total biaya kerusakan aset akibat insiden.'),
-            $this->kpi('enviro_accident', 'Environmental Accident', $enviroCount, null, 'lower', 0, 'kasus', null, 'Insiden pencemaran lingkungan.'),
-            $this->kpi('pak', 'Penyakit Akibat Kerja (PAK)', $pakCount, null, 'lower', 0, 'kasus', null, 'Diagnosa Penyakit Akibat Kerja tervalidasi.'),
-            $this->kpi('kaptk', 'KAPTK', $kaptkCount, null, 'lower', 0, 'kasus', null, 'Kejadian Akibat Penyakit Tenaga Kerja.'),
-            $this->kpi('near_miss', 'Near Miss', $nearMissCount, null, 'higher', null, 'laporan', null, 'Total laporan hampir celaka (Nearmiss).'),
-            $this->kpi('hipo', 'HIPO Near Miss', $hipoCount, null, 'lower', 0, 'laporan', null, 'High Potential Incident / Near Miss.'),
-            $this->kpi('exposure', 'Total Manhours', $exposure, null, 'higher', null, 'jam', null, 'Total jam kerja tervalidasi.'),
+            $this->kpi('fatality', 'Total Fatality', $current['Fatalities'], $previous['Fatalities'], 'lower', $fatalityTarget, 'kasus', route('hse.dashboard.performance.indicator', 'fatality'), 'Insiden kategori/tipe Fatality.'),
+            $this->kpi('lti', 'Total Lost Time Injury (LTI)', $current['Lost Time Injuries'], $previous['Lost Time Injuries'], 'lower', $ltiTarget, 'kasus', route('hse.dashboard.performance.indicator', 'lti'), 'Insiden tipe Lost Time Injury.'),
+            $this->kpi('ltifr', 'LTIFR', $ltifr, null, 'lower', $ltifrTarget, 'rate', null, '((LTI + Fatality) × 1.000.000) / Manhours. N/A bila manhours = 0.', 2),
+            $this->kpi('ltisr', 'LTISR', $severityRate, null, 'lower', $ltisrTarget, 'rate', null, '(Total Lost Days × 1.000.000) / Manhours. N/A bila manhours = 0.', 2),
+            $this->kpi('injury_non_lti', 'Injury Non-LTI', $current['Restricted Work Cases'] + $current['Medical Treatment Cases'] + $current['First Aid Cases'], null, 'lower', $nonLtiTarget, 'kasus', route('hse.dashboard.performance.indicator', 'non-lti'), 'First Aid + Medical Treatment + Restricted Work.'),
+            $this->kpi('property_damage', 'Property Damage', $pdCount, null, 'lower', $pdTarget, 'kasus', route('hse.dashboard.performance.indicator', 'property-damage'), 'Insiden Property Damage.'),
+            $this->kpi('pdfr', 'PDFR', $pdfr, null, 'lower', $pdfrTarget, 'rate', route('hse.dashboard.performance.indicator', 'pdfr'), '(Total Property Damage × 1.000.000) / Manhours.', 2),
+            $this->kpi('pd_cost', 'Property Damage Cost', $pdCost, null, 'lower', $pdCostTarget, 'Rp', route('hse.dashboard.performance.indicator', 'pd-cost'), 'Total biaya kerusakan aset akibat insiden.'),
+            $this->kpi('enviro_accident', 'Environmental Accident', $enviroCount, null, 'lower', $enviroTarget, 'kasus', route('hse.dashboard.performance.indicator', 'environmental'), 'Insiden pencemaran lingkungan.'),
+            $this->kpi('pak', 'Penyakit Akibat Kerja (PAK)', $pakCount, null, 'lower', $pakTarget, 'kasus', route('hse.dashboard.performance.indicator', 'pak'), 'Diagnosa Penyakit Akibat Kerja tervalidasi.'),
+            $this->kpi('kaptk', 'KAPTK', $kaptkCount, null, 'lower', $kaptkTarget, 'kasus', route('hse.dashboard.performance.indicator', 'kaptk'), 'Kejadian Akibat Penyakit Tenaga Kerja.'),
+            $this->kpi('near_miss', 'Near Miss', $nearMissCount, null, 'higher', $nearMissTarget, 'laporan', route('hse.dashboard.performance.indicator', 'near-miss'), 'Total laporan hampir celaka (Nearmiss).'),
+            $this->kpi('hipo', 'HIPO Near Miss', $hipoCount, null, 'lower', $hipoTarget, 'laporan', null, 'High Potential Incident / Near Miss.'),
+            $this->kpi('exposure', 'Total Manhours', $exposure, null, 'higher', $exposureTarget, 'jam', route('hse.dashboard.manhours.index'), 'Total jam kerja tervalidasi.'),
             $this->kpi('days_without_lti', 'Days Without Accident', $this->daysWithoutLti($f) ?? 0, null, 'higher', null, 'hari', null, 'Hari kerja selamat tanpa kecelakaan.'),
             $this->kpi('fac', 'First Aid Cases', $current['First Aid Cases'], $previous['First Aid Cases'], 'lower', null, 'kasus', null, 'Pertolongan pertama.'),
             $this->kpi('mtc', 'Medical Treatment Cases', $current['Medical Treatment Cases'], $previous['Medical Treatment Cases'], 'lower', null, 'kasus', null, 'Perawatan medis lanjutan.'),
@@ -1328,17 +1375,17 @@ class HseDashboardService
 
     private function manhoursSummaryData(array $f): array
     {
-        $manhours = SheManhour::whereBetween('date', [$f['from'], $f['to']])
-            ->where('status', 'Validated')
-            ->sum('manhours');
-        $headcount = SheManhour::whereBetween('date', [$f['from'], $f['to']])
-            ->where('status', 'Validated')
-            ->avg('employee_count');
+        $query = $this->scoped(SheManhour::class, $f)
+            ->whereBetween('date', [$f['from']->toDateString(), $f['to']->toDateString()])
+            ->where('status', 'Validated');
+
+        $manhours = (float) (clone $query)->sum('manhours');
+        $headcount = (float) (clone $query)->avg('employee_count');
 
         return [
             'kpis' => [
-                $this->kpi('total_manhours', 'Total Validated Manhours', (float) $manhours, null, 'higher', null, 'jam'),
-                $this->kpi('avg_headcount', 'Average Headcount', (float) round($headcount ?? 0), null, 'higher', null, 'karyawan'),
+                $this->kpi('total_manhours', 'Total Validated Manhours', $manhours, null, 'higher', null, 'jam', null, 'Total jam kerja tervalidasi.'),
+                $this->kpi('avg_headcount', 'Average Headcount', round($headcount ?? 0), null, 'higher', null, 'karyawan', null, 'Rata-rata tenaga kerja.'),
             ],
             'table' => [],
         ];
@@ -1600,6 +1647,40 @@ class HseDashboardService
         }
 
         return Carbon::parse($last)->startOfDay()->diffInDays(now(self::TZ)->startOfDay());
+    }
+
+    public function resolveTargetValue(string $key, array $f, $default = null): ?float
+    {
+        $year = (int) ($f['year'] ?? now()->year);
+        $siteId = $f['site_id'] ?? null;
+
+        // 1. Check SheKpiTarget for site + year
+        if ($siteId) {
+            $val = \App\Models\SheKpiTarget::where('kpi_key', $key)
+                ->where('year', $year)
+                ->where('site_id', $siteId)
+                ->value('target_value');
+            if ($val !== null) {
+                return (float) $val;
+            }
+        }
+
+        // 2. Check SheKpiTarget for global year
+        $val = \App\Models\SheKpiTarget::where('kpi_key', $key)
+            ->where('year', $year)
+            ->whereNull('site_id')
+            ->value('target_value');
+        if ($val !== null) {
+            return (float) $val;
+        }
+
+        // 3. Fallback to HseKpiTarget
+        $hseTarget = HseKpiTarget::where('key', $key)->where('is_active', true)->first();
+        if ($hseTarget && $hseTarget->target_value !== null) {
+            return (float) $hseTarget->target_value;
+        }
+
+        return $default !== null ? (float) $default : null;
     }
 
     private function targets(): Collection

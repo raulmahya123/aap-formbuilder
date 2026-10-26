@@ -621,5 +621,22 @@ Route::middleware('auth')->group(function () {
                 Route::get('/{document}/download', [\App\Http\Controllers\Hse\SheDocumentController::class, 'download'])->name('download');
                 Route::get('/{document}/preview', [\App\Http\Controllers\Hse\SheDocumentController::class, 'preview'])->name('preview');
             });
+
+            // End-to-End Operational Lifecycle Routes
+            Route::post('incidents', [\App\Http\Controllers\Hse\SheOperationsController::class, 'incidentStore'])->name('incidents.store');
+            Route::get('incidents/{incident}', [\App\Http\Controllers\Hse\SheOperationsController::class, 'incidentShow'])->name('incidents.show');
+            Route::post('incidents/{incident}/review', [\App\Http\Controllers\Hse\SheOperationsController::class, 'incidentReview'])->name('incidents.review');
+            Route::post('incidents/{incident}/investigate', [\App\Http\Controllers\Hse\SheOperationsController::class, 'incidentInvestigate'])->name('incidents.investigate');
+            Route::post('incidents/{incident}/approve', [\App\Http\Controllers\Hse\SheOperationsController::class, 'incidentApprove'])->name('incidents.approve');
+            Route::post('incidents/{incident}/close', [\App\Http\Controllers\Hse\SheOperationsController::class, 'incidentClose'])->name('incidents.close');
+
+            Route::post('inspections', [\App\Http\Controllers\Hse\SheOperationsController::class, 'inspectionStore'])->name('inspections.store');
+
+            Route::post('risk-register/{risk}/review', [\App\Http\Controllers\Hse\SheOperationsController::class, 'riskReview'])->name('risk.review');
+            Route::post('risk-register/{risk}/approve', [\App\Http\Controllers\Hse\SheOperationsController::class, 'riskApprove'])->name('risk.approve');
+            Route::post('risk-register/{risk}/close', [\App\Http\Controllers\Hse\SheOperationsController::class, 'riskClose'])->name('risk.close');
+
+            Route::post('training/records', [\App\Http\Controllers\Hse\SheOperationsController::class, 'trainingRecordStore'])->name('training.record.store');
+            Route::post('environment/records', [\App\Http\Controllers\Hse\SheOperationsController::class, 'environmentalRecordStore'])->name('environment.record.store');
         });
 }); // end middleware auth

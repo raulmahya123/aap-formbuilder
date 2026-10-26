@@ -13,7 +13,9 @@ class HseRiskAssessment extends Model
     protected $table = 'hse_risk_assessments';
 
     protected $fillable = [
-        'site_id', 'department_id', 'owner_id', 'activity', 'hazard', 'existing_controls',
+        'risk_no', 'version', 'site_id', 'department_id', 'owner_id',
+        'reviewed_by', 'reviewed_at', 'review_notes', 'approved_by', 'approved_at',
+        'activity', 'hazard', 'existing_controls',
         'category', 'likelihood', 'consequence', 'inherent_score',
         'residual_likelihood', 'residual_consequence', 'residual_score', 'risk_level',
         'treatment', 'treatment_due_date', 'treatment_status', 'status',
@@ -27,9 +29,13 @@ class HseRiskAssessment extends Model
         'residual_consequence' => 'integer',
         'residual_score' => 'integer',
         'treatment_due_date' => 'date',
+        'reviewed_at' => 'datetime',
+        'approved_at' => 'datetime',
     ];
 
     public const LEVELS = ['Low', 'Medium', 'High', 'Extreme'];
+
+    public const STATUSES = ['Draft', 'Active', 'In Review', 'Approved', 'Closed', 'Archived'];
 
     public function site()
     {
@@ -44,6 +50,16 @@ class HseRiskAssessment extends Model
     public function owner()
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function reviewer()
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function actions()
