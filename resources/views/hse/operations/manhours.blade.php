@@ -176,9 +176,10 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-4">
-            {{ $records->links() }}
-        </div>
     </x-hse.chart-card>
+
+    <div class="mt-4">
+        {{ $records->links() }}
+    </div>
 </div>
 @endsection

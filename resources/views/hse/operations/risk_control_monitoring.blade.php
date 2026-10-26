@@ -111,12 +111,13 @@
             </table>
         </div>
 
-        @if($controls->hasPages())
-            <div class="p-4 border-t border-slate-100">
-                {{ $controls->links() }}
-            </div>
-        @endif
     </div>
+
+    @if($controls->hasPages())
+        <div class="mt-4">
+            {{ $controls->links() }}
+        </div>
+    @endif
 
     {{-- MODAL UPDATE KONTROL (ASSIGN PIC, DUE DATE, EVIDENCE, PROGRESS, VERIFICATION) --}}
     <div x-show="openEditModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;" x-transition>

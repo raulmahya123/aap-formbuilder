@@ -97,12 +97,13 @@
             </table>
         </div>
 
-        @if($activities->hasPages())
-            <div class="p-4 border-t border-slate-100">
-                {{ $activities->links() }}
-            </div>
-        @endif
     </div>
+
+    @if($activities->hasPages())
+        <div class="mt-4">
+            {{ $activities->links() }}
+        </div>
+    @endif
 
     {{-- Critical Control Management (CCM) Reports Integration Feed --}}
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">

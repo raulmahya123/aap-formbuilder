@@ -119,12 +119,13 @@
             </table>
         </div>
 
-        @if($documents->hasPages())
-            <div class="p-4 border-t border-slate-100">
-                {{ $documents->links() }}
-            </div>
-        @endif
     </div>
+
+    @if($documents->hasPages())
+        <div class="mt-4">
+            {{ $documents->links() }}
+        </div>
+    @endif
 
     {{-- MODAL UPLOAD DOKUMEN BARU --}}
     <div x-show="openUploadModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;" x-transition>

@@ -143,11 +143,12 @@
             @endforelse
         </div>
 
-        @if($notifications->hasPages())
-            <div class="p-4 border-t border-slate-100">
-                {{ $notifications->links() }}
-            </div>
-        @endif
     </div>
+
+    @if($notifications->hasPages())
+        <div class="mt-4">
+            {{ $notifications->links() }}
+        </div>
+    @endif
 </div>
 @endsection

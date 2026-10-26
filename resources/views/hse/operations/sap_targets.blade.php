@@ -113,9 +113,10 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-4">
-            {{ $targets->links() }}
-        </div>
     </x-hse.chart-card>
+
+    <div class="mt-4">
+        {{ $targets->links() }}
+    </div>
 </div>
 @endsection

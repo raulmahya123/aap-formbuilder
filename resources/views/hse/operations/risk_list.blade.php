@@ -138,12 +138,13 @@
             </table>
         </div>
 
-        @if($risks->hasPages())
-            <div class="p-4 border-t border-slate-100">
-                {{ $risks->links() }}
-            </div>
-        @endif
     </div>
+
+    @if($risks->hasPages())
+        <div class="mt-4">
+            {{ $risks->links() }}
+        </div>
+    @endif
 
     {{-- MODAL TAMBAH RISK ASSESSMENT --}}
     <div x-show="openModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;" x-transition>
