@@ -16,6 +16,13 @@ class HseTrainingCourse extends Model
         'validity_months' => 'integer',
     ];
 
+    protected $appends = ['title'];
+
+    public function getTitleAttribute(): string
+    {
+        return (string) ($this->name ?? $this->code ?? '');
+    }
+
     public function records()
     {
         return $this->hasMany(HseTrainingRecord::class, 'course_id');

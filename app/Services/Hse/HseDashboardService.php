@@ -129,7 +129,7 @@ class HseDashboardService
             'departments' => $departmentsQuery->get(['id', 'name']),
             'years' => range((int) now(self::TZ)->year, (int) now(self::TZ)->year - 4),
             'users' => \App\Models\User::where('is_active', true)->orderBy('name')->limit(200)->get(['id', 'name', 'email']),
-            'training_courses' => \App\Models\HseTrainingCourse::orderBy('title')->get(['id', 'title']),
+            'training_courses' => \App\Models\HseTrainingCourse::orderBy('name')->get(['id', 'name', 'code']),
         ];
     }
 

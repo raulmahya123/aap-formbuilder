@@ -411,4 +411,41 @@ class SheFeatureIntegrationTest extends TestCase
         $forbiddenRes = $this->get(route('hse.dashboard.documents.download', $doc->id));
         $forbiddenRes->assertStatus(403);
     }
+
+    public function test_all_she_dashboard_and_operations_routes_render_ok()
+    {
+        $this->actingAs($this->admin);
+
+        $routes = [
+            '/hse/dashboard/overview',
+            '/hse/dashboard/safety',
+            '/hse/dashboard/incidents',
+            '/hse/dashboard/inspections',
+            '/hse/dashboard/training',
+            '/hse/dashboard/environment',
+            '/hse/dashboard/risk-compliance',
+            '/hse/dashboard/actions',
+            '/hse/dashboard/sites',
+            '/hse/dashboard/reports',
+            '/hse/dashboard/manhours',
+            '/hse/dashboard/targets',
+            '/hse/dashboard/sap',
+            '/hse/dashboard/sap/achievement/leading',
+            '/hse/dashboard/sap/achievement/lagging',
+            '/hse/dashboard/sap/employee-performance',
+            '/hse/dashboard/sap/department-performance',
+            '/hse/dashboard/sap/targets',
+            '/hse/dashboard/risk-register',
+            '/hse/dashboard/risk-register/list',
+            '/hse/dashboard/documents',
+            '/hse/dashboard/performance/fatality',
+            '/hse/dashboard/performance/lti',
+            '/hse/dashboard/performance/near-miss',
+        ];
+
+        foreach ($routes as $url) {
+            $response = $this->get($url);
+            $this->assertEquals(200, $response->status(), "Failed asserting 200 for URL: {$url}");
+        }
+    }
 }

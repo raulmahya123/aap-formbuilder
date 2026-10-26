@@ -119,7 +119,7 @@
                 <select name="course_id" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
                     <option value="">-- Pilih Modul Pelatihan --</option>
                     @foreach($options['training_courses'] ?? [] as $crs)
-                        <option value="{{ $crs->id }}">{{ $crs->title }}</option>
+                        <option value="{{ $crs->id }}">{{ $crs->name ?? $crs->title }}</option>
                     @endforeach
                 </select>
             </div>

@@ -1,5 +1,6 @@
 @once
 @php
+    $errors = $errors ?? new \Illuminate\Support\ViewErrorBag();
     $notifications = [];
     foreach (['success' => ['success', 'ok'], 'error' => ['error'], 'warning' => ['warning'], 'info' => ['info']] as $type => $keys) {
         foreach ($keys as $key) {
