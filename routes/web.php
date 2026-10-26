@@ -575,11 +575,13 @@ Route::middleware('auth')->group(function () {
             // SHE Operations & Modules
             Route::get('performance/{indicator}', [\App\Http\Controllers\Hse\SheOperationsController::class, 'performanceIndicator'])->name('performance.indicator');
             Route::get('manhours', [\App\Http\Controllers\Hse\SheOperationsController::class, 'manhoursIndex'])->name('manhours.index');
+            Route::get('manhours/create', [\App\Http\Controllers\Hse\SheOperationsController::class, 'manhoursCreate'])->name('manhours.create');
             Route::post('manhours', [\App\Http\Controllers\Hse\SheOperationsController::class, 'manhoursStore'])->name('manhours.store');
             Route::post('manhours/import', [\App\Http\Controllers\Hse\SheOperationsController::class, 'manhoursImport'])->name('manhours.import');
             Route::post('manhours/{manhour}/validate', [\App\Http\Controllers\Hse\SheOperationsController::class, 'manhoursValidate'])->name('manhours.validate');
 
             Route::get('targets', [\App\Http\Controllers\Hse\SheOperationsController::class, 'targetsIndex'])->name('targets.index');
+            Route::get('targets/create', [\App\Http\Controllers\Hse\SheOperationsController::class, 'targetsCreate'])->name('targets.create');
             Route::post('targets', [\App\Http\Controllers\Hse\SheOperationsController::class, 'targetsStore'])->name('targets.store');
 
             Route::get('sap', [\App\Http\Controllers\Hse\SheOperationsController::class, 'sapDashboard'])->name('sap.index');
@@ -587,6 +589,7 @@ Route::middleware('auth')->group(function () {
             Route::get('sap/employee-performance', [\App\Http\Controllers\Hse\SheOperationsController::class, 'sapEmployeePerformance'])->name('sap.employee');
             Route::get('sap/department-performance', [\App\Http\Controllers\Hse\SheOperationsController::class, 'sapDepartmentPerformance'])->name('sap.department');
             Route::get('sap/targets', [\App\Http\Controllers\Hse\SheOperationsController::class, 'sapTargetsIndex'])->name('sap.targets.index');
+            Route::get('sap/targets/create', [\App\Http\Controllers\Hse\SheOperationsController::class, 'sapTargetsCreate'])->name('sap.targets.create');
             Route::post('sap/targets', [\App\Http\Controllers\Hse\SheOperationsController::class, 'sapTargetsStore'])->name('sap.targets.store');
 
             Route::post('actions/{pica}/update', [\App\Http\Controllers\Hse\SheOperationsController::class, 'picaUpdate'])->name('actions.update');

@@ -33,86 +33,15 @@
         </div>
     </div>
 
-    {{-- IMPORT EXCEL & BULK INPUT --}}
-    <div class="rounded-xl border border-dashed border-[#94A3B8] bg-slate-50 p-6 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h3 class="text-sm font-bold text-[#0F172A]">Import Manhours via Excel / CSV</h3>
-                <p class="mt-1 text-xs text-[#64748B]">Unggah file CSV/Excel dengan kolom: <code>Tanggal (YYYY-MM-DD), Jumlah Karyawan, Jam Kerja, Lost Hours</code>.</p>
-            </div>
-            <form action="{{ route('hse.dashboard.manhours.import') }}" method="POST" enctype="multipart/form-data" class="flex items-center gap-2">
-                @csrf
-                <input type="file" name="file" required accept=".csv,.xlsx,.xls" class="text-xs text-slate-500 file:mr-2 file:rounded-md file:border-0 file:bg-blue-600 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-blue-700 cursor-pointer" />
-                <button type="submit" class="rounded-lg bg-[#0F172A] px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
-                    Proses Import
-                </button>
-            </form>
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-base font-bold text-slate-900">Riwayat & Validasi Manhours</h2>
+            <p class="text-xs text-slate-500">Antrean pencatatan jam kerja aman untuk divalidasi oleh SHE Department.</p>
         </div>
-    </div>
-
-    {{-- INPUT FORM MODAL / SECTION --}}
-    <div class="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
-        <h2 class="text-base font-semibold text-[#0F172A]">Input Jam Kerja (Manhours) Harian</h2>
-        <p class="mt-1 text-xs text-[#64748B]">Input data jam kerja karyawan dan kontraktor. Hanya data berstatus 'Validated' yang berkontribusi ke KPI LTIFR & LTISR.</p>
-
-        <form action="{{ route('hse.dashboard.manhours.store') }}" method="POST" class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            @csrf
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Tanggal</label>
-                <input type="date" name="date" value="{{ now()->toDateString() }}" required class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]" />
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Site</label>
-                <select name="site_id" required class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
-                    <option value="">Pilih Site</option>
-                    @foreach($options['sites'] as $s)
-                        <option value="{{ $s->id }}">{{ $s->name }} ({{ $s->code }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Perusahaan / Kontraktor</label>
-                <select name="company_id" class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
-                    <option value="">Internal / Pilih Perusahaan</option>
-                    @foreach($options['companies'] as $c)
-                        <option value="{{ $c->id }}">{{ $c->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Department</label>
-                <select name="department_id" class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
-                    <option value="">Pilih Department</option>
-                    @foreach($options['departments'] as $d)
-                        <option value="{{ $d->id }}">{{ $d->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Jumlah Karyawan (Manpower)</label>
-                <input type="number" name="employee_count" min="0" value="0" required class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]" />
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Jam Kerja (Worked Hours)</label>
-                <input type="number" step="0.5" name="manhours" min="0" required placeholder="Contoh: 80" class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]" />
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Lost Hours</label>
-                <input type="number" step="0.5" name="lost_hours" min="0" value="0" class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]" />
-            </div>
-
-            <div class="flex items-end">
-                <button type="submit" class="w-full rounded-lg bg-[#1646A0] px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#123880] transition">
-                    Simpan Jam Kerja
-                </button>
-            </div>
-        </form>
+        <a href="{{ route('hse.dashboard.manhours.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-[#1646A0] px-4 py-2.5 text-xs font-semibold text-white shadow hover:bg-[#123880] transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            + Input Jam Kerja (Manhours)
+        </a>
     </div>
 
     {{-- TABEL RIWAYAT & VALIDASI --}}

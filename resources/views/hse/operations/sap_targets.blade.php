@@ -17,68 +17,15 @@
         </div>
     @endif
 
-    {{-- FORM INPUT TARGET SAP --}}
-    <div class="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
-        <h2 class="text-base font-semibold text-[#0F172A]">Tetapkan Target SAP Baru</h2>
-        <p class="mt-1 text-xs text-[#64748B]">Tetapkan kuota kegiatan wajib inspeksi, observasi tugas (PTO), dan pelaporan bahaya.</p>
-
-        <form action="{{ route('hse.dashboard.sap.targets.store') }}" method="POST" class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            @csrf
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Site</label>
-                <select name="site_id" class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
-                    <option value="">Semua Site</option>
-                    @foreach($options['sites'] as $s)
-                        <option value="{{ $s->id }}">{{ $s->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Department</label>
-                <select name="department_id" class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
-                    <option value="">Semua Department</option>
-                    @foreach($options['departments'] as $d)
-                        <option value="{{ $d->id }}">{{ $d->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Tahun</label>
-                <input type="number" name="year" value="{{ now()->year }}" required class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]" />
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Bulan</label>
-                <select name="month" required class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
-                    @for($m = 1; $m <= 12; $m++)
-                        <option value="{{ $m }}" {{ $m == now()->month ? 'selected' : '' }}>Bulan {{ $m }}</option>
-                    @endfor
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Target Inspeksi</label>
-                <input type="number" name="target_inspection" min="0" value="4" required class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]" />
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Target PTO</label>
-                <input type="number" name="target_pto" min="0" value="2" required class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]" />
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Target Hazard Report</label>
-                <input type="number" name="target_hazard" min="0" value="6" required class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]" />
-            </div>
-
-            <div class="flex items-end">
-                <button type="submit" class="w-full rounded-lg bg-[#1646A0] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-[#123880] transition">
-                    Simpan Target SAP
-                </button>
-            </div>
-        </form>
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-base font-bold text-slate-900">Daftar Target SAP</h2>
+            <p class="text-xs text-slate-500">Konfigurasi target kewajiban K3 (Inspeksi, PTO, Hazard Report) per bulan.</p>
+        </div>
+        <a href="{{ route('hse.dashboard.sap.targets.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-[#1646A0] px-4 py-2.5 text-xs font-semibold text-white shadow hover:bg-[#123880] transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Tetapkan Target SAP Baru
+        </a>
     </div>
 
     {{-- LIST TARGET SAP --}}

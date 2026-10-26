@@ -66,6 +66,14 @@ class SheOperationsController extends Controller
         return view('hse.operations.manhours', compact('filters', 'options', 'records', 'stats'));
     }
 
+    public function manhoursCreate(Request $request)
+    {
+        $filters = $this->dashboardService->filters($request);
+        $options = $this->dashboardService->options($filters);
+
+        return view('hse.operations.manhours_create', compact('filters', 'options'));
+    }
+
     public function manhoursStore(Request $request)
     {
         $data = $request->validate([
@@ -84,7 +92,7 @@ class SheOperationsController extends Controller
 
         SheManhour::create($data);
 
-        return back()->with('ok', 'Data Manhours berhasil disimpan.');
+        return redirect()->route('hse.dashboard.manhours.index')->with('ok', 'Data Manhours berhasil disimpan.');
     }
 
     public function manhoursValidate(Request $request, SheManhour $manhour)
@@ -344,6 +352,33 @@ class SheOperationsController extends Controller
         return view('hse.operations.targets', compact('filters', 'options', 'targets', 'year', 'kpiKeys'));
     }
 
+    public function targetsCreate(Request $request)
+    {
+        $filters = $this->dashboardService->filters($request);
+        $options = $this->dashboardService->options($filters);
+
+        $year = (int) $request->input('year', now()->year);
+
+        $kpiKeys = [
+            'fatality' => ['label' => 'Total Fatality', 'unit' => 'kasus', 'direction' => 'lower'],
+            'lti' => ['label' => 'Total LTI', 'unit' => 'kasus', 'direction' => 'lower'],
+            'ltifr' => ['label' => 'LTIFR', 'unit' => 'rate', 'direction' => 'lower'],
+            'ltisr' => ['label' => 'LTISR', 'unit' => 'rate', 'direction' => 'lower'],
+            'injury_non_lti' => ['label' => 'Injury Non-LTI', 'unit' => 'kasus', 'direction' => 'lower'],
+            'property_damage' => ['label' => 'Property Damage', 'unit' => 'kasus', 'direction' => 'lower'],
+            'pdfr' => ['label' => 'PDFR', 'unit' => 'rate', 'direction' => 'lower'],
+            'pd_cost' => ['label' => 'Property Damage Cost', 'unit' => 'Rp', 'direction' => 'lower'],
+            'environmental' => ['label' => 'Environmental Accident', 'unit' => 'kasus', 'direction' => 'lower'],
+            'pak' => ['label' => 'PAK', 'unit' => 'kasus', 'direction' => 'lower'],
+            'kaptk' => ['label' => 'KAPTK', 'unit' => 'kasus', 'direction' => 'lower'],
+            'near_miss' => ['label' => 'Near Miss', 'unit' => 'laporan', 'direction' => 'higher'],
+            'hipo' => ['label' => 'HIPO Near Miss', 'unit' => 'laporan', 'direction' => 'lower'],
+            'manhours' => ['label' => 'Manhours', 'unit' => 'jam', 'direction' => 'higher'],
+        ];
+
+        return view('hse.operations.targets_create', compact('filters', 'options', 'year', 'kpiKeys'));
+    }
+
     public function targetsStore(Request $request)
     {
         $data = $request->validate([
@@ -380,7 +415,7 @@ class SheOperationsController extends Controller
             ]
         );
 
-        return back()->with('ok', 'Target KPI berhasil disimpan dan disinkronkan ke seluruh sistem.');
+        return redirect()->route('hse.dashboard.targets.index')->with('ok', 'Target KPI berhasil disimpan dan disinkronkan ke seluruh sistem.');
     }
 
     /* =========================================================
@@ -745,6 +780,14 @@ class SheOperationsController extends Controller
         return view('hse.operations.sap_targets', compact('filters', 'options', 'targets'));
     }
 
+    public function sapTargetsCreate(Request $request)
+    {
+        $filters = $this->dashboardService->filters($request);
+        $options = $this->dashboardService->options($filters);
+
+        return view('hse.operations.sap_targets_create', compact('filters', 'options'));
+    }
+
     public function sapTargetsStore(Request $request)
     {
         $data = $request->validate([
@@ -772,7 +815,7 @@ class SheOperationsController extends Controller
             $data
         );
 
-        return back()->with('ok', 'Target SAP berhasil disimpan.');
+        return redirect()->route('hse.dashboard.sap.targets.index')->with('ok', 'Target SAP berhasil disimpan.');
     }
 
     /* =========================================================

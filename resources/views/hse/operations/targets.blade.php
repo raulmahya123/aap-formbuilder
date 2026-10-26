@@ -17,57 +17,15 @@
         </div>
     @endif
 
-    {{-- INPUT TARGET FORM --}}
-    <div class="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
-        <h2 class="text-base font-semibold text-[#0F172A]">Tetapkan Target KPI Baru</h2>
-        <p class="mt-1 text-xs text-[#64748B]">Target akan otomatis terhubung ke kartu KPI dan grafik tren performa aktual vs target.</p>
-
-        <form action="{{ route('hse.dashboard.targets.store') }}" method="POST" class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            @csrf
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Indikator KPI</label>
-                <select name="kpi_key" required class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
-                    <option value="">Pilih KPI</option>
-                    @foreach($kpiKeys as $k => $conf)
-                        <option value="{{ $k }}">{{ $conf['label'] }} ({{ $conf['unit'] }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Site (Opsional)</label>
-                <select name="site_id" class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
-                    <option value="">Semua Site (Corporate Target)</option>
-                    @foreach($options['sites'] as $s)
-                        <option value="{{ $s->id }}">{{ $s->name }} ({{ $s->code }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Tahun</label>
-                <input type="number" name="year" value="{{ $year }}" required class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]" />
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Nilai Target</label>
-                <input type="number" step="any" name="target_value" required placeholder="0" class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]" />
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-[#475569]">Arah Sukses</label>
-                <select name="direction" required class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
-                    <option value="lower">Lebih rendah lebih baik (cth: Incident/LTI = 0)</option>
-                    <option value="higher">Lebih tinggi lebih baik (cth: Manhours, Score)</option>
-                </select>
-            </div>
-
-            <div class="sm:col-span-2 lg:col-span-5 flex justify-end">
-                <button type="submit" class="rounded-lg bg-[#1646A0] px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#123880] transition">
-                    Simpan Target KPI
-                </button>
-            </div>
-        </form>
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-base font-bold text-slate-900">Daftar Target KPI</h2>
+            <p class="text-xs text-slate-500">Konfigurasi target tahunan &amp; per-site untuk indikator keselamatan dan kinerja operasional.</p>
+        </div>
+        <a href="{{ route('hse.dashboard.targets.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-[#1646A0] px-4 py-2.5 text-xs font-semibold text-white shadow hover:bg-[#123880] transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Tetapkan Target KPI Baru
+        </a>
     </div>
 
     {{-- LIST TARGETS --}}
