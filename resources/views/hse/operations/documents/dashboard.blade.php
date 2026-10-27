@@ -3,7 +3,7 @@
 @section('title', 'Document Dashboard — MANDALA')
 
 @section('content')
-<div class="ui-page space-y-6" x-data="{ openUploadModal: false }">
+<div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
         'title' => 'Document Management Dashboard',
         'subtitle' => 'Repository resmi dokumen kebijakan SHE, SOP, Instruksi Kerja, Form digital, revisi dan peninjauan berkala.',
@@ -21,10 +21,7 @@
             <a href="{{ route('hse.dashboard.documents.index', 'approval') }}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
                 Antrian Approval ({{ $inReview }})
             </a>
-            <button type="button" @click="openUploadModal = true" class="inline-flex items-center gap-1.5 rounded-lg bg-[#1646A0] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#123880] transition">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Unggah Dokumen Baru
-            </button>
+            <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.documents.create') }}">Upload Dokumen</x-ui.link>
         </div>
     </div>
 
@@ -233,81 +230,5 @@
         </div>
     </div>
 
-    {{-- MODAL UPLOAD DOKUMEN BARU --}}
-    <div x-show="openUploadModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;" x-transition>
-        <div class="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6" @click.away="openUploadModal = false">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <h3 class="text-base font-bold text-slate-900">Unggah Dokumen SHE Baru</h3>
-                <button type="button" @click="openUploadModal = false" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
-            </div>
-
-            <form action="{{ route('hse.dashboard.documents.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-                @csrf
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kode Dokumen *</label>
-                        <input type="text" name="document_code" required placeholder="Contoh: SOP-SHE-001" class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori Dokumen *</label>
-                        <select name="category" required class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                            <option value="Policy">Policy (Kebijakan)</option>
-                            <option value="SOP" selected>SOP (Standard Operating Procedure)</option>
-                            <option value="IK">IK (Instruksi Kerja)</option>
-                            <option value="Form">Form Dokumen</option>
-                            <option value="Other">Lainnya</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Dokumen *</label>
-                    <input type="text" name="title" required placeholder="Contoh: Prosedur Pengendalian Bahaya Bekerja di Ketinggian" class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Department Owner *</label>
-                        <select name="department_id" required class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                            @foreach($departments as $dept)
-                                <option value="{{ $dept->id }}">{{ $dept->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Versi Dokumen *</label>
-                        <input type="text" name="version" required value="1.0" placeholder="1.0" class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Deskripsi & Ruang Lingkup</label>
-                    <textarea name="description" rows="2" placeholder="Ruang lingkup penerapan dokumen..." class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]"></textarea>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Efektif (Effective Date) *</label>
-                        <input type="date" name="effective_date" required value="{{ date('Y-m-d') }}" class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Review Ulang (Review Date)</label>
-                        <input type="date" name="review_date" value="{{ date('Y-m-d', strtotime('+1 year')) }}" class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih File Dokumen (PDF, DOCX) *</label>
-                    <input type="file" name="file_document" required class="w-full text-xs rounded-lg border border-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#1646A0] hover:file:bg-blue-100">
-                    <p class="text-[10px] text-slate-400 mt-1">Maksimum ukuran file: 20MB.</p>
-                </div>
-
-                <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
-                    <button type="button" @click="openUploadModal = false" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
-                    <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-[#1646A0] hover:bg-[#123880] rounded-lg shadow-sm">Simpan & Ajukan Dokumen</button>
-                </div>
-            </form>
-        </div>
-    </div>
 </div>
 @endsection

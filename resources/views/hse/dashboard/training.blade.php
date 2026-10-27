@@ -16,10 +16,7 @@
     </div>
 
     <div class="flex justify-end -mt-4">
-        <button type="button" onclick="document.getElementById('modal-input-training').showModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold shadow-sm hover:bg-[#0B2345] transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            Catat Pelatihan Karyawan
-        </button>
+        <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.training.create') }}">Form Pelatihan</x-ui.link>
     </div>
 
     @if(session('ok'))
@@ -105,78 +102,5 @@
 </div>
 
 <!-- Modal Catat Pelatihan Karyawan -->
-<dialog id="modal-input-training" class="rounded-xl border border-slate-200 p-0 shadow-2xl max-w-xl w-full backdrop:bg-slate-900/50">
-    <div class="p-6">
-        <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-            <h3 class="text-base font-bold text-[#0F172A]">Catat Partisipasi Pelatihan K3 & Sertifikasi</h3>
-            <button type="button" onclick="document.getElementById('modal-input-training').close()" class="text-slate-400 hover:text-slate-600">&times;</button>
-        </div>
 
-        <form action="{{ route('hse.dashboard.training.record.store') }}" method="POST" class="space-y-4">
-            @csrf
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Materi / Modul Pelatihan (Course) <span class="text-rose-500">*</span></label>
-                <select name="course_id" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
-                    <option value="">-- Pilih Modul Pelatihan --</option>
-                    @foreach($options['training_courses'] ?? [] as $crs)
-                        <option value="{{ $crs->id }}">{{ $crs->name ?? $crs->title }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Karyawan / Peserta <span class="text-rose-500">*</span></label>
-                    <select name="user_id" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
-                        <option value="">-- Pilih Karyawan --</option>
-                        @foreach($options['users'] ?? [] as $usr)
-                            <option value="{{ $usr->id }}">{{ $usr->name }} ({{ $usr->email }})</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Site Penugasan <span class="text-rose-500">*</span></label>
-                    <select name="site_id" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
-                        <option value="">-- Pilih Site --</option>
-                        @foreach($options['sites'] ?? [] as $st)
-                            <option value="{{ $st->id }}" {{ ($filters['site_id'] ?? null) == $st->id ? 'selected' : '' }}>{{ $st->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Jadwal <span class="text-rose-500">*</span></label>
-                    <input type="date" name="scheduled_date" required value="{{ now()->toDateString() }}" class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Selesai Pelatihan</label>
-                    <input type="date" name="completed_date" value="{{ now()->toDateString() }}" class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nilai Evaluasi / Ujian (0 - 100)</label>
-                    <input type="number" name="score" min="0" max="100" step="0.1" value="85" class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Status Keikutsertaan <span class="text-rose-500">*</span></label>
-                    <select name="status" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
-                        <option value="Completed" selected>Completed (Lulus/Selesai)</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Scheduled">Scheduled</option>
-                        <option value="Not Started">Not Started</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
-                <button type="button" onclick="document.getElementById('modal-input-training').close()" class="px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Batal</button>
-                <button type="submit" class="px-5 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold hover:bg-[#0B2345]">Simpan Catatan Pelatihan</button>
-            </div>
-        </form>
-    </div>
-</dialog>
 @endsection

@@ -68,6 +68,16 @@
 .ui-sidebar .ui-nav-item:hover { background: #F4F4F5; border-color: #D4D4D8; }
 .ui-sidebar .ui-nav-item.is-active,
 .ui-sidebar .ui-nav-item.is-active:hover { background: #713F12; border-color: #713F12; color: #fff; }
+.ui-navigation-group > button { width: 100%; text-align: left; }
+.ui-navigation-group .ui-navigation-chevron { margin-left: auto; flex: 0 0 16px; transition: transform .15s; }
+.ui-navigation-children { margin: 4px 0 8px 10px; padding-left: 10px; border-left: 1px solid #D4D4D8; display: grid; gap: 4px; }
+.ui-navigation-subgroup { display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 8px; color: #52525B; font-size: 12px; font-weight: 600; border-radius: 8px; }
+.ui-navigation-subgroup:hover { background: #F4F4F5; }
+.ui-sidebar nav a.ui-navigation-link { display: flex; align-items: center; min-height: 36px; padding: 8px; border-radius: 8px; color: #18181B; font-size: 13px; line-height: 1.4; text-decoration: none; overflow-wrap: anywhere; }
+.ui-sidebar nav a.ui-navigation-link:hover { background: #F4F4F5; }
+.ui-sidebar nav a.ui-navigation-link.is-active { background: #713F12; color: #fff; }
+.ui-sidebar--collapsed .ui-navigation-children,
+.ui-sidebar--collapsed .ui-navigation-chevron { display: none; }
 .ui-nav-section { width: 100%; text-align: left; min-height: 28px; align-items: center; }
 .ui-sidebar--collapsed .ui-nav-label,
 .ui-sidebar--collapsed .ui-nav-section { display: none; }

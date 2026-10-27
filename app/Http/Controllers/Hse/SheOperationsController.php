@@ -31,6 +31,43 @@ use Illuminate\Support\Str;
 
 class SheOperationsController extends Controller
 {
+    public function riskCreate(Request $request)
+    {
+        return $this->standaloneForm($request, 'risk', 'Form Risk Assessment', 'Catat aktivitas, bahaya, kontrol, dan penanggung jawab risiko.', 'hse.dashboard.risk.list');
+    }
+
+    public function picaCreate(Request $request)
+    {
+        return $this->standaloneForm($request, 'pica', 'Form PICA Baru', 'Lengkapi sumber temuan, rencana tindakan, PIC, dan batas waktu.', 'hse.dashboard.pica.list');
+    }
+
+    public function incidentCreate(Request $request)
+    {
+        return $this->standaloneForm($request, 'incident', 'Form Laporan Insiden', 'Isi data kejadian dan dampaknya. Ringkasan tersedia di halaman monitoring.', 'hse.dashboard.incidents');
+    }
+
+    public function trainingCreate(Request $request)
+    {
+        return $this->standaloneForm($request, 'training', 'Form Pelatihan', 'Catat peserta, pelaksanaan, dan hasil pelatihan.', 'hse.dashboard.training');
+    }
+
+    public function environmentCreate(Request $request)
+    {
+        return $this->standaloneForm($request, 'environment', 'Form Lingkungan & Limbah', 'Catat transaksi lingkungan dan limbah sesuai site.', 'hse.dashboard.environment');
+    }
+
+    private function standaloneForm(Request $request, string $formKey, string $title, string $description, string $backRoute)
+    {
+        $filters = $this->dashboardService->filters($request);
+        $options = $this->dashboardService->options($filters);
+        $users = User::orderBy('name')->get(['id', 'name']);
+        $options['users'] = User::orderBy('name')->get(['id', 'name', 'email']);
+        if ($formKey === 'training') $options['training_courses'] = \App\Models\HseTrainingCourse::orderBy('name')->get();
+        $departments = $options['departments'];
+        $backHref = route($backRoute);
+        return view('hse.operations.form-page', compact('formKey', 'title', 'description', 'options', 'users', 'departments', 'backHref', 'filters'));
+    }
+
     public function __construct(private readonly HseDashboardService $dashboardService)
     {
         $this->middleware(['auth']);
@@ -961,8 +998,8 @@ class SheOperationsController extends Controller
         if ($filters['site_id']) {
             $riskQuery->where('site_id', $filters['site_id']);
         }
-        if ($filters['dept_id']) {
-            $riskQuery->where('department_id', $filters['dept_id']);
+        if ($filters['department_id']) {
+            $riskQuery->where('department_id', $filters['department_id']);
         }
 
         $allRisks = (clone $riskQuery)->get();
@@ -993,8 +1030,8 @@ class SheOperationsController extends Controller
         if ($filters['site_id']) {
             $controlsQuery->where('site_id', $filters['site_id']);
         }
-        if ($filters['dept_id']) {
-            $controlsQuery->where('department_id', $filters['dept_id']);
+        if ($filters['department_id']) {
+            $controlsQuery->where('department_id', $filters['department_id']);
         }
 
         $openTreatments = (clone $controlsQuery)->whereIn('status', ['Open', 'In Progress'])->count();
@@ -1045,8 +1082,8 @@ class SheOperationsController extends Controller
         if ($filters['site_id']) {
             $query->where('site_id', $filters['site_id']);
         }
-        if ($filters['dept_id']) {
-            $query->where('department_id', $filters['dept_id']);
+        if ($filters['department_id']) {
+            $query->where('department_id', $filters['department_id']);
         }
         if ($request->filled('level')) {
             $query->where('risk_level', $request->input('level'));
@@ -1091,8 +1128,8 @@ class SheOperationsController extends Controller
         if ($filters['site_id']) {
             $query->where('site_id', $filters['site_id']);
         }
-        if ($filters['dept_id']) {
-            $query->where('department_id', $filters['dept_id']);
+        if ($filters['department_id']) {
+            $query->where('department_id', $filters['department_id']);
         }
         if ($request->filled('q')) {
             $q = $request->input('q');
@@ -1197,8 +1234,8 @@ class SheOperationsController extends Controller
         if ($filters['site_id']) {
             $query->where('site_id', $filters['site_id']);
         }
-        if ($filters['dept_id']) {
-            $query->where('department_id', $filters['dept_id']);
+        if ($filters['department_id']) {
+            $query->where('department_id', $filters['department_id']);
         }
         if ($request->filled('status')) {
             $query->where('status', $request->input('status'));
@@ -1231,8 +1268,8 @@ class SheOperationsController extends Controller
         if ($filters['site_id']) {
             $query->where('site_id', $filters['site_id']);
         }
-        if ($filters['dept_id']) {
-            $query->where('department_id', $filters['dept_id']);
+        if ($filters['department_id']) {
+            $query->where('department_id', $filters['department_id']);
         }
 
         $allPica = (clone $query)->get();
@@ -1362,8 +1399,8 @@ class SheOperationsController extends Controller
         if ($filters['site_id']) {
             $query->where('site_id', $filters['site_id']);
         }
-        if ($filters['dept_id']) {
-            $query->where('department_id', $filters['dept_id']);
+        if ($filters['department_id']) {
+            $query->where('department_id', $filters['department_id']);
         }
 
         // Submenu Source Filter

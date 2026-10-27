@@ -187,3 +187,8 @@
 .ui-truncated-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; max-width: 24rem; max-height: 3em; }
 #grant-site-access .ui-modal__body { display: flex; flex-direction: column; gap: 16px; }
 #grant-site-access .ui-modal__body > :is(fieldset, p) { margin-block: 0; }
+.ui-standalone-form label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 500; color: #18181B; }
+.ui-standalone-form :is(input:not([type=hidden]):not([type=checkbox]):not([type=radio]), select, textarea) { width: 100%; min-width: 0; font-size: 14px; border-color: #D4D4D8; border-radius: 8px; }
+.ui-standalone-form :is(input:not([type=hidden]):not([type=checkbox]):not([type=radio]), select) { min-height: 40px; }
+.ui-standalone-form textarea { min-height: 88px; }
+.ui-standalone-form form { max-width: 960px; }

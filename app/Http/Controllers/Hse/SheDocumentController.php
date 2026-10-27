@@ -16,6 +16,20 @@ use Illuminate\Support\Facades\Response;
 
 class SheDocumentController extends Controller
 {
+    public function create(Request $request)
+    {
+        $filters = $this->dashboardService->filters($request);
+        $options = $this->dashboardService->options($filters);
+        $departments = $options['departments'];
+        return view('hse.operations.form-page', [
+            'formKey'=>'document', 'title'=>'Upload Dokumen',
+            'description'=>'Lengkapi metadata dan file dokumen sebelum diajukan untuk review.',
+            'backHref'=>route('hse.dashboard.documents.index'),
+            'options'=>$options, 'departments'=>$departments,
+            'category'=>$request->query('category'),
+        ]);
+    }
+
     public function __construct(private readonly HseDashboardService $dashboardService)
     {
         $this->middleware(['auth']);

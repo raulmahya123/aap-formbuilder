@@ -19,7 +19,7 @@
             <select name="template_id" required class="w-full text-sm rounded-lg border border-slate-300 p-2.5">
                 <option value="">-- Pilih Template --</option>
                 @foreach($templates as $t)
-                    <option value="{{ $t->id }}">{{ $t->code }} - {{ $t->name }} ({{ $t->scoring_type }})</option>
+                    <option value="{{ $t->id }}" @selected((string)old('template_id', request('template_id')) === (string)$t->id)>{{ $t->code }} - {{ $t->name }} ({{ $t->scoring_type }})</option>
                 @endforeach
             </select>
         </div>

@@ -3,7 +3,7 @@
 @section('title', $sourceTitle . ' — PICA Management')
 
 @section('content')
-<div class="ui-page space-y-6" x-data="{ openCreateModal: false }">
+<div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
         'title' => $sourceTitle,
         'subtitle' => 'Daftar tindakan korektif dan preventif (PICA) dengan pelacakan status implementasi dan verifikasi evidence.',
@@ -39,10 +39,7 @@
         </form>
 
         <div class="flex items-center gap-2">
-            <button type="button" @click="openCreateModal = true" class="inline-flex items-center gap-1.5 rounded-lg bg-[#1646A0] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#123880] transition">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Buat PICA Manual
-            </button>
+            <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.pica.create') }}">Buat PICA</x-ui.link>
         </div>
     </div>
 
@@ -133,106 +130,5 @@
         </div>
     @endif
 
-    {{-- MODAL BUAT PICA MANUAL --}}
-    <div x-show="openCreateModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;" x-transition>
-        <div class="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6" @click.away="openCreateModal = false">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                <h3 class="text-base font-bold text-slate-900">Buat Tindakan Korektif (PICA) Manual</h3>
-                <button type="button" @click="openCreateModal = false" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
-            </div>
-
-            <form action="{{ route('hse.dashboard.pica.store') }}" method="POST" class="space-y-4">
-                @csrf
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Sumber Tindakan (Source Module) *</label>
-                        <select name="source_module" required class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                            <option value="PICA Audit">PICA Audit</option>
-                            <option value="PICA Investigation">PICA Investigation</option>
-                            <option value="PICA Inspection">PICA Inspection</option>
-                            <option value="PICA PTO">PICA PTO</option>
-                            <option value="PICA Hazard Report">PICA Hazard Report</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Prioritas *</label>
-                        <select name="priority" required class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                            <option value="Low">Low</option>
-                            <option value="Medium" selected>Medium</option>
-                            <option value="High">High</option>
-                            <option value="Critical">Critical</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Site *</label>
-                        <select name="site_id" required class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                            @foreach($options['sites'] ?? [] as $site)
-                                <option value="{{ $site->id }}">{{ $site->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Department</label>
-                        <select name="department_id" class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                            <option value="">-- Pilih Department --</option>
-                            @foreach($departments as $dept)
-                                <option value="{{ $dept->id }}">{{ $dept->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Judul PICA / Finding Summary *</label>
-                    <input type="text" name="title" required placeholder="Contoh: Perbaikan Pengaman Conveyor Line 2" class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Deskripsi Temuan (Finding Description) *</label>
-                    <textarea name="description" rows="2" required placeholder="Deskripsi ketidaksesuaian atau deviasi..." class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]"></textarea>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Root Cause (Akar Masalah)</label>
-                        <textarea name="root_cause" rows="2" placeholder="Analisa penyebab utama..." class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Corrective Action (Tindakan Korektif)</label>
-                        <textarea name="corrective_action" rows="2" placeholder="Tindakan langsung perbaikan..." class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]"></textarea>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Preventive Action (Tindakan Pencegahan)</label>
-                    <textarea name="preventive_action" rows="2" placeholder="Tindakan pencegahan agar tidak berulang..." class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]"></textarea>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Penanggung Jawab (PIC)</label>
-                        <select name="assigned_to" class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                            <option value="">-- Pilih PIC --</option>
-                            @foreach($users as $u)
-                                <option value="{{ $u->id }}">{{ $u->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Batas Waktu (Due Date) *</label>
-                        <input type="date" name="due_date" required class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
-                    <button type="button" @click="openCreateModal = false" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
-                    <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-[#1646A0] hover:bg-[#123880] rounded-lg shadow-sm">Terbitkan PICA</button>
-                </div>
-            </form>
-        </div>
-    </div>
 </div>
 @endsection

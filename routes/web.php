@@ -571,6 +571,9 @@ Route::middleware('auth')->group(function () {
 
             // SHE Operations & Modules
             Route::get('performance/{indicator}', [\App\Http\Controllers\Hse\SheOperationsController::class, 'performanceIndicator'])->name('performance.indicator');
+            Route::get('incidents/create', [\App\Http\Controllers\Hse\SheOperationsController::class, 'incidentCreate'])->name('incidents.create');
+            Route::get('training/create', [\App\Http\Controllers\Hse\SheOperationsController::class, 'trainingCreate'])->name('training.create');
+            Route::get('environment/create', [\App\Http\Controllers\Hse\SheOperationsController::class, 'environmentCreate'])->name('environment.create');
             Route::get('manhours', [\App\Http\Controllers\Hse\SheOperationsController::class, 'manhoursIndex'])->name('manhours.index');
             Route::get('manhours/create', [\App\Http\Controllers\Hse\SheOperationsController::class, 'manhoursCreate'])->name('manhours.create');
             Route::post('manhours', [\App\Http\Controllers\Hse\SheOperationsController::class, 'manhoursStore'])->name('manhours.store');
@@ -597,6 +600,7 @@ Route::middleware('auth')->group(function () {
 
             // FASE 3: Risk Register
             Route::get('risk-register', [\App\Http\Controllers\Hse\SheOperationsController::class, 'riskDashboard'])->name('risk.dashboard');
+            Route::get('risk-register/create', [\App\Http\Controllers\Hse\SheOperationsController::class, 'riskCreate'])->name('risk.create');
             Route::get('risk-register/list', [\App\Http\Controllers\Hse\SheOperationsController::class, 'riskList'])->name('risk.list');
             Route::get('risk-register/high-activities', [\App\Http\Controllers\Hse\SheOperationsController::class, 'riskHighActivities'])->name('risk.high_activities');
             Route::post('risk-register/assessment', [\App\Http\Controllers\Hse\SheOperationsController::class, 'riskAssessmentStore'])->name('risk.assessment.store');
@@ -604,6 +608,7 @@ Route::middleware('auth')->group(function () {
 
             // FASE 4: PICA Management
             Route::get('pica', [\App\Http\Controllers\Hse\SheOperationsController::class, 'picaDashboard'])->name('pica.dashboard');
+            Route::get('pica/create', [\App\Http\Controllers\Hse\SheOperationsController::class, 'picaCreate'])->name('pica.create');
             Route::get('pica/list/{source?}', [\App\Http\Controllers\Hse\SheOperationsController::class, 'picaList'])->name('pica.list');
             Route::get('pica/{pica}/detail', [\App\Http\Controllers\Hse\SheOperationsController::class, 'picaDetail'])->name('pica.detail');
             Route::post('pica', [\App\Http\Controllers\Hse\SheOperationsController::class, 'picaStore'])->name('pica.store');
@@ -611,6 +616,7 @@ Route::middleware('auth')->group(function () {
 
             // FASE 5: Document Management (SOP, IK, Policy Repository)
             Route::prefix('documents')->name('documents.')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Hse\SheDocumentController::class, 'create'])->name('create');
                 Route::get('/', [\App\Http\Controllers\Hse\SheDocumentController::class, 'dashboard'])->name('dashboard');
                 Route::get('/list/{category?}', [\App\Http\Controllers\Hse\SheDocumentController::class, 'index'])->name('index');
                 Route::post('/', [\App\Http\Controllers\Hse\SheDocumentController::class, 'store'])->name('store');
