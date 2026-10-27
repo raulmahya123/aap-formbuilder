@@ -58,7 +58,7 @@ class SapInspeksiController extends Controller
             // restrict
         }
 
-        $inspections = $query->paginate(20)->withQueryString();
+        $inspections = $query->paginate(\App\Support\Listing::perPage())->withQueryString();
         $templates = SapInspectionTemplate::where('is_active', true)->get();
 
         return view('hse.sap_inspeksi.index', compact('inspections', 'templates', 'filters', 'options'));
@@ -537,7 +537,7 @@ class SapInspeksiController extends Controller
     {
         $filters = $this->dashboardService->filters($request);
         $schedules = SapInspectionSchedule::with(['template', 'site', 'department', 'assignee'])
-            ->latest()->paginate(20);
+            ->latest()->paginate(\App\Support\Listing::perPage());
         return view('hse.sap_inspeksi.schedule.index', compact('schedules', 'filters'));
     }
 
@@ -591,7 +591,7 @@ class SapInspeksiController extends Controller
             $query->where('template_id', $request->template_id);
         }
 
-        $inspections = $query->latest()->paginate(30)->withQueryString();
+        $inspections = $query->latest()->paginate(\App\Support\Listing::perPage())->withQueryString();
         $templates = SapInspectionTemplate::where('is_active', true)->get();
 
         return view('hse.sap_inspeksi.reports', compact('inspections', 'templates', 'filters', 'options'));

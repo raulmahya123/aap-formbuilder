@@ -80,9 +80,7 @@
                             <td><x-hse.status :value="$row['status']" /></td>
                             <td>
                                 <div x-data="{ open: false }">
-                                    <button @click="open = true" type="button" class="rounded bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200">
-                                        Update / Verifikasi
-                                    </button>
+                                    <x-ui.button variant="primary" icon="save" @click="open = true" type="button">Update / Verifikasi</x-ui.button>
 
                                     <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" x-cloak>
                                         <div @click.away="open = false" class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
@@ -113,7 +111,7 @@
 
                                                 <div class="flex justify-end gap-2 pt-2">
                                                     <button @click="open = false" type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Batal</button>
-                                                    <button type="submit" class="rounded-lg bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-blue-700">Simpan Perubahan</button>
+                                                    <x-ui.button variant="primary" icon="save" type="submit">Simpan Perubahan</x-ui.button>
                                                 </div>
                                             </form>
                                         </div>

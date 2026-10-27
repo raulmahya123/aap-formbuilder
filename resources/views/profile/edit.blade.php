@@ -124,13 +124,11 @@
         <span>Ganti Foto</span>
       </button>
       @if($user->avatar_path)
-        <button 
+        <x-ui.button variant="danger" icon="trash-2" 
           type="button" 
           @click="deleteAvatar()" 
-          class="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-[#DC2626] hover:bg-[#FEF2F2] rounded-xl transition text-center"
-        >
-          Hapus Foto
-        </button>
+         
+        >Hapus Foto</x-ui.button>
       @endif
     </div>
   </div>
@@ -753,9 +751,7 @@
         <button type="button" @click="openEmploymentModal = false" class="px-4 py-2 font-semibold text-[#475569] hover:bg-[#E2E8F0] rounded-xl transition">
           Batal
         </button>
-        <button type="button" @click="submitEmploymentUpdate()" class="px-5 py-2 font-semibold text-white bg-[#0057FF] hover:bg-[#0046CC] rounded-xl transition">
-          Simpan Perubahan
-        </button>
+        <x-ui.button variant="primary" icon="save" type="button" @click="submitEmploymentUpdate()">Simpan Perubahan</x-ui.button>
       </div>
     </div>
   </div>

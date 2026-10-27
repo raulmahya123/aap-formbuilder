@@ -101,11 +101,9 @@
                             <td><x-hse.status :value="$row['investigation_status']" /></td>
                             <td>{{ $row['investigator'] }}</td>
                             <td><x-hse.status :value="$row['status']" /></td>
-                            <td>
-                                <a href="{{ route('hse.dashboard.incidents.show', $row['id']) }}" class="text-xs text-blue-600 hover:text-blue-800 font-semibold inline-flex items-center gap-1">
-                                    Detail &rarr;
-                                </a>
-                            </td>
+                            <td><x-ui.table-actions>
+                                <x-ui.icon-button action="view" label="Detail &rarr;" href="{{ route('hse.dashboard.incidents.show', $row['id']) }}" />
+                            </x-ui.table-actions></td>
                         </tr>
                     @empty
                         <x-ui.table-empty-state :colspan="11" title="Belum ada insiden" message="Tidak ada laporan pada periode ini." />

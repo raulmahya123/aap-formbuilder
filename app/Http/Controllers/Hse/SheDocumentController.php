@@ -160,7 +160,7 @@ class SheDocumentController extends Controller
             });
         }
 
-        $documents = $query->paginate(20)->withQueryString();
+        $documents = $query->paginate(\App\Support\Listing::perPage())->withQueryString();
         $departments = Department::orderBy('name')->get(['id', 'name']);
 
         return view('hse.operations.documents.index', compact('filters', 'options', 'documents', 'title', 'category', 'departments'));

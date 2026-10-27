@@ -11,7 +11,7 @@
         </div>
         <div class="flex gap-2">
             <a href="{{ route('hse.dashboard.sap.inspeksi.dashboard') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Dashboard</a>
-            <a href="{{ route('hse.dashboard.sap.inspeksi.create') }}" class="px-3 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold">Buat Inspeksi</a>
+            <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.inspeksi.create') }}">Buat Inspeksi</x-ui.link>
         </div>
     </div>
 
@@ -50,19 +50,19 @@
                     <td>{{ $i->created_at->format('d/m/Y') }}</td>
                     <td>{{ $i->status }}</td>
                     <td>{{ $i->percentage ? number_format($i->percentage,1).'%' : '-' }}</td>
-                    <td class="text-right">
-                        <a href="{{ route('hse.dashboard.sap.inspeksi.show', $i->id) }}" class="text-[#1646A0] text-xs font-semibold">Detail</a>
+                    <td class="text-right"><x-ui.table-actions>
+                        <x-ui.icon-button action="view" label="Detail" href="{{ route('hse.dashboard.sap.inspeksi.show', $i->id) }}" />
                         @if(in_array($i->status, ['Draft','Returned']))
-                        <a href="{{ route('hse.dashboard.sap.inspeksi.edit', $i->id) }}" class="text-slate-700 text-xs font-semibold ml-2">Isi Checklist</a>
+                        <x-ui.icon-button action="checklist" label="Isi Checklist" href="{{ route('hse.dashboard.sap.inspeksi.edit', $i->id) }}" />
                         @endif
-                    </td>
+                    <x-ui.sap-record-actions module="inspeksi" :record="$i" /></x-ui.table-actions></td>
                 </tr>
                 @empty
                 <tr><td colspan="8" class="text-center text-slate-500 text-xs py-6">Belum ada inspeksi</td></tr>
                 @endforelse
             </tbody>
         </table>
-        <div class="p-4">{{ $inspections->links() }}</div>
+        <div class="ui-pagination-footer">{{ $inspections->links() }}</div>
     </div>
 </div>
 @endsection

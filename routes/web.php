@@ -66,6 +66,9 @@ use App\Http\Controllers\Admin\CcmReportController as CcmReportController;
 use App\Http\Controllers\Api\Admin\OperationalDataController as AdminOperationalDataApiController;
 use Illuminate\Support\Facades\Response;
 
+Route::post('/table-export/pdf', \App\Http\Controllers\TableExportController::class)
+    ->middleware(['auth', 'throttle:20,1'])->name('table_export.pdf');
+
 Route::get('/storage/{path}', function ($path) {
     $fullPath = storage_path('app/public/' . $path);
 
@@ -646,6 +649,10 @@ Route::middleware('auth')->group(function () {
             Route::post('environment/records', [\App\Http\Controllers\Hse\SheOperationsController::class, 'environmentalRecordStore'])->name('environment.record.store');
 
             // SAP Inspeksi SHE/HSE Module
+            Route::get('sap-records/{module}/{id}/{format}', [\App\Http\Controllers\Hse\SapRecordActionController::class, 'export'])
+                ->whereIn('module', ['inspeksi', 'pto', 'hazard'])->whereNumber('id')->whereIn('format', ['pdf', 'print'])->name('sap.record.export');
+            Route::delete('sap-records/{module}/{id}', [\App\Http\Controllers\Hse\SapRecordActionController::class, 'destroy'])
+                ->whereIn('module', ['inspeksi', 'pto', 'hazard'])->whereNumber('id')->name('sap.record.destroy');
             Route::prefix('sap-inspeksi')->name('sap.inspeksi.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'index'])->name('index');
                 Route::get('/dashboard', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'dashboard'])->name('dashboard');

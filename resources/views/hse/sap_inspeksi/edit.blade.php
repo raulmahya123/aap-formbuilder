@@ -73,7 +73,7 @@
         </div>
         @endforeach
         <div class="flex justify-end gap-2">
-            <button type="submit" class="px-6 py-2.5 rounded-lg bg-slate-900 text-white text-sm font-semibold">Simpan Jawaban</button>
+            <x-ui.button variant="primary" icon="save" type="submit">Simpan Jawaban</x-ui.button>
         </div>
     </form>
 </div>

@@ -12,4 +12,7 @@
         @endisset
     </header>
     <div class="flex-1 p-4">{{ $slot }}</div>
+    @isset($footer)
+        <div class="ui-pagination-footer">{{ $footer }}</div>
+    @endisset
 </section>

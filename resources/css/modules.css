@@ -116,20 +116,9 @@
 .ui-table-scroll {
   max-width:100%
 }
-.ui-table-pagination {
-  margin-top:0;
-  border:1px solid var(--border);
-  border-top:0;
-  border-radius:0 0 8px 8px
-}
-.ui-table-pagination__per-page label {
-  display:flex;
-  align-items:center;
-  gap:8px
-}
-.ui-table-pagination a[aria-disabled=true] {
-  pointer-events:none
-}
+
+
+
 #ui-remote-modal [data-remote-form] {
   max-width:none;
   width:100%;
@@ -160,9 +149,7 @@
   grid-template-columns:90px minmax(0,1fr) 48px;
   gap:8px
 }
-.ui-table-pagination {
-  gap:16px
-}
+
 .ui-metric-card {
   padding:16px
 }

@@ -117,6 +117,6 @@
 
                 <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
                     <x-ui.back-link href="{{ route('hse.dashboard.risk.list') }}">Batal</x-ui.back-link>
-                    <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-[#1646A0] hover:bg-[#123880] rounded-lg shadow-sm">Simpan Risk Assessment</button>
+                    <x-ui.button variant="primary" icon="save" type="submit">Simpan Risk Assessment</x-ui.button>
                 </div>
             </form>

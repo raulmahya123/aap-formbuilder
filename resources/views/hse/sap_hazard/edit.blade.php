@@ -66,7 +66,7 @@
                         <input type="date" name="action_date" value="{{ date('Y-m-d') }}" class="w-full mt-1 border rounded px-2 py-1.5">
                     </div>
                     <div class="flex items-end">
-                        <button class="px-4 py-2 rounded bg-slate-700 text-white text-sm">Tambah</button>
+                        <x-ui.button variant="primary" icon="plus" type="submit">Tambah</x-ui.button>
                     </div>
                 </form>
                 @if($hazard->temporaryActions->count())

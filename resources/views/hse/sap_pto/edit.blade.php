@@ -96,7 +96,7 @@
                 </div>
 
                 <div class="flex justify-between">
-                    <button class="px-4 py-2 rounded bg-[#0B2345] text-white text-sm">Simpan Checklist</button>
+                    <x-ui.button variant="primary" icon="save" type="submit">Simpan Checklist</x-ui.button>
                 </div>
             </form>
 

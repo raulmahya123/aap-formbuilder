@@ -839,13 +839,11 @@
                   </div>
 
                   <template x-if="activeThread.can_manage && mem.id !== currentUserId">
-                    <button 
+                    <x-ui.button variant="danger" icon="trash-2" 
                       type="button" 
                       @click="removeGroupMember(mem)" 
-                      class="text-[10px] text-[#DC2626] hover:underline"
-                    >
-                      Hapus
-                    </button>
+                     
+                    >Hapus</x-ui.button>
                   </template>
                 </div>
               </template>
@@ -1068,14 +1066,12 @@
         >
           Batal
         </button>
-        <button 
+        <x-ui.button variant="primary" icon="plus" 
           type="button" 
           @click="submitCreateGroup()" 
           :disabled="creatingGroup || !newGroupData.name || selectedGroupMembers.length === 0"
-          class="px-4 py-2 text-xs font-semibold text-white bg-[#1565D8] hover:bg-[#0B4DB3] disabled:opacity-50 rounded-lg transition"
-        >
-          Buat Grup
-        </button>
+         
+        >Buat Grup</x-ui.button>
       </div>
     </div>
   </div>
@@ -1207,13 +1203,11 @@
               <option value="resolved">Resolved (Terselesaikan)</option>
               <option value="closed">Closed (Ditutup)</option>
             </select>
-            <button 
+            <x-ui.button variant="primary" icon="save" 
               type="button" 
               @click="submitUpdateReportStatus()"
-              class="px-4 py-2 text-xs font-semibold text-white bg-[#1565D8] hover:bg-[#0B4DB3] rounded-lg transition"
-            >
-              Update
-            </button>
+             
+            >Update</x-ui.button>
           </div>
         </div>
 

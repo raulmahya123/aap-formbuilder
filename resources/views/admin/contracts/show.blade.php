@@ -147,7 +147,7 @@
       </iframe>
       <p class="text-sm text-slate-500 mt-2">
         Jika preview tidak muncul, klik
-        <a class="underline" href="{{ route('admin.contracts.download', $contract) }}">Unduh PDF</a>.
+        <x-ui.link variant="secondary" icon="file-down" href="{{ route('admin.contracts.download', $contract) }}">Unduh PDF</x-ui.link>.
       </p>
     </div>
   </div>

@@ -92,7 +92,7 @@ class SheOperationsController extends Controller
             $query->where('status', $request->input('status'));
         }
 
-        $records = $query->paginate(20)->withQueryString();
+        $records = $query->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         $stats = [
             'total_hours' => (float) (clone $query)->where('status', 'Validated')->sum('manhours'),
@@ -219,7 +219,7 @@ class SheOperationsController extends Controller
             default => null,
         };
 
-        $records = $query->paginate(25)->withQueryString();
+        $records = $query->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         // Calculate actual & target comparison
         $actualCount = (clone $query)->count();
@@ -630,7 +630,7 @@ class SheOperationsController extends Controller
             if (!empty($deptId)) {
                 $hazardQuery->whereHas('user', fn ($u) => $u->where('department_id', $deptId));
             }
-            $records = $hazardQuery->latest('report_time')->paginate(25);
+            $records = $hazardQuery->latest('report_time')->paginate(\App\Support\Listing::perPage());
         } else {
             $query = HseInspection::with(['inspector:id,name', 'site:id,name'])
                 ->whereBetween('scheduled_date', [$filters['from'], $filters['to']]);
@@ -646,7 +646,7 @@ class SheOperationsController extends Controller
             } else {
                 $query->where('type', '!=', 'PTO');
             }
-            $records = $query->latest('scheduled_date')->paginate(25);
+            $records = $query->latest('scheduled_date')->paginate(\App\Support\Listing::perPage());
         }
 
         return view('hse.operations.sap_achievement', compact('filters', 'options', 'records', 'type', 'title'));
@@ -668,7 +668,7 @@ class SheOperationsController extends Controller
             $empQuery->whereHas('sites', fn ($s) => $s->whereIn('sites.id', $filters['scope_site_ids'] ?: [-1]));
         }
 
-        $employees = $empQuery->paginate(25);
+        $employees = $empQuery->paginate(\App\Support\Listing::perPage());
 
         // Calculate actual performance metrics per employee for the period
         $stats = [];
@@ -812,7 +812,7 @@ class SheOperationsController extends Controller
 
         $targets = SheSapTarget::with(['user:id,name', 'department:id,name', 'site:id,name'])
             ->latest()
-            ->paginate(20);
+            ->paginate(\App\Support\Listing::perPage());
 
         return view('hse.operations.sap_targets', compact('filters', 'options', 'targets'));
     }
@@ -868,7 +868,7 @@ class SheOperationsController extends Controller
 
         $notifications = SheNotification::where('user_id', $user->id)
             ->latest()
-            ->paginate(30);
+            ->paginate(\App\Support\Listing::perPage());
 
         $unreadCount = SheNotification::where('user_id', $user->id)->where('is_read', false)->count();
 
@@ -1105,7 +1105,7 @@ class SheOperationsController extends Controller
                   ->where('residual_consequence', (int) $request->input('consequence'));
         }
 
-        $risks = $query->paginate(20)->withQueryString();
+        $risks = $query->paginate(\App\Support\Listing::perPage())->withQueryString();
         $users = User::orderBy('name')->get(['id', 'name']);
         $departments = Department::orderBy('name')->get(['id', 'name']);
 
@@ -1139,7 +1139,7 @@ class SheOperationsController extends Controller
             });
         }
 
-        $activities = $query->paginate(20)->withQueryString();
+        $activities = $query->paginate(\App\Support\Listing::perPage())->withQueryString();
 
         // Also fetch CCM recent critical reports for context
         $ccmReports = CcmReport::latest('waktu_pelaporan')->limit(15)->get();
@@ -1246,7 +1246,7 @@ class SheOperationsController extends Controller
                   ->whereDate('due_date', '<', now()->toDateString());
         }
 
-        $controls = $query->paginate(20)->withQueryString();
+        $controls = $query->paginate(\App\Support\Listing::perPage())->withQueryString();
         $users = User::orderBy('name')->get(['id', 'name']);
 
         return view('hse.operations.risk_control_monitoring', compact('filters', 'options', 'controls', 'users'));
@@ -1445,7 +1445,7 @@ class SheOperationsController extends Controller
             });
         }
 
-        $records = $query->paginate(20)->withQueryString();
+        $records = $query->paginate(\App\Support\Listing::perPage())->withQueryString();
         $users = User::orderBy('name')->get(['id', 'name']);
         $departments = Department::orderBy('name')->get(['id', 'name']);
 

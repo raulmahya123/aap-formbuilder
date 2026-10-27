@@ -88,21 +88,16 @@
                             </td>
                             <td><x-hse.status :value="$ctrl->priority" /></td>
                             <td><x-hse.status :value="$ctrl->status" /></td>
-                            <td>
+                            <td><x-ui.table-actions>
                                 @if($ctrl->evidence_path)
-                                    <a href="{{ asset('storage/' . $ctrl->evidence_path) }}" target="_blank" class="inline-flex items-center gap-1 text-xs text-blue-600 font-semibold hover:underline">
-                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-                                        Lihat File
-                                    </a>
+                                    <x-ui.icon-button action="view" label="Lihat File" href="{{ asset('storage/' . $ctrl->evidence_path) }}" target="_blank" />
                                 @else
                                     <span class="text-xs text-slate-300">Belum Ada</span>
                                 @endif
-                            </td>
-                            <td>
-                                <button type="button" @click="activePica = {{ json_encode($ctrl) }}; openEditModal = true" class="inline-flex items-center gap-1 rounded bg-[#1646A0] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#123880] transition">
-                                    Update
-                                </button>
-                            </td>
+                            </x-ui.table-actions></td>
+                            <td><x-ui.table-actions>
+                                <x-ui.icon-button action="edit" label="Update" type="button" @click="activePica = {{ json_encode($ctrl) }}; openEditModal = true" />
+                            </x-ui.table-actions></td>
                         </tr>
                     @empty
                         <x-ui.table-empty-state :colspan="10" title="Tidak ada tindakan kontrol risiko" message="Belum ada corrective action atau kontrol risiko yang cocok dengan filter." />
@@ -110,14 +105,10 @@
                 </tbody>
             </table>
         </div>
-
-    </div>
-
-    @if($controls->hasPages())
-        <div class="mt-4">
+        <div class="ui-pagination-footer">
             {{ $controls->links() }}
         </div>
-    @endif
+    </div>
 
     {{-- MODAL UPDATE KONTROL (ASSIGN PIC, DUE DATE, EVIDENCE, PROGRESS, VERIFICATION) --}}
     <div x-show="openEditModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;" x-transition>
@@ -181,7 +172,7 @@
 
                 <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
                     <button type="button" @click="openEditModal = false" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
-                    <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-[#1646A0] hover:bg-[#123880] rounded-lg shadow-sm">Simpan Update Kontrol</button>
+                    <x-ui.button variant="primary" icon="save" type="submit">Simpan Update Kontrol</x-ui.button>
                 </div>
             </form>
         </div>

@@ -86,12 +86,12 @@
                                         <form action="{{ route('hse.dashboard.manhours.validate', $row->id) }}" method="POST">
                                             @csrf
                                             <input type="hidden" name="action" value="validate" />
-                                            <button type="submit" class="rounded bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-emerald-700">Validasi</button>
+                                            <x-ui.icon-button action="approve" label="Validasi" type="submit" />
                                         </form>
                                         <form action="{{ route('hse.dashboard.manhours.validate', $row->id) }}" method="POST" onsubmit="return confirm('Kembalikan entri manhours ini?')">
                                             @csrf
                                             <input type="hidden" name="action" value="return" />
-                                            <button type="submit" class="rounded bg-rose-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-rose-700">Return</button>
+                                            <x-ui.icon-button action="deactivate" label="Return" type="submit" />
                                         </form>
                                     </div>
                                 @else
@@ -105,10 +105,7 @@
                 </tbody>
             </table>
         </div>
+    <x-slot:footer>{{ $records->links() }}</x-slot:footer>
     </x-hse.chart-card>
-
-    <div class="mt-4">
-        {{ $records->links() }}
-    </div>
 </div>
 @endsection

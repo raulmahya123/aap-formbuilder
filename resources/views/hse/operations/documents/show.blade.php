@@ -167,9 +167,7 @@
                         <div class="mt-2.5 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-200/60 pt-2">
                             <span>Direvisi oleh: <strong>{{ $rev->revisor?->name ?? 'User' }}</strong></span>
                             @if($rev->file_path)
-                                <a href="{{ asset('storage/' . $rev->file_path) }}" target="_blank" class="text-blue-600 hover:underline font-semibold">
-                                    Unduh File Arsip
-                                </a>
+                                <x-ui.link variant="secondary" icon="download" href="{{ asset('storage/' . $rev->file_path) }}" target="_blank">Unduh File Arsip</x-ui.link>
                             @endif
                         </div>
                     </div>

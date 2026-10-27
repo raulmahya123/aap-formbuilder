@@ -109,11 +109,9 @@
                                 @endif
                             </td>
                             <td><x-hse.status :value="$pica->status" /></td>
-                            <td>
-                                <a href="{{ route('hse.dashboard.pica.detail', $pica->id) }}" class="inline-flex items-center gap-1 rounded bg-[#1646A0] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#123880] transition">
-                                    Detail / Verifikasi
-                                </a>
-                            </td>
+                            <td><x-ui.table-actions>
+                                <x-ui.icon-button action="view" label="Detail / Verifikasi" href="{{ route('hse.dashboard.pica.detail', $pica->id) }}" />
+                            </x-ui.table-actions></td>
                         </tr>
                     @empty
                         <x-ui.table-empty-state :colspan="10" title="Tidak ada data PICA" message="Belum ada tindakan korektif yang sesuai dengan kriteria filter." />
@@ -121,14 +119,10 @@
                 </tbody>
             </table>
         </div>
-
-    </div>
-
-    @if($records->hasPages())
-        <div class="mt-4">
+        <div class="ui-pagination-footer">
             {{ $records->links() }}
         </div>
-    @endif
+    </div>
 
 </div>
 @endsection

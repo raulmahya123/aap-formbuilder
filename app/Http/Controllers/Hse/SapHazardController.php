@@ -70,7 +70,7 @@ class SapHazardController extends Controller
         if ($request->filled('status')) $query->where('status', $request->status);
         if ($request->filled('risk_level')) $query->where('risk_level', $request->risk_level);
 
-        $hazards = $query->paginate(20)->withQueryString();
+        $hazards = $query->paginate(\App\Support\Listing::perPage())->withQueryString();
         return view('hse.sap_hazard.index', compact('hazards', 'filters', 'options'));
     }
 
@@ -413,7 +413,7 @@ class SapHazardController extends Controller
         if (!empty($filters['department_id'])) $query->where('department_id', $filters['department_id']);
         if ($request->filled('risk_level')) $query->where('risk_level', $request->risk_level);
 
-        $hazards = $query->latest()->paginate(30)->withQueryString();
+        $hazards = $query->latest()->paginate(\App\Support\Listing::perPage())->withQueryString();
         return view('hse.sap_hazard.reports', compact('hazards', 'filters', 'options'));
     }
 }

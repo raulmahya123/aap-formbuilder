@@ -71,7 +71,7 @@ class SapPtoController extends Controller
         if (!empty($filters['department_id'])) $query->where('department_id', $filters['department_id']);
         if ($request->filled('status')) $query->where('status', $request->status);
 
-        $ptos = $query->paginate(20)->withQueryString();
+        $ptos = $query->paginate(\App\Support\Listing::perPage())->withQueryString();
         return view('hse.sap_pto.index', compact('ptos', 'filters', 'options'));
     }
 
@@ -491,7 +491,7 @@ class SapPtoController extends Controller
     public function scheduleIndex(Request $request)
     {
         $filters = $this->dashboardService->filters($request);
-        $schedules = SapPtoSchedule::with(['observer', 'site', 'department'])->latest()->paginate(20);
+        $schedules = SapPtoSchedule::with(['observer', 'site', 'department'])->latest()->paginate(\App\Support\Listing::perPage());
         return view('hse.sap_pto.schedule.index', compact('schedules', 'filters'));
     }
 
@@ -532,7 +532,7 @@ class SapPtoController extends Controller
         if (!empty($filters['site_id'])) $query->where('site_id', $filters['site_id']);
         if (!empty($filters['department_id'])) $query->where('department_id', $filters['department_id']);
 
-        $ptos = $query->latest()->paginate(30)->withQueryString();
+        $ptos = $query->latest()->paginate(\App\Support\Listing::perPage())->withQueryString();
         return view('hse.sap_pto.reports', compact('ptos', 'filters', 'options'));
     }
 }

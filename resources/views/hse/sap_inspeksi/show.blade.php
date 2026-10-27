@@ -9,9 +9,9 @@
             <h1 class="text-xl font-bold text-slate-900">{{ $inspection->inspection_no }}</h1>
             <p class="text-sm text-slate-500">{{ $inspection->template->code }} - {{ $inspection->template->name }} | Status: <span class="font-semibold">{{ $inspection->status }}</span></p>
         </div>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap items-center gap-2"><x-ui.table-actions><x-ui.sap-record-actions module="inspeksi" :record="$inspection" /></x-ui.table-actions>
             @if(in_array($inspection->status, ['Draft','Returned']))
-            <a href="{{ route('hse.dashboard.sap.inspeksi.edit', $inspection->id) }}" class="px-3 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold">Lanjut Isi</a>
+            <x-ui.link variant="primary" icon="pencil" href="{{ route('hse.dashboard.sap.inspeksi.edit', $inspection->id) }}">Lanjut Isi</x-ui.link>
             @endif
             @if($inspection->status === 'Submitted' || $inspection->status === 'Under Review')
             <form action="{{ route('hse.dashboard.sap.inspeksi.review', $inspection->id) }}" method="POST" class="flex gap-2">

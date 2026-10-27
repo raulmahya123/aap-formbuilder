@@ -2,9 +2,9 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">PTO {{ $pto->pto_no }} - {{ $pto->status }}</h2>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap items-center gap-2"><x-ui.table-actions><x-ui.sap-record-actions module="pto" :record="$pto" /></x-ui.table-actions>
                 @if(in_array($pto->status, ['Draft','Returned','Revised']))
-                <a href="{{ route('hse.dashboard.sap.pto.edit', $pto->id) }}" class="px-3 py-1.5 text-xs rounded bg-amber-100">Edit</a>
+                <x-ui.link variant="primary" icon="pencil" href="{{ route('hse.dashboard.sap.pto.edit', $pto->id) }}">Edit</x-ui.link>
                 @endif
                 <a href="{{ route('hse.dashboard.sap.pto.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Kembali</a>
             </div>

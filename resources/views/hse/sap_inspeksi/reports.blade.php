@@ -42,14 +42,14 @@
                     <td>{{ $i->score ?? '-' }}</td>
                     <td>{{ $i->percentage ? number_format($i->percentage,1).'%' : '-' }}</td>
                     <td>{{ $i->status }}</td>
-                    <td><a href="{{ route('hse.dashboard.sap.inspeksi.show', $i->id) }}" class="text-[#1646A0] text-xs font-semibold">Detail</a></td>
+                    <td><x-ui.table-actions><x-ui.icon-button action="view" label="Detail" href="{{ route('hse.dashboard.sap.inspeksi.show', $i->id) }}" /><x-ui.sap-record-actions module="inspeksi" :record="$i" /></x-ui.table-actions></td>
                 </tr>
                 @empty
                 <tr><td colspan="10" class="text-center text-slate-500 text-xs py-6">Tidak ada data</td></tr>
                 @endforelse
             </tbody>
         </table>
-        <div class="p-4">{{ $inspections->links() }}</div>
+        <div class="ui-pagination-footer">{{ $inspections->links() }}</div>
     </div>
 </div>
 @endsection

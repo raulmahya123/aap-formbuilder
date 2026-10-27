@@ -2,9 +2,9 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Hazard {{ $hazard->hazard_no }} - {{ $hazard->status }}</h2>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap items-center gap-2"><x-ui.table-actions><x-ui.sap-record-actions module="hazard" :record="$hazard" /></x-ui.table-actions>
                 @if(in_array($hazard->status, ['Draft','Returned','Revised']))
-                <a href="{{ route('hse.dashboard.sap.hazard.edit', $hazard->id) }}" class="px-3 py-1.5 text-xs rounded bg-amber-100">Edit</a>
+                <x-ui.link variant="primary" icon="pencil" href="{{ route('hse.dashboard.sap.hazard.edit', $hazard->id) }}">Edit</x-ui.link>
                 @endif
                 <a href="{{ route('hse.dashboard.sap.hazard.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Kembali</a>
             </div>
@@ -80,7 +80,7 @@
                         <input type="date" name="target_completion_date" class="w-full mt-1 border rounded px-2 py-1.5">
                     </div>
                     <div class="md:col-span-4 flex justify-end">
-                        <button class="px-4 py-2 rounded bg-slate-700 text-white text-sm">Tambah Tindakan</button>
+                        <x-ui.button variant="primary" icon="plus" type="submit">Tambah Tindakan</x-ui.button>
                     </div>
                 </form>
 

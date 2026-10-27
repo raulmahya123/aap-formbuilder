@@ -111,9 +111,7 @@
                 <a href="{{ route('hse.dashboard.manhours.index') }}" class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
                     Batal
                 </a>
-                <button type="submit" class="rounded-lg bg-[#1646A0] px-6 py-2.5 text-xs font-semibold text-white shadow hover:bg-[#123880] transition">
-                    Simpan Jam Kerja
-                </button>
+                <x-ui.button variant="primary" icon="save" type="submit">Simpan Jam Kerja</x-ui.button>
             </div>
         </form>
     </div>

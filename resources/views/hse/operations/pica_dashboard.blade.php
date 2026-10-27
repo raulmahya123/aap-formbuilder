@@ -280,11 +280,9 @@
                                 {{ $p->due_date ? \Carbon\Carbon::parse($p->due_date)->format('d M Y') : '—' }}
                             </td>
                             <td><x-hse.status :value="$p->status" /></td>
-                            <td>
-                                <a href="{{ route('hse.dashboard.pica.detail', $p->id) }}" class="inline-flex items-center gap-1 rounded bg-[#1646A0] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#123880] transition">
-                                    Detail
-                                </a>
-                            </td>
+                            <td><x-ui.table-actions>
+                                <x-ui.icon-button action="view" label="Detail" href="{{ route('hse.dashboard.pica.detail', $p->id) }}" />
+                            </x-ui.table-actions></td>
                         </tr>
                     @empty
                         <x-ui.table-empty-state :colspan="9" title="Belum ada PICA" message="Tindakan korektif akan muncul saat temuan audit, insiden, atau inspeksi dibuat." />

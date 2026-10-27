@@ -240,6 +240,9 @@
   </div>
 
   <x-ui.toast-provider />
+  <template id="ui-table-export-template" data-pdf-url="{{ route('table_export.pdf') }}">
+    <x-ui.table-export />
+  </template>
 
   <x-ui.action-dialogs />
   <x-ui.remote-modal />

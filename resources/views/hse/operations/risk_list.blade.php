@@ -110,17 +110,17 @@
                                     @if($r->status !== 'Approved' && $r->status !== 'Archived')
                                         <form action="{{ route('hse.dashboard.risk.review', $r->id) }}" method="POST">
                                             @csrf
-                                            <button type="submit" class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 text-[10px] font-semibold">Review</button>
+                                            <x-ui.icon-button action="edit" label="Review" type="submit" />
                                         </form>
                                         <form action="{{ route('hse.dashboard.risk.approve', $r->id) }}" method="POST">
                                             @csrf
-                                            <button type="submit" class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[10px] font-semibold">Approve</button>
+                                            <x-ui.icon-button action="approve" label="Approve" type="submit" />
                                         </form>
                                     @endif
                                     @if($r->status !== 'Archived')
                                         <form action="{{ route('hse.dashboard.risk.close', $r->id) }}" method="POST" onsubmit="return confirm('Arsipkan asesmen risiko ini?')">
                                             @csrf
-                                            <button type="submit" class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 text-[10px] font-semibold">Archive</button>
+                                            <x-ui.icon-button action="deactivate" label="Archive" type="submit" />
                                         </form>
                                     @else
                                         <span class="text-[10px] text-slate-400">Archived</span>
@@ -134,14 +134,10 @@
                 </tbody>
             </table>
         </div>
-
-    </div>
-
-    @if($risks->hasPages())
-        <div class="mt-4">
+        <div class="ui-pagination-footer">
             {{ $risks->links() }}
         </div>
-    @endif
+    </div>
 
 </div>
 @endsection

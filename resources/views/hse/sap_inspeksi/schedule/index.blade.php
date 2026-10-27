@@ -11,7 +11,7 @@
         </div>
         <div class="flex gap-2">
             <a href="{{ route('hse.dashboard.sap.inspeksi.dashboard') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Dashboard</a>
-            <a href="{{ route('hse.dashboard.sap.inspeksi.schedule.create') }}" class="px-3 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold">Buat Jadwal</a>
+            <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.inspeksi.schedule.create') }}">Buat Jadwal</x-ui.link>
         </div>
     </div>
 
@@ -33,7 +33,7 @@
                 @endforelse
             </tbody>
         </table>
-        <div class="p-4">{{ $schedules->links() }}</div>
+        <div class="ui-pagination-footer">{{ $schedules->links() }}</div>
     </div>
 </div>
 @endsection

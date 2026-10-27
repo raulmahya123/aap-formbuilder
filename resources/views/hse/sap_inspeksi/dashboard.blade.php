@@ -69,7 +69,7 @@
                         <td>{{ $r->inspector->name ?? '-' }}</td>
                         <td><span class="px-2 py-0.5 rounded-full text-xs">{{ $r->status }}</span></td>
                         <td>{{ $r->percentage ? number_format($r->percentage,1).'%': '-' }}</td>
-                        <td><a href="{{ route('hse.dashboard.sap.inspeksi.show', $r->id) }}" class="text-[#1646A0] text-xs font-semibold">Lihat</a></td>
+                        <td><x-ui.table-actions><x-ui.icon-button action="view" label="Lihat" href="{{ route('hse.dashboard.sap.inspeksi.show', $r->id) }}" /><x-ui.sap-record-actions module="inspeksi" :record="$r" /></x-ui.table-actions></td>
                     </tr>
                     @empty
                     <tr><td colspan="7" class="text-center text-slate-500 text-xs py-4">Belum ada data</td></tr>

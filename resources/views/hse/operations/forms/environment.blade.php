@@ -64,6 +64,6 @@
 
             <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
                 <x-ui.back-link href="{{ route('hse.dashboard.environment') }}">Batal</x-ui.back-link>
-                <button type="submit" class="px-5 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold hover:bg-[#0B2345]">Simpan Rekam Lingkungan</button>
+                <x-ui.button variant="primary" icon="save" type="submit">Simpan Rekam Lingkungan</x-ui.button>
             </div>
         </form>

@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Daftar Hazard Report</h2>
-            <a href="{{ route('hse.dashboard.sap.hazard.create') }}" class="px-3 py-1.5 text-xs rounded bg-[#0B2345] text-white">Tambah Laporan</a>
+            <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.hazard.create') }}">Tambah Laporan</x-ui.link>
         </div>
     </x-slot>
 
@@ -35,12 +35,12 @@
                                 <td class="px-4 py-2">{{ $h->risk_level }}</td>
                                 <td class="px-4 py-2">{{ $h->risk_score }}</td>
                                 <td class="px-4 py-2">{{ $h->status }}</td>
-                                <td class="px-4 py-2 text-right space-x-1">
-                                    <a href="{{ route('hse.dashboard.sap.hazard.show', $h->id) }}" class="text-xs px-2 py-1 rounded bg-slate-100">Lihat</a>
+                                <td class="px-4 py-2 text-right space-x-1"><x-ui.table-actions>
+                                    <x-ui.icon-button action="view" label="Lihat" href="{{ route('hse.dashboard.sap.hazard.show', $h->id) }}" />
                                     @if(in_array($h->status, ['Draft','Returned','Revised']))
-                                    <a href="{{ route('hse.dashboard.sap.hazard.edit', $h->id) }}" class="text-xs px-2 py-1 rounded bg-amber-100">Edit</a>
+                                    <x-ui.icon-button action="edit" label="Edit" href="{{ route('hse.dashboard.sap.hazard.edit', $h->id) }}" />
                                     @endif
-                                </td>
+                                <x-ui.sap-record-actions module="hazard" :record="$h" /></x-ui.table-actions></td>
                             </tr>
                             @empty
                             <tr><td colspan="9" class="px-4 py-4 text-center text-slate-500">Belum ada data</td></tr>
@@ -48,7 +48,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="px-4 py-2">{{ $hazards->links() }}</div>
+                <div class="ui-pagination-footer">{{ $hazards->links() }}</div>
             </div>
         </div>
     </div>

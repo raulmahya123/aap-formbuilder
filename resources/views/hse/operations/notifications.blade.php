@@ -145,10 +145,8 @@
 
     </div>
 
-    @if($notifications->hasPages())
-        <div class="mt-4">
+    <div class="ui-pagination-footer">
             {{ $notifications->links() }}
         </div>
-    @endif
 </div>
 @endsection

@@ -41,9 +41,7 @@
             @if($incident->status === 'Under Review' || ($incident->investigation_status === 'Completed' && $incident->status !== 'Approved' && $incident->status !== 'Closed'))
                 <form action="{{ route('hse.dashboard.incidents.approve', $incident->id) }}" method="POST" onsubmit="return confirm('Setujui insiden ini secara resmi?')">
                     @csrf
-                    <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700">
-                        Approve Insiden
-                    </button>
+                    <x-ui.button variant="success" icon="circle-check" type="submit">Approve Insiden</x-ui.button>
                 </form>
             @endif
 
@@ -193,11 +191,9 @@
                                         <td>{{ $pica->assignee?->name ?? '—' }}</td>
                                         <td>{{ $pica->due_date?->format('d M Y') ?? '—' }}</td>
                                         <td><x-hse.status :value="$pica->status" /></td>
-                                        <td>
-                                            <a href="{{ route('hse.dashboard.pica.detail', $pica->id) }}" class="text-xs text-blue-600 hover:underline font-semibold">
-                                                Detail &rarr;
-                                            </a>
-                                        </td>
+                                        <td><x-ui.table-actions>
+                                            <x-ui.icon-button action="view" label="Detail &rarr;" href="{{ route('hse.dashboard.pica.detail', $pica->id) }}" />
+                                        </x-ui.table-actions></td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -261,7 +257,7 @@
             </div>
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button" onclick="document.getElementById('modal-review').close()" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Batal</button>
-                <button type="submit" class="px-4 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700">Simpan Review</button>
+                <x-ui.button variant="primary" icon="save" type="submit">Simpan Review</x-ui.button>
             </div>
         </form>
     </div>
@@ -287,7 +283,7 @@
             </div>
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button" onclick="document.getElementById('modal-investigate').close()" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Batal</button>
-                <button type="submit" class="px-4 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700">Simpan Investigasi</button>
+                <x-ui.button variant="primary" icon="save" type="submit">Simpan Investigasi</x-ui.button>
             </div>
         </form>
     </div>

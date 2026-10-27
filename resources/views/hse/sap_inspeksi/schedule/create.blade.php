@@ -77,7 +77,7 @@
         </div>
         <div class="flex justify-end gap-2 pt-4 border-t border-slate-200">
             <a href="{{ route('hse.dashboard.sap.inspeksi.schedule.index') }}" class="px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Batal</a>
-            <button type="submit" class="px-5 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold">Simpan Jadwal</button>
+            <x-ui.button variant="primary" icon="save" type="submit">Simpan Jadwal</x-ui.button>
         </div>
     </form>
 </div>

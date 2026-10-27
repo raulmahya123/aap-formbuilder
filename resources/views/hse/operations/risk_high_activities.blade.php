@@ -96,14 +96,10 @@
                 </tbody>
             </table>
         </div>
-
-    </div>
-
-    @if($activities->hasPages())
-        <div class="mt-4">
+        <div class="ui-pagination-footer">
             {{ $activities->links() }}
         </div>
-    @endif
+    </div>
 
     {{-- Critical Control Management (CCM) Reports Integration Feed --}}
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -158,13 +154,13 @@
                                     @endforelse
                                 </div>
                             </td>
-                            <td>
+                            <td><x-ui.table-actions>
                                 @if(Route::has('ccm-reports.show'))
-                                    <a href="{{ route('ccm-reports.show', $ccm->id) }}" class="text-xs font-medium text-[#1646A0] hover:underline">Detail Report</a>
+                                    <x-ui.icon-button action="view" label="Detail Report" href="{{ route('ccm-reports.show', $ccm->id) }}" />
                                 @else
                                     <span class="text-xs text-slate-400">Tercatat</span>
                                 @endif
-                            </td>
+                            </x-ui.table-actions></td>
                         </tr>
                     @empty
                         <x-ui.table-empty-state :colspan="5" title="Belum ada report CCM" message="Data pelaporan Critical Control Management akan tampil di sini." />

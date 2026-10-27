@@ -89,25 +89,19 @@
                                 </span>
                             </td>
                             <td><x-hse.status :value="$doc->status" /></td>
-                            <td>
+                            <td><x-ui.table-actions>
                                 <div class="flex items-center gap-2">
                                     @if($doc->file_path)
-                                        <a href="{{ route('hse.dashboard.documents.preview', $doc->id) }}" target="_blank" class="text-xs font-semibold text-blue-600 hover:underline inline-flex items-center gap-1">
-                                            Preview
-                                        </a>
-                                        <a href="{{ route('hse.dashboard.documents.download', $doc->id) }}" class="text-xs font-semibold text-emerald-600 hover:underline">
-                                            Unduh
-                                        </a>
+                                        <x-ui.icon-button action="view" label="Preview" href="{{ route('hse.dashboard.documents.preview', $doc->id) }}" target="_blank" />
+                                        <x-ui.icon-button action="download" label="Unduh" href="{{ route('hse.dashboard.documents.download', $doc->id) }}" />
                                     @else
                                         <span class="text-xs text-slate-300">—</span>
                                     @endif
                                 </div>
-                            </td>
-                            <td>
-                                <a href="{{ route('hse.dashboard.documents.show', $doc->id) }}" class="inline-flex items-center gap-1 rounded bg-[#1646A0] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#123880] transition">
-                                    Detail / Kelola
-                                </a>
-                            </td>
+                            </x-ui.table-actions></td>
+                            <td><x-ui.table-actions>
+                                <x-ui.icon-button action="view" label="Detail / Kelola" href="{{ route('hse.dashboard.documents.show', $doc->id) }}" />
+                            </x-ui.table-actions></td>
                         </tr>
                     @empty
                         <x-ui.table-empty-state :colspan="10" title="Tidak ada dokumen ditemukan" message="Belum ada dokumen yang sesuai dengan kategori atau filter yang dipilih." />
@@ -115,14 +109,10 @@
                 </tbody>
             </table>
         </div>
-
-    </div>
-
-    @if($documents->hasPages())
-        <div class="mt-4">
+        <div class="ui-pagination-footer">
             {{ $documents->links() }}
         </div>
-    @endif
+    </div>
 
 </div>
 @endsection

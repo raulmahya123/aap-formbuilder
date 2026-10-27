@@ -79,7 +79,7 @@
     </x-ui.panel>
     <noscript>
       <div class="mt-3 text-sm">
-        Browser kamu tidak mendukung preview. <a class="underline" href="{{ route('user.contracts.download', $contract) }}">Unduh PDF</a>.
+        Browser kamu tidak mendukung preview. <x-ui.link variant="secondary" icon="file-down" href="{{ route('user.contracts.download', $contract) }}">Unduh PDF</x-ui.link>.
       </div>
     </noscript>
   </div>

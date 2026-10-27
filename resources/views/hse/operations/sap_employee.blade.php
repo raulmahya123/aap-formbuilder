@@ -100,10 +100,7 @@
                 </tbody>
             </table>
         </div>
+    <x-slot:footer>{{ $employees->links() }}</x-slot:footer>
     </x-hse.chart-card>
-
-    <div class="mt-4">
-        {{ $employees->links() }}
-    </div>
 </div>
 @endsection

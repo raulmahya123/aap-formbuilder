@@ -10,6 +10,11 @@
 .ui-icon-button--edit, .ui-icon-button--download, .ui-icon-button--upload, .ui-icon-button--reset-password, .ui-icon-button--duplicate, .ui-icon-button--assign { color: var(--blue); }
 .ui-icon-button--delete, .ui-icon-button--deactivate { color: var(--red); }
 .ui-icon-button--activate, .ui-icon-button--approve { color: var(--green); }
+.ui-icon-button--pdf, .ui-icon-button--checklist, .ui-icon-button--save { color: var(--blue); }
+.ui-icon-button--print { color: var(--primary-dark); }
+.ui-table-export { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.ui-table-export__label, .ui-table-export__status { color: var(--gray); font-size: 12px; }
+.ui-table-export__status:empty { display: none; }
 .ui-icon-button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .ui-icon-button:disabled, .ui-icon-button[aria-disabled='true'] { opacity: .5; cursor: not-allowed; }
 .ui-table-actions { display: inline-flex; flex-flow: row nowrap; align-items: center; gap: 8px; vertical-align: middle; white-space: nowrap; }

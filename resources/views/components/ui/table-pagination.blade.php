@@ -6,6 +6,8 @@
   $first = $paginator->firstItem() ?? 0;
   $last = $paginator->lastItem() ?? 0;
   $total = $paginator->total();
+  $pageName = $paginator->getPageName();
+  $perPageOptions = collect($perPageOptions)->push($perPage)->unique()->sort()->values();
 
   // Build page window: always show first, last, current±1, with ellipses
   $pages = collect();
@@ -17,16 +19,24 @@
   $pages = $pages->unique()->sort()->values();
 
   // Helper to build URL preserving query params
-  $buildUrl = function ($page, $pp = null) use ($paginator, $perPageParam, $perPage) {
-    $params = request()->except(['page', $perPageParam, 'per', 'perPage']);
-    $params['page'] = $page;
+  $buildUrl = function ($page, $pp = null) use ($paginator, $perPageParam, $perPage, $pageName) {
+    $url = $paginator->url($page);
+    $parts = parse_url($url);
+    parse_str($parts['query'] ?? '', $params);
+    $params = array_replace(request()->except([$pageName, $perPageParam, 'per', 'perPage']), $params);
+    unset($params['per'], $params['perPage']);
+    $params[$pageName] = $page;
     $params[$perPageParam] = $pp ?? $perPage;
-    return url()->current() . '?' . http_build_query($params);
+    return strtok($url, '?#') . '?' . http_build_query($params) . (isset($parts['fragment']) ? '#' . $parts['fragment'] : '');
   };
 @endphp
 <div {{ $attributes->class(['ui-table-pagination']) }}>
   <div class="ui-table-pagination__info">
-    Menampilkan {{ $first }}–{{ $last }} dari {{ number_format($total) }} data
+    @if($total === 0)
+      Tidak ada data
+    @else
+      Menampilkan <strong>{{ $first }}–{{ $last }}</strong> dari <strong>{{ number_format($total) }}</strong> data
+    @endif
   </div>
   <div class="ui-table-pagination__controls">
     <div class="ui-table-pagination__per-page">

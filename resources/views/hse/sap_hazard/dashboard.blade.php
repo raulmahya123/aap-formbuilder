@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard Hazard Report (SHE-FM-007)</h2>
             <div class="flex gap-2">
                 <a href="{{ route('hse.dashboard.sap.hazard.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-800 text-white">Daftar Hazard</a>
-                <a href="{{ route('hse.dashboard.sap.hazard.create') }}" class="px-3 py-1.5 text-xs rounded bg-[#0B2345] text-white">Tambah Laporan</a>
+                <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.hazard.create') }}">Tambah Laporan</x-ui.link>
             </div>
         </div>
     </x-slot>
@@ -38,7 +38,7 @@
                         <tbody>
                             @forelse($recent as $r)
                             <tr class="border-t hover:bg-slate-50">
-                                <td class="px-4 py-2"><a class="text-[#1646A0] font-medium" href="{{ route('hse.dashboard.sap.hazard.show', $r->id) }}">{{ $r->hazard_no }}</a></td>
+                                <td class="px-4 py-2"><x-ui.table-actions><a class="text-[#1646A0] font-medium" href="{{ route('hse.dashboard.sap.hazard.show', $r->id) }}">{{ $r->hazard_no }}</a><x-ui.sap-record-actions module="hazard" :record="$r" /></x-ui.table-actions></td>
                                 <td class="px-4 py-2">{{ $r->report_date?->format('d/m/Y') }}</td>
                                 <td class="px-4 py-2">{{ $r->reporter?->name }}</td>
                                 <td class="px-4 py-2">{{ $r->location }}</td>

@@ -216,7 +216,7 @@
 
             <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
                 <button type="button" onclick="document.getElementById('modal-input-inspection').close()" class="px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Batal</button>
-                <button type="submit" class="px-5 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold hover:bg-[#0B2345]">Simpan Inspeksi</button>
+                <x-ui.button variant="primary" icon="save" type="submit">Simpan Inspeksi</x-ui.button>
             </div>
         </form>
     </div>
