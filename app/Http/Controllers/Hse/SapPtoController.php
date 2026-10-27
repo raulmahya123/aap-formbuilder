@@ -133,7 +133,7 @@ class SapPtoController extends Controller
         ]);
 
         $this->log($pto, 'created', 'PTO dibuat');
-        return redirect()->route('hse.sap.pto.edit', $pto->id)->with('ok', 'PTO berhasil dibuat. Silakan isi checklist observasi.');
+        return redirect()->route('hse.dashboard.sap.pto.edit', $pto->id)->with('ok', 'PTO berhasil dibuat. Silakan isi checklist observasi.');
     }
 
     public function edit(SapPtoRecord $pto)
@@ -331,7 +331,7 @@ class SapPtoController extends Controller
             $this->createFindings($pto);
             $this->log($pto, 'submitted', 'PTO diajukan untuk supervisor review');
             DB::commit();
-            return redirect()->route('hse.sap.pto.show', $pto->id)->with('ok', 'PTO berhasil diajukan.');
+            return redirect()->route('hse.dashboard.sap.pto.show', $pto->id)->with('ok', 'PTO berhasil diajukan.');
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal mengajukan: ' . $e->getMessage());
@@ -517,7 +517,7 @@ class SapPtoController extends Controller
         $data['created_by'] = auth()->id();
         $data['status'] = 'Planned';
         SapPtoSchedule::create($data);
-        return redirect()->route('hse.sap.pto.schedule.index')->with('ok', 'Jadwal PTO berhasil dibuat.');
+        return redirect()->route('hse.dashboard.sap.pto.schedule.index')->with('ok', 'Jadwal PTO berhasil dibuat.');
     }
 
     public function reports(Request $request)

@@ -124,7 +124,7 @@ class SapHazardController extends Controller
         ]);
 
         $this->log($hazard, 'created', 'Hazard Report dibuat');
-        return redirect()->route('hse.sap.hazard.edit', $hazard->id)->with('ok', 'Laporan bahaya berhasil dibuat. Lanjutkan penilaian risiko.');
+        return redirect()->route('hse.dashboard.sap.hazard.edit', $hazard->id)->with('ok', 'Laporan bahaya berhasil dibuat. Lanjutkan penilaian risiko.');
     }
 
     public function edit(SapHazardReport $hazard)
@@ -238,7 +238,7 @@ class SapHazardController extends Controller
 
             $this->log($hazard, 'submitted', 'Hazard Report diajukan');
             DB::commit();
-            return redirect()->route('hse.sap.hazard.show', $hazard->id)->with('ok', 'Hazard Report berhasil diajukan.');
+            return redirect()->route('hse.dashboard.sap.hazard.show', $hazard->id)->with('ok', 'Hazard Report berhasil diajukan.');
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal mengajukan: ' . $e->getMessage());

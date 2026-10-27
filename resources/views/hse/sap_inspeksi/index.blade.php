@@ -10,8 +10,8 @@
             <p class="text-sm text-slate-500">Semua inspeksi SAP Inspeksi berdasarkan template SHE-FM</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('hse.sap.inspeksi.dashboard') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Dashboard</a>
-            <a href="{{ route('hse.sap.inspeksi.create') }}" class="px-3 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold">Buat Inspeksi</a>
+            <a href="{{ route('hse.dashboard.sap.inspeksi.dashboard') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Dashboard</a>
+            <a href="{{ route('hse.dashboard.sap.inspeksi.create') }}" class="px-3 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold">Buat Inspeksi</a>
         </div>
     </div>
 
@@ -51,9 +51,9 @@
                     <td>{{ $i->status }}</td>
                     <td>{{ $i->percentage ? number_format($i->percentage,1).'%' : '-' }}</td>
                     <td class="text-right">
-                        <a href="{{ route('hse.sap.inspeksi.show', $i->id) }}" class="text-[#1646A0] text-xs font-semibold">Detail</a>
+                        <a href="{{ route('hse.dashboard.sap.inspeksi.show', $i->id) }}" class="text-[#1646A0] text-xs font-semibold">Detail</a>
                         @if(in_array($i->status, ['Draft','Returned']))
-                        <a href="{{ route('hse.sap.inspeksi.edit', $i->id) }}" class="text-slate-700 text-xs font-semibold ml-2">Isi Checklist</a>
+                        <a href="{{ route('hse.dashboard.sap.inspeksi.edit', $i->id) }}" class="text-slate-700 text-xs font-semibold ml-2">Isi Checklist</a>
                         @endif
                     </td>
                 </tr>

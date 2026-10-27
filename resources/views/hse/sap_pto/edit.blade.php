@@ -3,8 +3,8 @@
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Edit PTO {{ $pto->pto_no }} - Checklist SHE-FM-019</h2>
             <div class="flex gap-2">
-                <a href="{{ route('hse.sap.pto.show', $pto->id) }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Lihat</a>
-                <a href="{{ route('hse.sap.pto.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Kembali</a>
+                <a href="{{ route('hse.dashboard.sap.pto.show', $pto->id) }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Lihat</a>
+                <a href="{{ route('hse.dashboard.sap.pto.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Kembali</a>
             </div>
         </div>
     </x-slot>
@@ -18,7 +18,7 @@
                 <div><div class="text-xs text-slate-500">Diamati</div><div class="font-medium">{{ $pto->observedEmployee?->name }}</div></div>
             </div>
 
-            <form method="POST" action="{{ route('hse.sap.pto.save_checklist', $pto->id) }}" class="space-y-4">
+            <form method="POST" action="{{ route('hse.dashboard.sap.pto.save_checklist', $pto->id) }}" class="space-y-4">
                 @csrf
                 <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
                     <div class="px-4 py-2 border-b bg-slate-50 flex justify-between">
@@ -100,7 +100,7 @@
                 </div>
             </form>
 
-            <form id="detailsForm" method="POST" action="{{ route('hse.sap.pto.update_details', $pto->id) }}">
+            <form id="detailsForm" method="POST" action="{{ route('hse.dashboard.sap.pto.update_details', $pto->id) }}">
                 @csrf
                 <input type="hidden" name="observation_description">
                 <input type="hidden" name="safe_behavior">
@@ -111,7 +111,7 @@
             </form>
 
             <div class="flex justify-end gap-2">
-                <form method="POST" action="{{ route('hse.sap.pto.submit', $pto->id) }}">
+                <form method="POST" action="{{ route('hse.dashboard.sap.pto.submit', $pto->id) }}">
                     @csrf
                     <button class="px-4 py-2 rounded bg-green-700 text-white text-sm">Ajukan ke Supervisor untuk Review</button>
                 </form>

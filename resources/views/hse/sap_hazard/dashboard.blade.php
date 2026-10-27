@@ -3,8 +3,8 @@
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard Hazard Report (SHE-FM-007)</h2>
             <div class="flex gap-2">
-                <a href="{{ route('hse.sap.hazard.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-800 text-white">Daftar Hazard</a>
-                <a href="{{ route('hse.sap.hazard.create') }}" class="px-3 py-1.5 text-xs rounded bg-[#0B2345] text-white">Tambah Laporan</a>
+                <a href="{{ route('hse.dashboard.sap.hazard.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-800 text-white">Daftar Hazard</a>
+                <a href="{{ route('hse.dashboard.sap.hazard.create') }}" class="px-3 py-1.5 text-xs rounded bg-[#0B2345] text-white">Tambah Laporan</a>
             </div>
         </div>
     </x-slot>
@@ -38,7 +38,7 @@
                         <tbody>
                             @forelse($recent as $r)
                             <tr class="border-t hover:bg-slate-50">
-                                <td class="px-4 py-2"><a class="text-[#1646A0] font-medium" href="{{ route('hse.sap.hazard.show', $r->id) }}">{{ $r->hazard_no }}</a></td>
+                                <td class="px-4 py-2"><a class="text-[#1646A0] font-medium" href="{{ route('hse.dashboard.sap.hazard.show', $r->id) }}">{{ $r->hazard_no }}</a></td>
                                 <td class="px-4 py-2">{{ $r->report_date?->format('d/m/Y') }}</td>
                                 <td class="px-4 py-2">{{ $r->reporter?->name }}</td>
                                 <td class="px-4 py-2">{{ $r->location }}</td>

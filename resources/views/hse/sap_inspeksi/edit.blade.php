@@ -10,8 +10,8 @@
             <p class="text-sm text-slate-500">{{ $inspection->template->code }} - {{ $inspection->template->name }}</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('hse.sap.inspeksi.show', $inspection->id) }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Lihat Hasil</a>
-            <form action="{{ route('hse.sap.inspeksi.submit', $inspection->id) }}" method="POST" onsubmit="return confirm('Ajukan inspeksi ini untuk review? Pastikan semua item telah diisi.')">
+            <a href="{{ route('hse.dashboard.sap.inspeksi.show', $inspection->id) }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Lihat Hasil</a>
+            <form action="{{ route('hse.dashboard.sap.inspeksi.submit', $inspection->id) }}" method="POST" onsubmit="return confirm('Ajukan inspeksi ini untuk review? Pastikan semua item telah diisi.')">
                 @csrf
                 <button class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold">Ajukan untuk Review</button>
             </form>
@@ -25,7 +25,7 @@
         <div class="rounded-lg bg-rose-50 border border-rose-200 p-3 text-xs text-rose-800">{{ session('error') }}</div>
     @endif
 
-    <form action="{{ route('hse.sap.inspeksi.save_answers', $inspection->id) }}" method="POST" class="space-y-6">
+    <form action="{{ route('hse.dashboard.sap.inspeksi.save_answers', $inspection->id) }}" method="POST" class="space-y-6">
         @csrf
         @foreach($inspection->template->sections as $section)
         <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">

@@ -4,9 +4,9 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Hazard {{ $hazard->hazard_no }} - {{ $hazard->status }}</h2>
             <div class="flex gap-2">
                 @if(in_array($hazard->status, ['Draft','Returned','Revised']))
-                <a href="{{ route('hse.sap.hazard.edit', $hazard->id) }}" class="px-3 py-1.5 text-xs rounded bg-amber-100">Edit</a>
+                <a href="{{ route('hse.dashboard.sap.hazard.edit', $hazard->id) }}" class="px-3 py-1.5 text-xs rounded bg-amber-100">Edit</a>
                 @endif
-                <a href="{{ route('hse.sap.hazard.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Kembali</a>
+                <a href="{{ route('hse.dashboard.sap.hazard.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Kembali</a>
             </div>
         </div>
     </x-slot>
@@ -28,7 +28,7 @@
             @if(in_array($hazard->status, ['Submitted','SHE Review']))
             <div class="bg-white border rounded-lg p-4">
                 <div class="font-semibold text-sm mb-2">Review SHE</div>
-                <form method="POST" action="{{ route('hse.sap.hazard.review', $hazard->id) }}" class="space-y-3 text-sm">
+                <form method="POST" action="{{ route('hse.dashboard.sap.hazard.review', $hazard->id) }}" class="space-y-3 text-sm">
                     @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
@@ -61,7 +61,7 @@
             @if(in_array($hazard->status, ['Assigned','In Progress','Reopened']))
             <div class="bg-white border rounded-lg p-4">
                 <div class="font-semibold text-sm mb-2">Tindakan Perbaikan (Corrective Action)</div>
-                <form method="POST" action="{{ route('hse.sap.hazard.ca.store', $hazard->id) }}" class="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+                <form method="POST" action="{{ route('hse.dashboard.sap.hazard.ca.store', $hazard->id) }}" class="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
                     @csrf
                     <div class="md:col-span-2">
                         <label class="text-xs text-slate-600">Deskripsi Tindakan Perbaikan</label>
@@ -95,7 +95,7 @@
                             </div>
                             <div class="flex gap-2">
                                 @if($ca->status === 'Assigned' || $ca->status === 'In Progress' || $ca->status === 'Rejected')
-                                <form method="POST" action="{{ route('hse.sap.hazard.ca.submit', $ca->id) }}">
+                                <form method="POST" action="{{ route('hse.dashboard.sap.hazard.ca.submit', $ca->id) }}">
                                     @csrf
                                     <button class="text-xs px-2 py-1 rounded bg-amber-100">Ajukan Verifikasi</button>
                                 </form>
@@ -114,7 +114,7 @@
                 <div class="font-semibold text-sm mb-2">Verifikasi Tindakan Perbaikan (SHE)</div>
                 @foreach($hazard->correctiveActions as $ca)
                 @if($ca->status === 'Pending Verification')
-                <form method="POST" action="{{ route('hse.sap.hazard.ca.verify', $ca->id) }}" class="border rounded p-3 mb-2 space-y-2 text-sm">
+                <form method="POST" action="{{ route('hse.dashboard.sap.hazard.ca.verify', $ca->id) }}" class="border rounded p-3 mb-2 space-y-2 text-sm">
                     @csrf
                     <div><span class="font-medium">{{ $ca->corrective_action }}</span> - PIC: {{ $ca->pic?->name }}</div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-2">

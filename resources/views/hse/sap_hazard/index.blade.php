@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Daftar Hazard Report</h2>
-            <a href="{{ route('hse.sap.hazard.create') }}" class="px-3 py-1.5 text-xs rounded bg-[#0B2345] text-white">Tambah Laporan</a>
+            <a href="{{ route('hse.dashboard.sap.hazard.create') }}" class="px-3 py-1.5 text-xs rounded bg-[#0B2345] text-white">Tambah Laporan</a>
         </div>
     </x-slot>
 
@@ -36,9 +36,9 @@
                                 <td class="px-4 py-2">{{ $h->risk_score }}</td>
                                 <td class="px-4 py-2">{{ $h->status }}</td>
                                 <td class="px-4 py-2 text-right space-x-1">
-                                    <a href="{{ route('hse.sap.hazard.show', $h->id) }}" class="text-xs px-2 py-1 rounded bg-slate-100">Lihat</a>
+                                    <a href="{{ route('hse.dashboard.sap.hazard.show', $h->id) }}" class="text-xs px-2 py-1 rounded bg-slate-100">Lihat</a>
                                     @if(in_array($h->status, ['Draft','Returned','Revised']))
-                                    <a href="{{ route('hse.sap.hazard.edit', $h->id) }}" class="text-xs px-2 py-1 rounded bg-amber-100">Edit</a>
+                                    <a href="{{ route('hse.dashboard.sap.hazard.edit', $h->id) }}" class="text-xs px-2 py-1 rounded bg-amber-100">Edit</a>
                                     @endif
                                 </td>
                             </tr>

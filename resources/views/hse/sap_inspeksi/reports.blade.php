@@ -10,7 +10,7 @@
             <p class="text-sm text-slate-500">Rekap inspeksi, skor, temuan & status persetujuan</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('hse.sap.inspeksi.dashboard') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Dashboard</a>
+            <a href="{{ route('hse.dashboard.sap.inspeksi.dashboard') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Dashboard</a>
         </div>
     </div>
 
@@ -42,7 +42,7 @@
                     <td>{{ $i->score ?? '-' }}</td>
                     <td>{{ $i->percentage ? number_format($i->percentage,1).'%' : '-' }}</td>
                     <td>{{ $i->status }}</td>
-                    <td><a href="{{ route('hse.sap.inspeksi.show', $i->id) }}" class="text-[#1646A0] text-xs font-semibold">Detail</a></td>
+                    <td><a href="{{ route('hse.dashboard.sap.inspeksi.show', $i->id) }}" class="text-[#1646A0] text-xs font-semibold">Detail</a></td>
                 </tr>
                 @empty
                 <tr><td colspan="10" class="text-center text-slate-500 text-xs py-6">Tidak ada data</td></tr>

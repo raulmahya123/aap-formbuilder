@@ -10,14 +10,14 @@
             <p class="text-sm text-slate-500">9 formulir resmi SHE-FM untuk SAP Inspeksi</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('hse.sap.inspeksi.dashboard') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Dashboard</a>
-            <a href="{{ route('hse.sap.inspeksi.create') }}" class="px-3 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold">Buat Inspeksi</a>
+            <a href="{{ route('hse.dashboard.sap.inspeksi.dashboard') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Dashboard</a>
+            <a href="{{ route('hse.dashboard.sap.inspeksi.create') }}" class="px-3 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold">Buat Inspeksi</a>
         </div>
     </div>
 
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         @forelse($templates as $t)
-        <a href="{{ route('hse.sap.inspeksi.templates.show', $t->id) }}" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+        <a href="{{ route('hse.dashboard.sap.inspeksi.templates.show', $t->id) }}" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between">
                 <span class="px-2 py-1 rounded bg-blue-50 text-blue-700 text-xs font-bold">{{ $t->code }}</span>
                 <span class="text-xs text-slate-500">v{{ $t->version }}</span>

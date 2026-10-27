@@ -10,7 +10,7 @@
             <p class="text-sm text-slate-500">{{ $inspection->inspection_no }} - {{ $inspection->template->code }}</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('hse.sap.inspeksi.show', $inspection->id) }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Kembali ke Inspeksi</a>
+            <a href="{{ route('hse.dashboard.sap.inspeksi.show', $inspection->id) }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Kembali ke Inspeksi</a>
         </div>
     </div>
 
@@ -48,7 +48,7 @@
                             @if($ca->verified_at)<span>Diverifikasi: {{ $ca->verified_at->format('d/m/Y H:i') }}</span>@endif
                         </div>
                         @if($ca->status === 'Submitted')
-                        <form action="{{ route('hse.sap.inspeksi.ca.verify', $ca->id) }}" method="POST" class="flex items-center gap-2 mt-2">
+                        <form action="{{ route('hse.dashboard.sap.inspeksi.ca.verify', $ca->id) }}" method="POST" class="flex items-center gap-2 mt-2">
                             @csrf
                             <input type="text" name="verification_notes" placeholder="Catatan verifikasi" class="text-xs rounded-lg border border-slate-300 p-2 flex-1 max-w-md">
                             <button name="action" value="reject" class="px-3 py-1.5 rounded-lg border border-rose-300 text-rose-700 text-xs">Tolak</button>
@@ -60,7 +60,7 @@
                     <p class="text-xs text-slate-500">Belum ada tindakan perbaikan diajukan.</p>
                     @endforelse
 
-                    <form action="{{ route('hse.sap.inspeksi.ca.store', $f->id) }}" method="POST" class="mt-4 space-y-2 border-t border-slate-200 pt-4">
+                    <form action="{{ route('hse.dashboard.sap.inspeksi.ca.store', $f->id) }}" method="POST" class="mt-4 space-y-2 border-t border-slate-200 pt-4">
                         @csrf
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Tindakan Korektif <span class="text-rose-500">*</span></label>
@@ -81,7 +81,7 @@
                 </div>
 
                 @if($f->status === 'For Verification')
-                <form action="{{ route('hse.sap.inspeksi.finding.update', $f->id) }}" method="POST" class="flex items-center gap-2">
+                <form action="{{ route('hse.dashboard.sap.inspeksi.finding.update', $f->id) }}" method="POST" class="flex items-center gap-2">
                     @csrf
                     <input type="hidden" name="status" value="Closed">
                     <input type="text" name="closure_notes" placeholder="Catatan penutupan/verifikasi" class="text-xs rounded-lg border border-slate-300 p-2 flex-1 max-w-md">

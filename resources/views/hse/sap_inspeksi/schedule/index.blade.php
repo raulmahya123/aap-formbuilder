@@ -10,8 +10,8 @@
             <p class="text-sm text-slate-500">Perencanaan inspeksi berdasarkan template</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('hse.sap.inspeksi.dashboard') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Dashboard</a>
-            <a href="{{ route('hse.sap.inspeksi.schedule.create') }}" class="px-3 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold">Buat Jadwal</a>
+            <a href="{{ route('hse.dashboard.sap.inspeksi.dashboard') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Dashboard</a>
+            <a href="{{ route('hse.dashboard.sap.inspeksi.schedule.create') }}" class="px-3 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold">Buat Jadwal</a>
         </div>
     </div>
 

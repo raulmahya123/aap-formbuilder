@@ -175,7 +175,7 @@ class SapInspeksiController extends Controller
 
         $this->log($inspection, 'created', 'Inspeksi dibuat');
 
-        return redirect()->route('hse.sap.inspeksi.edit', $inspection->id)->with('ok', 'Inspeksi berhasil dibuat. Silakan isi checklist.');
+        return redirect()->route('hse.dashboard.sap.inspeksi.edit', $inspection->id)->with('ok', 'Inspeksi berhasil dibuat. Silakan isi checklist.');
     }
 
     public function edit(SapInspection $inspection)
@@ -269,7 +269,7 @@ class SapInspeksiController extends Controller
             $this->createFindingsFromAnswers($inspection);
 
             DB::commit();
-            return redirect()->route('hse.sap.inspeksi.show', $inspection->id)->with('ok', 'Inspeksi berhasil diajukan untuk review.');
+            return redirect()->route('hse.dashboard.sap.inspeksi.show', $inspection->id)->with('ok', 'Inspeksi berhasil diajukan untuk review.');
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal mengajukan: ' . $e->getMessage());
@@ -567,7 +567,7 @@ class SapInspeksiController extends Controller
         $data['status'] = 'Planned';
         SapInspectionSchedule::create($data);
 
-        return redirect()->route('hse.sap.inspeksi.schedule.index')->with('ok', 'Jadwal inspeksi berhasil dibuat.');
+        return redirect()->route('hse.dashboard.sap.inspeksi.schedule.index')->with('ok', 'Jadwal inspeksi berhasil dibuat.');
     }
 
     public function reports(Request $request)

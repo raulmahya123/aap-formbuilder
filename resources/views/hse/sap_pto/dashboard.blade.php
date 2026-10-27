@@ -3,8 +3,8 @@
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard PTO (Planned Task Observation)</h2>
             <div class="flex gap-2">
-                <a href="{{ route('hse.sap.pto.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-800 text-white">Daftar PTO</a>
-                <a href="{{ route('hse.sap.pto.create') }}" class="px-3 py-1.5 text-xs rounded bg-[#0B2345] text-white">Tambah PTO</a>
+                <a href="{{ route('hse.dashboard.sap.pto.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-800 text-white">Daftar PTO</a>
+                <a href="{{ route('hse.dashboard.sap.pto.create') }}" class="px-3 py-1.5 text-xs rounded bg-[#0B2345] text-white">Tambah PTO</a>
             </div>
         </div>
     </x-slot>
@@ -38,7 +38,7 @@
                         <tbody>
                             @forelse($recent as $r)
                             <tr class="border-t hover:bg-slate-50">
-                                <td class="px-4 py-2"><a class="text-[#1646A0] font-medium" href="{{ route('hse.sap.pto.show', $r->id) }}">{{ $r->pto_no }}</a></td>
+                                <td class="px-4 py-2"><a class="text-[#1646A0] font-medium" href="{{ route('hse.dashboard.sap.pto.show', $r->id) }}">{{ $r->pto_no }}</a></td>
                                 <td class="px-4 py-2">{{ $r->observation_date?->format('d/m/Y') }}</td>
                                 <td class="px-4 py-2">{{ $r->observer?->name }}</td>
                                 <td class="px-4 py-2">{{ $r->observedEmployee?->name }}</td>

@@ -11,18 +11,18 @@
         </div>
         <div class="flex flex-wrap gap-2">
             @if(in_array($inspection->status, ['Draft','Returned']))
-            <a href="{{ route('hse.sap.inspeksi.edit', $inspection->id) }}" class="px-3 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold">Lanjut Isi</a>
+            <a href="{{ route('hse.dashboard.sap.inspeksi.edit', $inspection->id) }}" class="px-3 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold">Lanjut Isi</a>
             @endif
             @if($inspection->status === 'Submitted' || $inspection->status === 'Under Review')
-            <form action="{{ route('hse.sap.inspeksi.review', $inspection->id) }}" method="POST" class="flex gap-2">
+            <form action="{{ route('hse.dashboard.sap.inspeksi.review', $inspection->id) }}" method="POST" class="flex gap-2">
                 @csrf
                 <input type="text" name="review_notes" placeholder="Catatan review" class="text-xs rounded-lg border border-slate-300 p-2">
                 <button name="action" value="return" class="px-3 py-2 rounded-lg border border-amber-300 text-amber-700 text-xs font-semibold">Kembalikan</button>
                 <button name="action" value="approve" class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold">Setujui</button>
             </form>
             @endif
-            <a href="{{ route('hse.sap.inspeksi.findings', $inspection->id) }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Temuan & Tindak Lanjut</a>
-            <a href="{{ route('hse.sap.inspeksi.index') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Kembali</a>
+            <a href="{{ route('hse.dashboard.sap.inspeksi.findings', $inspection->id) }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Temuan & Tindak Lanjut</a>
+            <a href="{{ route('hse.dashboard.sap.inspeksi.index') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Kembali</a>
         </div>
     </div>
 

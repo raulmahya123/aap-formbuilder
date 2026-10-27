@@ -14,14 +14,14 @@
     </div>
 
     <div class="flex flex-wrap justify-end gap-2 -mt-4">
-        <a href="{{ route('hse.sap.inspeksi.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold shadow-sm hover:bg-[#0B2345] transition-colors">
+        <a href="{{ route('hse.dashboard.sap.inspeksi.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold shadow-sm hover:bg-[#0B2345] transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Buat Inspeksi Baru
         </a>
-        <a href="{{ route('hse.sap.inspeksi.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Daftar Inspeksi</a>
-        <a href="{{ route('hse.sap.inspeksi.templates') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Template SHE-FM</a>
-        <a href="{{ route('hse.sap.inspeksi.schedule.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Jadwal Inspeksi</a>
-        <a href="{{ route('hse.sap.inspeksi.reports') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Laporan</a>
+        <a href="{{ route('hse.dashboard.sap.inspeksi.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Daftar Inspeksi</a>
+        <a href="{{ route('hse.dashboard.sap.inspeksi.templates') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Template SHE-FM</a>
+        <a href="{{ route('hse.dashboard.sap.inspeksi.schedule.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Jadwal Inspeksi</a>
+        <a href="{{ route('hse.dashboard.sap.inspeksi.reports') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Laporan</a>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -69,7 +69,7 @@
                         <td>{{ $r->inspector->name ?? '-' }}</td>
                         <td><span class="px-2 py-0.5 rounded-full text-xs">{{ $r->status }}</span></td>
                         <td>{{ $r->percentage ? number_format($r->percentage,1).'%': '-' }}</td>
-                        <td><a href="{{ route('hse.sap.inspeksi.show', $r->id) }}" class="text-[#1646A0] text-xs font-semibold">Lihat</a></td>
+                        <td><a href="{{ route('hse.dashboard.sap.inspeksi.show', $r->id) }}" class="text-[#1646A0] text-xs font-semibold">Lihat</a></td>
                     </tr>
                     @empty
                     <tr><td colspan="7" class="text-center text-slate-500 text-xs py-4">Belum ada data</td></tr>

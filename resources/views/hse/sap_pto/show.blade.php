@@ -4,9 +4,9 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">PTO {{ $pto->pto_no }} - {{ $pto->status }}</h2>
             <div class="flex gap-2">
                 @if(in_array($pto->status, ['Draft','Returned','Revised']))
-                <a href="{{ route('hse.sap.pto.edit', $pto->id) }}" class="px-3 py-1.5 text-xs rounded bg-amber-100">Edit</a>
+                <a href="{{ route('hse.dashboard.sap.pto.edit', $pto->id) }}" class="px-3 py-1.5 text-xs rounded bg-amber-100">Edit</a>
                 @endif
-                <a href="{{ route('hse.sap.pto.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Kembali</a>
+                <a href="{{ route('hse.dashboard.sap.pto.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Kembali</a>
             </div>
         </div>
     </x-slot>
@@ -52,7 +52,7 @@
             @if(in_array($pto->status, ['Submitted','Supervisor Review','Resubmitted']))
             <div class="bg-white border rounded-lg p-4">
                 <div class="font-semibold text-sm mb-2">Review Supervisor</div>
-                <form method="POST" action="{{ route('hse.sap.pto.review', $pto->id) }}" class="space-y-3 text-sm">
+                <form method="POST" action="{{ route('hse.dashboard.sap.pto.review', $pto->id) }}" class="space-y-3 text-sm">
                     @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
