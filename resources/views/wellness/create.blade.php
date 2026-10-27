@@ -56,8 +56,20 @@
               <x-ui.form-input id="position" name="position" :value="old('position')" required placeholder="Contoh: Operator / Pengawas / Mekanik" />
             </x-ui.form-field>
 
-            <x-ui.form-field name="site" label="Site / Lokasi Kerja" required>
-              <x-ui.form-input id="site" name="site" :value="old('site')" required placeholder="Contoh: Site Mandala / Muara Enim" />
+            <x-ui.form-field name="department_id" label="Departemen" required>
+              <x-ui.form-select id="department_id" name="department_id" required :invalid="$errors->has('department_id')">
+                <option value="">Pilih departemen</option>
+                @foreach($departments as $department)<option value="{{ $department->id }}" @selected((string)old('department_id') === (string)$department->id)>{{ $department->name }}</option>@endforeach
+              </x-ui.form-select>
+              @if($departments->isEmpty())<p class="mt-2 text-xs text-red-700">Daftar departemen belum tersedia. Hubungi admin.</p>@endif
+            </x-ui.form-field>
+
+            <x-ui.form-field name="site_id" label="Site / Lokasi Kerja" required>
+              <x-ui.form-select id="site_id" name="site_id" required :invalid="$errors->has('site_id')">
+                <option value="">Pilih site</option>
+                @foreach($sites as $site)<option value="{{ $site->id }}" @selected((string)old('site_id') === (string)$site->id)>{{ $site->code }} — {{ $site->name }}</option>@endforeach
+              </x-ui.form-select>
+              @if($sites->isEmpty())<p class="mt-2 text-xs text-red-700">Daftar site belum tersedia. Hubungi admin.</p>@endif
             </x-ui.form-field>
           </div>
         </section>
@@ -139,7 +151,7 @@
               <div class="pwa-pill-grid">
                 <label class="pwa-pill-option">
                   <input type="radio" name="health_complaint" value="tidak" x-model="complaint" @checked(old('health_complaint') === 'tidak') required>
-                  <span>Tidak Ada (Sehat)</span>
+                  <span>Tidak ada keluhan</span>
                 </label>
                 <label class="pwa-pill-option">
                   <input type="radio" name="health_complaint" value="ya" x-model="complaint" @checked(old('health_complaint') === 'ya') required>
@@ -155,17 +167,22 @@
           </div>
 
           <!-- Obat Berefek Kantuk -->
-          <div class="pwa-question">
-            <span class="pwa-question-label">Apakah sedang minum obat berefek samping mengantuk? <span class="text-red-500">*</span></span>
+          <div x-data="{ medication: @js(old('drowsy_medication', '')) }" class="pwa-question">
+            <span class="pwa-question-label">Apakah Anda sedang mengonsumsi obat dengan efek samping kantuk / menurunkan konsentrasi? <span class="text-red-500">*</span></span>
             <div class="pwa-pill-grid">
               <label class="pwa-pill-option">
-                <input type="radio" name="drowsy_medication" value="tidak" @checked(old('drowsy_medication') === 'tidak') required>
-                <span>Tidak Minum Obat</span>
+                <input type="radio" name="drowsy_medication" value="tidak" x-model="medication" @checked(old('drowsy_medication') === 'tidak') required>
+                <span>Tidak</span>
               </label>
               <label class="pwa-pill-option">
-                <input type="radio" name="drowsy_medication" value="ya" @checked(old('drowsy_medication') === 'ya') required>
-                <span>Ya, Sedang Minum</span>
+                <input type="radio" name="drowsy_medication" value="ya" x-model="medication" @checked(old('drowsy_medication') === 'ya') required>
+                <span>Ya</span>
               </label>
+            </div>
+            <div x-show="medication === 'ya'" x-cloak class="pwa-subfield-box">
+              <x-ui.form-field name="drowsy_medication_details" label="Nama obat yang dikonsumsi" required helper="Tuliskan semua nama obat yang sedang Anda konsumsi.">
+                <x-ui.form-textarea id="drowsy_medication_details" name="drowsy_medication_details" rows="2" maxlength="2000" x-bind:required="medication === 'ya'" x-bind:disabled="medication !== 'ya'" :invalid="$errors->has('drowsy_medication_details')" placeholder="Tuliskan nama obat di sini.">{{ old('drowsy_medication_details') }}</x-ui.form-textarea>
+              </x-ui.form-field>
             </div>
           </div>
 
@@ -191,7 +208,7 @@
 
       <!-- Submit Section -->
       <footer class="pwa-submit-section">
-        <button type="submit" class="pwa-submit-btn">
+        <button type="submit" class="pwa-submit-btn" @disabled($departments->isEmpty() || $sites->isEmpty())>
           <x-ui.lucide name="send" class="w-4 h-4" />
           <span>Kirim Health Assessment</span>
         </button>

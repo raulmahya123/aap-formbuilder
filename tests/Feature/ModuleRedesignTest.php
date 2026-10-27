@@ -58,7 +58,9 @@ class ModuleRedesignTest extends TestCase
 
     public function test_current_wellness_questionnaire_saves_without_fabricating_legacy_answers(): void
     {
-        $this->post(route('wellness.store'), ['sleep_quality'=>'baik','heavy_drowsiness'=>'tidak','name'=>'Contoh QA','nik'=>'QA-1','position'=>'Operator','site'=>'QA','shift'=>'pagi','sleep_before_shift'=>'lebih_6_jam','health_complaint'=>'tidak','drowsy_medication'=>'tidak','work_readiness'=>'ya'])->assertRedirect(route('wellness.create'));
+        $site = Site::create(['code'=>'WQA','name'=>'Wellness QA']);
+        $department = Department::create(['name'=>'Wellness Team','slug'=>'wellness-team']);
+        $this->post(route('wellness.store'), ['sleep_quality'=>'baik','heavy_drowsiness'=>'tidak','site_id'=>$site->id,'department_id'=>$department->id,'name'=>'Contoh QA','nik'=>'QA-1','position'=>'Operator','site'=>'QA','shift'=>'pagi','sleep_before_shift'=>'lebih_6_jam','health_complaint'=>'tidak','drowsy_medication'=>'tidak','work_readiness'=>'ya'])->assertRedirect(route('wellness.create'));
         $this->assertDatabaseHas('wellness_responses', ['nik'=>'QA-1','work_readiness'=>'ya','mood'=>null,'stress_level'=>null]);
     }
 

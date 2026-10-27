@@ -11,7 +11,7 @@ class WellnessSleepQualityTest extends TestCase
 
     private function answers(): array
     {
-        return ['name'=>'Test', 'nik'=>'QA', 'position'=>'Operator', 'site'=>'QA', 'shift'=>'pagi',
+        return ['department_id'=>\App\Models\Department::firstOrCreate(['slug'=>'she'], ['name'=>'SHE'])->id, 'site_id'=>\App\Models\Site::firstOrCreate(['code'=>'QA'], ['name'=>'QA Site'])->id, 'name'=>'Test', 'nik'=>'QA', 'position'=>'Operator', 'site'=>'QA', 'shift'=>'pagi',
             'sleep_before_shift'=>'6_jam', 'health_complaint'=>'tidak', 'drowsy_medication'=>'tidak',
             'work_readiness'=>'ya', 'sleep_quality'=>'buruk', 'heavy_drowsiness'=>'ya'];
     }

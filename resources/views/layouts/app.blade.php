@@ -226,7 +226,14 @@
 
       {{-- Main content --}}
       <main id="main-content" tabindex="-1" class="px-4 lg:px-8 py-6 grow">
-        @yield('content')
+        @hasSection('content')
+          @yield('content')
+        @else
+          @isset($header)
+            <div class="mb-5">{{ $header }}</div>
+          @endisset
+          {{ $slot ?? '' }}
+        @endif
       </main>
 
     </div>

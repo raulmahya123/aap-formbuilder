@@ -12,7 +12,7 @@ class UIFeedbackTest extends TestCase
     {
         $this->from('/wellness')->post(route('wellness.store'), [])
             ->assertRedirect('/wellness')
-            ->assertSessionHasErrors(['name', 'nik', 'position', 'site', 'shift', 'sleep_before_shift', 'health_complaint', 'drowsy_medication', 'work_readiness']);
+            ->assertSessionHasErrors(['name', 'nik', 'position', 'site_id', 'department_id', 'shift', 'sleep_before_shift', 'health_complaint', 'drowsy_medication', 'work_readiness']);
     }
 
     public function test_notification_provider_keeps_field_bags_and_sanitizes_diagnostics(): void
