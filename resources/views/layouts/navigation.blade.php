@@ -175,6 +175,9 @@
 
       <div x-show="sidebarCollapsed || openSapGroup" x-collapse x-cloak class="mt-1 pl-7 pr-2 grid gap-1 border-l-2 border-slate-200 ml-5 py-1">
         <a href="{{ route('hse.dashboard.sap.index') }}" class="{{ $subItemClass(request()->routeIs('hse.dashboard.sap.index')) }}">SAP Dashboard</a>
+        <a href="{{ route('hse.sap.inspeksi.dashboard') }}" class="{{ $subItemClass(request()->routeIs('hse.sap.inspeksi.*')) }}">SAP Inspeksi SHE/HSE (9 Form)</a>
+        <a href="{{ route('hse.sap.pto.dashboard') }}" class="{{ $subItemClass(request()->routeIs('hse.sap.pto.*')) }}">PTO (Planned Task Observation)</a>
+        <a href="{{ route('hse.sap.hazard.dashboard') }}" class="{{ $subItemClass(request()->routeIs('hse.sap.hazard.*')) }}">Hazard Report (SHE-FM-007)</a>
         <a href="{{ route('hse.dashboard.sap.achievement', 'inspection') }}" class="{{ $subItemClass(request()->is('*/sap/achievement/inspection')) }}">Inspection Achievement</a>
         <a href="{{ route('hse.dashboard.sap.achievement', 'pto') }}" class="{{ $subItemClass(request()->is('*/sap/achievement/pto')) }}">PTO Achievement</a>
         <a href="{{ route('hse.dashboard.sap.achievement', 'hazard') }}" class="{{ $subItemClass(request()->is('*/sap/achievement/hazard')) }}">Hazard Report Achievement</a>

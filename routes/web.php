@@ -638,5 +638,68 @@ Route::middleware('auth')->group(function () {
 
             Route::post('training/records', [\App\Http\Controllers\Hse\SheOperationsController::class, 'trainingRecordStore'])->name('training.record.store');
             Route::post('environment/records', [\App\Http\Controllers\Hse\SheOperationsController::class, 'environmentalRecordStore'])->name('environment.record.store');
+
+            // SAP Inspeksi SHE/HSE Module
+            Route::prefix('sap-inspeksi')->name('sap.inspeksi.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'index'])->name('index');
+                Route::get('/dashboard', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'dashboard'])->name('dashboard');
+                Route::get('/templates', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'templates'])->name('templates');
+                Route::get('/templates/{template}', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'templateShow'])->name('templates.show');
+                Route::get('/create', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'store'])->name('store');
+                Route::get('/{inspection}', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'show'])->name('show');
+                Route::get('/{inspection}/edit', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'edit'])->name('edit');
+                Route::post('/{inspection}/answers', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'saveAnswers'])->name('save_answers');
+                Route::post('/{inspection}/submit', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'submit'])->name('submit');
+                Route::post('/{inspection}/review', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'review'])->name('review');
+                Route::get('/{inspection}/findings', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'findings'])->name('findings');
+                Route::post('/{inspection}/findings', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'storeFinding'])->name('findings.store');
+                Route::post('/findings/{finding}', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'updateFinding'])->name('finding.update');
+                Route::post('/findings/{finding}/ca', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'storeCa'])->name('ca.store');
+                Route::post('/ca/{ca}/verify', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'verifyCa'])->name('ca.verify');
+                Route::get('/schedule/index', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'scheduleIndex'])->name('schedule.index');
+                Route::get('/schedule/create', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'scheduleCreate'])->name('schedule.create');
+                Route::post('/schedule', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'scheduleStore'])->name('schedule.store');
+                Route::get('/reports/list', [\App\Http\Controllers\Hse\SapInspeksiController::class, 'reports'])->name('reports');
+            });
+
+            // SAP PTO (Planned Task Observation) - SHE-FM-019
+            Route::prefix('sap-pto')->name('sap.pto.')->group(function () {
+                Route::get('/dashboard', [\App\Http\Controllers\Hse\SapPtoController::class, 'dashboard'])->name('dashboard');
+                Route::get('/', [\App\Http\Controllers\Hse\SapPtoController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Hse\SapPtoController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Hse\SapPtoController::class, 'store'])->name('store');
+                Route::get('/{pto}', [\App\Http\Controllers\Hse\SapPtoController::class, 'show'])->name('show');
+                Route::get('/{pto}/edit', [\App\Http\Controllers\Hse\SapPtoController::class, 'edit'])->name('edit');
+                Route::post('/{pto}/checklist', [\App\Http\Controllers\Hse\SapPtoController::class, 'saveChecklist'])->name('save_checklist');
+                Route::post('/{pto}/details', [\App\Http\Controllers\Hse\SapPtoController::class, 'updateDetails'])->name('update_details');
+                Route::post('/{pto}/submit', [\App\Http\Controllers\Hse\SapPtoController::class, 'submit'])->name('submit');
+                Route::post('/{pto}/review', [\App\Http\Controllers\Hse\SapPtoController::class, 'review'])->name('review');
+                Route::get('/{pto}/findings', [\App\Http\Controllers\Hse\SapPtoController::class, 'findings'])->name('findings');
+                Route::post('/{pto}/findings', [\App\Http\Controllers\Hse\SapPtoController::class, 'storeFinding'])->name('findings.store');
+                Route::post('/findings/{finding}', [\App\Http\Controllers\Hse\SapPtoController::class, 'updateFinding'])->name('finding.update');
+                Route::get('/schedule/index', [\App\Http\Controllers\Hse\SapPtoController::class, 'scheduleIndex'])->name('schedule.index');
+                Route::get('/schedule/create', [\App\Http\Controllers\Hse\SapPtoController::class, 'scheduleCreate'])->name('schedule.create');
+                Route::post('/schedule', [\App\Http\Controllers\Hse\SapPtoController::class, 'scheduleStore'])->name('schedule.store');
+                Route::get('/reports/list', [\App\Http\Controllers\Hse\SapPtoController::class, 'reports'])->name('reports');
+            });
+
+            // SAP Hazard Report - SHE-FM-007
+            Route::prefix('sap-hazard')->name('sap.hazard.')->group(function () {
+                Route::get('/dashboard', [\App\Http\Controllers\Hse\SapHazardController::class, 'dashboard'])->name('dashboard');
+                Route::get('/', [\App\Http\Controllers\Hse\SapHazardController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Hse\SapHazardController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Hse\SapHazardController::class, 'store'])->name('store');
+                Route::get('/{hazard}', [\App\Http\Controllers\Hse\SapHazardController::class, 'show'])->name('show');
+                Route::get('/{hazard}/edit', [\App\Http\Controllers\Hse\SapHazardController::class, 'edit'])->name('edit');
+                Route::post('/{hazard}/assess', [\App\Http\Controllers\Hse\SapHazardController::class, 'assessRisk'])->name('assess');
+                Route::post('/{hazard}/temp-action', [\App\Http\Controllers\Hse\SapHazardController::class, 'storeTemporaryAction'])->name('temp_action');
+                Route::post('/{hazard}/submit', [\App\Http\Controllers\Hse\SapHazardController::class, 'submit'])->name('submit');
+                Route::post('/{hazard}/review', [\App\Http\Controllers\Hse\SapHazardController::class, 'review'])->name('review');
+                Route::post('/{hazard}/ca', [\App\Http\Controllers\Hse\SapHazardController::class, 'storeCa'])->name('ca.store');
+                Route::post('/ca/{ca}/submit', [\App\Http\Controllers\Hse\SapHazardController::class, 'submitCa'])->name('ca.submit');
+                Route::post('/ca/{ca}/verify', [\App\Http\Controllers\Hse\SapHazardController::class, 'verifyCa'])->name('ca.verify');
+                Route::get('/reports/list', [\App\Http\Controllers\Hse\SapHazardController::class, 'reports'])->name('reports');
+            });
         });
 }); // end middleware auth
