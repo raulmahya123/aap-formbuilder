@@ -80,7 +80,7 @@
                             <td><x-hse.status :value="$row['status']" /></td>
                             <td>
                                 <div x-data="{ open: false }">
-                                    <x-ui.button variant="primary" icon="save" @click="open = true" type="button">Update / Verifikasi</x-ui.button>
+                                    <x-ui.icon-button action="edit" label="Update / Verifikasi" @click="open = true" type="button" />
 
                                     <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" x-cloak>
                                         <div @click.away="open = false" class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">

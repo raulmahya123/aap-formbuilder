@@ -4,15 +4,20 @@ const tables = new WeakMap();
 function collectTable(table) {
     const header = table.tHead?.rows[table.tHead.rows.length - 1];
     if (!header) throw new Error('Tabel belum siap dicetak.');
-    const indexes = [...header.cells].flatMap((cell, index) =>
-        /^(aksi|action|actions)$/i.test(cell.textContent.trim()) ? [] : [index]);
-    const columns = indexes.map(index => header.cells[index].textContent.trim());
+    const bodyRows = [...table.tBodies].flatMap(body => [...body.rows]);
+    const indexes = [...header.cells].flatMap((cell, index) => {
+        const label = cell.textContent.trim();
+        const isAction = /^(aksi|action|actions)$/i.test(label)
+            || (!label && bodyRows.some(row => row.cells[index]?.querySelector('.ui-icon-button, .ui-table-actions')));
+        return isAction ? [] : [index];
+    });
+    const columns = indexes.map(index => header.cells[index].textContent.trim() || `Kolom ${index + 1}`);
     const rows = [...table.tBodies].flatMap(body => [...body.rows])
         .filter(row => row.cells.length === header.cells.length && !row.querySelector('[colspan]'))
         .filter(row => !row.hidden && getComputedStyle(row).display !== 'none')
         .map(row => indexes.map(index => {
             const cell = row.cells[index].cloneNode(true);
-            cell.querySelectorAll('button, .ui-table-actions, .ui-action-menu, dialog, [x-cloak], script, style').forEach(el => el.remove());
+            cell.querySelectorAll('button, .ui-table-actions, .ui-action-menu, dialog, [x-cloak], [hidden], input[type="hidden"], input[type="file"], script, style').forEach(el => el.remove());
             cell.querySelectorAll('input, select, textarea').forEach(input => {
                 const original = row.cells[index].querySelector(`[name="${CSS.escape(input.name)}"]`);
                 const value = original || input;
@@ -99,4 +104,5 @@ document.addEventListener('click', async event => {
 });
 
 enhanceTables();
-if (template) new MutationObserver(enhanceTables).observe(document.querySelector('main'), { childList: true, subtree: true });
+const main = document.querySelector('main');
+if (template && main) new MutationObserver(enhanceTables).observe(main, { childList: true, subtree: true });

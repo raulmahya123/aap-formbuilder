@@ -4,16 +4,16 @@
 
 @section('content')
 <div class="ui-page space-y-6">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-xl font-bold text-slate-900">{{ $template->code }} - {{ $template->name }}</h1>
-            <p class="text-sm text-slate-500">Tipe Penilaian: {{ $template->scoring_type }}</p>
+    <x-ui.page-header>
+        <div class="ui-page-header__copy">
+            <h1 class="ui-page-title">{{ $template->code }} - {{ $template->name }}</h1>
+            <p class="ui-page-description">Tipe Penilaian: {{ $template->scoring_type }}</p>
         </div>
-        <div class="flex gap-2">
+        <div class="ui-page-actions">
             <a href="{{ route('hse.dashboard.sap.inspeksi.templates') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Kembali</a>
             <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.inspeksi.create') }}?template_id={{ $template->id }}">Buat Inspeksi</x-ui.link>
         </div>
-    </div>
+    </x-ui.page-header>
 
     @foreach($template->sections as $section)
     <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">

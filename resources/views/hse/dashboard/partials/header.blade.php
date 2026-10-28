@@ -1,13 +1,10 @@
 @props(['title', 'subtitle', 'filters', 'options', 'export' => null])
-<header class="ui-page-header">
-    <div class="ui-page-header__row">
+<x-ui.page-header>
         <div class="ui-page-header__copy">
             <h1 class="ui-page-title">{{ $title }}</h1>
             <p class="ui-page-description">{{ $subtitle }}</p>
         </div>
         <div class="ui-page-actions">
-            <span class="ui-status ui-status--info">{{ $filters['label'] }}</span>
-            <span class="text-xs text-[#64748B]">{{ $filters['from']->format('d M Y') }} – {{ $filters['to']->format('d M Y') }}</span>
             @if($export)
                 <a class="ui-button" href="{{ route('hse.dashboard.reports.export', ['report' => $export] + request()->query()) }}">
                     <x-ui.lucide name="download" /> Export CSV
@@ -17,8 +14,11 @@
                 <x-ui.lucide name="file-text" /> Reports
             </a>
         </div>
-    </div>
-    <div class="ui-page-header__filters">
+    <x-slot:filters>
+        <div class="ui-filter-summary">
+            <span class="ui-filter-summary__title"><x-ui.lucide name="filter" /> Filter data</span>
+            <span>{{ $filters['label'] }} · {{ $filters['from']->format('d M Y') }} – {{ $filters['to']->format('d M Y') }}</span>
+        </div>
         <x-hse.filter-bar :filters="$filters" :options="$options" />
-    </div>
-</header>
+    </x-slot:filters>
+</x-ui.page-header>

@@ -4,8 +4,8 @@
 
 @section('content')
 <div class="ui-page space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200">
-        <div>
+    <x-ui.page-header>
+        <div class="ui-page-header__copy">
             <div class="flex items-center gap-2">
                 <a href="{{ route('hse.dashboard.incidents') }}" class="text-xs font-medium text-slate-500 hover:text-[#1646A0]">
                     &larr; Kembali ke Incident Register
@@ -13,19 +13,19 @@
                 <span class="text-slate-300">/</span>
                 <span class="text-xs font-semibold text-slate-700">Detail Insiden</span>
             </div>
-            <h1 class="text-2xl font-bold text-[#0F172A] mt-1 flex items-center gap-3">
+            <h1 class="ui-page-title">
                 {{ $incident->incident_no }}
                 <x-hse.status :value="$incident->status" />
                 <x-hse.status :value="$incident->severity" />
             </h1>
-            <p class="text-xs text-slate-500 mt-0.5">
-                Site: <span class="font-semibold text-slate-700">{{ $incident->site?->name ?? '—' }}</span> &bull; 
-                Departemen: <span class="font-semibold text-slate-700">{{ $incident->department?->name ?? '—' }}</span> &bull; 
+            <p class="ui-page-description">
+                Site: <span class="font-semibold text-slate-700">{{ $incident->site?->name ?? '—' }}</span> &bull;
+                Departemen: <span class="font-semibold text-slate-700">{{ $incident->department?->name ?? '—' }}</span> &bull;
                 Waktu Kejadian: <span class="font-semibold text-slate-700">{{ $incident->occurred_at?->format('d M Y H:i') ?? '—' }}</span>
             </p>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="ui-page-actions">
             @if(in_array($incident->status, ['Reported', 'Draft']))
                 <button type="button" onclick="document.getElementById('modal-review').showModal()" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700">
                     Review Insiden
@@ -54,7 +54,7 @@
                 </form>
             @endif
         </div>
-    </div>
+    </x-ui.page-header>
 
     @if(session('ok'))
         <div class="rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-800 font-medium">
@@ -115,7 +115,7 @@
                     <div class="pt-2 border-t border-slate-100">
                         <span class="text-xs font-semibold text-slate-700 block mb-1">Data Cedera Korban</span>
                         <p class="text-xs text-slate-600">
-                            Nama Korban: <strong>{{ $incident->injured_name ?? '—' }}</strong> &bull; 
+                            Nama Korban: <strong>{{ $incident->injured_name ?? '—' }}</strong> &bull;
                             Jenis Cedera: <strong>{{ $incident->injury_type ?? '—' }}</strong>
                         </p>
                     </div>
@@ -209,7 +209,7 @@
         <div class="space-y-6">
             <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
                 <h3 class="text-sm font-bold text-[#0F172A] border-b border-slate-100 pb-2">Status & Pelacak Workflow</h3>
-                
+
                 <div class="space-y-3 text-xs">
                     <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                         <span class="text-slate-500">Pelapor (Reporter)</span>

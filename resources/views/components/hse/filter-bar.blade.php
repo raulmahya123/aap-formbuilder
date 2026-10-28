@@ -1,5 +1,6 @@
 @props(['filters', 'options', 'showDepartment' => true])
-<form method="GET" action="{{ url()->current() }}" class="flex flex-wrap items-end gap-3" x-data="{ period: '{{ $filters['period'] }}' }">
+<form method="GET" action="{{ url()->current() }}" class="ui-table-toolbar ui-hse-filters" data-listing-filters x-data="{ period: '{{ $filters['period'] }}' }">
+    <div class="ui-filter-fields">
     <div class="grid gap-1">
         <label class="text-xs font-medium text-[#52525B]" for="hse-period">Periode</label>
         <select id="hse-period" name="period" x-model="period" class="ui-input">
@@ -80,8 +81,9 @@
         <input id="hse-date-to" type="date" name="date_to" value="{{ request('date_to') }}" class="ui-input">
     </div>
 
-    <div class="flex items-center gap-2 pb-0.5">
-        <button type="submit" class="ui-button ui-button--primary">Terapkan</button>
-        <a href="{{ url()->current() }}" class="ui-button">Reset</a>
+    </div>
+    <div class="ui-filter-actions">
+        <x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button>
+        <x-ui.link href="{{ url()->current() }}" variant="secondary" icon="rotate-ccw">Reset</x-ui.link>
     </div>
 </form>

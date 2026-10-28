@@ -18,7 +18,7 @@ class UnifiedActionsAndExportTest extends TestCase
         $this->assertStringStartsWith('%PDF-', $response->getContent());
         $this->postJson(route('table_export.pdf'), ['title'=>'X', 'columns'=>['A'], 'rows'=>[['1','2']]])->assertUnprocessable();
         $this->postJson(route('table_export.pdf'), ['title'=>'X', 'columns'=>['A'], 'rows'=>array_fill(0,101,['1'])])->assertUnprocessable();
-        $html = view('exports.table', $payload + ['title'=>'<script>alert(1)</script>', 'exportedAt'=>now()])->render();
+        $html = view('exports.table', array_replace($payload, ['title'=>'<script>alert(1)</script>', 'exportedAt'=>now()]))->render();
         $this->assertStringNotContainsString('<script>', $html);
     }
 

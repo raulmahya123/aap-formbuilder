@@ -1069,7 +1069,7 @@
         <x-ui.button variant="primary" icon="plus" 
           type="button" 
           @click="submitCreateGroup()" 
-          :disabled="creatingGroup || !newGroupData.name || selectedGroupMembers.length === 0"
+          ::disabled="creatingGroup || !newGroupData.name || selectedGroupMembers.length === 0"
          
         >Buat Grup</x-ui.button>
       </div>

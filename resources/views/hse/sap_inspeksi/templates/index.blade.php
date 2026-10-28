@@ -4,16 +4,16 @@
 
 @section('content')
 <div class="ui-page space-y-6">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-xl font-bold text-slate-900">Template Inspeksi SHE-FM</h1>
-            <p class="text-sm text-slate-500">9 formulir resmi SHE-FM untuk SAP Inspeksi</p>
+    <x-ui.page-header>
+        <div class="ui-page-header__copy">
+            <h1 class="ui-page-title">Template Inspeksi SHE-FM</h1>
+            <p class="ui-page-description">9 formulir resmi SHE-FM untuk SAP Inspeksi</p>
         </div>
-        <div class="flex gap-2">
+        <div class="ui-page-actions">
             <a href="{{ route('hse.dashboard.sap.inspeksi.dashboard') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Dashboard</a>
             <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.inspeksi.create') }}">Buat Inspeksi</x-ui.link>
         </div>
-    </div>
+    </x-ui.page-header>
 
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         @forelse($templates as $t)

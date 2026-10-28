@@ -5,8 +5,8 @@
 @section('content')
 <div class="ui-page space-y-6" x-data="{ openVerifyModal: false, decision: 'approve' }">
     {{-- Header --}}
-    <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <div>
+    <x-ui.page-header>
+        <div class="ui-page-header__copy">
             <div class="flex items-center gap-2">
                 <a href="{{ route('hse.dashboard.pica.list') }}" class="text-xs font-semibold text-[#1646A0] hover:underline flex items-center gap-1">
                     ← Kembali ke Daftar PICA
@@ -16,11 +16,11 @@
                     {{ $pica->source_module ?: 'Corrective Action' }}
                 </span>
             </div>
-            <h1 class="text-xl font-bold text-slate-900 mt-2">{{ $pica->action_no }} — {{ $pica->title }}</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Dibuat pada {{ $pica->created_at?->format('d M Y H:i') }} • Status Terkini: <strong>{{ $pica->status }}</strong></p>
+            <h1 class="ui-page-title">{{ $pica->action_no }} — {{ $pica->title }}</h1>
+            <p class="ui-page-description">Dibuat pada {{ $pica->created_at?->format('d M Y H:i') }} • Status Terkini: <strong>{{ $pica->status }}</strong></p>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="ui-page-actions">
             @if($pica->status !== 'Closed')
                 <button type="button" @click="decision = 'approve'; openVerifyModal = true" class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -37,7 +37,7 @@
                 </span>
             @endif
         </div>
-    </div>
+    </x-ui.page-header>
 
     {{-- Workflow Progress Indicator --}}
     @php

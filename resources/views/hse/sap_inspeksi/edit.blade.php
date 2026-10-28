@@ -4,19 +4,19 @@
 
 @section('content')
 <div class="ui-page space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-xl font-bold text-slate-900">{{ $inspection->inspection_no }}</h1>
-            <p class="text-sm text-slate-500">{{ $inspection->template->code }} - {{ $inspection->template->name }}</p>
+    <x-ui.page-header>
+        <div class="ui-page-header__copy">
+            <h1 class="ui-page-title">{{ $inspection->inspection_no }}</h1>
+            <p class="ui-page-description">{{ $inspection->template->code }} - {{ $inspection->template->name }}</p>
         </div>
-        <div class="flex gap-2">
+        <div class="ui-page-actions">
             <a href="{{ route('hse.dashboard.sap.inspeksi.show', $inspection->id) }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Lihat Hasil</a>
             <form action="{{ route('hse.dashboard.sap.inspeksi.submit', $inspection->id) }}" method="POST" onsubmit="return confirm('Ajukan inspeksi ini untuk review? Pastikan semua item telah diisi.')">
                 @csrf
                 <button class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold">Ajukan untuk Review</button>
             </form>
         </div>
-    </div>
+    </x-ui.page-header>
 
     @if(session('ok'))
         <div class="rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-800">{{ session('ok') }}</div>

@@ -4,18 +4,18 @@
 
 @section('content')
 <div class="ui-page space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-xl font-bold text-slate-900">Daftar Inspeksi SHE/HSE</h1>
-            <p class="text-sm text-slate-500">Semua inspeksi SAP Inspeksi berdasarkan template SHE-FM</p>
+    <x-ui.page-header>
+        <div class="ui-page-header__copy">
+            <h1 class="ui-page-title">Daftar Inspeksi SHE/HSE</h1>
+            <p class="ui-page-description">Semua inspeksi SAP Inspeksi berdasarkan template SHE-FM</p>
         </div>
-        <div class="flex gap-2">
+        <div class="ui-page-actions">
             <a href="{{ route('hse.dashboard.sap.inspeksi.dashboard') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Dashboard</a>
             <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.inspeksi.create') }}">Buat Inspeksi</x-ui.link>
         </div>
-    </div>
+    </x-ui.page-header>
 
-    <form method="GET" class="flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <x-ui.table-toolbar>
         <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Template</label>
             <select name="template_id" class="text-xs rounded-lg border border-slate-300 p-2">
@@ -34,12 +34,12 @@
                 @endforeach
             </select>
         </div>
-        <button class="px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold">Filter</button>
-    </form>
+
+    <x-slot:actions><x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button><x-ui.link href="{{ url()->current() }}" icon="rotate-ccw">Reset</x-ui.link></x-slot:actions></x-ui.table-toolbar>
 
     <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <table class="ui-table">
-            <thead><tr><th>No. Inspeksi</th><th>Template</th><th>Site/Dept</th><th>Inspektor</th><th>Tanggal</th><th>Status</th><th>Skor</th><th></th></tr></thead>
+            <thead><tr><th>No. Inspeksi</th><th>Template</th><th>Site/Dept</th><th>Inspektor</th><th>Tanggal</th><th>Status</th><th>Skor</th><th class="text-right">Aksi</th></tr></thead>
             <tbody>
                 @forelse($inspections as $i)
                 <tr>

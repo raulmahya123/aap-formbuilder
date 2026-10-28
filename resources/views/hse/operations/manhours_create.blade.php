@@ -4,16 +4,16 @@
 
 @section('content')
 <div class="ui-page max-w-4xl mx-auto space-y-6">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-xl font-bold text-slate-900">Input Jam Kerja (Manhours)</h1>
-            <p class="text-xs text-slate-500 mt-1">Catat jam kerja aman dan tenaga kerja harian per site dan kontraktor untuk kalkulasi LTIFR & LTISR.</p>
+    <x-ui.page-header>
+        <div class="ui-page-header__copy">
+            <h1 class="ui-page-title">Input Jam Kerja (Manhours)</h1>
+            <p class="ui-page-description">Catat jam kerja aman dan tenaga kerja harian per site dan kontraktor untuk kalkulasi LTIFR & LTISR.</p>
         </div>
         <a href="{{ route('hse.dashboard.manhours.index') }}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Kembali ke Riwayat
         </a>
-    </div>
+    </x-ui.page-header>
 
     @if($errors->any())
         <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">

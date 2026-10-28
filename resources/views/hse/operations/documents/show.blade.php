@@ -5,8 +5,8 @@
 @section('content')
 <div class="ui-page space-y-6" x-data="{ openReviseModal: false, openApprovalModal: false, approvalAction: 'approve_publish' }">
     {{-- Header --}}
-    <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <div>
+    <x-ui.page-header>
+        <div class="ui-page-header__copy">
             <div class="flex items-center gap-2">
                 <a href="{{ route('hse.dashboard.documents.index') }}" class="text-xs font-semibold text-[#1646A0] hover:underline flex items-center gap-1">
                     ← Kembali ke Repository
@@ -16,11 +16,11 @@
                     {{ $document->category }}
                 </span>
             </div>
-            <h1 class="text-xl font-bold text-slate-900 mt-2">{{ $document->document_code }} — {{ $document->title }}</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Versi Saat Ini: <strong>v{{ $document->version }}</strong> (Rev #{{ $document->revision_number }}) • Status: <strong>{{ $document->status }}</strong></p>
+            <h1 class="ui-page-title">{{ $document->document_code }} — {{ $document->title }}</h1>
+            <p class="ui-page-description">Versi Saat Ini: <strong>v{{ $document->version }}</strong> (Rev #{{ $document->revision_number }}) • Status: <strong>{{ $document->status }}</strong></p>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="ui-page-actions">
             @if($document->file_path)
                 <a href="{{ route('hse.dashboard.documents.preview', $document->id) }}" target="_blank" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -55,7 +55,7 @@
                 </form>
             @endif
         </div>
-    </div>
+    </x-ui.page-header>
 
     {{-- Workflow Status Banner --}}
     @php

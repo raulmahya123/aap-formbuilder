@@ -4,8 +4,7 @@
 
 @section('content')
 <div class="ui-page space-y-6">
-    <header class="ui-page-header">
-        <div class="ui-page-header__row">
+    <x-ui.page-header>
             <div class="ui-page-header__copy">
                 <div class="flex items-center gap-2">
                     <span class="inline-flex h-3 w-3 rounded-full bg-[#1646A0]"></span>
@@ -24,8 +23,7 @@
                     </form>
                 @endif
             </div>
-        </div>
-    </header>
+    </x-ui.page-header>
 
     @if(session('ok'))
         <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800 shadow-sm flex items-center gap-2">

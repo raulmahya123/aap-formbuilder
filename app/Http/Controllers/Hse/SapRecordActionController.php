@@ -30,6 +30,8 @@ class SapRecordActionController extends Controller
         $record = $this->record($request, $module, $id);
         abort_unless(SapRecordActions::canDelete($request->user(), $record), 403);
         DB::transaction(function () use ($record, $request) {
+            $record = $record->newQuery()->lockForUpdate()->findOrFail($record->id);
+            abort_unless(SapRecordActions::canDelete($request->user(), $record), 403);
             $record->logs()->create(['user_id'=>$request->user()->id, 'action'=>'deleted', 'description'=>'Draft dihapus melalui daftar SAP.']);
             $record->delete();
         });
@@ -51,6 +53,7 @@ class SapRecordActionController extends Controller
         $details = ['Site'=>$record->site?->name, 'Department'=>$record->department?->name, 'Status'=>$record->status];
         $person = match ($module) {'inspeksi'=>'inspector', 'pto'=>'observer', 'hazard'=>'reporter'};
         $details['Pelapor / pengamat'] = $record->$person?->name;
+        if ($module === 'pto') $details['Pegawai yang diamati'] = $record->observedEmployee?->name;
         foreach ($fields as $key=>$label) {
             $value = $record->$key;
             $details[$label] = $value instanceof \DateTimeInterface ? $value->format('d/m/Y H:i') : (is_bool($value) ? ($value ? 'Ya' : 'Tidak') : $value);
@@ -58,10 +61,17 @@ class SapRecordActionController extends Controller
         $sections = [];
         if ($module !== 'hazard') {
             $record->load(['answers.item', 'findings']);
-            $sections[] = ['title'=>'Jawaban checklist', 'columns'=>['Pertanyaan', 'Jawaban', 'Catatan'], 'rows'=>$record->answers->map(fn ($answer)=>[$answer->item?->question, $answer->answer, $answer->remarks])->all()];
+            $record->load($module === 'inspeksi' ? 'template.sections.items' : 'template.items');
+            $items = $module === 'inspeksi' ? $record->template?->sections->flatMap->items : $record->template?->items;
+            $checklist = $items?->map(function ($item) use ($record) {
+                $answer = $record->answers->firstWhere('item_id', $item->id);
+                return [$item->question, $answer?->answer ?? 'Belum diisi', $answer?->remarks];
+            })->all() ?? $record->answers->map(fn ($answer)=>[$answer->item?->question, $answer->answer, $answer->remarks])->all();
+            $sections[] = ['title'=>'Jawaban checklist', 'columns'=>['Pertanyaan', 'Jawaban', 'Catatan'], 'rows'=>$checklist];
             $sections[] = ['title'=>'Temuan', 'columns'=>['Temuan', 'Deskripsi', 'Status'], 'rows'=>$record->findings->map(fn ($finding)=>[$finding->title ?? $finding->finding_no, $finding->description, $finding->status])->all()];
         } else {
-            $record->load('correctiveActions.pic');
+            $record->load(['correctiveActions.pic', 'temporaryActions.pic']);
+            $sections[] = ['title'=>'Tindakan sementara', 'columns'=>['Tindakan', 'PIC', 'Tanggal', 'Status'], 'rows'=>$record->temporaryActions->map(fn ($action)=>[$action->description, $action->pic?->name, $action->action_date?->format('d/m/Y'), $action->status])->all()];
             $sections[] = ['title'=>'Tindakan perbaikan', 'columns'=>['Tindakan', 'PIC', 'Target', 'Status'], 'rows'=>$record->correctiveActions->map(fn ($action)=>[$action->corrective_action, $action->pic?->name, $action->target_completion_date?->format('d/m/Y'), $action->status])->all()];
         }
         $data = compact('title', 'number', 'details', 'sections', 'format');

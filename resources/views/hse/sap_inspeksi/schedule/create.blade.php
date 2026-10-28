@@ -4,13 +4,13 @@
 
 @section('content')
 <div class="ui-page space-y-6 max-w-3xl mx-auto">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-xl font-bold text-slate-900">Buat Jadwal Inspeksi</h1>
-            <p class="text-sm text-slate-500">Rencanakan inspeksi SHE-FM</p>
+    <x-ui.page-header>
+        <div class="ui-page-header__copy">
+            <h1 class="ui-page-title">Buat Jadwal Inspeksi</h1>
+            <p class="ui-page-description">Rencanakan inspeksi SHE-FM</p>
         </div>
         <a href="{{ route('hse.dashboard.sap.inspeksi.schedule.index') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Kembali</a>
-    </div>
+    </x-ui.page-header>
 
     <form action="{{ route('hse.dashboard.sap.inspeksi.schedule.store') }}" method="POST" class="rounded-xl border border-slate-200 bg-white shadow-sm p-6 space-y-4">
         @csrf

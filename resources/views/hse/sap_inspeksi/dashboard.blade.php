@@ -59,7 +59,7 @@
     <x-hse.chart-card title="Inspeksi Terbaru" subtitle="10 inspeksi terakhir">
         <div class="ui-table-scroll">
             <table class="ui-table">
-                <thead><tr><th>No. Inspeksi</th><th>Template</th><th>Site</th><th>Inspektor</th><th>Status</th><th>Skor</th><th></th></tr></thead>
+                <thead><tr><th>No. Inspeksi</th><th>Template</th><th>Site</th><th>Inspektor</th><th>Status</th><th>Skor</th><th class="text-right">Aksi</th></tr></thead>
                 <tbody>
                     @forelse($recent as $r)
                     <tr>

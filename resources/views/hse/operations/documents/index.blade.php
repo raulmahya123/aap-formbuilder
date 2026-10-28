@@ -12,8 +12,8 @@
     ])
 
     {{-- Filter Toolbar --}}
-    <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <form method="GET" action="{{ route('hse.dashboard.documents.index', $category ?: '') }}" class="flex flex-wrap items-center gap-2">
+    <div class="ui-filter-panel ui-module-filter-toolbar">
+        <x-ui.table-toolbar action="{{ route('hse.dashboard.documents.index', $category ?: '') }}">
             <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari kode dokumen, judul, deskripsi..." class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0] w-64">
 
             <select name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
@@ -32,11 +32,9 @@
                 @endforeach
             </select>
 
-            <button type="submit" class="rounded-lg bg-slate-800 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700 transition">Filter</button>
-            @if(request()->anyFilled(['q', 'status', 'department_id']))
-                <a href="{{ route('hse.dashboard.documents.index', $category ?: '') }}" class="text-xs text-slate-500 hover:text-slate-800 py-2 px-1">Reset</a>
-            @endif
-        </form>
+
+
+        <x-slot:actions><x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button><x-ui.link href="{{ url()->current() }}" icon="rotate-ccw">Reset</x-ui.link></x-slot:actions></x-ui.table-toolbar>
 
         <div class="flex items-center gap-2">
             <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.documents.create') }}">Upload Dokumen</x-ui.link>

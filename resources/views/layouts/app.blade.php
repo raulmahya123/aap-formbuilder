@@ -230,7 +230,7 @@
           @yield('content')
         @else
           @isset($header)
-            <div class="mb-5">{{ $header }}</div>
+            <x-ui.page-header>{{ $header }}</x-ui.page-header>
           @endisset
           {{ $slot ?? '' }}
         @endif

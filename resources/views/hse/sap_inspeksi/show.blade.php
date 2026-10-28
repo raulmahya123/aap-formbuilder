@@ -4,12 +4,12 @@
 
 @section('content')
 <div class="ui-page space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-xl font-bold text-slate-900">{{ $inspection->inspection_no }}</h1>
-            <p class="text-sm text-slate-500">{{ $inspection->template->code }} - {{ $inspection->template->name }} | Status: <span class="font-semibold">{{ $inspection->status }}</span></p>
+    <x-ui.page-header>
+        <div class="ui-page-header__copy">
+            <h1 class="ui-page-title">{{ $inspection->inspection_no }}</h1>
+            <p class="ui-page-description">{{ $inspection->template->code }} - {{ $inspection->template->name }} | Status: <span class="font-semibold">{{ $inspection->status }}</span></p>
         </div>
-        <div class="flex flex-wrap items-center gap-2"><x-ui.table-actions><x-ui.sap-record-actions module="inspeksi" :record="$inspection" /></x-ui.table-actions>
+        <div class="ui-page-actions"><x-ui.table-actions><x-ui.sap-record-actions module="inspeksi" :record="$inspection" /></x-ui.table-actions>
             @if(in_array($inspection->status, ['Draft','Returned']))
             <x-ui.link variant="primary" icon="pencil" href="{{ route('hse.dashboard.sap.inspeksi.edit', $inspection->id) }}">Lanjut Isi</x-ui.link>
             @endif
@@ -24,7 +24,7 @@
             <a href="{{ route('hse.dashboard.sap.inspeksi.findings', $inspection->id) }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Temuan & Tindak Lanjut</a>
             <a href="{{ route('hse.dashboard.sap.inspeksi.index') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Kembali</a>
         </div>
-    </div>
+    </x-ui.page-header>
 
     @if(session('ok'))<div class="rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-800">{{ session('ok') }}</div>@endif
     @if(session('error'))<div class="rounded-lg bg-rose-50 border border-rose-200 p-3 text-xs text-rose-800">{{ session('error') }}</div>@endif

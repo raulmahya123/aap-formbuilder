@@ -8,7 +8,7 @@
     @isset($actions)
         <div class="ui-filter-actions">{{ $actions }}</div>
     @endisset
-    @foreach(request()->only(['site_id','company_id','department_id','doc_type','sort','dir']) as $key => $value)
+    @foreach(request()->only(['site_id','company_id','department_id','doc_type','sort','dir','period','year','month','quarter','date_from','date_to']) as $key => $value)
         @if(is_scalar($value) && !preg_match('/name=[\"\x27]'.preg_quote($key, '/').'[\"\x27]/', (string) $slot))<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif
     @endforeach
     @if(request('per_page') && !preg_match('/name=[\"\x27](per_page|perPage|per)[\"\x27]/', (string) $slot))<input type="hidden" name="per_page" value="{{ \App\Support\Listing::perPage() }}">@endif
