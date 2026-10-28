@@ -6,7 +6,7 @@
     };
     $subItemClass = function (bool $isActive) {
         return $isActive
-            ? 'flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold bg-[#1646A0] text-white transition'
+            ? 'flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold bg-[#713F12] text-white transition'
             : 'flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition';
     };
 
@@ -18,7 +18,7 @@
     $isDocActive = request()->is('*/documents*');
     $isOpsActive = request()->is('*/overview*') || request()->is('*/incidents*') || request()->is('*/inspections*') || request()->is('*/training*') || request()->is('*/environment*') || request()->is('*/sites*') || request()->is('*/reports*') || request()->is('*/notifications*');
     $isMasterActive = request()->routeIs('admin.departments.*') || request()->routeIs('admin.sites.*') || request()->routeIs('admin.companies.*') || request()->routeIs('admin.groups.*') || request()->routeIs('admin.indicators.*') || request()->routeIs('admin.forms.*') || request()->routeIs('user.forms.*');
-    $isK3lhActive = request()->routeIs('admin.daily.*') || request()->routeIs('admin.qa.*') || request()->routeIs('admin.wellness.*') || request()->routeIs('admin.reports.*') || request()->routeIs('admin.ccm.*');
+    $isK3lhActive = request()->routeIs('admin.daily.*') || request()->routeIs('admin.hipo.*') || request()->routeIs('admin.wellness.*') || request()->routeIs('admin.reports.*') || request()->routeIs('admin.ccm.*');
 @endphp
 
 <aside id="app-sidebar" aria-label="Navigasi utama" x-show="isDesktop || sidebarOpen" x-cloak
@@ -52,6 +52,12 @@
           </a>
         @endif
         @endif
+        @if(Route::has('admin.qa.index') && $user?->canUseFeatureRoute('admin.qa.index'))
+          <a title="Mandala Chat" href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}">
+            <x-ui-icon name="chat"/>
+            <span class="ui-nav-label font-semibold">Mandala Chat</span>
+          </a>
+        @endif
       </div>
     </div>
 
@@ -74,9 +80,9 @@
         @endif
         @endif
 
-        @if(Route::has('admin.qa.index'))
-        @if($user?->canUseFeatureRoute('admin.qa.index'))
-          <a title="HIPO & Nearmiss" href="{{ route('admin.qa.index') }}" class="{{ $subItemClass(request()->routeIs('admin.qa.*')) }}">HIPO & Nearmiss</a>
+        @if(Route::has('admin.hipo.index'))
+        @if($user?->canUseFeatureRoute('admin.hipo.index'))
+          <a title="HIPO & Nearmiss" href="{{ route('admin.hipo.index') }}" class="{{ $subItemClass(request()->routeIs('admin.hipo.*')) }}">HIPO & Nearmiss</a>
         @endif
         @endif
 
@@ -229,10 +235,8 @@
           <a href="{{ route('dashboard') }}" class="{{ $navItemClass(request()->routeIs('dashboard')) }}"><x-ui-icon name="dashboard"/><span class="ui-nav-label">Dashboard</span></a>
         @endif
 
-        @if(Route::has('admin.qa.index'))
-        @if($user?->canUseFeatureRoute('admin.qa.index'))
-          <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="chat"/><span class="ui-nav-label">HIPO & Nearmiss</span></a>
-        @endif
+        @if(Route::has('admin.qa.index') && $user?->canUseFeatureRoute('admin.qa.index'))
+          <a href="{{ route('admin.qa.index') }}" class="{{ $navItemClass(request()->routeIs('admin.qa.*')) }}"><x-ui-icon name="chat"/><span class="ui-nav-label">Mandala Chat</span></a>
         @endif
 
 
