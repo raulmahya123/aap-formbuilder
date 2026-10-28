@@ -1,4 +1,4 @@
-@props(['name' => 'search', 'placeholder' => 'Cari...', 'value' => null])
+@props(['name' => 'search', 'placeholder' => 'Cari...', 'value' => null, 'autoSubmit' => true])
 @php $val = $value ?? request($name, ''); @endphp
 <div class="ui-table-search" x-data="{ q: @js($val) }">
   <span class="ui-table-search__icon"><x-ui.lucide name="search" /></span>
@@ -11,14 +11,14 @@
       'class' => 'ui-table-search__input',
     ]) }}
     x-model="q"
-    @input.debounce.400ms="$el.closest('form')?.requestSubmit()"
+    @if($autoSubmit) @input.debounce.400ms="$el.closest('form')?.requestSubmit()" @endif
   >
   <button
     type="button"
     class="ui-table-search__clear"
     x-show="q"
     x-cloak
-    @click="q=''; $nextTick(() => $el.closest('form')?.requestSubmit())"
+    @if($autoSubmit) @click="q=''; $nextTick(() => $el.closest('form')?.requestSubmit())" @else @click="q=''" @endif
     aria-label="Hapus pencarian"
   ><x-ui.lucide name="x" /></button>
 </div>

@@ -571,6 +571,8 @@ Route::middleware('auth')->group(function () {
             Route::get('sites', [HseDashboardController::class, 'sites'])->name('sites');
             Route::get('reports', [HseDashboardController::class, 'reports'])->name('reports');
             Route::get('reports/{report}/export', [HseDashboardController::class, 'export'])->name('reports.export');
+            Route::get('reports/{report}/excel', [HseDashboardController::class, 'exportExcel'])->name('reports.excel');
+            Route::get('reports/{report}/pdf', [HseDashboardController::class, 'exportPdf'])->name('reports.pdf');
 
             // SHE Operations & Modules
             Route::get('performance/{indicator}', [\App\Http\Controllers\Hse\SheOperationsController::class, 'performanceIndicator'])->name('performance.indicator');

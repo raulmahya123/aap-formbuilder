@@ -72,14 +72,14 @@
 
 <x-slot:filters>
 <x-ui.table-toolbar class="mb-6 grid grid-cols-1 md:grid-cols-6 gap-3">
-    <div class="md:col-span-2">
-      <label class="block text-xs mb-1 text-coal-600 dark:text-coal-300">Periode (Bulan)</label>
-      <input type="month" name="period" value="{{ $period }}"
+    <div class="ui-filter-field">
+      <label class="ui-filter-field__label" for="daily-period">Periode (bulan)</label>
+      <input id="daily-period" type="month" name="period" value="{{ $period }}"
              class="w-full px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 bg-white dark:bg-coal-900">
     </div>
-    <div class="md:col-span-2">
-      <label class="block text-xs mb-1 text-coal-600 dark:text-coal-300">Site</label>
-      <select name="site_id"
+    <div class="ui-filter-field">
+      <label class="ui-filter-field__label" for="daily-site">Site</label>
+      <select id="daily-site" name="site_id"
               class="w-full px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 bg-white dark:bg-coal-900">
         <option value="">ALL</option>
         @foreach($sites as $s)

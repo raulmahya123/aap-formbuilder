@@ -1,11 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard Hazard Report (SHE-FM-007)</h2>
-            <div class="flex gap-2">
-                <a href="{{ route('hse.dashboard.sap.hazard.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-800 text-white">Daftar Hazard</a>
-                <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.hazard.create') }}">Tambah Laporan</x-ui.link>
-            </div>
+            <div class="ui-page-header__copy"><x-ui.page-title>Dashboard Hazard Report</x-ui.page-title><x-ui.page-description>Ringkasan laporan bahaya SHE-FM-007 dan tindak lanjutnya.</x-ui.page-description></div>
+            <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.hazard.index') }}">Daftar Hazard</x-ui.link><x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.hazard.create') }}">Tambah Laporan</x-ui.link></x-ui.page-actions>
         </div>
     </x-slot>
 

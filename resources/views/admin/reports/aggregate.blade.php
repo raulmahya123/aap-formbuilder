@@ -122,34 +122,30 @@ foreach ($categoryCharts as $key => $chart) {
   <x-ui.page-actions></x-ui.page-actions>
 
 <x-slot:filters>
-<x-ui.table-toolbar class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6" x-data="{ scope: '{{ $scopeNow }}' }">
+<x-ui.table-toolbar x-data="{ scope: '{{ $scopeNow }}' }">
         <input type="hidden" name="scope" :value="scope">
-        <select name="site_id" class="px-3 py-2 border rounded-lg bg-white">
+        <div class="ui-filter-field"><label class="ui-filter-field__label" for="aggregate-site">Site</label><select id="aggregate-site" name="site_id" class="px-3 py-2 border rounded-lg bg-white">
           <option value="">Semua Site</option>
           @foreach($sites as $s)
             <option value="{{ $s->id }}" @selected(($siteId ?? null) == $s->id)>{{ $s->code }} - {{ $s->name }}</option>
           @endforeach
-        </select>
-        <select x-model="scope" class="px-3 py-2 border rounded-lg bg-white">
+        </select></div>
+        <div class="ui-filter-field"><label class="ui-filter-field__label" for="aggregate-scope">Periode</label><select id="aggregate-scope" x-model="scope" class="px-3 py-2 border rounded-lg bg-white">
           <option value="day">Harian</option>
           <option value="week">Mingguan</option>
           <option value="month">Bulanan</option>
           <option value="year">Tahunan</option>
-        </select>
-        <input type="date" name="date" value="{{ $dateObj->toDateString() }}" class="px-3 py-2 border rounded-lg" x-show="scope === 'day'">
-        <div class="flex gap-2" x-show="scope === 'week'">
-          <input type="number" name="week" value="{{ $weekVal }}" class="w-20 px-3 py-2 border rounded-lg">
-          <input type="number" name="year" value="{{ $yearVal }}" class="w-24 px-3 py-2 border rounded-lg">
-        </div>
-        <div class="flex gap-2" x-show="scope === 'month'">
-          <select name="month" class="px-3 py-2 border rounded-lg bg-white">
+        </select></div>
+        <div class="ui-filter-field" x-show="scope === 'day'"><label class="ui-filter-field__label" for="aggregate-date">Tanggal</label><input id="aggregate-date" type="date" name="date" value="{{ $dateObj->toDateString() }}" class="px-3 py-2 border rounded-lg"></div>
+        <div class="ui-filter-field" x-show="scope === 'week'"><label class="ui-filter-field__label" for="aggregate-week">Minggu</label><input id="aggregate-week" type="number" name="week" value="{{ $weekVal }}" min="1" max="53" class="px-3 py-2 border rounded-lg"></div>
+        <div class="ui-filter-field" x-show="scope === 'week'"><label class="ui-filter-field__label" for="aggregate-week-year">Tahun</label><input id="aggregate-week-year" type="number" name="year" value="{{ $yearVal }}" class="px-3 py-2 border rounded-lg"></div>
+        <div class="ui-filter-field" x-show="scope === 'month'"><label class="ui-filter-field__label" for="aggregate-month">Bulan</label><select id="aggregate-month" name="month" class="px-3 py-2 border rounded-lg bg-white">
             @for($m = 1; $m <= 12; $m++)
               <option value="{{ $m }}" @selected($monthVal == $m)>{{ $m }}</option>
             @endfor
-          </select>
-          <input type="number" name="year" value="{{ $yearVal }}" class="w-24 px-3 py-2 border rounded-lg">
-        </div>
-        <input type="number" name="year" value="{{ $yearVal }}" class="px-3 py-2 border rounded-lg" x-show="scope === 'year'">
+          </select></div>
+        <div class="ui-filter-field" x-show="scope === 'month'"><label class="ui-filter-field__label" for="aggregate-month-year">Tahun</label><input id="aggregate-month-year" type="number" name="year" value="{{ $yearVal }}" class="px-3 py-2 border rounded-lg"></div>
+        <div class="ui-filter-field" x-show="scope === 'year'"><label class="ui-filter-field__label" for="aggregate-year">Tahun</label><input id="aggregate-year" type="number" name="year" value="{{ $yearVal }}" class="px-3 py-2 border rounded-lg"></div>
 
 <x-slot:actions>
 <x-ui.button variant="primary" class="px-4 py-2 font-semibold rounded-lg">Terapkan</x-ui.button>

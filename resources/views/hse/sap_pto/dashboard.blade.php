@@ -1,11 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard PTO (Planned Task Observation)</h2>
-            <div class="flex gap-2">
-                <a href="{{ route('hse.dashboard.sap.pto.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-800 text-white">Daftar PTO</a>
-                <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.pto.create') }}">Tambah PTO</x-ui.link>
-            </div>
+            <div class="ui-page-header__copy"><x-ui.page-title>Dashboard PTO</x-ui.page-title><x-ui.page-description>Ringkasan observasi Planned Task Observation dan tindak lanjutnya.</x-ui.page-description></div>
+            <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.pto.index') }}">Daftar PTO</x-ui.link><x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.pto.create') }}">Tambah PTO</x-ui.link></x-ui.page-actions>
         </div>
     </x-slot>
 

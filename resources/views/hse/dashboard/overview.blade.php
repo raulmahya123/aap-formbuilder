@@ -86,7 +86,15 @@
         </x-hse.chart-card>
     </div>
 
-    <div class="grid gap-4 xl:grid-cols-2">
+    @php
+        $overviewSections = [
+            ['key' => 'incidents', 'title' => 'Insiden Terbaru', 'description' => 'Laporan insiden pada periode terpilih.', 'count' => count($data['recent']), 'icon' => 'alert-triangle'],
+            ['key' => 'inspections', 'title' => 'Inspeksi Mendatang', 'description' => 'Jadwal inspeksi terdekat.', 'count' => count($data['upcoming_inspections']), 'icon' => 'calendar-days'],
+            ['key' => 'actions', 'title' => 'Corrective Action Terlambat', 'description' => 'Action yang melewati due date dan belum selesai.', 'count' => count($data['overdue_actions']), 'icon' => 'clipboard-list'],
+        ];
+    @endphp
+    <x-ui.dashboard-section-picker :items="$overviewSections">
+        <div x-show="active === 'incidents'" x-cloak>
         <x-hse.chart-card title="Insiden Terbaru" subtitle="6 laporan terakhir">
             <div class="ui-table-scroll">
                 <table class="ui-table">
@@ -110,7 +118,8 @@
                 </table>
             </div>
         </x-hse.chart-card>
-
+        </div>
+        <div x-show="active === 'inspections'" x-cloak>
         <x-hse.chart-card title="Inspeksi Mendatang" subtitle="Jadwal terdekat">
             <div class="ui-table-scroll">
                 <table class="ui-table">
@@ -132,8 +141,8 @@
                 </table>
             </div>
         </x-hse.chart-card>
-    </div>
-
+        </div>
+        <div x-show="active === 'actions'" x-cloak>
     <x-hse.chart-card title="Corrective Action Terlambat" subtitle="Action yang melewati due date dan belum closed">
         <div class="ui-table-scroll">
             <table class="ui-table">
@@ -156,5 +165,7 @@
             </table>
         </div>
     </x-hse.chart-card>
+        </div>
+    </x-ui.dashboard-section-picker>
 </div>
 @endsection

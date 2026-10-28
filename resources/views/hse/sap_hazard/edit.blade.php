@@ -1,11 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Edit Hazard {{ $hazard->hazard_no }} - Penilaian Risiko</h2>
-            <div class="flex gap-2">
-                <a href="{{ route('hse.dashboard.sap.hazard.show', $hazard->id) }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Lihat</a>
-                <a href="{{ route('hse.dashboard.sap.hazard.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Kembali</a>
-            </div>
+            <div class="ui-page-header__copy"><x-ui.page-title>Edit Hazard {{ $hazard->hazard_no }}</x-ui.page-title><x-ui.page-description>Perbarui penilaian risiko dan informasi laporan bahaya.</x-ui.page-description></div>
+            <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.hazard.show', $hazard->id) }}">Lihat</x-ui.link><x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.hazard.index') }}">Kembali ke daftar</x-ui.link></x-ui.page-actions>
         </div>
     </x-slot>
 

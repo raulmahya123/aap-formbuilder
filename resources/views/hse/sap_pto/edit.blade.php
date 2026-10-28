@@ -1,11 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Edit PTO {{ $pto->pto_no }} - Checklist SHE-FM-019</h2>
-            <div class="flex gap-2">
-                <a href="{{ route('hse.dashboard.sap.pto.show', $pto->id) }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Lihat</a>
-                <a href="{{ route('hse.dashboard.sap.pto.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Kembali</a>
-            </div>
+            <div class="ui-page-header__copy"><x-ui.page-title>Edit PTO {{ $pto->pto_no }}</x-ui.page-title><x-ui.page-description>Perbarui checklist SHE-FM-019 untuk observasi ini.</x-ui.page-description></div>
+            <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.pto.show', $pto->id) }}">Lihat</x-ui.link><x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.pto.index') }}">Kembali ke daftar</x-ui.link></x-ui.page-actions>
         </div>
     </x-slot>
 

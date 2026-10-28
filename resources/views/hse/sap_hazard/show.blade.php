@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Hazard {{ $hazard->hazard_no }} - {{ $hazard->status }}</h2>
+            <div class="ui-page-header__copy"><x-ui.page-title>Hazard {{ $hazard->hazard_no }}</x-ui.page-title><x-ui.page-description>Detail laporan bahaya dan status tindak lanjut: {{ $hazard->status }}.</x-ui.page-description></div>
             <div class="flex flex-wrap items-center gap-2"><x-ui.table-actions><x-ui.sap-record-actions module="hazard" :record="$hazard" /></x-ui.table-actions>
                 @if(in_array($hazard->status, ['Draft','Returned','Revised']))
                 <x-ui.link variant="primary" icon="pencil" href="{{ route('hse.dashboard.sap.hazard.edit', $hazard->id) }}">Edit</x-ui.link>
                 @endif
-                <a href="{{ route('hse.dashboard.sap.hazard.index') }}" class="px-3 py-1.5 text-xs rounded bg-slate-200">Kembali</a>
+                <x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.hazard.index') }}">Kembali ke daftar</x-ui.link>
             </div>
         </div>
     </x-slot>

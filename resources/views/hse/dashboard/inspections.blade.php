@@ -64,7 +64,15 @@
         </x-hse.chart-card>
     </div>
 
-    <div class="grid gap-4 xl:grid-cols-2">
+    @php
+        $inspectionSections = [
+            ['key' => 'upcoming', 'title' => 'Inspeksi Mendatang', 'description' => 'Jadwal inspeksi terdekat.', 'count' => count($data['upcoming']), 'icon' => 'calendar-days'],
+            ['key' => 'history', 'title' => 'Riwayat Inspeksi', 'description' => 'Inspeksi yang sudah tercatat.', 'count' => count($data['history']), 'icon' => 'history'],
+            ['key' => 'findings', 'title' => 'Temuan Audit & Inspeksi', 'description' => 'Temuan yang perlu ditindaklanjuti.', 'count' => count($data['findings']), 'icon' => 'alert-triangle'],
+        ];
+    @endphp
+    <x-ui.dashboard-section-picker :items="$inspectionSections">
+    <div x-show="active === 'upcoming'" x-cloak>
         <x-hse.chart-card title="Inspeksi Mendatang" subtitle="10 jadwal terdekat">
             <div class="ui-table-scroll">
                 <table class="ui-table">
@@ -84,6 +92,8 @@
                 </table>
             </div>
         </x-hse.chart-card>
+    </div>
+    <div x-show="active === 'history'" x-cloak>
         <x-hse.chart-card title="Riwayat Inspeksi" subtitle="50 inspeksi terakhir">
             <div class="ui-table-scroll">
                 <table class="ui-table">
@@ -106,6 +116,7 @@
         </x-hse.chart-card>
     </div>
 
+    <div x-show="active === 'findings'" x-cloak>
     <x-hse.chart-card title="Temuan Audit & Inspeksi" subtitle="50 temuan terakhir">
         <div class="ui-table-scroll">
             <table class="ui-table">
@@ -128,6 +139,8 @@
             </table>
         </div>
     </x-hse.chart-card>
+    </div>
+    </x-ui.dashboard-section-picker>
 </div>
 
 <!-- Modal Catat Inspeksi / PTO Baru -->

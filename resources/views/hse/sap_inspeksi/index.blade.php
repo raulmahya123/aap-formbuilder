@@ -16,18 +16,18 @@
     </x-ui.page-header>
 
     <x-ui.table-toolbar>
-        <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Template</label>
-            <select name="template_id" class="text-xs rounded-lg border border-slate-300 p-2">
+        <div class="ui-filter-field">
+            <label for="inspection-template-filter" class="ui-filter-field__label">Template</label>
+            <select id="inspection-template-filter" name="template_id" class="text-xs rounded-lg border border-slate-300 p-2">
                 <option value="">Semua</option>
                 @foreach($templates as $t)
                     <option value="{{ $t->id }}" @selected(request('template_id')==$t->id)>{{ $t->code }}</option>
                 @endforeach
             </select>
         </div>
-        <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Status</label>
-            <select name="status" class="text-xs rounded-lg border border-slate-300 p-2">
+        <div class="ui-filter-field">
+            <label for="inspection-status-filter" class="ui-filter-field__label">Status</label>
+            <select id="inspection-status-filter" name="status" class="text-xs rounded-lg border border-slate-300 p-2">
                 <option value="">Semua</option>
                 @foreach(['Draft','Submitted','Under Review','Approved','Returned','Closed'] as $st)
                     <option value="{{ $st }}" @selected(request('status')==$st)>{{ $st }}</option>

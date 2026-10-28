@@ -49,6 +49,14 @@
         </x-hse.chart-card>
     </div>
 
+    @php
+        $trainingSections = [
+            ['key' => 'expiring', 'title' => 'Sertifikasi Akan Kedaluwarsa', 'description' => 'Sertifikasi yang perlu diperbarui dalam 120 hari.', 'count' => count($data['charts']['expiring']), 'icon' => 'calendar-days'],
+            ['key' => 'matrix', 'title' => 'Training Matrix', 'description' => 'Status training karyawan per course.', 'count' => count($data['matrix']['rows'] ?? []), 'icon' => 'clipboard-list'],
+        ];
+    @endphp
+    <x-ui.dashboard-section-picker :items="$trainingSections">
+    <div x-show="active === 'expiring'" x-cloak>
     <x-hse.chart-card title="Sertifikasi Akan Kedaluwarsa" subtitle="Dalam 120 hari ke depan">
         <div class="ui-table-scroll">
             <table class="ui-table">
@@ -68,6 +76,8 @@
         </div>
     </x-hse.chart-card>
 
+    </div>
+    <div x-show="active === 'matrix'" x-cloak>
     <x-hse.chart-card title="Training Matrix" subtitle="Status training per karyawan dan course">
         @if(empty($data['matrix']['rows']))
             <x-ui.empty-state title="Belum ada data training" message="Matrix akan tampil setelah record training tersedia." />
@@ -99,6 +109,8 @@
             </div>
         @endif
     </x-hse.chart-card>
+    </div>
+    </x-ui.dashboard-section-picker>
 </div>
 
 <!-- Modal Catat Pelatihan Karyawan -->

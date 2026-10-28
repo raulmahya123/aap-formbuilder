@@ -9,13 +9,61 @@
         'subtitle' => 'Pemantauan aktivitas berisiko tinggi (High & Extreme) serta kepatuhan Critical Control Management.',
         'filters' => $filters,
         'options' => $options,
+        'panel' => $selectedPanel,
     ])
+
+    @php
+        $panelUrl = fn (string $panel) => route('hse.dashboard.risk.high_activities', array_merge(request()->except(['panel', 'page', 'q']), ['panel' => $panel]));
+    @endphp
+
+    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-label="Pilih daftar monitoring">
+        <a href="{{ $panelUrl('high') }}" class="group rounded-lg border border-zinc-300 bg-white p-5 transition hover:border-orange-700 hover:ring-1 hover:ring-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">
+            <div class="flex items-center justify-between gap-3">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 text-orange-800"><x-ui.lucide name="alert-triangle" /></span>
+                <span class="text-2xl font-semibold text-zinc-900">{{ number_format($highCount) }}</span>
+            </div>
+            <h2 class="mt-4 text-base font-semibold text-zinc-900">Risiko Tinggi</h2>
+            <p class="mt-1 text-sm text-zinc-600">Aktivitas dengan level High yang memerlukan mitigasi.</p>
+            <span class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-700">Lihat daftar <x-ui.lucide name="chevron-right" /></span>
+        </a>
+
+        <a href="{{ $panelUrl('extreme') }}" class="group rounded-lg border border-zinc-300 bg-white p-5 transition hover:border-red-700 hover:ring-1 hover:ring-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">
+            <div class="flex items-center justify-between gap-3">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 text-red-800"><x-ui.lucide name="alert-triangle" /></span>
+                <span class="text-2xl font-semibold text-zinc-900">{{ number_format($extremeCount) }}</span>
+            </div>
+            <h2 class="mt-4 text-base font-semibold text-zinc-900">Risiko Ekstrem</h2>
+            <p class="mt-1 text-sm text-zinc-600">Aktivitas level Extreme dengan prioritas penanganan tertinggi.</p>
+            <span class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-700">Lihat daftar <x-ui.lucide name="chevron-right" /></span>
+        </a>
+
+        <a href="{{ $panelUrl('ccm') }}" class="group rounded-lg border border-zinc-300 bg-white p-5 transition hover:border-blue-700 hover:ring-1 hover:ring-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">
+            <div class="flex items-center justify-between gap-3">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-800"><x-ui.lucide name="shield" /></span>
+                <span class="text-2xl font-semibold text-zinc-900">{{ number_format($ccmCount) }}</span>
+            </div>
+            <h2 class="mt-4 text-base font-semibold text-zinc-900">Laporan Critical Control</h2>
+            <p class="mt-1 text-sm text-zinc-600">Laporan aktivitas kritis dari modul Critical Control Management.</p>
+            <span class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-700">Lihat daftar <x-ui.lucide name="chevron-right" /></span>
+        </a>
+    </section>
+
+    @if($selectedPanel)
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h2 class="text-lg font-semibold text-zinc-900">
+                {{ match($selectedPanel) { 'high' => 'Daftar Risiko Tinggi', 'extreme' => 'Daftar Risiko Ekstrem', default => 'Laporan Critical Control' } }}
+            </h2>
+            <p class="text-sm text-zinc-600">Pilih kartu lain untuk berpindah daftar.</p>
+        </div>
+        <x-ui.link href="{{ route('hse.dashboard.risk.high_activities', request()->except(['panel', 'page', 'q'])) }}" icon="chevron-left">Kembali ke ringkasan</x-ui.link>
+    </div>
 
     {{-- Filter Search --}}
     <div class="ui-filter-panel ui-module-filter-toolbar">
-        <x-ui.table-toolbar action="{{ route('hse.dashboard.risk.high_activities') }}">
-            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari aktivitas atau bahaya..." class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0] w-64">
-        <x-slot:actions><x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button><x-ui.link href="{{ url()->current() }}" icon="rotate-ccw">Reset</x-ui.link></x-slot:actions></x-ui.table-toolbar>
+        <x-ui.table-toolbar action="{{ route('hse.dashboard.risk.high_activities', array_merge(request()->except(['page', 'q']), ['panel' => $selectedPanel])) }}">
+            <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari data monitoring" :placeholder="$selectedPanel === 'ccm' ? 'Cari jobsite atau pelapor…' : 'Cari aktivitas atau bahaya…'" />
+        <x-slot:actions><x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button><x-ui.link href="{{ route('hse.dashboard.risk.high_activities', ['panel' => $selectedPanel]) }}" icon="rotate-ccw">Reset</x-ui.link></x-slot:actions></x-ui.table-toolbar>
         <div class="flex items-center gap-2 text-xs">
             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 font-semibold">
                 <span class="h-2 w-2 rounded-full bg-rose-600"></span>
@@ -23,13 +71,15 @@
             </span>
         </div>
     </div>
+    @endif
 
     {{-- High Risk Activities Table --}}
+    @if(in_array($selectedPanel, ['high', 'extreme'], true))
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-4 border-b border-slate-100 flex items-center justify-between">
             <div>
-                <h3 class="text-base font-semibold text-slate-900">Aktivitas Risiko Tinggi & Ekstrem</h3>
-                <p class="text-xs text-slate-500">Tabel monitoring aktivitas dengan skor risiko inherent/residual ≥ 9.</p>
+                <h3 class="text-base font-semibold text-slate-900">{{ $selectedPanel === 'high' ? 'Aktivitas Risiko Tinggi' : 'Aktivitas Risiko Ekstrem' }}</h3>
+                <p class="text-xs text-slate-500">Tabel aktivitas sesuai tingkat risiko yang dipilih.</p>
             </div>
             <span class="text-xs font-semibold text-slate-600">Total: {{ $activities->total() }} aktivitas</span>
         </div>
@@ -87,7 +137,7 @@
                             <td><x-hse.status :value="$act->treatment_status ?: $act->status" /></td>
                         </tr>
                     @empty
-                        <x-ui.table-empty-state :colspan="11" title="Tidak ada aktivitas risiko tinggi" message="Tidak ditemukan asesmen risiko aktif dengan tingkat High atau Extreme." />
+                        <x-ui.table-empty-state :colspan="11" :title="$selectedPanel === 'high' ? 'Tidak ada aktivitas risiko tinggi' : 'Tidak ada aktivitas risiko ekstrem'" message="Tidak ada data pada daftar ini untuk filter yang dipilih." />
                     @endforelse
                 </tbody>
             </table>
@@ -96,8 +146,10 @@
             {{ $activities->links() }}
         </div>
     </div>
+    @endif
 
     {{-- Critical Control Management (CCM) Reports Integration Feed --}}
+    @if($selectedPanel === 'ccm')
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-4 border-b border-slate-100 flex items-center justify-between">
             <div>
@@ -164,6 +216,8 @@
                 </tbody>
             </table>
         </div>
+        <div class="ui-pagination-footer">{{ $ccmReports->links() }}</div>
     </div>
+    @endif
 </div>
 @endsection

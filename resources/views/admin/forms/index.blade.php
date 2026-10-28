@@ -6,7 +6,7 @@
 <x-slot:filters>
 <x-ui.table-toolbar>
 <x-ui.table-search name="q" placeholder="Cari judul dokumen…" aria-label="Cari dokumen" />
-<label class="sr-only" for="mandala-company">Company</label><x-ui.form-select id="mandala-company" name="company_id" @change="$el.form.elements.site_id.value=''; $el.form.elements.department_id.value=''; $el.form.requestSubmit()"><option value="">Semua company</option>@foreach($companies as $company)<option value="{{ $company->id }}" @selected(request('company_id') == $company->id)>{{ $company->code }} — {{ $company->name }}</option>@endforeach</x-ui.form-select>
+<div class="ui-filter-field"><label class="ui-filter-field__label" for="mandala-company">Perusahaan</label><x-ui.form-select id="mandala-company" name="company_id" @change="$el.form.elements.site_id.value=''; $el.form.elements.department_id.value=''; $el.form.requestSubmit()"><option value="">Semua perusahaan</option>@foreach($companies as $company)<option value="{{ $company->id }}" @selected(request('company_id') == $company->id)>{{ $company->code }} — {{ $company->name }}</option>@endforeach</x-ui.form-select></div>
 <x-ui.table-filter name="department_id" :options="$departments->pluck('name','id')" label="Department" placeholder="Semua department" />
 <x-ui.table-filter name="site_id" :options="$sites->when(request('company_id'), fn ($items) => $items->where('company_id', request('company_id')))->pluck('name','id')" label="Site" placeholder="Semua site" />
 <input type="hidden" name="doc_type" value="{{ request('doc_type') }}">

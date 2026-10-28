@@ -52,12 +52,22 @@
         </x-hse.chart-card>
     </div>
 
+    @php
+        $riskRows = array_merge($data['extreme_risk'], $data['high_risk']);
+        $riskSections = [
+            ['key' => 'high-extreme', 'title' => 'Risiko High & Extreme', 'description' => 'Risiko aktif dengan skor tertinggi.', 'count' => count($riskRows), 'icon' => 'alert-triangle'],
+            ['key' => 'overdue', 'title' => 'Treatment Terlambat', 'description' => 'Melewati tanggal target dan belum selesai.', 'count' => count($data['overdue_treatment']), 'icon' => 'calendar-days'],
+            ['key' => 'permits', 'title' => 'Permit Akan Kedaluwarsa', 'description' => 'Permit yang perlu diperpanjang dalam 60 hari.', 'count' => count($data['expiring_permits']), 'icon' => 'file-text'],
+            ['key' => 'requirements', 'title' => 'Requirement Belum Terpenuhi', 'description' => 'Finding yang belum ditutup.', 'count' => count($data['non_compliance']), 'icon' => 'clipboard-list'],
+        ];
+    @endphp
+    <x-ui.dashboard-section-picker :items="$riskSections">
+    <div x-show="active === 'high-extreme'" x-cloak>
     <x-hse.chart-card title="Risiko High & Extreme" subtitle="10 risiko aktif dengan skor tertinggi">
         <div class="ui-table-scroll">
             <table class="ui-table">
                 <thead><tr><th>Aktivitas</th><th>Hazard</th><th>Site</th><th>L</th><th>C</th><th>Skor</th><th>Level</th><th>Treatment</th><th>Due</th></tr></thead>
                 <tbody>
-                    @php $riskRows = array_merge($data['extreme_risk'], $data['high_risk']); @endphp
                     @forelse($riskRows as $row)
                         <tr>
                             <td class="font-medium">{{ $row['activity'] }}</td>
@@ -77,8 +87,9 @@
             </table>
         </div>
     </x-hse.chart-card>
+    </div>
 
-    <div class="grid gap-4 xl:grid-cols-2">
+    <div x-show="active === 'overdue'" x-cloak>
         <x-hse.chart-card title="Treatment Terlambat" subtitle="Melewati treatment due date">
             <div class="ui-table-scroll">
                 <table class="ui-table">
@@ -99,7 +110,8 @@
                 </table>
             </div>
         </x-hse.chart-card>
-
+    </div>
+    <div x-show="active === 'permits'" x-cloak>
         <x-hse.chart-card title="Permit Akan Kedaluwarsa" subtitle="Dalam 60 hari ke depan">
             <div class="ui-table-scroll">
                 <table class="ui-table">
@@ -121,7 +133,7 @@
             </div>
         </x-hse.chart-card>
     </div>
-
+    <div x-show="active === 'requirements'" x-cloak>
     <x-hse.chart-card title="Requirement Belum Terpenuhi" subtitle="Finding yang belum closed">
         <div class="ui-table-scroll">
             <table class="ui-table">
@@ -142,5 +154,7 @@
             </table>
         </div>
     </x-hse.chart-card>
+    </div>
+    </x-ui.dashboard-section-picker>
 </div>
 @endsection

@@ -30,7 +30,7 @@
     <section>
         <div class="flex items-center justify-between mb-3">
             <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700">9 Laporan Resmi SHE</h2>
-            <span class="text-xs text-slate-400">Tersedia format CSV / Excel & Preview</span>
+            <span class="text-xs text-slate-400">Tersedia format Excel, CSV, dan PDF</span>
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -47,14 +47,16 @@
                     </div>
 
                     <div class="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-                        <div class="flex items-center gap-1.5">
-                            <a class="inline-flex items-center gap-1 rounded-lg bg-[#1646A0] px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#123880] transition" href="{{ route('hse.dashboard.reports.export', ['report' => $report['key']] + request()->query()) }}">
-                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                Download Excel/CSV
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <a class="inline-flex items-center gap-1 rounded-lg bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-800 transition" href="{{ route('hse.dashboard.reports.excel', ['report' => $report['key']] + request()->query()) }}" aria-label="Unduh Excel {{ $report['title'] }}">
+                                <x-ui.lucide name="file-text" /> Excel
                             </a>
-                            <button type="button" onclick="window.print()" class="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition" title="Cetak / Simpan sebagai PDF">
-                                PDF
-                            </button>
+                            <a class="inline-flex items-center gap-1 rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-zinc-900 hover:bg-zinc-100 transition" href="{{ route('hse.dashboard.reports.export', ['report' => $report['key']] + request()->query()) }}" aria-label="Unduh CSV {{ $report['title'] }}">
+                                <x-ui.lucide name="download" /> CSV
+                            </a>
+                            <a class="inline-flex items-center gap-1 rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-zinc-900 hover:bg-zinc-100 transition" href="{{ route('hse.dashboard.reports.pdf', ['report' => $report['key']] + request()->query()) }}" aria-label="Unduh PDF {{ $report['title'] }}">
+                                <x-ui.lucide name="file-down" /> PDF
+                            </a>
                         </div>
                         <a class="text-xs font-semibold text-[#1646A0] hover:underline" href="{{ route($report['route'], request()->query()) }}">
                             Preview Dashboard →

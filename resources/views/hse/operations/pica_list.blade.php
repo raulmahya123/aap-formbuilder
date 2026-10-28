@@ -9,36 +9,34 @@
         'subtitle' => 'Daftar tindakan korektif dan preventif (PICA) dengan pelacakan status implementasi dan verifikasi evidence.',
         'filters' => $filters,
         'options' => $options,
+        'create' => ['route' => 'hse.dashboard.pica.create', 'label' => 'Buat PICA'],
     ])
 
     {{-- Filter Toolbar --}}
     <div class="ui-filter-panel ui-module-filter-toolbar">
         <x-ui.table-toolbar action="{{ route('hse.dashboard.pica.list', $source ?: '') }}">
-            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari No PICA, judul, temuan, root cause..." class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0] w-64">
+            <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari PICA" placeholder="Cari nomor PICA, judul, temuan, atau root cause…" />
 
-            <select name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="pica-status-filter">Status</label><select id="pica-status-filter" name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
                 <option value="">-- Semua Status --</option>
                 <option value="Open" {{ request('status') === 'Open' ? 'selected' : '' }}>Open</option>
                 <option value="In Progress" {{ request('status') === 'In Progress' ? 'selected' : '' }}>In Progress</option>
                 <option value="Pending Verification" {{ request('status') === 'Pending Verification' ? 'selected' : '' }}>Waiting Verification</option>
                 <option value="Closed" {{ request('status') === 'Closed' ? 'selected' : '' }}>Closed</option>
-            </select>
+            </select></div>
 
-            <select name="priority" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="pica-priority-filter">Prioritas</label><select id="pica-priority-filter" name="priority" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
                 <option value="">-- Semua Prioritas --</option>
                 <option value="Low" {{ request('priority') === 'Low' ? 'selected' : '' }}>Low</option>
                 <option value="Medium" {{ request('priority') === 'Medium' ? 'selected' : '' }}>Medium</option>
                 <option value="High" {{ request('priority') === 'High' ? 'selected' : '' }}>High</option>
                 <option value="Critical" {{ request('priority') === 'Critical' ? 'selected' : '' }}>Critical</option>
-            </select>
+            </select></div>
 
 
 
         <x-slot:actions><x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button><x-ui.link href="{{ url()->current() }}" icon="rotate-ccw">Reset</x-ui.link></x-slot:actions></x-ui.table-toolbar>
 
-        <div class="flex items-center gap-2">
-            <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.pica.create') }}">Buat PICA</x-ui.link>
-        </div>
     </div>
 
     {{-- Main Table --}}

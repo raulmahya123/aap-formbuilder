@@ -19,6 +19,8 @@
 }
 
 .ui-shell main { padding: var(--page-padding); display: flex; flex-direction: column; gap: var(--section-gap); }
+.ui-shell main > .py-6:has(> div[class*="max-w-"]) { padding-block: 0; }
+.ui-shell main > .py-6 > div[class*="max-w-"] { width: 100%; max-width: none; margin-inline: 0; padding-inline: 0; }
 .ui-page { padding: 0; }
 .ui-page:not(.flex):not(.grid) { display: flex; flex-direction: column; gap: var(--section-gap); }
 .ui-page:not(.flex):not(.grid) > * { margin-block: 0; }

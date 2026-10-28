@@ -42,6 +42,15 @@
                 <div class="rounded-lg bg-emerald-50 p-3 text-center"><p class="text-xs text-emerald-700">Closed/Verified</p><p class="text-xl font-bold text-emerald-900">{{ $findingStats['closed'] }}</p></div>
             </div>
         </x-hse.chart-card>
+    </div>
+        @php
+            $inspectionDashboardSections = [
+                ['key' => 'templates', 'title' => 'Template Aktif', 'description' => 'Jumlah inspeksi yang menggunakan tiap template.', 'count' => $templates->count(), 'icon' => 'file-text'],
+                ['key' => 'recent', 'title' => 'Inspeksi Terbaru', 'description' => 'Inspeksi yang baru tercatat.', 'count' => count($recent), 'icon' => 'history'],
+            ];
+        @endphp
+        <x-ui.dashboard-section-picker :items="$inspectionDashboardSections">
+        <div x-show="active === 'templates'" x-cloak>
         <x-hse.chart-card title="Template Aktif" subtitle="Jumlah inspeksi per template">
             <div class="ui-table-scroll">
                 <table class="ui-table">
@@ -54,8 +63,8 @@
                 </table>
             </div>
         </x-hse.chart-card>
-    </div>
-
+        </div>
+        <div x-show="active === 'recent'" x-cloak>
     <x-hse.chart-card title="Inspeksi Terbaru" subtitle="10 inspeksi terakhir">
         <div class="ui-table-scroll">
             <table class="ui-table">
@@ -78,5 +87,7 @@
             </table>
         </div>
     </x-hse.chart-card>
+        </div>
+        </x-ui.dashboard-section-picker>
 </div>
 @endsection

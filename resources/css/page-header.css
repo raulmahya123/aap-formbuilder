@@ -38,9 +38,8 @@
 .ui-module-filter-toolbar > .ui-table-toolbar { flex: 1 1 480px; min-width: 0; }
 .ui-page-header__row > .flex:only-child { width: 100%; gap: 16px; flex-wrap: wrap; }
 .ui-page-header :is(h1,h2) { margin: 0; color: var(--text-primary); font: 600 var(--type-page)/1.35 var(--font-sans); }
-.ui-hse-filters .ui-filter-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); flex-basis: 100%; width: 100%; gap: 12px; }
+.ui-hse-filters .ui-filter-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .ui-hse-filters .ui-filter-fields > div { min-width: 0; }
 .ui-hse-filters .ui-filter-fields :is(input,select) { width: 100%; min-width: 0; max-width: 100%; }
-.ui-hse-filters > .ui-filter-actions { width: 100%; margin-left: 0; padding-top: 4px; }
-@media(max-width: 1023px) { .ui-hse-filters .ui-filter-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media(max-width: 1023px) { .ui-hse-filters:has(> .ui-filter-fields) { grid-template-columns: minmax(0, 1fr); } .ui-hse-filters .ui-filter-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ui-hse-filters > .ui-filter-actions { width: 100%; } }
 @media(max-width: 539px) { .ui-filter-panel { padding: 12px; } .ui-hse-filters .ui-filter-fields { grid-template-columns: minmax(0, 1fr); } }

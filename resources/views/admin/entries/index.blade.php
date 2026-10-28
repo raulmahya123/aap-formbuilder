@@ -13,20 +13,20 @@
 
 <x-slot:filters>
 <x-ui.table-toolbar class="mb-4 grid md:grid-cols-4 gap-3">
-      <x-ui.table-search   name="q" value="{{ request('q') }}" placeholder="Cari data (contoh: nama)"
+      <x-ui.table-search name="q" value="{{ request('q') }}" aria-label="Cari data isian" placeholder="Cari data (contoh: nama)"
         class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500" />
-      <input type="text" name="user" value="{{ request('user') }}" placeholder="Nama/Email user"
+      <div class="ui-filter-field"><label class="ui-filter-field__label" for="entries-user-filter">Pengguna</label><input id="entries-user-filter" type="text" name="user" value="{{ request('user') }}" aria-label="Nama atau email pengguna" placeholder="Nama atau email pengguna"
         class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500">
-      <input type="number" name="form_id" value="{{ request('form_id') }}" placeholder="Form ID"
+      </div><div class="ui-filter-field"><label class="ui-filter-field__label" for="entries-form-filter">ID Form</label><input id="entries-form-filter" type="number" name="form_id" value="{{ request('form_id') }}" placeholder="ID Form"
         class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500">
-      <select name="status"
+      </div><div class="ui-filter-field"><label class="ui-filter-field__label" for="entries-status-filter">Status</label><select id="entries-status-filter" name="status"
         class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500">
         <option value="">— Semua Status —</option>
         <option value="submitted" @selected(request('status')==='submitted' )>Submitted</option>
         <option value="reviewed" @selected(request('status')==='reviewed' )>Reviewed</option>
         <option value="approved" @selected(request('status')==='approved' )>Approved</option>
         <option value="rejected" @selected(request('status')==='rejected' )>Rejected</option>
-      </select>
+      </select></div>
 
 <x-slot:actions>
 <div class="md:col-span-4">

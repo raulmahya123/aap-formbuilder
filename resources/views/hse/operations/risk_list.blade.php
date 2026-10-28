@@ -9,6 +9,7 @@
         'subtitle' => 'Daftar seluruh asesmen risiko operasional dengan detail Likelihood, Consequence, dan Kontrol.',
         'filters' => $filters,
         'options' => $options,
+        'create' => ['route' => 'hse.dashboard.risk.create', 'label' => 'Tambah Risk Assessment'],
     ])
 
     {{-- Filter Toolbar & Actions --}}
@@ -23,29 +24,26 @@
                 </span>
             @endif
 
-            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari aktivitas, hazard, kontrol..." class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0] focus:ring focus:ring-blue-100 w-56">
+            <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari risk register" placeholder="Cari aktivitas, hazard, atau kontrol…" />
 
-            <select name="level" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0] focus:ring focus:ring-blue-100" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="risk-level-filter">Tingkat risiko</label><select id="risk-level-filter" name="level" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0] focus:ring focus:ring-blue-100" onchange="this.form.submit()">
                 <option value="">-- Semua Severity --</option>
                 <option value="Low" {{ request('level') === 'Low' ? 'selected' : '' }}>Low (1-3)</option>
                 <option value="Medium" {{ request('level') === 'Medium' ? 'selected' : '' }}>Medium (4-8)</option>
                 <option value="High" {{ request('level') === 'High' ? 'selected' : '' }}>High (9-14)</option>
                 <option value="Extreme" {{ request('level') === 'Extreme' ? 'selected' : '' }}>Extreme (15-25)</option>
-            </select>
+            </select></div>
 
-            <select name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0] focus:ring focus:ring-blue-100" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="risk-status-filter">Status</label><select id="risk-status-filter" name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0] focus:ring focus:ring-blue-100" onchange="this.form.submit()">
                 <option value="">-- Status --</option>
                 <option value="Active" {{ request('status') === 'Active' ? 'selected' : '' }}>Active</option>
                 <option value="Closed" {{ request('status') === 'Closed' ? 'selected' : '' }}>Closed</option>
-            </select>
+            </select></div>
 
 
 
         <x-slot:actions><x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button><x-ui.link href="{{ url()->current() }}" icon="rotate-ccw">Reset</x-ui.link></x-slot:actions></x-ui.table-toolbar>
 
-        <div class="flex items-center gap-2">
-            <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.risk.create') }}">Tambah Risk Assessment</x-ui.link>
-        </div>
     </div>
 
     {{-- Main Table --}}

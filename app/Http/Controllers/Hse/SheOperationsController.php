@@ -1117,34 +1117,60 @@ class SheOperationsController extends Controller
         $filters = $this->dashboardService->filters($request);
         $options = $this->dashboardService->options($filters);
 
-        // High risk items from both HseRiskAssessment (High & Extreme) and CCM critical activity categories
-        $query = HseRiskAssessment::with(['site:id,name,code', 'department:id,name', 'owner:id,name'])
-            ->whereIn('risk_level', ['High', 'Extreme'])
-            ->latest();
+        $selectedPanel = $request->query('panel');
+        if (! in_array($selectedPanel, ['high', 'extreme', 'ccm'], true)) {
+            $selectedPanel = null;
+        }
+
+        $riskBaseQuery = HseRiskAssessment::query();
 
         if ($filters['scope_site_ids'] !== null) {
-            $query->whereIn('site_id', $filters['scope_site_ids'] ?: [-1]);
+            $riskBaseQuery->whereIn('site_id', $filters['scope_site_ids'] ?: [-1]);
         }
         if ($filters['site_id']) {
-            $query->where('site_id', $filters['site_id']);
+            $riskBaseQuery->where('site_id', $filters['site_id']);
         }
         if ($filters['department_id']) {
-            $query->where('department_id', $filters['department_id']);
-        }
-        if ($request->filled('q')) {
-            $q = $request->input('q');
-            $query->where(function ($b) use ($q) {
-                $b->where('activity', 'like', "%{$q}%")
-                  ->orWhere('hazard', 'like', "%{$q}%");
-            });
+            $riskBaseQuery->where('department_id', $filters['department_id']);
         }
 
-        $activities = $query->paginate(\App\Support\Listing::perPage())->withQueryString();
+        $highCount = (clone $riskBaseQuery)->where('risk_level', 'High')->count();
+        $extremeCount = (clone $riskBaseQuery)->where('risk_level', 'Extreme')->count();
+        $activities = null;
+        $ccmReports = null;
+        $ccmCount = CcmReport::count();
 
-        // Also fetch CCM recent critical reports for context
-        $ccmReports = CcmReport::latest('waktu_pelaporan')->limit(15)->get();
+        if (in_array($selectedPanel, ['high', 'extreme'], true)) {
+            $query = (clone $riskBaseQuery)
+                ->with(['site:id,name,code', 'department:id,name', 'owner:id,name'])
+                ->where('risk_level', $selectedPanel === 'high' ? 'High' : 'Extreme');
 
-        return view('hse.operations.risk_high_activities', compact('filters', 'options', 'activities', 'ccmReports'));
+            if ($request->filled('q')) {
+                $q = $request->input('q');
+                $query->where(function ($b) use ($q) {
+                    $b->where('activity', 'like', "%{$q}%")
+                      ->orWhere('hazard', 'like', "%{$q}%");
+                });
+            }
+
+            $activities = $query->latest()->paginate(\App\Support\Listing::perPage())->withQueryString();
+        } elseif ($selectedPanel === 'ccm') {
+            $ccmQuery = CcmReport::query();
+            if ($request->filled('q')) {
+                $q = $request->input('q');
+                $ccmQuery->where(function ($b) use ($q) {
+                    $b->where('jobsite', 'like', "%{$q}%")
+                      ->orWhere('nama_pelapor', 'like', "%{$q}%");
+                });
+            }
+
+            $ccmCount = (clone $ccmQuery)->count();
+            $ccmReports = $ccmQuery->latest('waktu_pelaporan')->paginate(\App\Support\Listing::perPage())->withQueryString();
+        }
+
+        return view('hse.operations.risk_high_activities', compact(
+            'filters', 'options', 'selectedPanel', 'highCount', 'extremeCount', 'ccmCount', 'activities', 'ccmReports'
+        ));
     }
 
     public function riskAssessmentStore(Request $request)

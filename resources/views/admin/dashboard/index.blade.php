@@ -13,8 +13,8 @@
 
 <x-slot:filters>
 <x-ui.table-toolbar class="ui-card flex flex-col gap-3 rounded-lg border border-coal-100 bg-white shadow-none sm:flex-row sm:items-end">
-    <div class="min-w-0 flex-1">
-      <label for="site_id" class="mb-1 block text-xs font-semibold normal-case tracking-normal text-coal-500">Filter site</label>
+    <div class="ui-filter-field min-w-0 flex-1">
+      <label for="site_id" class="ui-filter-field__label">Site</label>
       <select id="site_id" name="site_id" data-submit-on-change class="w-full rounded-lg border border-coal-200 bg-white px-3 py-2 text-sm">
         <option value="">Semua site</option>
         @foreach($sites as $site)

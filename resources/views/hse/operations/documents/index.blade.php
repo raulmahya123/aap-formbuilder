@@ -9,36 +9,34 @@
         'subtitle' => 'Repository dokumen terkontrol: pencarian kode, versi, pemilik departemen, dan masa berlaku.',
         'filters' => $filters,
         'options' => $options,
+        'create' => ['route' => 'hse.dashboard.documents.create', 'label' => 'Upload Dokumen'],
     ])
 
     {{-- Filter Toolbar --}}
     <div class="ui-filter-panel ui-module-filter-toolbar">
         <x-ui.table-toolbar action="{{ route('hse.dashboard.documents.index', $category ?: '') }}">
-            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari kode dokumen, judul, deskripsi..." class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0] w-64">
+            <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari dokumen" placeholder="Cari kode, judul, atau deskripsi dokumen…" />
 
-            <select name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="document-status-filter">Status</label><select id="document-status-filter" name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
                 <option value="">-- Semua Status --</option>
                 <option value="Published" {{ request('status') === 'Published' ? 'selected' : '' }}>Published (Aktif)</option>
                 <option value="In Review" {{ request('status') === 'In Review' ? 'selected' : '' }}>In Review</option>
                 <option value="Submitted" {{ request('status') === 'Submitted' ? 'selected' : '' }}>Submitted</option>
                 <option value="Draft" {{ request('status') === 'Draft' ? 'selected' : '' }}>Draft</option>
                 <option value="Obsolete" {{ request('status') === 'Obsolete' ? 'selected' : '' }}>Obsolete (Usang)</option>
-            </select>
+            </select></div>
 
-            <select name="department_id" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="document-department-filter">Department</label><select id="document-department-filter" name="department_id" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
                 <option value="">-- Semua Departemen --</option>
                 @foreach($departments as $dept)
                     <option value="{{ $dept->id }}" {{ request('department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
                 @endforeach
-            </select>
+            </select></div>
 
 
 
         <x-slot:actions><x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button><x-ui.link href="{{ url()->current() }}" icon="rotate-ccw">Reset</x-ui.link></x-slot:actions></x-ui.table-toolbar>
 
-        <div class="flex items-center gap-2">
-            <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.documents.create') }}">Upload Dokumen</x-ui.link>
-        </div>
     </div>
 
     {{-- Main Documents Table --}}

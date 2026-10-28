@@ -13,9 +13,9 @@
 <x-ui.table-toolbar class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-2" action="{{ route('admin.sites.index') }}">
   <x-ui.table-search
     class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:border-[color:var(--brand-maroon,#713F12)]"
-     name="q" value="{{ $q }}" placeholder="Cari name/code/deskripsi..." />
+     name="q" value="{{ $q }}" aria-label="Cari site" placeholder="Cari nama, kode, atau deskripsi site…" />
   {{-- Filter perusahaan (opsional: kirimkan $companies dari controller) --}}
-  <select name="company_id"
+  <div class="ui-filter-field"><label class="ui-filter-field__label" for="site-company-filter">Perusahaan</label><select id="site-company-filter" name="company_id"
           class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:border-[color:var(--brand-maroon,#713F12)]">
     <option value="">— Semua Perusahaan —</option>
     @foreach(($companies ?? []) as $c)
@@ -23,7 +23,7 @@
         {{ $c->code }} — {{ $c->name }}
       </option>
     @endforeach
-  </select>
+  </select></div>
 
 <x-slot:actions>
 <div class="flex gap-2">

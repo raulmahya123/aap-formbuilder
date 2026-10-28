@@ -1,5 +1,6 @@
-@props(['filters', 'options', 'showDepartment' => true])
+@props(['filters', 'options', 'showDepartment' => true, 'panel' => null])
 <form method="GET" action="{{ url()->current() }}" class="ui-table-toolbar ui-hse-filters" data-listing-filters x-data="{ period: '{{ $filters['period'] }}' }">
+    @if($panel)<input type="hidden" name="panel" value="{{ $panel }}">@endif
     <div class="ui-filter-fields">
     <div class="grid gap-1">
         <label class="text-xs font-medium text-[#52525B]" for="hse-period">Periode</label>
@@ -84,6 +85,6 @@
     </div>
     <div class="ui-filter-actions">
         <x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button>
-        <x-ui.link href="{{ url()->current() }}" variant="secondary" icon="rotate-ccw">Reset</x-ui.link>
+        <x-ui.link href="{{ url()->current() }}{{ $panel ? '?'.http_build_query(['panel' => $panel]) : '' }}" variant="secondary" icon="rotate-ccw">Reset</x-ui.link>
     </div>
 </form>
