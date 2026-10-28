@@ -10,6 +10,7 @@
         'filters' => $filters,
         'options' => $options,
         'panel' => $selectedPanel,
+        'showDashboardFilters' => ! $selectedPanel,
     ])
 
     @php
@@ -63,6 +64,9 @@
     <div class="ui-filter-panel ui-module-filter-toolbar">
         <x-ui.table-toolbar action="{{ route('hse.dashboard.risk.high_activities', array_merge(request()->except(['page', 'q']), ['panel' => $selectedPanel])) }}">
             <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari data monitoring" :placeholder="$selectedPanel === 'ccm' ? 'Cari jobsite atau pelapor…' : 'Cari aktivitas atau bahaya…'" />
+            @if($selectedPanel !== 'ccm')
+                <x-hse.module-scope-filters :options="$options" :filters="$filters" />
+            @endif
         <x-slot:actions><x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button><x-ui.link href="{{ route('hse.dashboard.risk.high_activities', ['panel' => $selectedPanel]) }}" icon="rotate-ccw">Reset</x-ui.link></x-slot:actions></x-ui.table-toolbar>
         <div class="flex items-center gap-2 text-xs">
             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 font-semibold">

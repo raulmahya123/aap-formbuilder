@@ -76,17 +76,23 @@
 .ui-sidebar nav a.ui-navigation-link { display: flex; align-items: center; min-height: 36px; padding: 8px; border-radius: 8px; color: #18181B; font-size: 13px; line-height: 1.4; text-decoration: none; overflow-wrap: anywhere; }
 .ui-sidebar nav a.ui-navigation-link:hover { background: #F4F4F5; }
 .ui-sidebar nav a.ui-navigation-link.is-active { background: #713F12; color: #fff; }
+.ui-sidebar-brand-mark { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; background: #fff; color: #B91C1C; font-size: 24px; font-weight: 700; letter-spacing: -.06em; }
 .ui-sidebar--collapsed .ui-navigation-children,
-.ui-sidebar--collapsed .ui-navigation-chevron { display: none; }
+.ui-sidebar--collapsed .ui-navigation-chevron,
+.ui-sidebar--collapsed .ui-sidebar-nav-children { display: none !important; }
 .ui-nav-section { width: 100%; text-align: left; min-height: 28px; align-items: center; }
 .ui-sidebar--collapsed .ui-nav-label,
 .ui-sidebar--collapsed .ui-nav-section { display: none; }
 .ui-sidebar--collapsed nav a { justify-content: center; padding: 8px; }
+.ui-sidebar--collapsed .ui-nav-item { justify-content: center; padding: 8px; }
+.ui-sidebar--collapsed .ui-nav-item > div { width: 100%; justify-content: center; }
+.ui-sidebar--collapsed .ui-nav-item > svg:last-child { display: none; }
 .ui-sidebar--collapsed nav { padding: 8px; }
 .ui-sidebar--collapsed img { width: 48px; height: 40px; }
 .ui-sidebar--collapsed nav > div + div { border-top: 1px solid #D4D4D8; padding-top: 12px; }
 @media (min-width: 1024px) {
   .ui-drawer-close { display: none; }
+  .ui-sidebar { position: sticky; top: 0; align-self: start; height: 100dvh; min-height: 0; overflow-y: auto; }
 }
 @media (max-width: 1023px) {
   .ui-topbar { padding-inline: 16px; }

@@ -9,11 +9,13 @@
         'subtitle' => 'Pemantauan implementasi tindakan kontrol mitigasi risiko, bukti evidence, verifikasi, dan status overdue.',
         'filters' => $filters,
         'options' => $options,
+        'showDashboardFilters' => false,
     ])
 
     {{-- Filter Toolbar --}}
     <div class="ui-filter-panel ui-module-filter-toolbar">
         <x-ui.table-toolbar action="{{ route('hse.dashboard.risk.controls') }}">
+            <x-hse.module-scope-filters :options="$options" :filters="$filters" />
             <div class="ui-filter-field"><label class="ui-filter-field__label" for="risk-control-status">Status</label><select id="risk-control-status" name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
                 <option value="">-- Semua Status --</option>
                 <option value="Open" {{ request('status') === 'Open' ? 'selected' : '' }}>Open</option>

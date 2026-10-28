@@ -10,6 +10,7 @@
         'filters' => $filters,
         'options' => $options,
         'create' => ['route' => 'hse.dashboard.risk.create', 'label' => 'Tambah Risk Assessment'],
+        'showDashboardFilters' => false,
     ])
 
     {{-- Filter Toolbar & Actions --}}
@@ -25,6 +26,7 @@
             @endif
 
             <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari risk register" placeholder="Cari aktivitas, hazard, atau kontrol…" />
+            <x-hse.module-scope-filters :options="$options" :filters="$filters" />
 
             <div class="ui-filter-field"><label class="ui-filter-field__label" for="risk-level-filter">Tingkat risiko</label><select id="risk-level-filter" name="level" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0] focus:ring focus:ring-blue-100" onchange="this.form.submit()">
                 <option value="">-- Semua Severity --</option>

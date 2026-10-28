@@ -27,14 +27,16 @@
   class="ui-sidebar fixed inset-y-0 left-0 z-50 w-64 -translate-x-full bg-white border-r border-[#D4D4D8] transition-transform duration-200 lg:static lg:translate-x-0 lg:w-auto lg:block overflow-y-auto">
   <button type="button" class="ui-drawer-close ui-shell-toggle lg:hidden" @click="sidebarOpen=false; $nextTick(() => document.getElementById('navigation-toggle').focus())" aria-label="Tutup navigasi"><x-ui.icon name="x" /></button>
   <nav aria-label="Menu aplikasi">
-  <div class="flex items-center justify-center border-b border-[#D4D4D8] bg-white px-4 py-5">
-    <a href="{{ route('dashboard') }}" class="flex items-center justify-center">
+  <div class="ui-sidebar-brand flex items-center justify-center border-b border-[#D4D4D8] bg-white px-4 py-5">
+    <a href="{{ route('dashboard') }}" class="flex items-center justify-center" aria-label="Mandala — Dashboard">
       <img
         src="{{ asset('assets/images/logomandala.png') }}"
         alt="Mandala Management System Andalan"
-        class="h-auto transition-all"
-        :class="sidebarCollapsed ? 'w-10' : 'w-36'"
+        class="h-auto w-36 transition-all"
+        x-show="!sidebarCollapsed"
+        x-cloak
       />
+      <span class="ui-sidebar-brand-mark" x-show="sidebarCollapsed" x-cloak aria-hidden="true">M</span>
     </a>
   </div>
   <div class="mt-4 grid gap-3">
@@ -63,7 +65,7 @@
 
     {{-- 2. OPERASIONAL K3LH (DROPDOWN) --}}
     <div x-data="{ openK3lh: {{ $isK3lhActive ? 'true' : 'false' }} }" class="rounded-xl border border-transparent transition">
-      <button type="button" @click="openK3lh = !openK3lh" class="ui-nav-item w-full justify-between cursor-pointer font-semibold text-slate-800 hover:bg-slate-100" :class="{ 'bg-slate-50 border-slate-200': openK3lh }">
+      <button type="button" @click="if (sidebarCollapsed) { toggleSidebarCollapse(); openK3lh = true; } else { openK3lh = !openK3lh; }" title="Operasional K3LH" aria-label="Operasional K3LH" class="ui-nav-item w-full justify-between cursor-pointer font-semibold text-slate-800 hover:bg-slate-100" :class="{ 'bg-slate-50 border-slate-200': openK3lh }">
         <div class="flex items-center gap-3 min-w-0">
           <x-ui-icon name="shield"/>
           <span class="ui-nav-label">Operasional K3LH</span>
@@ -73,7 +75,7 @@
         </svg>
       </button>
 
-      <div x-show="sidebarCollapsed || openK3lh" x-collapse x-cloak class="mt-1 pl-7 pr-2 grid gap-1 border-l-2 border-slate-200 ml-5 py-1">
+      <div x-show="openK3lh && !sidebarCollapsed" x-collapse x-cloak class="mt-1 pl-7 pr-2 grid gap-1 border-l-2 border-slate-200 ml-5 py-1">
         @if(Route::has('admin.daily.index'))
         @if($user?->canUseFeatureRoute('admin.daily.index'))
           <a title="Input Data Operasional" href="{{ route('admin.daily.index') }}" class="{{ $subItemClass(request()->routeIs('admin.daily.*')) }}">Input Data Operasional</a>
@@ -131,18 +133,18 @@
     </div>
 
     @if($user?->canUseFeature('hse'))
-      <div class="px-3 pt-2 text-xs font-medium text-[#52525B]">SHE Management</div>
+      <div class="ui-nav-section px-3 pt-2 text-xs font-medium text-[#52525B]">SHE Management</div>
       <x-ui.navigation-tree :items="\App\Support\SheNavigation::visible(\App\Support\SheNavigation::groups(), $user)" />
     @endif
 
     {{-- SECTION DIVIDER: MASTER DATA --}}
-    <div class="px-3 pt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+    <div class="ui-nav-section px-3 pt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
       Master Data & Formulir
     </div>
 
     {{-- 9. DOKUMEN & MASTER DATA (DROPDOWN) --}}
     <div x-data="{ openMaster: {{ $isMasterActive ? 'true' : 'false' }} }" class="rounded-xl border border-transparent transition">
-      <button type="button" @click="openMaster = !openMaster" class="ui-nav-item w-full justify-between cursor-pointer font-semibold text-slate-800 hover:bg-slate-100" :class="{ 'bg-slate-50 border-slate-200': openMaster }">
+      <button type="button" @click="if (sidebarCollapsed) { toggleSidebarCollapse(); openMaster = true; } else { openMaster = !openMaster; }" title="Master Data & Forms" aria-label="Master Data & Forms" class="ui-nav-item w-full justify-between cursor-pointer font-semibold text-slate-800 hover:bg-slate-100" :class="{ 'bg-slate-50 border-slate-200': openMaster }">
         <div class="flex items-center gap-3 min-w-0">
           <x-ui-icon name="mandala"/>
           <span class="ui-nav-label">Master Data & Forms</span>
@@ -152,7 +154,7 @@
         </svg>
       </button>
 
-      <div x-show="sidebarCollapsed || openMaster" x-collapse x-cloak class="mt-1 pl-7 pr-2 grid gap-1 border-l-2 border-slate-200 ml-5 py-1">
+      <div x-show="openMaster && !sidebarCollapsed" x-collapse x-cloak class="mt-1 pl-7 pr-2 grid gap-1 border-l-2 border-slate-200 ml-5 py-1">
         @if(Route::has('admin.forms.index'))
         @if($user?->canUseFeatureRoute('admin.forms.index'))
           <a href="{{ route('admin.forms.index') }}" class="{{ $subItemClass(request()->routeIs('admin.forms.*')) }}">Dokumen Mandala</a>
@@ -206,7 +208,7 @@
     {{-- 10. ADMINISTRASI SISTEM --}}
     @if($user?->role === 'super_admin')
     <div x-data="{ openAdmin: false }" class="rounded-xl border border-transparent transition">
-      <button type="button" @click="openAdmin = !openAdmin" class="ui-nav-item w-full justify-between cursor-pointer font-semibold text-slate-800 hover:bg-slate-100">
+      <button type="button" @click="if (sidebarCollapsed) { toggleSidebarCollapse(); openAdmin = true; } else { openAdmin = !openAdmin; }" title="Administrasi" aria-label="Administrasi" class="ui-nav-item w-full justify-between cursor-pointer font-semibold text-slate-800 hover:bg-slate-100">
         <div class="flex items-center gap-3 min-w-0">
           <x-ui-icon name="lock"/>
           <span class="ui-nav-label">Administrasi</span>
@@ -216,7 +218,7 @@
         </svg>
       </button>
 
-      <div x-show="sidebarCollapsed || openAdmin" x-collapse x-cloak class="mt-1 pl-7 pr-2 grid gap-1 border-l-2 border-slate-200 ml-5 py-1">
+      <div x-show="openAdmin && !sidebarCollapsed" x-collapse x-cloak class="mt-1 pl-7 pr-2 grid gap-1 border-l-2 border-slate-200 ml-5 py-1">
         @if($isSuper && Route::has('admin.users.active.index'))
         @if($user?->canUseFeatureRoute('admin.users.active.index'))
           <a href="{{ route('admin.users.active.index') }}" class="{{ $subItemClass(request()->routeIs('admin.users.active.*') || request()->routeIs('admin.site_access.*')) }}">Kelola Pengguna & Akses</a>

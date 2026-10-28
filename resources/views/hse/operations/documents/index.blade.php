@@ -10,12 +10,14 @@
         'filters' => $filters,
         'options' => $options,
         'create' => ['route' => 'hse.dashboard.documents.create', 'label' => 'Upload Dokumen'],
+        'showDashboardFilters' => false,
     ])
 
     {{-- Filter Toolbar --}}
     <div class="ui-filter-panel ui-module-filter-toolbar">
         <x-ui.table-toolbar action="{{ route('hse.dashboard.documents.index', $category ?: '') }}">
             <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari dokumen" placeholder="Cari kode, judul, atau deskripsi dokumen…" />
+            <x-hse.module-scope-filters :options="$options" :filters="$filters" :show-department="false" />
 
             <div class="ui-filter-field"><label class="ui-filter-field__label" for="document-status-filter">Status</label><select id="document-status-filter" name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
                 <option value="">-- Semua Status --</option>

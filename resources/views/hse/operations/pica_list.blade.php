@@ -10,12 +10,14 @@
         'filters' => $filters,
         'options' => $options,
         'create' => ['route' => 'hse.dashboard.pica.create', 'label' => 'Buat PICA'],
+        'showDashboardFilters' => false,
     ])
 
     {{-- Filter Toolbar --}}
     <div class="ui-filter-panel ui-module-filter-toolbar">
         <x-ui.table-toolbar action="{{ route('hse.dashboard.pica.list', $source ?: '') }}">
             <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari PICA" placeholder="Cari nomor PICA, judul, temuan, atau root cause…" />
+            <x-hse.module-scope-filters :options="$options" :filters="$filters" />
 
             <div class="ui-filter-field"><label class="ui-filter-field__label" for="pica-status-filter">Status</label><select id="pica-status-filter" name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
                 <option value="">-- Semua Status --</option>

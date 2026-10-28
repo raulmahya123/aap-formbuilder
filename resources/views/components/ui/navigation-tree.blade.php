@@ -2,7 +2,7 @@
 @foreach($items as $item)
     @if(isset($item['children']))
         <div class="ui-navigation-group" x-data="{ expanded: @js($item['active']) }">
-            <button type="button" @click="if (sidebarCollapsed) toggleSidebarCollapse(); expanded = !expanded" :aria-expanded="expanded" title="{{ $item['label'] }}" aria-label="{{ $item['label'] }}" class="{{ $depth === 0 ? 'ui-nav-item' : 'ui-navigation-subgroup' }}">
+            <button type="button" @click="if (sidebarCollapsed) { toggleSidebarCollapse(); expanded = true; } else { expanded = !expanded; }" :aria-expanded="expanded" title="{{ $item['label'] }}" aria-label="{{ $item['label'] }}" class="{{ $depth === 0 ? 'ui-nav-item' : 'ui-navigation-subgroup' }}">
                 @if(isset($item['icon']))<x-ui.icon :name="$item['icon']" />@endif
                 <span class="ui-nav-label">{{ $item['label'] }}</span>
                 <x-ui.lucide name="chevron-right" class="ui-navigation-chevron" x-bind:class="expanded ? 'rotate-90' : ''" />
