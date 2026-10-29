@@ -26,13 +26,13 @@
     @endif
 
     <div class="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
-        <form action="{{ route('hse.dashboard.targets.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('hse.dashboard.targets.store') }}" method="POST" >
             @csrf
 
             <div class="grid gap-6 sm:grid-cols-2">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700">Indikator KPI <span class="text-rose-500">*</span></label>
-                    <select name="kpi_key" required class="mt-1.5 w-full rounded-lg border border-slate-300 p-2.5 text-xs focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
+                    <label class="block">Indikator KPI <span class="text-rose-500">*</span></label>
+                    <select name="kpi_key" required class="w-full ui-input">
                         <option value="">Pilih KPI</option>
                         @foreach($kpiKeys as $k => $conf)
                             <option value="{{ $k }}">{{ $conf['label'] }} ({{ $conf['unit'] }})</option>
@@ -42,8 +42,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700">Site Operasional</label>
-                    <select name="site_id" class="mt-1.5 w-full rounded-lg border border-slate-300 p-2.5 text-xs focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
+                    <label class="block">Site Operasional</label>
+                    <select name="site_id" class="w-full ui-input">
                         <option value="">Semua Site (Corporate Target)</option>
                         @foreach($options['sites'] as $s)
                             <option value="{{ $s->id }}">{{ $s->name }} ({{ $s->code }})</option>
@@ -53,19 +53,19 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700">Tahun Target <span class="text-rose-500">*</span></label>
-                    <input type="number" name="year" value="{{ $year }}" required class="mt-1.5 w-full rounded-lg border border-slate-300 p-2.5 text-xs focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]" />
+                    <label class="block">Tahun Target <span class="text-rose-500">*</span></label>
+                    <input type="number" name="year" value="{{ $year }}" required class="w-full ui-input" />
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700">Nilai Target <span class="text-rose-500">*</span></label>
-                    <input type="number" step="any" name="target_value" required placeholder="0" class="mt-1.5 w-full rounded-lg border border-slate-300 p-2.5 text-xs focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]" />
+                    <label class="block">Nilai Target <span class="text-rose-500">*</span></label>
+                    <input type="number" step="any" name="target_value" required placeholder="0" class="w-full ui-input" />
                     <span class="text-[11px] text-slate-400 mt-1 block">Angka kuantitatif yang dijadikan patokan.</span>
                 </div>
 
                 <div class="sm:col-span-2">
-                    <label class="block text-xs font-semibold text-slate-700">Arah Sukses Target <span class="text-rose-500">*</span></label>
-                    <select name="direction" required class="mt-1.5 w-full rounded-lg border border-slate-300 p-2.5 text-xs focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
+                    <label class="block">Arah Sukses Target <span class="text-rose-500">*</span></label>
+                    <select name="direction" required class="w-full ui-input">
                         <option value="lower">Lebih rendah atau sama dengan target lebih baik (≤ Target, contoh: Incident, LTI = 0)</option>
                         <option value="higher">Lebih tinggi atau sama dengan target lebih baik (≥ Target, contoh: Manhours, Score, Kepatuhan)</option>
                     </select>

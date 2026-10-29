@@ -42,7 +42,7 @@
   <x-ui.table-toolbar>
     <x-ui.table-search name="q" placeholder="Cari nama atau email pengguna…" aria-label="Cari pengguna" />
     <x-ui.table-filter name="site_id" :options="$sites->mapWithKeys(fn ($site) => [$site->id => $site->displayLabel()])" :value="$siteId" label="Site" placeholder="Semua site" />
-    @if($email)<input type="hidden" name="email" value="{{ $email }}"><span class="text-sm">Email: {{ $email }}</span>@endif
+    @if($email)<input type="hidden" name="email" value="{{ $email }}"><span>Email: {{ $email }}</span>@endif
     <x-slot:actions>
       <x-ui.button variant="secondary" type="submit">Terapkan</x-ui.button>
       <x-ui.link variant="secondary" :href="route('admin.site_access.index', ['site_id'=>''])">Reset</x-ui.link>

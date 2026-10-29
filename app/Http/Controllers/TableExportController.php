@@ -24,7 +24,7 @@ class TableExportController extends Controller
         }
 
         return Pdf::loadView('exports.table', $data + ['exportedAt' => now()])
-            ->setPaper('a4', count($data['columns']) > 5 ? 'landscape' : 'portrait')
+            ->setPaper('a4', 'portrait')
             ->setOptions(['isRemoteEnabled' => false, 'isPhpEnabled' => false, 'defaultFont' => 'DejaVu Sans'])
             ->download((Str::slug($data['title']) ?: 'mandala') . '-' . now()->format('Ymd-His') . '.pdf');
     }

@@ -16,7 +16,7 @@
     <div class="ui-filter-panel ui-module-filter-toolbar">
         <x-ui.table-toolbar action="{{ route('hse.dashboard.risk.controls') }}">
             <x-hse.module-scope-filters :options="$options" :filters="$filters" />
-            <div class="ui-filter-field"><label class="ui-filter-field__label" for="risk-control-status">Status</label><select id="risk-control-status" name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="risk-control-status">Status</label><select id="risk-control-status" name="status" class="w-full ui-input" onchange="this.form.submit()">
                 <option value="">-- Semua Status --</option>
                 <option value="Open" {{ request('status') === 'Open' ? 'selected' : '' }}>Open</option>
                 <option value="In Progress" {{ request('status') === 'In Progress' ? 'selected' : '' }}>In Progress</option>
@@ -24,7 +24,7 @@
                 <option value="Closed" {{ request('status') === 'Closed' ? 'selected' : '' }}>Closed</option>
             </select></div>
 
-            <div class="ui-filter-field"><label class="ui-filter-field__label" for="risk-control-overdue">Jatuh tempo</label><select id="risk-control-overdue" name="overdue" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="risk-control-overdue">Jatuh tempo</label><select id="risk-control-overdue" name="overdue" class="w-full ui-input" onchange="this.form.submit()">
                 <option value="">-- Filter Due Date --</option>
                 <option value="1" {{ request('overdue') == '1' ? 'selected' : '' }}>Hanya yang Overdue</option>
             </select></div>
@@ -106,7 +106,7 @@
             </table>
         </div>
         <div class="ui-pagination-footer">
-            {{ $controls->links() }}
+            <x-ui.table-pagination :paginator="$controls" />
         </div>
     </div>
 

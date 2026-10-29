@@ -56,9 +56,9 @@
   <div class="flex items-center justify-between p-4 sm:p-5 pb-0">
     <x-ui.section-title class="font-medium">Data</x-ui.section-title>
     {{-- Tombol Download Data (PDF) --}}
-    <x-ui.link variant="primary" href="{{ route('admin.entries.data_pdf', $entry) }}"
-       class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-ivory-50 transition text-sm">
-      ⬇️ Download Data (PDF)
+      <x-ui.link variant="primary" icon="file-down" href="{{ route('admin.entries.data_pdf', $entry) }}"
+         class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-ivory-50 transition text-sm">
+      Unduh Data PDF
     </x-ui.link>
   </div>
   <div class="p-4 sm:p-5 pt-3">

@@ -19,42 +19,42 @@
 @endif
 
 <form action="{{ route('admin.groups.store') }}" method="post"
-      class="w-full min-w-0 ui-card space-y-5 bg-white rounded-lg shadow-none border border-gray-200">
+      class="w-full min-w-0 ui-card">
   @csrf
 
   <div>
-    <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+    <label class="block">Name</label>
     <input name="name" value="{{ old('name') }}"
-           class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:outline-none"
+           class="w-full ui-input"
            required>
   </div>
 
   <div>
-    <label class="block text-sm font-semibold text-gray-700 mb-1">Code</label>
+    <label class="block">Code</label>
     <input name="code" value="{{ old('code') }}" placeholder="LAGGING"
-           class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:outline-none"
+           class="w-full ui-input"
            required>
   </div>
 
   <div class="grid grid-cols-2 gap-4">
     <div>
-      <label class="block text-sm font-semibold text-gray-700 mb-1">Order</label>
+      <label class="block">Order</label>
       <input type="number" name="order_index" value="{{ old('order_index',0) }}"
-             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:outline-none">
+             class="w-full ui-input">
     </div>
     <div class="flex items-center gap-2">
       <input type="checkbox" name="is_active" value="1" {{ old('is_active',1) ? 'checked' : '' }}
-             class="h-4 w-4 text-maroon-600 border-gray-300 rounded-lg focus:ring-maroon-500">
+             class="h-4 w-4">
       <span class="text-sm text-gray-700">Active</span>
     </div>
   </div>
 
   <div class="flex gap-3">
-    <x-ui.button variant="primary" class="px-5 py-3 rounded-lg shadow-none">
+    <x-ui.button variant="primary" >
       Save
     </x-ui.button>
     <x-ui.link variant="secondary" href="{{ route('admin.groups.index') }}"
-       class="px-5 py-3 rounded-lg border">
+       >
       Cancel
     </x-ui.link>
   </div>

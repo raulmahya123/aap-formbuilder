@@ -376,11 +376,11 @@ class DocumentController extends Controller
         return back()->with('success', 'Akses dihapus.');
     }
 
-    public function export(Document $document)
+    public function export(Request $request, Document $document)
     {
         $this->authorize('export', $document);
 
-        $document->load(['owner:id,name', 'department:id,name', 'signatures' => fn($q) => $q->orderBy('order')]);
+        $document->load(['owner:id,name', 'department:id,name', 'signatures' => fn($q) => $q->with('signedBy:id,name')->orderBy('order')]);
 
         $view = 'admin.documents.export';
 
@@ -390,7 +390,7 @@ class DocumentController extends Controller
             ])->setPaper('a4', 'portrait');
 
             $filename = Str::slug($document->doc_no . '-' . $document->title) . '.pdf';
-            return $pdf->download($filename);
+            return $request->boolean('inline') ? $pdf->stream($filename) : $pdf->download($filename);
         }
 
         $html = view($view, ['document' => $document])->render();

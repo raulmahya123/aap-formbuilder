@@ -19,7 +19,7 @@
             <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari PICA" placeholder="Cari nomor PICA, judul, temuan, atau root cause…" />
             <x-hse.module-scope-filters :options="$options" :filters="$filters" />
 
-            <div class="ui-filter-field"><label class="ui-filter-field__label" for="pica-status-filter">Status</label><select id="pica-status-filter" name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="pica-status-filter">Status</label><select id="pica-status-filter" name="status" class="w-full ui-input" onchange="this.form.submit()">
                 <option value="">-- Semua Status --</option>
                 <option value="Open" {{ request('status') === 'Open' ? 'selected' : '' }}>Open</option>
                 <option value="In Progress" {{ request('status') === 'In Progress' ? 'selected' : '' }}>In Progress</option>
@@ -27,7 +27,7 @@
                 <option value="Closed" {{ request('status') === 'Closed' ? 'selected' : '' }}>Closed</option>
             </select></div>
 
-            <div class="ui-filter-field"><label class="ui-filter-field__label" for="pica-priority-filter">Prioritas</label><select id="pica-priority-filter" name="priority" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="pica-priority-filter">Prioritas</label><select id="pica-priority-filter" name="priority" class="w-full ui-input" onchange="this.form.submit()">
                 <option value="">-- Semua Prioritas --</option>
                 <option value="Low" {{ request('priority') === 'Low' ? 'selected' : '' }}>Low</option>
                 <option value="Medium" {{ request('priority') === 'Medium' ? 'selected' : '' }}>Medium</option>
@@ -118,7 +118,7 @@
             </table>
         </div>
         <div class="ui-pagination-footer">
-            {{ $records->links() }}
+            <x-ui.table-pagination :paginator="$records" />
         </div>
     </div>
 

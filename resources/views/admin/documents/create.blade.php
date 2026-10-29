@@ -6,7 +6,7 @@
   <x-ui.page-header>
   <div class="ui-page-header__copy"><x-ui.page-title>Buat Dokumen</x-ui.page-title>
 <x-ui.page-description>Lengkapi informasi untuk menambahkan dokumen.</x-ui.page-description></div>
-  <x-ui.page-actions><x-ui.button variant="primary" form="docForm" class="px-4 py-2 rounded-lg hover:opacity-90">Simpan</x-ui.button></x-ui.page-actions>
+  <x-ui.page-actions><x-ui.button variant="primary" form="docForm" >Simpan</x-ui.button></x-ui.page-actions>
 </x-ui.page-header>
 
   {{-- Inject daftar templates sebagai JSON murni untuk Alpine --}}
@@ -27,14 +27,14 @@
 
     <div class="grid lg:grid-cols-[2fr_1fr] gap-5">
       {{-- KIRI: PREVIEW --}}
-      <x-ui.panel class="bg-white border rounded-lg">
+      <x-ui.panel >
         <div class="flex items-center justify-between">
-          <x-ui.section-title class="font-semibold text-[#1D1C1A]">Preview</x-ui.section-title>
+          <x-ui.section-title >Preview</x-ui.section-title>
           <div class="flex items-center gap-2 text-sm">
-            <x-ui.button variant="secondary" type="button" class="px-2 py-1 border rounded-lg" @click="addPage()">+ Halaman</x-ui.button>
-            <x-ui.button variant="secondary" type="button" class="px-2 py-1 border rounded-lg" @click="zoomOut()">–</x-ui.button>
+            <x-ui.button variant="secondary" type="button"  @click="addPage()">+ Halaman</x-ui.button>
+            <x-ui.button variant="secondary" type="button"  @click="zoomOut()">–</x-ui.button>
             <span x-text="Math.round(preview.zoom*100)+'%'"></span>
-            <x-ui.button variant="secondary" type="button" class="px-2 py-1 border rounded-lg" @click="zoomIn()">+</x-ui.button>
+            <x-ui.button variant="secondary" type="button"  @click="zoomIn()">+</x-ui.button>
           </div>
         </div>
 
@@ -158,11 +158,11 @@
       </x-ui.panel>
 
       {{-- KANAN: FORM + SECTIONS --}}
-      <x-ui.panel :padded="false" class="bg-white border rounded-lg space-y-5">
+      <x-ui.panel :padded="false" >
         <div class="grid gap-3">
           <div>
-            <label class="text-sm font-medium">Document Template</label>
-            <select x-model.number="selectedTemplateId" class="mt-1 w-full border rounded-lg px-3 py-2">
+            <label >Document Template</label>
+            <select x-model.number="selectedTemplateId" class="w-full ui-input">
               <option value="">— Tanpa Template —</option>
               @foreach($templates as $t)
                 <option value="{{ $t->id }}">#{{ $t->id }} — {{ $t->name }}</option>
@@ -174,34 +174,34 @@
           </div>
 
           <div>
-            <label class="text-sm font-medium">Judul</label>
-            <input name="title" class="mt-1 w-full border rounded-lg px-3 py-2" required>
+            <label >Judul</label>
+            <input name="title" class="w-full ui-input" required>
           </div>
 
           {{-- 3 kolom: Dept, Doc Type, Project Code --}}
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <label class="text-sm font-medium">Dept Code</label>
-              <input name="dept_code" class="mt-1 w-full border rounded-lg px-3 py-2" placeholder="PLT/SHE/ENG">
+              <label >Dept Code</label>
+              <input name="dept_code" class="w-full ui-input" placeholder="PLT/SHE/ENG">
             </div>
             <div>
-              <label class="text-sm font-medium">Doc Type</label>
-              <input name="doc_type" class="mt-1 w-full border rounded-lg px-3 py-2" placeholder="SOP/IK/ST...">
+              <label >Doc Type</label>
+              <input name="doc_type" class="w-full ui-input" placeholder="SOP/IK/ST...">
             </div>
             <div>
-              <label class="text-sm font-medium">Project Code</label>
-              <input name="project_code" class="mt-1 w-full border rounded-lg px-3 py-2" placeholder="CT-001 / PROJ-ABC">
+              <label >Project Code</label>
+              <input name="project_code" class="w-full ui-input" placeholder="CT-001 / PROJ-ABC">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="text-sm font-medium">Effective Date</label>
-              <input type="date" name="effective_date" class="mt-1 w-full border rounded-lg px-3 py-2">
+              <label >Effective Date</label>
+              <input type="date" name="effective_date" class="w-full ui-input">
             </div>
             <div>
-              <label class="text-sm font-medium">Class</label>
-              <select name="class" class="mt-1 w-full border rounded-lg px-3 py-2">
+              <label >Class</label>
+              <select name="class" class="w-full ui-input">
                 <option value="">-</option><option>I</option><option>II</option><option>III</option><option>IV</option>
               </select>
             </div>
@@ -209,16 +209,16 @@
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="text-sm font-medium">Controlled Status</label>
-              <select name="controlled_status" class="mt-1 w-full border rounded-lg px-3 py-2">
+              <label >Controlled Status</label>
+              <select name="controlled_status" class="w-full ui-input">
                 <option value="controlled">Controlled</option>
                 <option value="uncontrolled">Uncontrolled</option>
                 <option value="obsolete">Obsolete</option>
               </select>
             </div>
             <div>
-              <label class="text-sm font-medium">Department Owner</label>
-              <select name="department_id" class="mt-1 w-full border rounded-lg px-3 py-2">
+              <label >Department Owner</label>
+              <select name="department_id" class="w-full ui-input">
                 <option value="">-</option>
                 @foreach($departments as $dp)
                   <option value="{{ $dp->id }}">{{ $dp->name }}</option>
@@ -231,56 +231,56 @@
         {{-- Sections --}}
         <div class="pt-2">
           <div class="flex items-center justify-between">
-            <x-ui.section-title class="font-semibold text-[#1D1C1A]">Sections</x-ui.section-title>
-            <x-ui.button variant="secondary" type="button" @click="addSection()" class="">+ Tambah</x-ui.button>
+            <x-ui.section-title >Sections</x-ui.section-title>
+            <x-ui.button variant="secondary" type="button" @click="addSection()">+ Tambah</x-ui.button>
           </div>
 
           <template x-for="(s,i) in sections" :key="s.key">
             <div class="mt-3 p-3 border rounded-lg space-y-2">
               <div class="flex flex-wrap gap-2 items-center">
-                <input x-model="s.label" class="border rounded-lg px-2 py-1 w-56" placeholder="Nama Section (key)">
-                <input x-model="s.title" class="border rounded-lg px-2 py-1 w-56" placeholder="Judul Section">
-                <input x-model="s.subtitle" class="border rounded-lg px-2 py-1 w-56" placeholder="Subjudul (opsional)">
+                <input x-model="s.label" class="w-56 ui-input" placeholder="Nama Section (key)">
+                <input x-model="s.title" class="w-56 ui-input" placeholder="Judul Section">
+                <input x-model="s.subtitle" class="w-56 ui-input" placeholder="Subjudul (opsional)">
 
-                <select x-model="s.type" class="border rounded-lg px-2 py-1">
+                <select x-model="s.type" class="w-full ui-input">
                   <option value="text">Teks/HTML</option>
                   <option value="table">Tabel</option>
                 </select>
 
                 <!-- Posisi & ukuran -->
-                <input x-model.number="s.top"    type="number" class="border rounded-lg px-2 py-1 w-24"  placeholder="top">
-                <input x-model.number="s.left"   type="number" class="border rounded-lg px-2 py-1 w-24"  placeholder="left">
-                <input x-model.number="s.width"  type="number" class="border rounded-lg px-2 py-1 w-24"  placeholder="width">
-                <input x-model.number="s.height" type="number" class="border rounded-lg px-2 py-1 w-24"  placeholder="height">
+                <input x-model.number="s.top"    type="number" class="w-24 ui-input"  placeholder="top">
+                <input x-model.number="s.left"   type="number" class="w-24 ui-input"  placeholder="left">
+                <input x-model.number="s.width"  type="number" class="w-24 ui-input"  placeholder="width">
+                <input x-model.number="s.height" type="number" class="w-24 ui-input"  placeholder="height">
 
                 <!-- Halaman & Auto flow -->
-                <input x-model.number="s.page" type="number" min="1" class="border rounded-lg px-2 py-1 w-20" title="Halaman" placeholder="Pg">
-                <label class="flex items-center gap-1 text-sm">
+                <input x-model.number="s.page" type="number" min="1" class="w-20 ui-input" title="Halaman" placeholder="Pg">
+                <label class="flex items-center">
                   <input type="checkbox" x-model="s.autoFlow">
                   Auto flow
                 </label>
 
                 <!-- REPEAT SECTION -->
-                <label class="flex items-center gap-1 text-sm">
+                <label class="flex items-center">
                   <input type="checkbox" x-model="s.repeatEachPage">
                   Repeat semua halaman
                 </label>
 
-                <x-ui.button variant="danger" type="button" @click="sections.splice(i,1); refreshBlocks()" class="">hapus</x-ui.button>
+                <x-ui.button variant="danger" type="button" @click="sections.splice(i,1); refreshBlocks()">hapus</x-ui.button>
               </div>
 
               <!-- TEXT/HTML -->
               <div x-show="s.type==='text'">
-                <textarea x-model="s.html" class="mt-1 w-full border rounded-lg px-3 py-2" rows="4"
+                <textarea x-model="s.html" class="w-full ui-input" rows="4"
                   placeholder="Ketik teks atau HTML (p, ul/li, b, i, dll)"></textarea>
               </div>
 
               <!-- TABLE -->
               <div x-show="s.type==='table'" class="space-y-2">
                 <div class="flex gap-2 items-center">
-                  <input x-model.number="s.rows" type="number" min="1" class="border rounded-lg px-2 py-1 w-24" placeholder="rows">
-                  <input x-model.number="s.cols" type="number" min="1" class="border rounded-lg px-2 py-1 w-24" placeholder="cols">
-                  <x-ui.button variant="secondary" type="button" class="px-2 py-1 border rounded-lg" @click="initTable(i)">Buat grid</x-ui.button>
+                  <input x-model.number="s.rows" type="number" min="1" class="w-24 ui-input" placeholder="rows">
+                  <input x-model.number="s.cols" type="number" min="1" class="w-24 ui-input" placeholder="cols">
+                  <x-ui.button variant="secondary" type="button"  @click="initTable(i)">Buat grid</x-ui.button>
                 </div>
                 <div class="overflow-auto" x-show="s.cells?.length">
                   <x-ui.table class="border-collapse">
@@ -288,7 +288,7 @@
                       <tr>
                         <template x-for="c in s.cols">
                           <td class="border p-1">
-                            <input class="border rounded-lg px-1 py-1" x-model="s.cells[(r-1)*s.cols + (c-1)]" placeholder="cell">
+                            <input class="w-full ui-input" x-model="s.cells[(r-1)*s.cols + (c-1)]" placeholder="cell">
                           </td>
                         </template>
                       </tr>

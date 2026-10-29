@@ -22,12 +22,12 @@
   <x-ui.page-actions><div class="flex items-center gap-2">
       @if($form->type === 'builder' && Route::has('admin.forms.builder'))
         <x-ui.link variant="secondary" href="{{ route('admin.forms.builder', $form) }}"
-           class="px-3 py-2 rounded-lg border text-sm">
+           >
           Open Builder
         </x-ui.link>
       @endif
       <x-ui.link variant="secondary" href="{{ route('admin.forms.index') }}"
-         class="px-3 py-2 rounded-lg border text-sm">Kembali</x-ui.link>
+         >Kembali</x-ui.link>
     </div></x-ui.page-actions>
 </x-ui.page-header>
   {{-- Flash --}}
@@ -49,11 +49,11 @@
         x-data='@json(["type" => old("type", $form->type)])'>
     @csrf
     @method('PUT')
-    <x-ui.panel class="rounded-lg border bg-white space-y-5">
+    <x-ui.panel >
       {{-- Company --}}
       <div>
-        <label class="block text-sm font-medium text-slate-700">Perusahaan <span class="text-rose-600">*</span></label>
-        <select name="company_id" id="company_id" class="mt-1 w-full rounded-lg border px-3 py-2" required>
+        <label class="block">Perusahaan <span class="text-rose-600">*</span></label>
+        <select name="company_id" id="company_id" class="w-full ui-input" required>
           @foreach($companies as $c)
             <option value="{{ $c->id }}" @selected((string)old('company_id',$form->company_id)===(string)$c->id)>
               {{ $c->code }} — {{ $c->name }}
@@ -64,9 +64,9 @@
       </div>
       {{-- Site assignment (ter-filter by company) --}}
       <div>
-        <label class="block text-sm font-medium text-slate-700">Site <span class="text-rose-600">*</span></label>
+        <label class="block">Site <span class="text-rose-600">*</span></label>
         <select name="site_id" id="site_id" required
-                class="mt-1 w-full rounded-lg border px-3 py-2"
+                class="w-full ui-input"
                 {{ $currentCompanyId ? '' : 'disabled' }}>
           <option value="" disabled>— Pilih Site —</option>
           @if($currentCompanyId !== '' && !empty($sitesByCompany[(string)$currentCompanyId]))
@@ -80,8 +80,8 @@
       </div>
       {{-- Department --}}
       <div>
-        <label class="block text-sm font-medium text-slate-700">Departemen <span class="text-rose-600">*</span></label>
-        <select name="department_id" class="mt-1 w-full rounded-lg border px-3 py-2" required>
+        <label class="block">Departemen <span class="text-rose-600">*</span></label>
+        <select name="department_id" class="w-full ui-input" required>
           @foreach($departments as $d)
             <option value="{{ $d->id }}" @selected((string)old('department_id',$form->department_id)===(string)$d->id)>
               {{ $d->name }}
@@ -92,15 +92,15 @@
       </div>
       {{-- Title --}}
       <div>
-        <label class="block text-sm font-medium text-slate-700">Judul <span class="text-rose-600">*</span></label>
+        <label class="block">Judul <span class="text-rose-600">*</span></label>
         <input type="text" name="title" value="{{ old('title',$form->title) }}"
-               class="mt-1 w-full rounded-lg border px-3 py-2" required maxlength="190">
+               class="w-full ui-input" required maxlength="190">
         @error('title')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
       </div>
       {{-- Jenis Dokumen (SOP/IK/FORM) --}}
       <div>
-        <label class="block text-sm font-medium text-slate-700">Jenis Dokumen <span class="text-rose-600">*</span></label>
-        <select name="doc_type" id="doc_type" class="mt-1 w-full rounded-lg border px-3 py-2" required>
+        <label class="block">Jenis Dokumen <span class="text-rose-600">*</span></label>
+        <select name="doc_type" id="doc_type" class="w-full ui-input" required>
           <option value="SOP"  @selected($selectedDocType==='SOP')>SOP</option>
           <option value="IK"   @selected($selectedDocType==='IK')>IK</option>
           <option value="FORM" @selected($selectedDocType==='FORM')>FORM</option>
@@ -110,8 +110,8 @@
       </div>
       {{-- Type --}}
       <div>
-        <label class="block text-sm font-medium text-slate-700">Tipe <span class="text-rose-600">*</span></label>
-        <select name="type" x-model="type" class="mt-1 w-full rounded-lg border px-3 py-2" required>
+        <label class="block">Tipe <span class="text-rose-600">*</span></label>
+        <select name="type" x-model="type" class="w-full ui-input" required>
           <option value="builder">Builder</option>
           <option value="pdf">File (PDF/Word/Excel)</option>
         </select>
@@ -119,9 +119,9 @@
       </div>
       {{-- Builder schema --}}
       <div x-show="type==='builder'">
-        <label class="block text-sm font-medium text-slate-700">Schema (JSON)</label>
+        <label class="block">Schema (JSON)</label>
         <textarea name="schema" rows="10"
-          class="mt-1 w-full rounded-lg border px-3 py-2 font-mono text-sm"
+          class="w-full ui-input"
           placeholder='{"fields":[...]}'>@php($schemaValue = old('schema', $form->schema ?? ['fields'=>[]])){{ is_array($schemaValue) ? json_encode($schemaValue, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : $schemaValue }}</textarea>
         @error('schema')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
         <p class="text-xs text-slate-500 mt-1">
@@ -132,7 +132,7 @@
           <p class="text-sm font-medium text-slate-700 mb-2">Import Soal dari CSV</p>
           <div class="flex items-center gap-3">
             <x-ui.link variant="secondary" href="{{ route('admin.forms.import-template') }}"
-               class="inline-flex items-center gap-1 px-3 py-2 text-xs font-medium border rounded-lg">
+               class="inline-flex items-center">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
               Download Template
             </x-ui.link>
@@ -143,10 +143,10 @@
       </div>
       {{-- File (PDF/Word/Excel) --}}
       <div x-show="type==='pdf'">
-        <label class="block text-sm font-medium text-slate-700">Unggah File (opsional untuk ganti)</label>
+        <label class="block">Unggah File (opsional untuk ganti)</label>
         <input type="file" name="pdf" id="pdfInput"
                accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-               class="mt-1 block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+               class="block w-full">
         <p class="text-xs text-slate-500 mt-1">
           Format: PDF, DOC/DOCX, XLS/XLSX — maks 4 MB. File akan dikompresi otomatis saat disimpan.
         </p>
@@ -166,11 +166,11 @@
       <div class="flex items-center gap-2">
         <input type="checkbox" id="active" name="is_active" value="1"
                @checked(old('is_active', $form->is_active))>
-        <label for="active" class="text-sm">Aktif</label>
+        <label for="active" >Aktif</label>
       </div>
     </x-ui.panel>
     <div class="mt-6 flex items-center gap-3">
-      <x-ui.button variant="primary" class="px-5 py-3 rounded-lg hover:brightness-105">
+      <x-ui.button variant="primary" >
         Simpan Perubahan
       </x-ui.button>
     </div>
@@ -180,10 +180,10 @@
   {{-- Delete --}}
   <form method="POST"
         action="{{ route('admin.forms.destroy', $form) }}"
-        class="mt-4"
+
         data-confirm="Hapus form ini? Tindakan tidak bisa dibatalkan.">
     @csrf @method('DELETE')
-    <x-ui.button variant="danger" class="px-4 py-2 rounded-lg border">
+    <x-ui.button variant="danger" >
       Hapus
     </x-ui.button>
   </form>

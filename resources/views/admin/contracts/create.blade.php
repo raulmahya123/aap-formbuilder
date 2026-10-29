@@ -6,7 +6,7 @@
   <div class="ui-page-header__copy"><x-ui.page-title>Upload Kontrak Baru</x-ui.page-title>
 <x-ui.page-description>Lengkapi informasi untuk menambahkan kontrak.</x-ui.page-description></div>
   <x-ui.page-actions>
-<x-ui.button form="page-primary-form" variant="primary" class="px-4 py-2 rounded-lg hover:brightness-95">
+<x-ui.button form="page-primary-form" variant="primary" >
       Simpan
     </x-ui.button>
 </x-ui.page-actions>
@@ -23,24 +23,24 @@
 @endif
 
 <form id="page-primary-form" method="post" action="{{ route('admin.contracts.store') }}" enctype="multipart/form-data"
-      class="w-full min-w-0 ui-card space-y-4 bg-white p-6 rounded shadow border-t-4 border-[#713F12]">
+      class="w-full min-w-0 ui-card">
   @csrf
   <div>
-    <label class="block mb-1 font-medium text-[#713F12]">Judul</label>
+    <label class="block">Judul</label>
     <input type="text" name="title" value="{{ old('title') }}"
-           class="w-full border rounded-lg p-2 focus:border-[#713F12] focus:ring-0" required>
+           class="w-full ui-input" required>
   </div>
 
   <div>
-    <label class="block mb-1 font-medium text-[#713F12]">File PDF</label>
+    <label class="block">File PDF</label>
     <input type="file" name="file" accept="application/pdf"
-           class="w-full border rounded-lg p-2 focus:border-[#713F12] focus:ring-0" required>
+           class="w-full" required>
   </div>
 
   <div>
-    <label class="block mb-1 font-medium text-[#713F12]">Viewer (User Terdaftar)</label>
+    <label class="block">Viewer (User Terdaftar)</label>
     <select name="emails[]" multiple size="8"
-            class="w-full border rounded-lg p-2 focus:border-[#713F12] focus:ring-0">
+            class="w-full ui-input">
       @foreach($users as $u)
         <option value="{{ $u->email }}"
           @if(collect(old('emails'))->contains($u->email)) selected @endif>

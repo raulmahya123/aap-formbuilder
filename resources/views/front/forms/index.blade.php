@@ -95,11 +95,11 @@
     @endsection</x-ui.page-actions>
 
 <x-slot:filters>
-<x-ui.table-toolbar class="mb-4 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+<x-ui.table-toolbar class="mb-4">
     <div class="flex-1">
       <x-ui.table-search   name="q" value="{{ $q }}"
              placeholder="Cari form (judul/deskripsi)…"
-             class="w-full px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 bg-white dark:bg-coal-900" />
+             class="w-full" />
     </div>
     @if($currentDocType)
       <input type="hidden" name="doc_type" value="{{ $currentDocType }}">
@@ -109,7 +109,7 @@
     @endif
 
 <x-slot:actions>
-<x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-900">
+<x-ui.button variant="secondary" >
       Cari
     </x-ui.button>
 

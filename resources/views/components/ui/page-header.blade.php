@@ -1,3 +1,4 @@
+@props(['variant' => 'listing'])
 <header {{ $attributes->class(['ui-page-header']) }}>
     @isset($breadcrumbs)
         <x-ui.breadcrumbs>{{ $breadcrumbs }}</x-ui.breadcrumbs>
@@ -9,5 +10,5 @@
     <div class="ui-page-header__row">{{ $slot }}</div>
 </header>
 @isset($filters)
-    <x-ui.filter-panel>{{ $filters }}</x-ui.filter-panel>
+    <x-ui.filter-panel :variant="$variant">{{ $filters }}</x-ui.filter-panel>
 @endisset

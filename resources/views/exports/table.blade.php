@@ -1,20 +1,24 @@
-<!doctype html>
-<html lang="id"><head><meta charset="utf-8"><title>{{ $title }}</title>
-<style>
-@page { margin: 28px; }
-body { font-family: 'DejaVu Sans', sans-serif; font-size: 9px; color: #18181b; }
-.brand { font-size: 14px; font-weight: bold; color: #713f12; }
-h1 { font-size: 17px; margin: 12px 0 6px; }
-p { color: #52525b; margin: 0 0 16px; }
-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-thead { display: table-header-group; }
-th, td { border: 1px solid #d4d4d8; padding: 6px; text-align: left; vertical-align: top; overflow-wrap: break-word; word-wrap: break-word; }
-th { background: #f4f4f5; font-weight: bold; }
-tr { page-break-inside: avoid; }
-</style></head><body>
-<div class="brand">MANDALA</div>
-<h1>{{ $title }}</h1>
-<p>Data pada halaman aktif · {{ count($rows) }} baris · Dicetak {{ $exportedAt->format('d/m/Y H:i') }}</p>
-<table><thead><tr>@foreach($columns as $column)<th>{{ $column }}</th>@endforeach</tr></thead>
-<tbody>@foreach($rows as $row)<tr>@foreach($row as $value)<td>{{ $value ?? '—' }}</td>@endforeach</tr>@endforeach</tbody></table>
-</body></html>
+@extends('exports.pdf.layout')
+
+@section('pdf-title', $title)
+
+@push('pdf-styles')
+    .table-export { table-layout: fixed; }
+    .table-export th, .table-export td { font-size: {{ count($columns) > 5 ? '6.5pt' : '8pt' }}; }
+    .table-export th:nth-child(1) { width: {{ number_format(100 / count($columns), 2, '.', '') }}%; }
+@endpush
+
+@section('pdf-content')
+    <p class="pdf-eyebrow">Laporan Data Mandala</p>
+    <h1 class="pdf-title">{{ $title }}</h1>
+    <p class="pdf-subtitle">Data pada halaman aktif · {{ count($rows) }} baris</p>
+    <p class="pdf-meta">Dibuat {{ $exportedAt->format('d/m/Y H:i') }} WIB</p>
+    <table class="pdf-table table-export {{ count($columns) > 5 ? 'pdf-table--compact' : '' }}">
+        <thead><tr>@foreach($columns as $column)<th>{{ $column }}</th>@endforeach</tr></thead>
+        <tbody>
+            @foreach($rows as $row)
+                <tr>@foreach($row as $value)<td>{{ $value ?? '-' }}</td>@endforeach</tr>
+            @endforeach
+        </tbody>
+    </table>
+@endsection

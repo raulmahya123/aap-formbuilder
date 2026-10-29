@@ -144,19 +144,13 @@
 </div>
 
 <!-- Modal Catat Inspeksi / PTO Baru -->
-<dialog id="modal-input-inspection" class="rounded-xl border border-slate-200 p-0 shadow-2xl max-w-2xl w-full backdrop:bg-slate-900/50">
-    <div class="p-6">
-        <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-            <h3 class="text-base font-bold text-[#0F172A]">Catat Inspeksi / Observasi Tugas (PTO) Baru</h3>
-            <button type="button" onclick="document.getElementById('modal-input-inspection').close()" class="text-slate-400 hover:text-slate-600">&times;</button>
-        </div>
-
-        <form action="{{ route('hse.dashboard.inspections.store') }}" method="POST" class="space-y-4">
+<x-ui.modal id="modal-input-inspection" title="Catat Inspeksi / Observasi Tugas (PTO) Baru" description="Lengkapi data kegiatan dan hasil inspeksi." size="lg" icon="clipboard-list" variant="info">
+        <form id="inspection-input-form" action="{{ route('hse.dashboard.inspections.store') }}" method="POST" class="grid gap-4">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Site Operasional <span class="text-rose-500">*</span></label>
-                    <select name="site_id" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="ui-form-label">Site Operasional <span class="ui-required">*</span></label>
+                    <select name="site_id" required class="w-full ui-form-input">
                         <option value="">-- Pilih Site --</option>
                         @foreach($options['sites'] ?? [] as $st)
                             <option value="{{ $st->id }}" {{ ($filters['site_id'] ?? null) == $st->id ? 'selected' : '' }}>{{ $st->name }} ({{ $st->code }})</option>
@@ -164,8 +158,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Departemen</label>
-                    <select name="department_id" class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="ui-form-label">Departemen</label>
+                    <select name="department_id" class="w-full ui-form-input">
                         <option value="">-- Pilih Departemen --</option>
                         @foreach($options['departments'] ?? [] as $dp)
                             <option value="{{ $dp->id }}" {{ ($filters['department_id'] ?? null) == $dp->id ? 'selected' : '' }}>{{ $dp->name }}</option>
@@ -176,12 +170,12 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Inspeksi / Kegiatan <span class="text-rose-500">*</span></label>
-                    <input type="text" name="title" required placeholder="Contoh: Inspeksi K3 Alat Berat Hauling" class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="ui-form-label">Judul Inspeksi / Kegiatan <span class="ui-required">*</span></label>
+                    <input type="text" name="title" required placeholder="Contoh: Inspeksi K3 Alat Berat Hauling" class="w-full ui-form-input">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tipe Kegiatan <span class="text-rose-500">*</span></label>
-                    <select name="type" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="ui-form-label">Tipe Kegiatan <span class="ui-required">*</span></label>
+                    <select name="type" required class="w-full ui-form-input">
                         <option value="Routine">Inspeksi Rutin (Routine)</option>
                         <option value="PTO">Planned Task Observation (PTO)</option>
                         <option value="Equipment">Inspeksi Alat & Peralatan</option>
@@ -194,16 +188,16 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Jadwal <span class="text-rose-500">*</span></label>
-                    <input type="date" name="scheduled_date" required value="{{ now()->toDateString() }}" class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="ui-form-label">Tanggal Jadwal <span class="ui-required">*</span></label>
+                    <input type="date" name="scheduled_date" required value="{{ now()->toDateString() }}" class="w-full ui-form-input">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Penyelesaian</label>
-                    <input type="date" name="completed_date" value="{{ now()->toDateString() }}" class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="ui-form-label">Tanggal Penyelesaian</label>
+                    <input type="date" name="completed_date" value="{{ now()->toDateString() }}" class="w-full ui-form-input">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Status Kegiatan <span class="text-rose-500">*</span></label>
-                    <select name="status" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="ui-form-label">Status Kegiatan <span class="ui-required">*</span></label>
+                    <select name="status" required class="w-full ui-form-input">
                         <option value="Completed" selected>Completed</option>
                         <option value="Scheduled">Scheduled</option>
                         <option value="In Progress">In Progress</option>
@@ -213,25 +207,24 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Skor Pemenuhan (0 - 100)</label>
-                    <input type="number" name="score" min="0" max="100" step="0.1" value="100" class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="ui-form-label">Skor Pemenuhan (0 - 100)</label>
+                    <input type="number" name="score" min="0" max="100" step="0.1" value="100" class="w-full ui-form-input">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Deskripsi Temuan (Jika ada)</label>
-                    <input type="text" name="finding_description" placeholder="Akan otomatis membuat tugas PICA jika diisi" class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="ui-form-label">Deskripsi Temuan (Jika ada)</label>
+                    <input type="text" name="finding_description" placeholder="Akan otomatis membuat tugas PICA jika diisi" class="w-full ui-form-input">
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan / Keterangan Observasi</label>
-                <textarea name="notes" rows="2" placeholder="Catatan inspektor atau ringkasan temuan di lapangan..." class="w-full text-xs rounded-lg border border-slate-300 p-2.5"></textarea>
+                <label class="ui-form-label">Catatan / Keterangan Observasi</label>
+                <textarea name="notes" rows="2" placeholder="Catatan inspektor atau ringkasan temuan di lapangan..." class="w-full ui-form-input"></textarea>
             </div>
 
-            <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
-                <button type="button" onclick="document.getElementById('modal-input-inspection').close()" class="px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Batal</button>
-                <x-ui.button variant="primary" icon="save" type="submit">Simpan Inspeksi</x-ui.button>
-            </div>
         </form>
-    </div>
-</dialog>
+    <x-slot:footer>
+        <x-ui.button type="button" data-dialog-cancel>Batal</x-ui.button>
+        <x-ui.button variant="primary" icon="save" type="submit" form="inspection-input-form">Simpan Inspeksi</x-ui.button>
+    </x-slot:footer>
+</x-ui.modal>
 @endsection

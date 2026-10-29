@@ -15,19 +15,15 @@
       </x-ui.page-description>
     </div></div>
   <x-ui.page-actions>@php
-      $pdfRoute = \Illuminate\Support\Facades\Route::has('admin.documents.download')
-                  ? route('admin.documents.download', $document)
-                  : (\Illuminate\Support\Facades\Route::has('admin.documents.pdf')
-                      ? route('admin.documents.pdf', $document)
-                      : null);
+      $pdfRoute = route('admin.documents.export', $document);
     @endphp
 
     <div class="flex items-center gap-3">
       <x-ui.back-link href="{{ route('admin.documents.index') }}">Kembali</x-ui.back-link>
       @if($pdfRoute)
-        <x-ui.link variant="secondary" href="{{ $pdfRoute }}" class="px-4 py-2 rounded-lg border" target="_blank" rel="noopener">Unduh PDF</x-ui.link>
+        <x-ui.icon-button ability="export" :subject="$document" action="pdf" label="Unduh dokumen PDF" href="{{ $pdfRoute }}" />
       @endif
-      <x-ui.button variant="primary" type="button" onclick="window.print()" class="px-4 py-2 rounded-lg hover:opacity-90">Cetak</x-ui.button>
+      <x-ui.icon-button action="print" label="Cetak dokumen dengan kop Andalan" href="{{ route('admin.documents.export', ['document' => $document, 'inline' => 1]) }}" target="_blank" />
     </div></x-ui.page-actions>
 </x-ui.page-header>
 

@@ -225,7 +225,7 @@
       </header>
 
       {{-- Main content --}}
-      <main id="main-content" tabindex="-1" class="px-4 lg:px-8 py-6 grow">
+      <main id="main-content" tabindex="-1" @class(['px-4 lg:px-8 py-6 grow', 'ui-form-page' => request()->routeIs('*.create', '*.edit', '*.edit_total')])>
         @hasSection('content')
           @yield('content')
         @else
@@ -240,7 +240,7 @@
   </div>
 
   <x-ui.toast-provider />
-  <template id="ui-table-export-template" data-pdf-url="{{ route('table_export.pdf') }}">
+  <template id="ui-table-export-template" data-pdf-url="{{ route('table_export.pdf') }}" data-letterhead-url="{{ asset('assets/images/andalan-letterhead.jpg') }}">
     <x-ui.table-export />
   </template>
 

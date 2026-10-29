@@ -65,7 +65,7 @@
   @endif
   {{-- FORM --}}
   <form action="{{ route('admin.report-totals.update') }}" method="post"
-        class="space-y-4 rounded-lg border border-slate-200 bg-white px-4 py-4 shadow-none">
+        >
     @csrf
     {{-- kalau route update kamu pakainya PUT/PATCH, aktifkan baris ini --}}
     {{-- @method('PUT') --}}
@@ -79,7 +79,7 @@
     <input type="hidden" name="year"         value="{{ $year }}">
     <input type="hidden" name="site_id"      value="{{ $siteId }}">
     <div>
-      <label class="block text-xs font-semibold text-slate-700 mb-1">
+      <label class="block">
         Total Baru
       </label>
       <input
@@ -87,7 +87,7 @@
         step="0.01"
         name="total"
         value="{{ old('total', $existingTotal) }}"
-        class="w-full rounded-lg border-slate-300 text-sm shadow-none focus:border-maroon-500 focus:ring-maroon-500"
+        class="w-full ui-input"
         required
       >
       <p class="mt-1 text-[11px] text-slate-500">
@@ -102,7 +102,7 @@
       {{-- Kembali ke rekap: paling aman pakai URL sebelumnya --}}
       <x-ui.back-link href="{{ url()->previous() }}">Kembali ke rekap</x-ui.back-link>
       <x-ui.button variant="primary" type="submit"
-              class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-semibold shadow-none">
+              class="inline-flex items-center">
         Simpan Total
       </x-ui.button>
     </div>

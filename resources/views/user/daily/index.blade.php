@@ -71,16 +71,16 @@
   <x-ui.page-actions></x-ui.page-actions>
 
 <x-slot:filters>
-<x-ui.table-toolbar class="mb-6 grid grid-cols-1 md:grid-cols-6 gap-3">
+<x-ui.table-toolbar class="mb-6">
     <div class="ui-filter-field">
       <label class="ui-filter-field__label" for="daily-period">Periode (bulan)</label>
       <input id="daily-period" type="month" name="period" value="{{ $period }}"
-             class="w-full px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 bg-white dark:bg-coal-900">
+             class="w-full ui-input">
     </div>
     <div class="ui-filter-field">
       <label class="ui-filter-field__label" for="daily-site">Site</label>
       <select id="daily-site" name="site_id"
-              class="w-full px-3 py-2 rounded-lg border border-coal-300 dark:border-coal-700 bg-white dark:bg-coal-900">
+              class="w-full ui-input">
         <option value="">ALL</option>
         @foreach($sites as $s)
           <option value="{{ $s->id }}"
@@ -93,7 +93,7 @@
 
 <x-slot:actions>
 <div class="md:col-span-2 flex items-end">
-      <x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-900 w-full">
+      <x-ui.button variant="secondary" class="w-full">
         Terapkan
       </x-ui.button>
     </div>

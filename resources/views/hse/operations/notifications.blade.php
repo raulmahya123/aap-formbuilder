@@ -144,7 +144,7 @@
     </div>
 
     <div class="ui-pagination-footer">
-            {{ $notifications->links() }}
+            <x-ui.table-pagination :paginator="$notifications" />
         </div>
 </div>
 @endsection

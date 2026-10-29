@@ -7,7 +7,7 @@
   <div class="ui-page-header__copy"><x-ui.page-title>Tambah HIPO / Nearmiss</x-ui.page-title>
 <x-ui.page-description>Lengkapi informasi untuk menambahkan laporan HIPO dan Nearmiss.</x-ui.page-description></div>
   <x-ui.page-actions><x-ui.back-link href="{{ route('admin.hipo.index') }}">Kembali</x-ui.back-link>
-<x-ui.button form="page-primary-form" variant="primary" class="px-6 py-2 rounded-lg transition">
+<x-ui.button form="page-primary-form" variant="primary" >
                 <x-ui.lucide name="save" /> Simpan Laporan
             </x-ui.button>
 </x-ui.page-actions>
@@ -27,41 +27,41 @@
     <form id="page-primary-form" method="POST"
         action="{{ route('admin.hipo.store') }}"
         enctype="multipart/form-data"
-        class="ui-card bg-white border rounded-lg p-6 space-y-5 shadow-none">
+        class="ui-card">
   @csrf
 
         {{-- ================= DATA UMUM ================= --}}
         <div>
-            <x-ui.card-title class="font-semibold text-sm mb-3"><x-ui.lucide name="clipboard-list" /> Data Umum</x-ui.card-title>
+            <x-ui.card-title ><x-ui.lucide name="clipboard-list" /> Data Umum</x-ui.card-title>
 
             <div class="grid md:grid-cols-3 gap-4">
 
                 {{-- REPORT TIME --}}
                 <div>
-                    <label class="text-xs">Tanggal & Waktu</label>
+                    <label >Tanggal & Waktu</label>
                     <input type="datetime-local"
                         name="report_time"
                         value="{{ old('report_time') }}"
                         required
-                        class="w-full border rounded-lg px-3 py-2">
+                        class="w-full ui-input">
                 </div>
 
                 {{-- REPORTER --}}
                 <div>
-                    <label class="text-xs">Reporter</label>
+                    <label >Reporter</label>
                     <input type="text"
                         value="{{ auth()->user()->name }}"
-                        class="w-full border rounded-lg px-3 py-2 bg-gray-100"
+                        class="w-full ui-input"
                         readonly>
                 </div>
 
                 {{-- JOBSITE --}}
                 <div>
-                    <label class="text-xs">Jobsite</label>
+                    <label >Jobsite</label>
                     <select
                         name="site_id"
                         required
-                        class="w-full border rounded-lg px-3 py-2">
+                        class="w-full ui-input">
                         <option value="">-- Pilih Jobsite --</option>
                         @foreach(($sites ?? []) as $site)
                             <option value="{{ $site['id'] }}" {{ old('site_id') == $site['id'] ? 'selected' : '' }}>
@@ -73,10 +73,10 @@
 
                 {{-- SHIFT --}}
                 <div>
-                    <label class="text-xs">Shift</label>
+                    <label >Shift</label>
                     <select name="shift"
                         required
-                        class="w-full border rounded-lg px-3 py-2">
+                        class="w-full ui-input">
                         <option value="">-- Pilih Shift --</option>
                         <option value="Shift 1" {{ old('shift') == 'Shift 1' ? 'selected' : '' }}>Shift 1</option>
                         <option value="Shift 2" {{ old('shift') == 'Shift 2' ? 'selected' : '' }}>Shift 2</option>
@@ -85,10 +85,10 @@
 
                 {{-- SUMBER --}}
                 <div>
-                    <label class="text-xs">Sumber</label>
+                    <label >Sumber</label>
                     <select name="source"
                         required
-                        class="w-full border rounded-lg px-3 py-2">
+                        class="w-full ui-input">
                         <option value="">-- Pilih Sumber --</option>
                         <option value="Hazard Report" {{ old('source') == 'Hazard Report' ? 'selected' : '' }}>Hazard Report</option>
                         <option value="Safety Inspection" {{ old('source') == 'Safety Inspection' ? 'selected' : '' }}>Safety Inspection</option>
@@ -98,10 +98,10 @@
 
                 {{-- CATEGORY --}}
                 <div>
-                    <label class="text-xs">Kategori</label>
+                    <label >Kategori</label>
                     <select name="category"
                         required
-                        class="w-full border rounded-lg px-3 py-2">
+                        class="w-full ui-input">
                         <option value="">-- Pilih Kategori --</option>
                         <option value="High Potential Hazard" {{ old('category') == 'High Potential Hazard' ? 'selected' : '' }}>
                             High Potential Hazard
@@ -114,10 +114,10 @@
 
                 {{-- RISK LEVEL --}}
                 <div>
-                    <label class="text-xs">Risk Level</label>
+                    <label >Risk Level</label>
                     <select name="risk_level"
                         required
-                        class="w-full border rounded-lg px-3 py-2">
+                        class="w-full ui-input">
                         @foreach(['Low','Medium','High','Extreme'] as $risk)
                             <option value="{{ $risk }}"
                                 {{ old('risk_level') == $risk ? 'selected' : '' }}>
@@ -133,7 +133,7 @@
                         name="stop_work"
                         value="1"
                         {{ old('stop_work') ? 'checked' : '' }}>
-                    <label class="text-sm">Stop Work</label>
+                    <label >Stop Work</label>
                 </div>
 
             </div>
@@ -141,39 +141,39 @@
 
         {{-- ================= RINCIAN ================= --}}
         <div>
-            <x-ui.card-title class="font-semibold text-sm mb-3"><x-ui.lucide name="pencil" /> Rincian Kejadian</x-ui.card-title>
+            <x-ui.card-title ><x-ui.lucide name="pencil" /> Rincian Kejadian</x-ui.card-title>
 
             <div class="space-y-4">
 
                 <div>
-                    <label class="text-xs font-semibold">KTA</label>
+                    <label >KTA</label>
                     <textarea name="kta"
                         rows="3"
                         required
-                        class="w-full border rounded-lg px-3 py-2">{{ old('kta') }}</textarea>
+                        class="w-full ui-input">{{ old('kta') }}</textarea>
                 </div>
 
                 <div>
-                    <label class="text-xs font-semibold">TTA</label>
+                    <label >TTA</label>
                     <textarea name="tta"
                         rows="3"
                         required
-                        class="w-full border rounded-lg px-3 py-2">{{ old('tta') }}</textarea>
+                        class="w-full ui-input">{{ old('tta') }}</textarea>
                 </div>
 
                 <div>
-                    <label class="text-xs font-semibold">Deskripsi Kejadian</label>
+                    <label >Deskripsi Kejadian</label>
                     <textarea name="description"
                         rows="3"
                         required
-                        class="w-full border rounded-lg px-3 py-2">{{ old('description') }}</textarea>
+                        class="w-full ui-input">{{ old('description') }}</textarea>
                 </div>
 
                 <div>
-                    <label class="text-xs font-semibold">Konsekuensi Potensial</label>
+                    <label >Konsekuensi Potensial</label>
                     <select name="potential_consequence"
                         required
-                        class="w-full border rounded-lg px-3 py-2">
+                        class="w-full ui-input">
                         <option value="">-- Pilih Konsekuensi --</option>
                         @foreach([
                             'Fatality',
@@ -195,7 +195,7 @@
 
         {{-- ================= KONTROL RISIKO ================= --}}
         <div>
-            <x-ui.card-title class="font-semibold text-sm mb-3"><x-ui.lucide name="shield" /> Kontrol Risiko</x-ui.card-title>
+            <x-ui.card-title ><x-ui.lucide name="shield" /> Kontrol Risiko</x-ui.card-title>
 
             <div class="grid md:grid-cols-2 gap-5">
 
@@ -212,14 +212,14 @@
 
                     <textarea name="control_{{ $key }}"
                         rows="2"
-                        class="w-full border rounded-lg px-3 py-2"
+                        class="w-full ui-input"
                         placeholder="Tindakan kontrol...">{{ old('control_'.$key) }}</textarea>
 
                     <x-ui.user-name-select name="pic_{{ $key }}" :users="$picUsers" :value="old('pic_'.$key)" aria-label="PIC {{ $label }}" />
 
                     <input type="file"
                         name="evidence_{{ $key }}"
-                        class="w-full border rounded-lg px-3 py-2">
+                        class="w-full">
 
                 </div>
 

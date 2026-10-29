@@ -25,7 +25,7 @@
         <div class="rounded-lg bg-rose-50 border border-rose-200 p-3 text-xs text-rose-800">{{ session('error') }}</div>
     @endif
 
-    <form action="{{ route('hse.dashboard.sap.inspeksi.save_answers', $inspection->id) }}" method="POST" class="space-y-6">
+    <form action="{{ route('hse.dashboard.sap.inspeksi.save_answers', $inspection->id) }}" method="POST" >
         @csrf
         @foreach($inspection->template->sections as $section)
         <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -47,25 +47,25 @@
                     <div class="flex flex-wrap items-center gap-4">
                         @if($item->answer_type === 'score_1_4')
                             @foreach([1,2,3,4] as $v)
-                            <label class="flex items-center gap-2 text-sm">
+                            <label class="flex items-center">
                                 <input type="radio" name="answers[{{ $item->id }}]" value="{{ $v }}" @checked($ans && $ans->answer == $v) required>
                                 <span>{{ $v }}</span>
                             </label>
                             @endforeach
                             <span class="text-xs text-slate-400">1=Tidak Sesuai, 2=Kurang, 3=Sesuai, 4=Sangat Baik</span>
                         @elseif(in_array($item->answer_type, ['yes_no', 'yes_no_na']))
-                            <label class="flex items-center gap-2 text-sm"><input type="radio" name="answers[{{ $item->id }}]" value="YA" @checked($ans && $ans->answer == 'YA') required> Ya</label>
-                            <label class="flex items-center gap-2 text-sm"><input type="radio" name="answers[{{ $item->id }}]" value="TIDAK" @checked($ans && $ans->answer == 'TIDAK') required> Tidak</label>
+                            <label class="flex items-center"><input type="radio" name="answers[{{ $item->id }}]" value="YA" @checked($ans && $ans->answer == 'YA') required> Ya</label>
+                            <label class="flex items-center"><input type="radio" name="answers[{{ $item->id }}]" value="TIDAK" @checked($ans && $ans->answer == 'TIDAK') required> Tidak</label>
                             @if($item->answer_type === 'yes_no_na')
-                            <label class="flex items-center gap-2 text-sm"><input type="radio" name="answers[{{ $item->id }}]" value="NA" @checked($ans && $ans->answer == 'NA')> N/A</label>
+                            <label class="flex items-center"><input type="radio" name="answers[{{ $item->id }}]" value="NA" @checked($ans && $ans->answer == 'NA')> N/A</label>
                             @endif
                         @else
-                            <input type="text" name="answers[{{ $item->id }}]" class="w-full max-w-md text-sm rounded-lg border border-slate-300 p-2" value="{{ $ans->answer ?? '' }}" placeholder="Uraian...">
+                            <input type="text" name="answers[{{ $item->id }}]" class="w-full max-w-md ui-input" value="{{ $ans->answer ?? '' }}" placeholder="Uraian...">
                         @endif
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Catatan / Bukti Temuan</label>
-                        <textarea name="remarks[{{ $item->id }}]" rows="2" class="w-full text-sm rounded-lg border border-slate-300 p-2">{{ $ans->remarks ?? '' }}</textarea>
+                        <label class="block">Catatan / Bukti Temuan</label>
+                        <textarea name="remarks[{{ $item->id }}]" rows="2" class="w-full ui-input">{{ $ans->remarks ?? '' }}</textarea>
                     </div>
                 </div>
                 @endforeach

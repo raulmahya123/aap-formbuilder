@@ -3,20 +3,10 @@
 @section('title', 'Akun Saya')
 
 @push('styles')
-<style>
-  :root {
-    --profile-primary: #0057FF;
-    --profile-primary-hover: #0046CC;
-    --profile-border: #E2E8F0;
-    --profile-bg: #F8FAFC;
-    --profile-text: #111827;
-    --profile-muted: #475569;
-  }
-</style>
 @endpush
 
 @section('content')
-<div 
+<div
   x-data="profileManager({
     isSuperAdmin: {{ $user->isSuperAdmin() ? 'true' : 'false' }},
     userId: {{ $user->id }},
@@ -30,7 +20,7 @@
       updatePassword: '{{ route('password.update') }}',
       deleteAccount: '{{ route('profile.destroy') }}',
     }
-  })" 
+  })"
   class="ui-page min-w-0 space-y-6"
 >
 
@@ -83,9 +73,9 @@
         </template>
 
         <!-- Camera overlay button -->
-        <button 
-          type="button" 
-          @click="openAvatarModal = true" 
+        <button
+          type="button"
+          @click="openAvatarModal = true"
           class="absolute bottom-0 right-0 p-2 bg-[#0057FF] hover:bg-[#0046CC] text-white rounded-full shadow-md transition transform group-hover:scale-105"
           title="Ubah Foto Profil"
           aria-label="Ubah Foto Profil"
@@ -115,19 +105,18 @@
 
     <!-- Quick action buttons -->
     <div class="flex sm:flex-col items-center justify-center gap-2 shrink-0">
-      <button 
-        type="button" 
-        @click="openAvatarModal = true" 
+      <button
+        type="button"
+        @click="openAvatarModal = true"
         class="w-full sm:w-auto px-4 py-2 border border-[#E2E8F0] hover:bg-[#F8FAFC] text-xs font-semibold text-[#111827] rounded-xl transition inline-flex items-center justify-center gap-2"
       >
         <x-ui-icon name="camera" class="w-4 h-4 text-[#475569]" />
         <span>Ganti Foto</span>
       </button>
       @if($user->avatar_path)
-        <x-ui.button variant="danger" icon="trash-2" 
-          type="button" 
-          @click="deleteAvatar()" 
-         
+        <x-ui.button variant="danger" icon="trash-2"
+          type="button"
+          @click="deleteAvatar()"
         >Hapus Foto</x-ui.button>
       @endif
     </div>
@@ -138,8 +127,8 @@
   <!-- ========================================== -->
   <div class="border-b border-[#E2E8F0] overflow-x-auto chat-scroll">
     <div class="flex items-center gap-8 min-w-max">
-      <button 
-        type="button" 
+      <button
+        type="button"
         @click="switchTab('personal')"
         class="pb-3 text-xs sm:text-sm font-semibold transition relative"
         :class="currentTab === 'personal' ? 'text-[#0057FF] border-b-2 border-[#0057FF]' : 'text-[#475569] hover:text-[#111827] border-b-2 border-transparent'"
@@ -147,8 +136,8 @@
         Informasi Pribadi
       </button>
 
-      <button 
-        type="button" 
+      <button
+        type="button"
         @click="switchTab('employment')"
         class="pb-3 text-xs sm:text-sm font-semibold transition relative"
         :class="currentTab === 'employment' ? 'text-[#0057FF] border-b-2 border-[#0057FF]' : 'text-[#475569] hover:text-[#111827] border-b-2 border-transparent'"
@@ -156,8 +145,8 @@
         Informasi Pekerjaan
       </button>
 
-      <button 
-        type="button" 
+      <button
+        type="button"
         @click="switchTab('security')"
         class="pb-3 text-xs sm:text-sm font-semibold transition relative"
         :class="currentTab === 'security' ? 'text-[#0057FF] border-b-2 border-[#0057FF]' : 'text-[#475569] hover:text-[#111827] border-b-2 border-transparent'"
@@ -165,8 +154,8 @@
         Keamanan Akun
       </button>
 
-      <button 
-        type="button" 
+      <button
+        type="button"
         @click="switchTab('activity')"
         class="pb-3 text-xs sm:text-sm font-semibold transition relative"
         :class="currentTab === 'activity' ? 'text-[#0057FF] border-b-2 border-[#0057FF]' : 'text-[#475569] hover:text-[#111827] border-b-2 border-transparent'"
@@ -180,7 +169,7 @@
   <!-- 4. TAB 1: INFORMASI PRIBADI               -->
   <!-- ========================================== -->
   <div x-show="currentTab === 'personal'" x-transition class="space-y-6">
-    <form method="POST" action="{{ route('profile.update') }}" class="bg-white border border-[#E2E8F0] rounded-2xl p-6 sm:p-8 shadow-xs">
+    <form method="POST" action="{{ route('profile.update') }}" class="sm:p-8">
       @csrf
       @method('patch')
 
@@ -192,50 +181,50 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
         <!-- Nama Lengkap -->
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">Nama Lengkap <span class="text-[#DC2626]">*</span></label>
-          <input 
-            type="text" 
-            name="name" 
-            value="{{ old('name', $user->name) }}" 
-            required 
-            class="w-full h-11 px-3.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+          <label class="block">Nama Lengkap <span class="text-[#DC2626]">*</span></label>
+          <input
+            type="text"
+            name="name"
+            value="{{ old('name', $user->name) }}"
+            required
+            class="w-full ui-input"
           />
           @error('name') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Nama Panggilan -->
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">Nama Panggilan</label>
-          <input 
-            type="text" 
-            name="nickname" 
-            value="{{ old('nickname', $user->nickname) }}" 
+          <label class="block">Nama Panggilan</label>
+          <input
+            type="text"
+            name="nickname"
+            value="{{ old('nickname', $user->nickname) }}"
             placeholder="Panggilan akrab"
-            class="w-full h-11 px-3.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+            class="w-full ui-input"
           />
           @error('nickname') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- NIK -->
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">NIK (Nomor Induk Kependudukan - 16 Digit)</label>
-          <input 
-            type="text" 
-            name="nik" 
+          <label class="block">NIK (Nomor Induk Kependudukan - 16 Digit)</label>
+          <input
+            type="text"
+            name="nik"
             maxlength="16"
-            value="{{ old('nik', $user->nik) }}" 
+            value="{{ old('nik', $user->nik) }}"
             placeholder="16 digit angka sesuai KTP"
-            class="w-full h-11 px-3.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+            class="w-full ui-input"
           />
           @error('nik') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Jenis Kelamin -->
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">Jenis Kelamin</label>
-          <select 
-            name="gender" 
-            class="w-full h-11 px-3.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition"
+          <label class="block">Jenis Kelamin</label>
+          <select
+            name="gender"
+            class="w-full ui-input"
           >
             <option value="">Pilih Jenis Kelamin</option>
             <option value="L" @selected(old('gender', $user->gender) === 'L')>Laki-laki</option>
@@ -246,100 +235,100 @@
 
         <!-- Tempat Lahir -->
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">Tempat Lahir</label>
-          <input 
-            type="text" 
-            name="birth_place" 
-            value="{{ old('birth_place', $user->birth_place) }}" 
+          <label class="block">Tempat Lahir</label>
+          <input
+            type="text"
+            name="birth_place"
+            value="{{ old('birth_place', $user->birth_place) }}"
             placeholder="Kota / Kabupaten kelahiran"
-            class="w-full h-11 px-3.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+            class="w-full ui-input"
           />
           @error('birth_place') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Tanggal Lahir -->
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">Tanggal Lahir</label>
-          <input 
-            type="date" 
-            name="birth_date" 
-            value="{{ old('birth_date', optional($user->birth_date)->format('Y-m-d')) }}" 
-            class="w-full h-11 px-3.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+          <label class="block">Tanggal Lahir</label>
+          <input
+            type="date"
+            name="birth_date"
+            value="{{ old('birth_date', optional($user->birth_date)->format('Y-m-d')) }}"
+            class="w-full ui-input"
           />
           @error('birth_date') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Email -->
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">Email Perusahaan / Login <span class="text-[#DC2626]">*</span></label>
-          <input 
-            type="email" 
-            name="email" 
-            value="{{ old('email', $user->email) }}" 
+          <label class="block">Email Perusahaan / Login <span class="text-[#DC2626]">*</span></label>
+          <input
+            type="email"
+            name="email"
+            value="{{ old('email', $user->email) }}"
             required
-            class="w-full h-11 px-3.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+            class="w-full ui-input"
           />
           @error('email') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Nomor Telepon -->
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">Nomor Telepon Seluler</label>
-          <input 
-            type="tel" 
-            name="phone" 
-            value="{{ old('phone', $user->phone) }}" 
+          <label class="block">Nomor Telepon Seluler</label>
+          <input
+            type="tel"
+            name="phone"
+            value="{{ old('phone', $user->phone) }}"
             placeholder="Contoh: 081234567890"
-            class="w-full h-11 px-3.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+            class="w-full ui-input"
           />
           @error('phone') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- WhatsApp -->
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">Nomor WhatsApp Aktif</label>
-          <input 
-            type="tel" 
-            name="whatsapp" 
-            value="{{ old('whatsapp', $user->whatsapp) }}" 
+          <label class="block">Nomor WhatsApp Aktif</label>
+          <input
+            type="tel"
+            name="whatsapp"
+            value="{{ old('whatsapp', $user->whatsapp) }}"
             placeholder="Contoh: 081234567890"
-            class="w-full h-11 px-3.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+            class="w-full ui-input"
           />
           @error('whatsapp') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Alamat Lengkap -->
         <div class="md:col-span-2">
-          <label class="block font-medium text-[#111827] mb-1.5">Alamat Domisili Lengkap</label>
-          <textarea 
-            name="address" 
-            rows="2" 
+          <label class="block">Alamat Domisili Lengkap</label>
+          <textarea
+            name="address"
+            rows="2"
             placeholder="Alamat jalan, nomor rumah, RT/RW..."
-            class="w-full px-3.5 py-2.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition"
+            class="w-full ui-input"
           >{{ old('address', $user->address) }}</textarea>
           @error('address') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Provinsi & Kota -->
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">Provinsi</label>
-          <input 
-            type="text" 
-            name="province" 
-            value="{{ old('province', $user->province) }}" 
+          <label class="block">Provinsi</label>
+          <input
+            type="text"
+            name="province"
+            value="{{ old('province', $user->province) }}"
             placeholder="Contoh: Kalimantan Timur, DKI Jakarta..."
-            class="w-full h-11 px-3.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+            class="w-full ui-input"
           />
         </div>
 
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">Kota / Kabupaten</label>
-          <input 
-            type="text" 
-            name="city" 
-            value="{{ old('city', $user->city) }}" 
+          <label class="block">Kota / Kabupaten</label>
+          <input
+            type="text"
+            name="city"
+            value="{{ old('city', $user->city) }}"
             placeholder="Contoh: Balikpapan, Samarinda, Jakarta Selatan..."
-            class="w-full h-11 px-3.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+            class="w-full ui-input"
           />
         </div>
 
@@ -348,23 +337,23 @@
           <h4 class="font-bold text-[#111827] mb-3">Kontak Darurat (Emergency Contact)</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block font-medium text-[#111827] mb-1.5">Nama Kontak Darurat</label>
-              <input 
-                type="text" 
-                name="emergency_contact_name" 
-                value="{{ old('emergency_contact_name', $user->emergency_contact_name) }}" 
+              <label class="block">Nama Kontak Darurat</label>
+              <input
+                type="text"
+                name="emergency_contact_name"
+                value="{{ old('emergency_contact_name', $user->emergency_contact_name) }}"
                 placeholder="Nama keluarga terdekat / pasangan"
-                class="w-full h-11 px-3.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+                class="w-full ui-input"
               />
             </div>
             <div>
-              <label class="block font-medium text-[#111827] mb-1.5">Nomor Telepon Darurat</label>
-              <input 
-                type="tel" 
-                name="emergency_contact_phone" 
-                value="{{ old('emergency_contact_phone', $user->emergency_contact_phone) }}" 
+              <label class="block">Nomor Telepon Darurat</label>
+              <input
+                type="tel"
+                name="emergency_contact_phone"
+                value="{{ old('emergency_contact_phone', $user->emergency_contact_phone) }}"
                 placeholder="Nomor yang dapat dihubungi saat darurat"
-                class="w-full h-11 px-3.5 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+                class="w-full ui-input"
               />
             </div>
           </div>
@@ -376,8 +365,8 @@
         <a href="{{ route('profile.edit') }}" class="px-5 py-2.5 text-xs font-semibold text-[#475569] hover:bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl transition">
           Batal
         </a>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           class="px-6 py-2.5 text-xs font-semibold text-white bg-[#0057FF] hover:bg-[#0046CC] rounded-xl transition shadow-xs inline-flex items-center gap-2"
         >
           <x-ui-icon name="save" class="w-4 h-4 text-white" />
@@ -398,9 +387,9 @@
           <p class="text-xs text-[#475569] mt-0.5">Penugasan, site penempatan, struktur divisi, dan wewenang akun.</p>
         </div>
         @if($user->isSuperAdmin())
-          <button 
-            type="button" 
-            @click="openEditEmploymentModal()" 
+          <button
+            type="button"
+            @click="openEditEmploymentModal()"
             class="px-4 py-2 text-xs font-semibold text-[#0057FF] bg-[#EFF6FF] border border-[#BFDBFE] hover:bg-[#DBEAFE] rounded-xl transition inline-flex items-center gap-1.5"
           >
             <x-ui-icon name="edit" class="w-3.5 h-3.5 text-[#0057FF]" />
@@ -467,7 +456,7 @@
   <!-- ========================================== -->
   <div x-show="currentTab === 'security'" x-transition class="space-y-6">
     <!-- Form Update Password -->
-    <form method="POST" action="{{ route('password.update', [], false) }}" class="bg-white border border-[#E2E8F0] rounded-2xl p-6 sm:p-8 shadow-xs">
+    <form method="POST" action="{{ route('password.update', [], false) }}" class="sm:p-8">
       @csrf
       @method('put')
 
@@ -479,15 +468,15 @@
       <div class="max-w-xl space-y-4 text-xs" x-data="{ showPass1: false, showPass2: false, showPass3: false }">
         <!-- Current Password -->
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">Kata Sandi Saat Ini <span class="text-[#DC2626]">*</span></label>
+          <label class="block">Kata Sandi Saat Ini <span class="text-[#DC2626]">*</span></label>
           <div class="relative">
-            <input 
-              :type="showPass1 ? 'text' : 'password'" 
-              name="current_password" 
-              required 
+            <input
+              :type="showPass1 ? 'text' : 'password'"
+              name="current_password"
+              required
               autocomplete="current-password"
               placeholder="Masukkan kata sandi saat ini"
-              class="w-full h-11 px-3.5 pr-10 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+              class="w-full ui-input"
             />
             <button type="button" @click="showPass1 = !showPass1" class="absolute inset-y-0 right-0 pr-3 flex items-center text-[#94A3B8] hover:text-[#475569]">
               <x-ui-icon name="eye" class="w-4 h-4" x-show="!showPass1" />
@@ -501,15 +490,15 @@
 
         <!-- New Password -->
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">Kata Sandi Baru <span class="text-[#DC2626]">*</span></label>
+          <label class="block">Kata Sandi Baru <span class="text-[#DC2626]">*</span></label>
           <div class="relative">
-            <input 
-              :type="showPass2 ? 'text' : 'password'" 
-              name="password" 
-              required 
+            <input
+              :type="showPass2 ? 'text' : 'password'"
+              name="password"
+              required
               autocomplete="new-password"
               placeholder="Minimal 8 karakter"
-              class="w-full h-11 px-3.5 pr-10 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+              class="w-full ui-input"
             />
             <button type="button" @click="showPass2 = !showPass2" class="absolute inset-y-0 right-0 pr-3 flex items-center text-[#94A3B8] hover:text-[#475569]">
               <x-ui-icon name="eye" class="w-4 h-4" x-show="!showPass2" />
@@ -523,15 +512,15 @@
 
         <!-- Confirm Password -->
         <div>
-          <label class="block font-medium text-[#111827] mb-1.5">Konfirmasi Kata Sandi Baru <span class="text-[#DC2626]">*</span></label>
+          <label class="block">Konfirmasi Kata Sandi Baru <span class="text-[#DC2626]">*</span></label>
           <div class="relative">
-            <input 
-              :type="showPass3 ? 'text' : 'password'" 
-              name="password_confirmation" 
-              required 
+            <input
+              :type="showPass3 ? 'text' : 'password'"
+              name="password_confirmation"
+              required
               autocomplete="new-password"
               placeholder="Ulangi kata sandi baru"
-              class="w-full h-11 px-3.5 pr-10 text-xs bg-white border border-[#E2E8F0] rounded-xl text-[#111827] focus:border-[#0057FF] focus:ring-1 focus:ring-[#0057FF] transition" 
+              class="w-full ui-input"
             />
             <button type="button" @click="showPass3 = !showPass3" class="absolute inset-y-0 right-0 pr-3 flex items-center text-[#94A3B8] hover:text-[#475569]">
               <x-ui-icon name="eye" class="w-4 h-4" x-show="!showPass3" />
@@ -541,8 +530,8 @@
         </div>
 
         <div class="pt-4">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             class="px-6 py-2.5 text-xs font-semibold text-white bg-[#0057FF] hover:bg-[#0046CC] rounded-xl transition shadow-xs inline-flex items-center gap-2"
           >
             <x-ui-icon name="lock" class="w-4 h-4 text-white" />
@@ -561,9 +550,9 @@
         </p>
       </div>
 
-      <button 
-        type="button" 
-        @click="openDeleteModal = true" 
+      <button
+        type="button"
+        @click="openDeleteModal = true"
         class="px-5 py-2.5 text-xs font-semibold text-white bg-[#DC2626] hover:bg-[#B91C1C] rounded-xl transition shadow-xs inline-flex items-center gap-2"
       >
         <x-ui-icon name="trash" class="w-4 h-4 text-white" />
@@ -627,12 +616,12 @@
   <!-- ========================================== -->
 
   <!-- Modal: Upload / Ganti Foto Profil -->
-  <div 
-    x-show="openAvatarModal" 
-    x-cloak 
+  <div
+    x-show="openAvatarModal"
+    x-cloak
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
   >
-    <div 
+    <div
       @click.outside="openAvatarModal = false"
       class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden"
     >
@@ -658,7 +647,7 @@
         </div>
 
         <div>
-          <label class="cursor-pointer px-4 py-2 bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#111827] font-semibold text-xs rounded-xl inline-block transition">
+          <label class="inline-block">
             <span>Pilih Berkas Foto</span>
             <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" @change="previewFile($event)" />
           </label>
@@ -670,9 +659,9 @@
         <button type="button" @click="openAvatarModal = false; avatarPreview = null" class="px-4 py-2 font-semibold text-[#475569] hover:bg-[#E2E8F0] rounded-xl transition">
           Batal
         </button>
-        <button 
-          type="button" 
-          @click="submitAvatarUpload()" 
+        <button
+          type="button"
+          @click="submitAvatarUpload()"
           :disabled="!avatarFile || uploadingAvatar"
           class="px-5 py-2 font-semibold text-white bg-[#0057FF] hover:bg-[#0046CC] disabled:opacity-50 rounded-xl transition"
         >
@@ -684,12 +673,12 @@
   </div>
 
   <!-- Modal: Super Admin Ubah Data Pekerjaan -->
-  <div 
-    x-show="openEmploymentModal" 
-    x-cloak 
+  <div
+    x-show="openEmploymentModal"
+    x-cloak
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
   >
-    <div 
+    <div
       @click.outside="openEmploymentModal = false"
       class="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden"
     >
@@ -705,18 +694,18 @@
 
       <div class="p-6 space-y-4 text-xs overflow-y-auto max-h-[70vh] chat-scroll">
         <div>
-          <label class="block font-medium text-[#111827] mb-1">Jabatan / Position</label>
-          <input type="text" x-model="employmentForm.position" class="w-full h-10 px-3 border border-[#E2E8F0] rounded-xl" />
+          <label class="block">Jabatan / Position</label>
+          <input type="text" x-model="employmentForm.position" class="w-full ui-input" />
         </div>
 
         <div>
-          <label class="block font-medium text-[#111827] mb-1">Divisi</label>
-          <input type="text" x-model="employmentForm.division" class="w-full h-10 px-3 border border-[#E2E8F0] rounded-xl" />
+          <label class="block">Divisi</label>
+          <input type="text" x-model="employmentForm.division" class="w-full ui-input" />
         </div>
 
         <div>
-          <label class="block font-medium text-[#111827] mb-1">Departemen</label>
-          <select x-model="employmentForm.department_id" class="w-full h-10 px-3 border border-[#E2E8F0] rounded-xl">
+          <label class="block">Departemen</label>
+          <select x-model="employmentForm.department_id" class="w-full ui-input">
             <option value="">Pilih Departemen</option>
             @foreach($allDepartments as $dept)
               <option value="{{ $dept->id }}">{{ $dept->name }}</option>
@@ -725,8 +714,8 @@
         </div>
 
         <div>
-          <label class="block font-medium text-[#111827] mb-1">Role Akun</label>
-          <select x-model="employmentForm.role" class="w-full h-10 px-3 border border-[#E2E8F0] rounded-xl">
+          <label class="block">Role Akun</label>
+          <select x-model="employmentForm.role" class="w-full ui-input">
             <option value="user">User</option>
             <option value="admin_ho">Admin HO</option>
             <option value="admin_site">Admin Site</option>
@@ -735,11 +724,11 @@
         </div>
 
         <div>
-          <label class="block font-medium text-[#111827] mb-1">Assigned Sites</label>
+          <label class="block">Assigned Sites</label>
           <div class="grid grid-cols-2 gap-2 p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl max-h-36 overflow-y-auto">
             @foreach($allSites as $s)
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" value="{{ $s->id }}" x-model="employmentForm.site_ids" class="rounded border-[#CBD5E1] text-[#0057FF]" />
+              <label class="flex items-center">
+                <input type="checkbox" value="{{ $s->id }}" x-model="employmentForm.site_ids" class="w-full ui-input" />
                 <span class="truncate">{{ $s->code }} — {{ $s->name }}</span>
               </label>
             @endforeach
@@ -757,12 +746,12 @@
   </div>
 
   <!-- Modal: Konfirmasi Hapus Akun -->
-  <div 
-    x-show="openDeleteModal" 
-    x-cloak 
+  <div
+    x-show="openDeleteModal"
+    x-cloak
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
   >
-    <div 
+    <div
       @click.outside="openDeleteModal = false"
       class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#FEE2E2] overflow-hidden"
     >
@@ -780,13 +769,13 @@
           </p>
 
           <div class="pt-2 text-left">
-            <label class="block text-xs font-semibold text-[#111827] mb-1">Kata Sandi Konfirmasi</label>
-            <input 
-              type="password" 
-              name="password" 
-              required 
-              placeholder="Masukkan kata sandi akun Anda" 
-              class="w-full h-10 px-3 text-xs border border-[#E2E8F0] rounded-xl"
+            <label class="block">Kata Sandi Konfirmasi</label>
+            <input
+              type="password"
+              name="password"
+              required
+              placeholder="Masukkan kata sandi akun Anda"
+              class="w-full ui-input"
             />
           </div>
         </div>

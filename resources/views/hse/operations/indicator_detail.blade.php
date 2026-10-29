@@ -73,7 +73,7 @@
                 </tbody>
             </table>
         </div>
-    <x-slot:footer>{{ $records->links() }}</x-slot:footer>
+    <x-slot:footer><x-ui.table-pagination :paginator="$records" /></x-slot:footer>
     </x-hse.chart-card>
 </div>
 @endsection

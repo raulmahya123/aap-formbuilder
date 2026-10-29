@@ -21,17 +21,17 @@
     @endif</x-ui.page-actions>
 
 <x-slot:filters>
-<x-ui.table-toolbar class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+<x-ui.table-toolbar >
     <div class="relative flex-1">
       <x-ui.table-search   name="q" value="{{ request('q') }}" placeholder="Cari judul kontrak…"
-             class="w-full border rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-[#713F12]" />
+             class="w-full" />
 
     </div>
 
 <x-slot:actions>
-<x-ui.button variant="secondary" class="px-4 py-2 rounded-lg border">Filter</x-ui.button>
+<x-ui.button variant="secondary" >Filter</x-ui.button>
     @if(request()->has('q') && request('q')!=='')
-      <x-ui.link variant="secondary" href="{{ route('admin.contracts.index') }}" class="px-4 py-2 rounded-lg border">Reset</x-ui.link>
+      <x-ui.link variant="secondary" href="{{ route('admin.contracts.index') }}" >Reset</x-ui.link>
     @endif
 
 </x-slot:actions>

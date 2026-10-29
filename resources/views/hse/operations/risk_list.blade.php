@@ -19,16 +19,16 @@
             @if(request('likelihood') && request('consequence'))
                 <input type="hidden" name="likelihood" value="{{ request('likelihood') }}">
                 <input type="hidden" name="consequence" value="{{ request('consequence') }}">
-                <span class="inline-flex items-center gap-1 rounded bg-blue-50 px-2 py-1 text-xs font-semibold text-[#1646A0] border border-blue-200">
+                <span class="ui-filter-chip">
                     Filter Sel Matriks: L{{ request('likelihood') }} × C{{ request('consequence') }}
-                    <a href="{{ route('hse.dashboard.risk.list') }}" class="text-rose-500 hover:text-rose-700 ml-1">&times;</a>
+                    <a href="{{ route('hse.dashboard.risk.list') }}" class="ui-filter-chip__remove" aria-label="Hapus filter matriks"><x-ui.lucide name="x" /></a>
                 </span>
             @endif
 
             <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari risk register" placeholder="Cari aktivitas, hazard, atau kontrol…" />
             <x-hse.module-scope-filters :options="$options" :filters="$filters" />
 
-            <div class="ui-filter-field"><label class="ui-filter-field__label" for="risk-level-filter">Tingkat risiko</label><select id="risk-level-filter" name="level" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0] focus:ring focus:ring-blue-100" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="risk-level-filter">Tingkat risiko</label><select id="risk-level-filter" name="level" class="w-full ui-input" onchange="this.form.submit()">
                 <option value="">-- Semua Severity --</option>
                 <option value="Low" {{ request('level') === 'Low' ? 'selected' : '' }}>Low (1-3)</option>
                 <option value="Medium" {{ request('level') === 'Medium' ? 'selected' : '' }}>Medium (4-8)</option>
@@ -36,7 +36,7 @@
                 <option value="Extreme" {{ request('level') === 'Extreme' ? 'selected' : '' }}>Extreme (15-25)</option>
             </select></div>
 
-            <div class="ui-filter-field"><label class="ui-filter-field__label" for="risk-status-filter">Status</label><select id="risk-status-filter" name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0] focus:ring focus:ring-blue-100" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="risk-status-filter">Status</label><select id="risk-status-filter" name="status" class="w-full ui-input" onchange="this.form.submit()">
                 <option value="">-- Status --</option>
                 <option value="Active" {{ request('status') === 'Active' ? 'selected' : '' }}>Active</option>
                 <option value="Closed" {{ request('status') === 'Closed' ? 'selected' : '' }}>Closed</option>
@@ -133,7 +133,7 @@
             </table>
         </div>
         <div class="ui-pagination-footer">
-            {{ $risks->links() }}
+            <x-ui.table-pagination :paginator="$risks" />
         </div>
     </div>
 

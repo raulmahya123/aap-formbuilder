@@ -19,7 +19,7 @@
             <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari dokumen" placeholder="Cari kode, judul, atau deskripsi dokumen…" />
             <x-hse.module-scope-filters :options="$options" :filters="$filters" :show-department="false" />
 
-            <div class="ui-filter-field"><label class="ui-filter-field__label" for="document-status-filter">Status</label><select id="document-status-filter" name="status" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="document-status-filter">Status</label><select id="document-status-filter" name="status" class="w-full ui-input" onchange="this.form.submit()">
                 <option value="">-- Semua Status --</option>
                 <option value="Published" {{ request('status') === 'Published' ? 'selected' : '' }}>Published (Aktif)</option>
                 <option value="In Review" {{ request('status') === 'In Review' ? 'selected' : '' }}>In Review</option>
@@ -28,7 +28,7 @@
                 <option value="Obsolete" {{ request('status') === 'Obsolete' ? 'selected' : '' }}>Obsolete (Usang)</option>
             </select></div>
 
-            <div class="ui-filter-field"><label class="ui-filter-field__label" for="document-department-filter">Department</label><select id="document-department-filter" name="department_id" class="text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" onchange="this.form.submit()">
+            <div class="ui-filter-field"><label class="ui-filter-field__label" for="document-department-filter">Department</label><select id="document-department-filter" name="department_id" class="w-full ui-input" onchange="this.form.submit()">
                 <option value="">-- Semua Departemen --</option>
                 @foreach($departments as $dept)
                     <option value="{{ $dept->id }}" {{ request('department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
@@ -108,7 +108,7 @@
             </table>
         </div>
         <div class="ui-pagination-footer">
-            {{ $documents->links() }}
+            <x-ui.table-pagination :paginator="$documents" />
         </div>
     </div>
 

@@ -10,16 +10,16 @@
   <x-ui.page-actions><x-ui.back-link href="{{ route('admin.companies.index') }}">Kembali</x-ui.back-link></x-ui.page-actions>
 </x-ui.page-header>
 
-  <x-ui.panel class="rounded-lg border bg-white">
-    <form action="{{ route('admin.companies.update', $company) }}" method="POST" enctype="multipart/form-data" class="grid gap-5">
+  <x-ui.panel >
+    <form action="{{ route('admin.companies.update', $company) }}" method="POST" enctype="multipart/form-data" class="grid">
       @csrf
       @method('PUT')
       @include('admin.companies._form', ['company' => $company])
       <div class="flex items-center gap-3">
-        <x-ui.button variant="secondary" class="px-4 py-2 rounded-lg hover:brightness-105">
+        <x-ui.button variant="secondary" >
           Update
         </x-ui.button>
-        <x-ui.link variant="secondary" href="{{ route('admin.companies.index') }}" class="px-4 py-2 rounded-lg border">Batal</x-ui.link>
+        <x-ui.link variant="secondary" href="{{ route('admin.companies.index') }}" >Batal</x-ui.link>
       </div>
     </form>
   </x-ui.panel>

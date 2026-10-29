@@ -7,7 +7,7 @@
   <div class="ui-page-header__copy"><x-ui.page-title>{{ $site->exists ? 'Edit' : 'Tambah' }} Site</x-ui.page-title>
 <x-ui.page-description>Kelola identitas dan status site operasional.</x-ui.page-description></div>
   <x-ui.page-actions>
-<x-ui.button form="page-primary-form" variant="primary" class="px-5 py-3 rounded-lg hover:brightness-105 shadow-none">
+<x-ui.button form="page-primary-form" variant="primary" >
       Simpan
     </x-ui.button>
 </x-ui.page-actions>
@@ -25,15 +25,15 @@
 
 <form id="page-primary-form" method="POST"
       action="{{ $site->exists ? route('admin.sites.update',$site) : route('admin.sites.store') }}"
-      class="w-full min-w-0 ui-card space-y-5 bg-white rounded-lg p-6 shadow-none border border-gray-200">
+      class="w-full min-w-0 ui-card">
   @csrf
   @if($site->exists) @method('PUT') @endif
 
   {{-- Perusahaan --}}
   <div>
-    <label class="block mb-1 font-semibold text-gray-700">Perusahaan</label>
+    <label class="block">Perusahaan</label>
     <select name="company_id"
-            class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:outline-none">
+            class="w-full ui-input">
       <option value="" {{ old('company_id', $site->company_id) ? '' : 'selected' }}>— (Tidak terkait perusahaan)</option>
       @foreach(($companies ?? []) as $c)
         <option value="{{ $c->id }}"
@@ -46,50 +46,50 @@
   </div>
 
   <div>
-    <label class="block mb-1 font-semibold text-gray-700">
+    <label class="block">
       Code <span class="text-sm text-gray-500">(mis: HO, BGG, SBS, DBK)</span>
     </label>
     <input name="code" value="{{ old('code',$site->code) }}"
-           class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:outline-none"
+           class="w-full ui-input"
            required>
   </div>
 
   <div>
-    <label class="block mb-1 font-semibold text-gray-700">Name</label>
+    <label class="block">Name</label>
     <input name="name" value="{{ old('name',$site->name) }}"
-           class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:outline-none"
+           class="w-full ui-input"
            required>
   </div>
 
   <div class="grid gap-4 sm:grid-cols-2">
     <div>
-      <label class="block mb-1 font-semibold text-gray-700">Latitude</label>
+      <label class="block">Latitude</label>
       <input name="latitude" type="number" step="any" min="-90" max="90"
              value="{{ old('latitude',$site->latitude) }}"
-             class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:outline-none"
+             class="w-full ui-input"
              placeholder="-6.2000000">
       <p class="text-xs text-slate-500 mt-1">Opsional. Digunakan untuk peta sebaran site HSE.</p>
     </div>
     <div>
-      <label class="block mb-1 font-semibold text-gray-700">Longitude</label>
+      <label class="block">Longitude</label>
       <input name="longitude" type="number" step="any" min="-180" max="180"
              value="{{ old('longitude',$site->longitude) }}"
-             class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:outline-none"
+             class="w-full ui-input"
              placeholder="106.8166667">
     </div>
   </div>
 
   <div>
-    <label class="block mb-1 font-semibold text-gray-700">Description</label>
+    <label class="block">Description</label>
     <textarea name="description"
-              class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-[color:var(--brand-maroon,#713F12)] focus:outline-none"
+              class="w-full ui-input"
               rows="3">{{ old('description',$site->description) }}</textarea>
   </div>
 
   <div class="flex gap-3">
 
     <x-ui.link variant="secondary" href="{{ route('admin.sites.index') }}"
-       class="px-5 py-3 rounded-lg border">
+       >
       Batal
     </x-ui.link>
   </div>

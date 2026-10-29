@@ -10,7 +10,7 @@
             <x-ui.page-description>Critical Control Management</x-ui.page-description>
         </div></div>
   <x-ui.page-actions><x-ui.back-link href="{{ route('ccm-reports.index') }}">Kembali ke daftar</x-ui.back-link>
-<x-ui.button form="ccmForm" variant="primary" type="submit" class="px-8 py-3 rounded-lg font-semibold shadow-none transition transform active:scale-95">
+<x-ui.button form="ccmForm" variant="primary" type="submit" >
                 <x-ui.lucide name="save" /> Update Laporan CCM
             </x-ui.button>
 </x-ui.page-actions>
@@ -20,14 +20,14 @@
     <form method="POST"
           action="{{ route('ccm-reports.update', $report->id) }}"
           enctype="multipart/form-data"
-          class="space-y-5"
+
           id="ccmForm">
         @csrf
         @method('PUT')
 
         {{-- ================= SECTION 1 : UMUM ================= --}}
-        <x-ui.panel class="bg-white rounded-lg border shadow-none">
-            <x-ui.section-title class="font-bold text-lg mb-4 text-gray-700 border-b pb-2">1. Informasi Umum</x-ui.section-title>
+        <x-ui.panel >
+            <x-ui.section-title >1. Informasi Umum</x-ui.section-title>
             <div class="grid md:grid-cols-3 gap-5">
                 <div>
                     <x-ui.form-label for="ccm-waktu" required>Waktu Pelaporan</x-ui.form-label>
@@ -95,15 +95,15 @@
                 $currentFlag = old($flagName, $report->$flagName);
             @endphp
 
-            <x-ui.panel class="bg-white rounded-lg border shadow-none overflow-hidden section-card" data-section="{{ $key }}">
+            <x-ui.panel class="overflow-hidden section-card" data-section="{{ $key }}">
 
                 <div class="bg-gray-50 p-4 border-b flex justify-between items-center">
-                    <x-ui.card-title class="font-bold text-gray-800">{{ $title }}</x-ui.card-title>
+                    <x-ui.card-title >{{ $title }}</x-ui.card-title>
                     <div class="flex items-center space-x-4">
                         <span class="text-sm text-gray-600">Ada Kegiatan?</span>
                         <select name="{{ $flagName }}"
                                 data-section-key="{{ $key }}"
-                                class="activity-toggle text-sm border-gray-300 rounded-lg shadow-none focus:ring-blue-500 focus:border-blue-500 font-bold"
+                                class="w-full activity-toggle ui-input"
                                 onchange="toggleSection('{{ $key }}', this.value)">
                             <option value="">-- Pilih --</option>
                             <option value="1" {{ $currentFlag == '1' || $currentFlag === true ? 'selected' : '' }}>ADA</option>
@@ -115,9 +115,9 @@
                 <div class="p-6">
                     {{-- CONTAINER: TIDAK ADA (ALASAN) --}}
                     <div id="{{ $key }}_no_content" class="hidden space-y-3">
-                        <label class="block text-sm font-medium text-gray-700">Alasan Tidak Ada Kegiatan <span class="text-red-500">*</span></label>
+                        <label class="block">Alasan Tidak Ada Kegiatan <span class="text-red-500">*</span></label>
                         <input type="text" name="{{ $key }}_tidak_ada_alasan"
-                               class="w-full border-gray-300 rounded-lg shadow-none bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                               class="w-full ui-input"
                                placeholder="Contoh: Tidak ada jadwal hari ini"
                                value="{{ old($key.'_tidak_ada_alasan', $report->{$key.'_tidak_ada_alasan'} ?? '') }}">
                     </div>
@@ -126,17 +126,17 @@
                     <div id="{{ $key }}_yes_content" class="hidden space-y-5">
                         <div class="grid md:grid-cols-3 gap-4">
                             <div class="md:col-span-3">
-                                <label class="block text-sm font-medium text-gray-700">Deskripsi Pekerjaan Kritis</label>
+                                <label class="block">Deskripsi Pekerjaan Kritis</label>
                                 <input type="text" name="{{ $fieldPekerjaan }}"
-                                       class="w-full border-gray-300 rounded-lg shadow-none focus:ring-blue-500 focus:border-blue-500"
+                                       class="w-full ui-input"
                                        value="{{ old($fieldPekerjaan, $report->$fieldPekerjaan ?? '') }}">
                                 @error($fieldPekerjaan) <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Dropdown Prosedur (Sync Enum) --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Prosedur Terkait</label>
-                                <select name="{{ $key }}_prosedur" class="w-full border-gray-300 rounded-lg shadow-none">
+                                <label class="block">Prosedur Terkait</label>
+                                <select name="{{ $key }}_prosedur" class="w-full ui-input">
                                     <option value="">-- Pilih --</option>
                                     @php $optPro = ($key === 'kritis_baru') ? ['Ada','Tidak Ada'] : ['Sudah','Belum']; @endphp
                                     @foreach($optPro as $o)
@@ -148,8 +148,8 @@
 
                             {{-- Dropdown Pelanggaran (Sync Enum) --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Potensi/Pelanggaran</label>
-                                <select name="{{ $key }}_pelanggaran" class="w-full border-gray-300 rounded-lg shadow-none">
+                                <label class="block">Potensi/Pelanggaran</label>
+                                <select name="{{ $key }}_pelanggaran" class="w-full ui-input">
                                     <option value="">-- Pilih --</option>
                                     @foreach(['Ada','Tidak Ada'] as $o)
                                         <option value="{{ $o }}" {{ old($key.'_pelanggaran', $report->{$key.'_pelanggaran'} ?? '') == $o ? 'selected' : '' }}>{{ $o }}</option>
@@ -161,8 +161,8 @@
                             {{-- Dropdown Dipahami (Hanya Kritis Baru) --}}
                             @if($key === 'kritis_baru')
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Apakah Tim Paham?</label>
-                                <select name="kritis_baru_dipahami" class="w-full border-gray-300 rounded-lg shadow-none">
+                                <label class="block">Apakah Tim Paham?</label>
+                                <select name="kritis_baru_dipahami" class="w-full ui-input">
                                     <option value="">-- Pilih --</option>
                                     @foreach(['Sudah','Belum'] as $o)
                                         <option value="{{ $o }}" {{ old('kritis_baru_dipahami', $report->kritis_baru_dipahami ?? '') == $o ? 'selected' : '' }}>{{ $o }}</option>
@@ -184,13 +184,13 @@
                             @endphp
                             <div class="border rounded-lg p-4 bg-gray-50">
                                 <div class="mb-3">
-                                    <label class="block text-xs font-bold text-gray-500 normal-case mb-1">{{ str_replace('_', ' ', $ctrl) }} - Deskripsi</label>
+                                    <label class="block normal-case">{{ str_replace('_', ' ', $ctrl) }} - Deskripsi</label>
                                     <textarea name="{{ $key }}_{{ $ctrl }}" rows="2"
-                                              class="w-full border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">{{ old($key.'_'.$ctrl, $report->{$key.'_'.$ctrl} ?? '') }}</textarea>
+                                              class="w-full ui-input">{{ old($key.'_'.$ctrl, $report->{$key.'_'.$ctrl} ?? '') }}</textarea>
                                     @error($key.'_'.$ctrl) <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-500 normal-case mb-1">Upload Foto</label>
+                                    <label class="block normal-case">Upload Foto</label>
 
                                     {{-- Show existing evidence thumbnail if available --}}
                                     @if($existingEvidence)
@@ -207,7 +207,7 @@
                                     @endif
 
                                     <input type="file" name="{{ $evidenceField }}" accept="image/*"
-                                           class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                                           class="w-full">
                                     @error($evidenceField) <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                 </div>
                             </div>

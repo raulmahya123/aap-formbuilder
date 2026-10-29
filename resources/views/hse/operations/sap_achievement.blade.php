@@ -9,6 +9,7 @@
         'subtitle' => 'Daftar aktivitas dan submission terverifikasi untuk ' . $title . '.',
         'filters' => $filters,
         'options' => $options,
+        'filterMode' => 'listing',
     ])
 
     <x-hse.chart-card title="Riwayat Aktivitas & Submission" subtitle="Data realisasi kegiatan karyawan">
@@ -66,7 +67,7 @@
                 </tbody>
             </table>
         </div>
-    <x-slot:footer>{{ $records->links() }}</x-slot:footer>
+    <x-slot:footer><x-ui.table-pagination :paginator="$records" /></x-slot:footer>
     </x-hse.chart-card>
 </div>
 @endsection

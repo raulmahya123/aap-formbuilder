@@ -38,7 +38,17 @@ function printTable(data) {
     document.body.append(frame);
     const doc = frame.contentDocument;
     doc.open();
-    doc.write('<!doctype html><html lang="id"><head><meta charset="utf-8"><style>@page{size:landscape;margin:12mm}body{font:12px Arial;color:#18181b}h1{font-size:20px}p{color:#52525b}table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #d4d4d8;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#f4f4f5}thead{display:table-header-group}tr{break-inside:avoid}</style></head><body></body></html>');
+    const letterheadUrl = template.dataset.letterheadUrl;
+    doc.write(`<!doctype html><html lang="id"><head><meta charset="utf-8"><style>
+      @page{size:A4 portrait;margin:32mm 16mm 39mm}
+      *{box-sizing:border-box}html,body{margin:0;padding:0}
+      body{font:9pt/1.45 Arial,sans-serif;color:#18181b;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .letterhead{position:fixed;top:0;left:0;width:210mm;height:297mm;z-index:-1}
+      h1{font-size:17pt;line-height:1.2;margin:0 0 2mm}p{font-size:8pt;color:#52525b;margin:0 0 5mm}
+      table{width:100%;table-layout:fixed;border-collapse:collapse}thead{display:table-header-group}
+      th,td{padding:1.6mm 1.8mm;border:1px solid #d4d4d8;text-align:left;vertical-align:top;overflow-wrap:anywhere;word-break:break-word;font-size:${data.columns.length > 5 ? '6.5pt' : '8pt'}}
+      th{background:#f4f4f5;font-weight:700}tr{break-inside:avoid}
+    </style></head><body><img class="letterhead" src="${letterheadUrl}" alt=""></body></html>`);
     doc.close();
     doc.title = data.title;
     const heading = doc.createElement('h1'); heading.textContent = data.title;

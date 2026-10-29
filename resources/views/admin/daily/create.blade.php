@@ -25,7 +25,7 @@ $computedReadonly = !$hasAnyAllowedSite;
   </div>
   <x-ui.page-actions>
     <x-ui.button form="page-primary-form" variant="primary"
-      class="px-6 py-2.5 rounded-lg shadow-none disabled:opacity-60 disabled:cursor-not-allowed"
+
       :disabled="!$hasAnyAllowedSite || $computedReadonly">
       <x-ui.lucide name="save" /> Simpan Data
     </x-ui.button>
@@ -101,7 +101,7 @@ $computedReadonly = !$hasAnyAllowedSite;
           requestAnimationFrame(() => this.sanitize(e.target));
         }
       }"
-  class="w-full min-w-0 ui-card relative space-y-5 bg-white rounded-lg border border-gray-200 shadow-none p-6 {{ $computedReadonly ? 'opacity-95' : '' }}">
+  class="w-full min-w-0 ui-card relative">
   @csrf
 
   {{-- Jika readonly total, blok pointer supaya benar2 tidak bisa edit --}}
@@ -114,7 +114,7 @@ $computedReadonly = !$hasAnyAllowedSite;
     <div>
       <x-ui.form-label for="daily-site-id" required>Site Operasional</x-ui.form-label>
       <select id="daily-site-id" name="site_id"
-        class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400 transition {{ $computedReadonly ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : 'bg-white' }}"
+        class="w-full ui-input"
         @if($computedReadonly) disabled @endif required>
         @php $printed = false; @endphp
         @foreach($sites as $s)
@@ -136,7 +136,7 @@ $computedReadonly = !$hasAnyAllowedSite;
     <div>
       <x-ui.form-label for="daily-date" required>Tanggal Input</x-ui.form-label>
       <input type="date" id="daily-date" name="date" value="{{ old('date', $date) }}"
-        class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400 transition {{ $computedReadonly ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : 'bg-white' }}"
+        class="w-full ui-input"
         @if($computedReadonly) readonly disabled @endif required>
       @error('date') <x-ui.form-error>{{ $message }}</x-ui.form-error> @enderror
     </div>
@@ -193,7 +193,7 @@ $computedReadonly = !$hasAnyAllowedSite;
     <div class="px-4 py-2 font-semibold bg-maroon-700 text-white rounded-t">
       {{ $g->name }}
     </div>
-    <x-ui.panel :padded="false" class="bg-white border-x border-b rounded-b-lg overflow-hidden">
+    <x-ui.panel :padded="false" class="overflow-hidden">
       <x-ui.table class="min-w-full text-sm">
         <thead class="bg-maroon-50 text-maroon-800">
           <tr>
@@ -246,7 +246,7 @@ $computedReadonly = !$hasAnyAllowedSite;
             <td class="px-3 py-2">
               @if($i->is_derived)
               <input disabled placeholder="Derived"
-                class="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-500">
+                class="w-full ui-input">
               @else
               <input
                 name="values[{{ $i->id }}]"
@@ -256,7 +256,7 @@ $computedReadonly = !$hasAnyAllowedSite;
                 @if($max !==null) max="{{ $max }}" @endif
                 inputmode="{{ $inputMode }}"
                 value="{{ old("values.$i->id") }}"
-                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400 {{ $disabledClass }}"
+                class="w-full {{ $disabledClass }} ui-input"
                 placeholder="{{ $isPercent ? '0–100' : '0' }}"
                 title="{{ $isPercent ? 'Masukkan angka 0–100 (tanpa %). Gunakan titik untuk desimal.' : 'Gunakan titik untuk desimal' }}"
                 {{-- normalisasi & kunci minus → 0 --}}
@@ -294,7 +294,7 @@ $computedReadonly = !$hasAnyAllowedSite;
               <div class="text-xs text-gray-500">Unit: {{ $i->unit ?? '-' }}</div>
               <input name="notes[{{ $i->id }}]"
                 value="{{ old("notes.$i->id") }}"
-                class="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-maroon-400 focus:border-maroon-400 {{ $disabledClass }}"
+                class="w-full {{ $disabledClass }} ui-input"
                 placeholder="Catatan (opsional)"
                 @if($computedReadonly) readonly disabled @endif>
             </td>
@@ -310,7 +310,7 @@ $computedReadonly = !$hasAnyAllowedSite;
   <div class="{{ $computedReadonly ? 'opacity-60 pointer-events-none' : '' }}">
 
     <x-ui.link variant="secondary" href="{{ route('admin.daily.index') }}"
-      class="ml-2 px-6 py-3 rounded-lg border">
+      >
       Batal
     </x-ui.link>
   </div>

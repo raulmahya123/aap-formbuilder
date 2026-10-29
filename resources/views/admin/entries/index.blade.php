@@ -12,15 +12,15 @@
       </x-ui.link></x-ui.page-actions>
 
 <x-slot:filters>
-<x-ui.table-toolbar class="mb-4 grid md:grid-cols-4 gap-3">
+<x-ui.table-toolbar class="mb-4">
       <x-ui.table-search name="q" value="{{ request('q') }}" aria-label="Cari data isian" placeholder="Cari data (contoh: nama)"
-        class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500" />
+        class="w-full" />
       <div class="ui-filter-field"><label class="ui-filter-field__label" for="entries-user-filter">Pengguna</label><input id="entries-user-filter" type="text" name="user" value="{{ request('user') }}" aria-label="Nama atau email pengguna" placeholder="Nama atau email pengguna"
-        class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500">
+        class="w-full ui-input">
       </div><div class="ui-filter-field"><label class="ui-filter-field__label" for="entries-form-filter">ID Form</label><input id="entries-form-filter" type="number" name="form_id" value="{{ request('form_id') }}" placeholder="ID Form"
-        class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500">
+        class="w-full ui-input">
       </div><div class="ui-filter-field"><label class="ui-filter-field__label" for="entries-status-filter">Status</label><select id="entries-status-filter" name="status"
-        class="w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-coal-950 dark:border-coal-700 focus:outline-none focus:ring-2 focus:ring-maroon-500/60 focus:border-maroon-500">
+        class="w-full ui-input">
         <option value="">— Semua Status —</option>
         <option value="submitted" @selected(request('status')==='submitted' )>Submitted</option>
         <option value="reviewed" @selected(request('status')==='reviewed' )>Reviewed</option>
@@ -30,10 +30,10 @@
 
 <x-slot:actions>
 <div class="md:col-span-4">
-        <x-ui.button variant="primary" class="px-4 py-2 rounded-lg text-ivory-50 transition text-sm w-full md:w-auto">
+        <x-ui.button variant="primary" class="w-full md:w-auto">
           Terapkan Filter
         </x-ui.button>
-        <x-ui.link variant="secondary" class="px-3 py-2 rounded-lg border dark:text-maroon-300 dark:border-maroon-400 dark:hover:bg-maroon-900/20 transition text-sm"
+        <x-ui.link variant="secondary"
           href="{{ route('admin.entries.export_zip', request()->query()) }}">
           <x-ui.lucide name="download" /> Export ZIP
         </x-ui.link>
@@ -78,8 +78,9 @@
             <td class="ui-action-cell p-3"><x-ui.table-actions>
               <div class="flex flex-nowrap items-center gap-2">
                 <x-ui.icon-button ability="view" :subject="$e" action="view" label="Lihat detail" href="{{ route('admin.entries.show',$e) }}" />
+                <x-ui.icon-button ability="view" :subject="$e->form" action="pdf" label="Unduh data entri sebagai PDF" href="{{ route('admin.entries.data_pdf',$e) }}" />
                 @if($e->pdf_output_path)
-                <x-ui.icon-button ability="view" :subject="$e" action="download" label="Unduh" href="{{ route('admin.entries.download_pdf',$e) }}" />
+                <x-ui.icon-button ability="view" :subject="$e" action="download" label="Unduh lampiran PDF" href="{{ route('admin.entries.download_pdf',$e) }}" />
                 @endif
                 <form action="{{ route('admin.entries.destroy',$e) }}" method="post"
                   data-confirm="Hapus entry?">

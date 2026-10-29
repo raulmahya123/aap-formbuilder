@@ -1,6 +1,6 @@
 <section class="space-y-5">
     <header>
-        <x-ui.section-title class="text-lg font-medium text-gray-900">
+        <x-ui.section-title >
             {{ __('Delete Account') }}
         </x-ui.section-title>
 
@@ -15,11 +15,11 @@
     >{{ __('Delete Account') }}</x-danger-button>
 
     <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
-        <form method="post" action="{{ route('profile.destroy') }}" class="p-6" data-error-bag="userDeletion">
+        <form method="post" action="{{ route('profile.destroy') }}"  data-error-bag="userDeletion">
             @csrf
             @method('delete')
 
-            <x-ui.section-title class="text-lg font-medium text-gray-900">
+            <x-ui.section-title >
                 {{ __('Are you sure you want to delete your account?') }}
             </x-ui.section-title>
 

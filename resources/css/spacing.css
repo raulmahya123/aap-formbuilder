@@ -30,8 +30,7 @@
 .ui-panel, .ui-card, .ui-auth-card { padding: var(--card-padding); border-radius: var(--radius); box-shadow: none; }
 .ui-shell main .card:not(:has(.ui-table)) { padding: var(--card-padding); }
 .ui-panel.ui-panel--flush { padding: 0; }
-.ui-table-scroll, .table-shell, .filter-bar, .toast, .empty-state { border-radius: var(--radius); }
-.filter-bar { padding: var(--card-padding); gap: var(--space-3); }
+.ui-table-scroll, .toast, .empty-state { border-radius: var(--radius); }
 .toast { padding: var(--card-padding); }
 .empty-state { padding: var(--space-8) var(--card-padding); }
 .ui-status { gap: var(--space-1); padding: var(--space-1) var(--space-2); border-radius: var(--radius); }

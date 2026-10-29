@@ -26,13 +26,13 @@
     @endif
 
     <div class="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
-        <form action="{{ route('hse.dashboard.sap.targets.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('hse.dashboard.sap.targets.store') }}" method="POST" >
             @csrf
 
             <div class="grid gap-6 sm:grid-cols-2">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700">Site Operasional</label>
-                    <select name="site_id" class="mt-1.5 w-full rounded-lg border border-slate-300 p-2.5 text-xs focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
+                    <label class="block">Site Operasional</label>
+                    <select name="site_id" class="w-full ui-input">
                         <option value="">Semua Site (Corporate Level)</option>
                         @foreach($options['sites'] as $s)
                             <option value="{{ $s->id }}">{{ $s->name }} ({{ $s->code }})</option>
@@ -42,8 +42,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700">Department</label>
-                    <select name="department_id" class="mt-1.5 w-full rounded-lg border border-slate-300 p-2.5 text-xs focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
+                    <label class="block">Department</label>
+                    <select name="department_id" class="w-full ui-input">
                         <option value="">Semua Department</option>
                         @foreach($options['departments'] as $d)
                             <option value="{{ $d->id }}">{{ $d->name }}</option>
@@ -53,8 +53,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700">Target Karyawan Spesifik (Opsional)</label>
-                    <select name="user_id" class="mt-1.5 w-full rounded-lg border border-slate-300 p-2.5 text-xs focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
+                    <label class="block">Target Karyawan Spesifik (Opsional)</label>
+                    <select name="user_id" class="w-full ui-input">
                         <option value="">Semua Karyawan dalam Lingkup</option>
                         @foreach($options['users'] as $u)
                             <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->email }})</option>
@@ -64,13 +64,13 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700">Tahun <span class="text-rose-500">*</span></label>
-                        <input type="number" name="year" value="{{ now()->year }}" required class="mt-1.5 w-full rounded-lg border border-slate-300 p-2.5 text-xs focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]" />
+                        <label class="block">Tahun <span class="text-rose-500">*</span></label>
+                        <input type="number" name="year" value="{{ now()->year }}" required class="w-full ui-input" />
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700">Bulan <span class="text-rose-500">*</span></label>
-                        <select name="month" required class="mt-1.5 w-full rounded-lg border border-slate-300 p-2.5 text-xs focus:border-[#1646A0] focus:ring-1 focus:ring-[#1646A0]">
+                        <label class="block">Bulan <span class="text-rose-500">*</span></label>
+                        <select name="month" required class="w-full ui-input">
                             @for($m = 1; $m <= 12; $m++)
                                 <option value="{{ $m }}" {{ $m == now()->month ? 'selected' : '' }}>
                                     {{ \Carbon\Carbon::create(2000, $m, 1)->translatedFormat('F') }}
@@ -87,25 +87,25 @@
 
                 <div class="grid gap-4 sm:grid-cols-3">
                     <div class="rounded-xl border border-blue-100 bg-blue-50/50 p-4">
-                        <label class="block text-xs font-semibold text-blue-900">Target Inspeksi</label>
+                        <label class="block">Target Inspeksi</label>
                         <div class="mt-2 flex items-center gap-2">
-                            <input type="number" name="target_inspection" min="0" value="4" required class="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm font-bold text-slate-900 focus:border-[#1646A0]" />
+                            <input type="number" name="target_inspection" min="0" value="4" required class="w-full ui-input" />
                             <span class="text-xs text-slate-500">kali</span>
                         </div>
                     </div>
 
                     <div class="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
-                        <label class="block text-xs font-semibold text-emerald-900">Target PTO (Observasi)</label>
+                        <label class="block">Target PTO (Observasi)</label>
                         <div class="mt-2 flex items-center gap-2">
-                            <input type="number" name="target_pto" min="0" value="2" required class="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm font-bold text-slate-900 focus:border-emerald-600" />
+                            <input type="number" name="target_pto" min="0" value="2" required class="w-full ui-input" />
                             <span class="text-xs text-slate-500">kali</span>
                         </div>
                     </div>
 
                     <div class="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
-                        <label class="block text-xs font-semibold text-amber-900">Target Hazard Report</label>
+                        <label class="block">Target Hazard Report</label>
                         <div class="mt-2 flex items-center gap-2">
-                            <input type="number" name="target_hazard" min="0" value="6" required class="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm font-bold text-slate-900 focus:border-amber-600" />
+                            <input type="number" name="target_hazard" min="0" value="6" required class="w-full ui-input" />
                             <span class="text-xs text-slate-500">laporan</span>
                         </div>
                     </div>

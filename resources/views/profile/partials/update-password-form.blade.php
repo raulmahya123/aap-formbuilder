@@ -1,6 +1,6 @@
 <section>
     <header>
-        <x-ui.section-title class="text-lg font-medium text-gray-900">
+        <x-ui.section-title >
             {{ __('Update Password') }}
         </x-ui.section-title>
 
@@ -9,7 +9,7 @@
         </p>
     </header>
 
-    <form method="post" action="{{ route('password.update', [], false) }}" class="mt-6 space-y-5" data-error-bag="updatePassword">
+    <form method="post" action="{{ route('password.update', [], false) }}"  data-error-bag="updatePassword">
         @csrf
         @method('put')
 

@@ -1,9 +1,9 @@
-<form action="{{ route('hse.dashboard.environment.record.store') }}" method="POST" class="space-y-4">
+<form action="{{ route('hse.dashboard.environment.record.store') }}" method="POST" >
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Site Operasional <span class="text-rose-500">*</span></label>
-                    <select name="site_id" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="block">Site Operasional <span class="text-rose-500">*</span></label>
+                    <select name="site_id" required class="w-full ui-input">
                         <option value="" @selected(old('site_id') !== null && (string)old('site_id') === (string)(''))>-- Pilih Site --</option>
                         @foreach($options['sites'] ?? [] as $st)
                             <option value="{{ $st->id }}" {{ ($filters['site_id'] ?? null) == $st->id ? 'selected' : '' }}>{{ $st->name }} ({{ $st->code }})</option>
@@ -11,8 +11,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Departemen Terkait</label>
-                    <select name="department_id" class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="block">Departemen Terkait</label>
+                    <select name="department_id" class="w-full ui-input">
                         <option value="" @selected(old('department_id') !== null && (string)old('department_id') === (string)(''))>-- Pilih Departemen --</option>
                         @foreach($options['departments'] ?? [] as $dp)
                             <option value="{{ $dp->id }}" {{ ($filters['department_id'] ?? null) == $dp->id ? 'selected' : '' }}>{{ $dp->name }}</option>
@@ -23,12 +23,12 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Pencatatan <span class="text-rose-500">*</span></label>
-                    <input type="date" name="recorded_date" required value="{{ now()->toDateString() }}" class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="block">Tanggal Pencatatan <span class="text-rose-500">*</span></label>
+                    <input type="date" name="recorded_date" required value="{{ now()->toDateString() }}" class="w-full ui-input">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Parameter / Metrik Lingkungan <span class="text-rose-500">*</span></label>
-                    <select name="metric" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="block">Parameter / Metrik Lingkungan <span class="text-rose-500">*</span></label>
+                    <select name="metric" required class="w-full ui-input">
                         <option value="Waste Generated" @selected(old('metric') !== null && (string)old('metric') === (string)('Waste Generated'))>Waste Generated (Total Limbah)</option>
                         <option value="Hazardous Waste" @selected(old('metric') !== null && (string)old('metric') === (string)('Hazardous Waste'))>Hazardous Waste (Limbah B3)</option>
                         <option value="Non-Hazardous Waste" @selected(old('metric') !== null && (string)old('metric') === (string)('Non-Hazardous Waste'))>Non-Hazardous Waste (Limbah Non-B3)</option>
@@ -42,12 +42,12 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nilai / Jumlah Volume <span class="text-rose-500">*</span></label>
-                    <input type="number" name="value" step="0.01" min="0" required placeholder="Contoh: 12.5" class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="block">Nilai / Jumlah Volume <span class="text-rose-500">*</span></label>
+                    <input type="number" name="value" step="0.01" min="0" required placeholder="Contoh: 12.5" class="w-full ui-input">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Satuan Pengukuran <span class="text-rose-500">*</span></label>
-                    <select name="unit" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5">
+                    <label class="block">Satuan Pengukuran <span class="text-rose-500">*</span></label>
+                    <select name="unit" required class="w-full ui-input">
                         <option value="Ton" @selected(old('unit') !== null && (string)old('unit') === (string)('Ton'))>Ton</option>
                         <option value="Kg" @selected(old('unit') !== null && (string)old('unit') === (string)('Kg'))>Kg</option>
                         <option value="kWh" @selected(old('unit') !== null && (string)old('unit') === (string)('kWh'))>kWh</option>
@@ -58,8 +58,8 @@
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan Tambahan / Keterangan TPS</label>
-                <textarea name="notes" rows="2" placeholder="Sumber limbah, nomor manifest B3, atau detail pencatatan..." class="w-full text-xs rounded-lg border border-slate-300 p-2.5"></textarea>
+                <label class="block">Catatan Tambahan / Keterangan TPS</label>
+                <textarea name="notes" rows="2" placeholder="Sumber limbah, nomor manifest B3, atau detail pencatatan..." class="w-full ui-input"></textarea>
             </div>
 
             <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">

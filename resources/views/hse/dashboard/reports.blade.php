@@ -9,22 +9,8 @@
         'subtitle' => 'Pusat unduhan dan pratinjau seluruh laporan resmi SHE. Nilai konsisten dengan metrik dashboard.',
         'filters' => $filters,
         'options' => $options,
+        'filterMode' => 'listing',
     ])
-
-    {{-- Filter Toolbar Reminder --}}
-    <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <div class="flex items-center gap-2">
-            <span class="inline-flex h-3 w-3 rounded-full bg-[#1646A0]"></span>
-            <span class="text-xs font-semibold text-slate-800">Filter Aktif:</span>
-            <span class="text-xs text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">{{ $filters['label'] ?? 'Semua Periode' }}</span>
-            @if(!empty($filters['site_id']))
-                <span class="text-xs text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">Site Filtered</span>
-            @endif
-        </div>
-        <div class="text-xs text-slate-500">
-            Export otomatis menyertakan filter tanggal kustom, site, dan departemen yang sedang dipilih.
-        </div>
-    </div>
 
     {{-- 9 REPORT CATALOG CARDS --}}
     <section>

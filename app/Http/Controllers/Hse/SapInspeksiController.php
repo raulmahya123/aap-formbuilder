@@ -536,9 +536,21 @@ class SapInspeksiController extends Controller
     public function scheduleIndex(Request $request)
     {
         $filters = $this->dashboardService->filters($request);
-        $schedules = SapInspectionSchedule::with(['template', 'site', 'department', 'assignee'])
-            ->latest()->paginate(\App\Support\Listing::perPage());
-        return view('hse.sap_inspeksi.schedule.index', compact('schedules', 'filters'));
+        $options = $this->dashboardService->options($filters);
+        $query = SapInspectionSchedule::with(['template', 'site', 'department', 'assignee']);
+
+        if ($filters['scope_site_ids'] !== null) {
+            $query->whereIn('site_id', $filters['scope_site_ids'] ?: [-1]);
+        }
+        if (!empty($filters['site_id'])) {
+            $query->where('site_id', $filters['site_id']);
+        }
+        if (!empty($filters['department_id'])) {
+            $query->where('department_id', $filters['department_id']);
+        }
+
+        $schedules = $query->latest()->paginate(\App\Support\Listing::perPage())->withQueryString();
+        return view('hse.sap_inspeksi.schedule.index', compact('schedules', 'filters', 'options'));
     }
 
     public function scheduleCreate(Request $request)

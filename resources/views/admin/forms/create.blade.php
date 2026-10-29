@@ -21,7 +21,7 @@
   <div class="ui-page-header__copy"><x-ui.page-title>Buat Form</x-ui.page-title>
 <x-ui.page-description>Lengkapi informasi untuk menambahkan form dan dokumen.</x-ui.page-description></div>
   <x-ui.page-actions>
-<x-ui.button form="form-create" variant="primary" class="px-4 py-2 rounded-lg">Simpan</x-ui.button>
+<x-ui.button form="form-create" variant="primary" >Simpan</x-ui.button>
 </x-ui.page-actions>
 </x-ui.page-header>
   {{-- Flash + error --}}
@@ -37,8 +37,8 @@
     @csrf
     {{-- ===== Perusahaan ===== --}}
     <div class="mb-3">
-      <label class="block font-medium mb-1">Perusahaan <span class="text-rose-600">*</span></label>
-      <select name="company_id" id="company_id" class="border rounded-lg w-full p-2" required>
+      <label class="block">Perusahaan <span class="text-rose-600">*</span></label>
+      <select name="company_id" id="company_id" class="w-full ui-input" required>
         <option value="" disabled {{ $selectedCompanyId ? '' : 'selected' }}>Pilih perusahaan…</option>
         @foreach(($companies ?? []) as $c)
           <option value="{{ $c->id }}" @selected((string)$selectedCompanyId === (string)$c->id)>
@@ -51,8 +51,8 @@
     </div>
   {{-- ===== Site assignment (otomatis filter by company) ===== --}}
     <div class="mb-3">
-      <label class="block font-medium mb-1">Site <span class="text-rose-600">*</span></label>
-      <select name="site_id" id="site_id" required class="border rounded-lg w-full p-2" {{ $selectedCompanyId ? '' : 'disabled' }}>
+      <label class="block">Site <span class="text-rose-600">*</span></label>
+      <select name="site_id" id="site_id" required class="w-full ui-input" {{ $selectedCompanyId ? '' : 'disabled' }}>
         <option value="" disabled>— Pilih Site —</option>
         {{-- Render awal (kalau ada default company) --}}
         @if($selectedCompanyId && !empty($sitesByCompany[(string)$selectedCompanyId]))
@@ -66,8 +66,8 @@
     </div>
     {{-- ===== Department ===== --}}
     <div class="mb-3">
-      <label class="block font-medium mb-1">Department <span class="text-rose-600">*</span></label>
-      <select name="department_id" class="border rounded-lg w-full p-2" required>
+      <label class="block">Department <span class="text-rose-600">*</span></label>
+      <select name="department_id" class="w-full ui-input" required>
         @foreach($departments as $d)
           <option value="{{ $d->id }}" @selected(old('department_id', request('department_id')) == $d->id)>{{ $d->name }}</option>
         @endforeach
@@ -76,14 +76,14 @@
     </div>
     {{-- ===== Judul ===== --}}
     <div class="mb-3">
-      <label class="block font-medium mb-1">Judul <span class="text-rose-600">*</span></label>
-      <input type="text" name="title" class="border rounded-lg w-full p-2" value="{{ old('title') }}" required maxlength="190">
+      <label class="block">Judul <span class="text-rose-600">*</span></label>
+      <input type="text" name="title" class="w-full ui-input" value="{{ old('title') }}" required maxlength="190">
       @error('title')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
     </div>
     {{-- === Jenis Dokumen (SOP/IK/FORM) === --}}
     <div class="mb-3">
-      <label class="block font-medium mb-1">Jenis Dokumen <span class="text-rose-600">*</span></label>
-      <select name="doc_type" id="doc_type" class="border rounded-lg w-full p-2" required>
+      <label class="block">Jenis Dokumen <span class="text-rose-600">*</span></label>
+      <select name="doc_type" id="doc_type" class="w-full ui-input" required>
         <option value="SOP"  @selected($selectedDocType === 'SOP')>SOP</option>
         <option value="IK"   @selected($selectedDocType === 'IK')>IK</option>
         <option value="FORM" @selected($selectedDocType === 'FORM')>FORM</option>
@@ -93,8 +93,8 @@
     </div>
     {{-- ===== Tipe ===== --}}
     <div class="mb-3">
-      <label class="block font-medium mb-1">Tipe <span class="text-rose-600">*</span></label>
-      <select name="type" id="type" class="border rounded-lg w-full p-2" required>
+      <label class="block">Tipe <span class="text-rose-600">*</span></label>
+      <select name="type" id="type" class="w-full ui-input" required>
         <option value="builder" @selected($selectedType === 'builder')>Builder</option>
         <option value="pdf"     @selected($selectedType === 'pdf')>File (PDF/Word/Excel)</option>
       </select>
@@ -102,8 +102,8 @@
     </div>
     {{-- ===== Builder Box ===== --}}
     <div id="builderBox" class="mb-3">
-      <label class="block font-medium mb-1">Schema (JSON)</label>
-      <textarea name="schema" rows="10" class="border rounded-lg w-full p-2">{{ old('schema', json_encode([
+      <label class="block">Schema (JSON)</label>
+      <textarea name="schema" rows="10" class="w-full ui-input">{{ old('schema', json_encode([
         'fields' => [
           ['label'=>'Nama','name'=>'nama','type'=>'text','required'=>true],
           ['label'=>'Email','name'=>'email','type'=>'email'],
@@ -116,19 +116,19 @@
     </div>
     {{-- ===== File Box (PDF/Word/Excel) ===== --}}
     <div id="pdfBox" class="mb-3 hidden">
-      <label class="block font-medium mb-1">Unggah File (PDF/Word/Excel)</label>
+      <label class="block">Unggah File (PDF/Word/Excel)</label>
       <input
         id="pdfInput"
         type="file"
         name="pdf"
         accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        class="border rounded-lg w-full p-2"
+        class="w-full"
       >
       @error('pdf')<div class="text-sm text-rose-600 mt-1">{{ $message }}</div>@enderror
       <p class="text-sm text-slate-500 mt-1">Format: PDF, DOC/DOCX, XLS/XLSX — maks 4&nbsp;MB. File akan dikompresi otomatis saat disimpan.</p>
     </div>
     {{-- Aktif --}}
-    <label class="inline-flex items-center gap-2">
+    <label class="inline-flex items-center">
       <input type="checkbox" name="is_active" value="1" {{ old('is_active', 1) ? 'checked' : '' }}>
       <span>Aktif</span>
     </label>

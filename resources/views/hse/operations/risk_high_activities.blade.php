@@ -147,7 +147,7 @@
             </table>
         </div>
         <div class="ui-pagination-footer">
-            {{ $activities->links() }}
+            <x-ui.table-pagination :paginator="$activities" />
         </div>
     </div>
     @endif
@@ -220,7 +220,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="ui-pagination-footer">{{ $ccmReports->links() }}</div>
+        <div class="ui-pagination-footer"><x-ui.table-pagination :paginator="$ccmReports" /></div>
     </div>
     @endif
 </div>

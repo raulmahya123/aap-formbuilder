@@ -267,8 +267,6 @@ class HseDashboardController extends Controller
         $data = $this->service->reportData($report, $filters);
         $title = $this->reportTitle($report);
         $sections = $this->reportSections($data);
-        $maxColumns = max(7, collect($sections)->max(fn ($section) => count($section['columns'])) ?? 0);
-        $orientation = $maxColumns > 5 ? 'landscape' : 'portrait';
         $filterLabels = [
             'site' => $options['sites']->firstWhere('id', $filters['site_id'])?->name,
             'company' => $options['companies']->firstWhere('id', $filters['company_id'])?->name,
@@ -282,7 +280,7 @@ class HseDashboardController extends Controller
             'kpis' => $data['kpis'] ?? [],
             'sections' => $sections,
             'generatedAt' => now(),
-        ])->setPaper('a4', $orientation)
+        ])->setPaper('a4', 'portrait')
             ->setOptions(['isRemoteEnabled' => false, 'isPhpEnabled' => false, 'defaultFont' => 'DejaVu Sans']);
         $binary = $pdf->output();
         $this->recordReportRun($report, $title, $filters, 'pdf', $request);

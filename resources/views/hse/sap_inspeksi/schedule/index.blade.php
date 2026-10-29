@@ -3,21 +3,30 @@
 @section('title', 'Jadwal Inspeksi')
 
 @section('content')
-<div class="ui-page space-y-6">
+<x-ui.page>
     <x-ui.page-header>
         <div class="ui-page-header__copy">
-            <h1 class="ui-page-title">Jadwal Inspeksi SHE/HSE</h1>
-            <p class="ui-page-description">Perencanaan inspeksi berdasarkan template</p>
+            <x-ui.page-title>Jadwal Inspeksi SHE/HSE</x-ui.page-title>
+            <x-ui.page-description>Perencanaan inspeksi berdasarkan template, site, dan department.</x-ui.page-description>
         </div>
-        <div class="ui-page-actions">
-            <a href="{{ route('hse.dashboard.sap.inspeksi.dashboard') }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Dashboard</a>
+        <x-ui.page-actions>
+            <x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.inspeksi.dashboard') }}">Dashboard</x-ui.link>
             <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.inspeksi.schedule.create') }}">Buat Jadwal</x-ui.link>
-        </div>
+        </x-ui.page-actions>
     </x-ui.page-header>
 
-    <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <table class="ui-table">
-            <thead><tr><th>Template</th><th>Site/Dept</th><th>Ditugaskan</th><th>Periode</th><th>Jatuh Tempo</th><th>Status</th></tr></thead>
+    <x-ui.filter-panel variant="listing">
+        <x-ui.table-toolbar variant="listing">
+            <x-hse.module-scope-filters :options="$options" :filters="$filters" />
+            <x-slot:actions>
+                <x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button>
+                <x-ui.link variant="secondary" icon="rotate-ccw" href="{{ route('hse.dashboard.sap.inspeksi.schedule.index') }}">Reset</x-ui.link>
+            </x-slot:actions>
+        </x-ui.table-toolbar>
+    </x-ui.filter-panel>
+
+    <x-ui.table :paginator="$schedules">
+            <thead><tr><th>Template</th><th>Site / Department</th><th>Ditugaskan</th><th>Periode</th><th>Jatuh tempo</th><th>Status</th></tr></thead>
             <tbody>
                 @forelse($schedules as $s)
                 <tr>
@@ -25,15 +34,13 @@
                     <td>{{ $s->site->name ?? '-' }} / {{ $s->department->name ?? '-' }}</td>
                     <td>{{ $s->assignee->name ?? '-' }}</td>
                     <td>{{ $s->period ?? '-' }} {{ $s->year }}{{ $s->month ? '/'.$s->month : '' }}</td>
-                    <td>{{ $s->due_date ? $s->due_date->format('d/m/Y') : '-' }}</td>
-                    <td>{{ $s->status }}</td>
+                    <td class="whitespace-nowrap">{{ $s->due_date?->format('d/m/Y') ?? '-' }}</td>
+                    <td><x-ui.status-badge :variant="match($s->status) { 'Completed', 'Approved' => 'success', 'Cancelled', 'Rejected' => 'danger', 'In Progress' => 'info', default => 'warning' }">{{ $s->status }}</x-ui.status-badge></td>
                 </tr>
                 @empty
-                <tr><td colspan="6" class="text-center text-slate-500 text-xs py-6">Belum ada jadwal</td></tr>
+                <x-ui.table-empty-state colspan="6" title="Belum ada jadwal inspeksi" message="Atur site atau department, lalu buat jadwal inspeksi." />
                 @endforelse
             </tbody>
-        </table>
-        <div class="ui-pagination-footer">{{ $schedules->links() }}</div>
-    </div>
-</div>
+    </x-ui.table>
+</x-ui.page>
 @endsection

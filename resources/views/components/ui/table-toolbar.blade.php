@@ -1,5 +1,5 @@
-@props(['action' => null])
-<form method="GET" action="{{ $action ?? url()->current() }}" {{ $attributes->class(['ui-table-toolbar'])->merge(['x-data' => '']) }} data-listing-filters>
+@props(['action' => null, 'variant' => 'listing'])
+<form method="GET" action="{{ $action ?? url()->current() }}" {{ $attributes->class(['ui-table-toolbar', 'ui-table-toolbar--'.$variant])->merge(['x-data' => '']) }} data-listing-filters>
     <div class="ui-filter-fields">{{ $slot }}</div>
     @isset($actions)
         <div class="ui-filter-actions">{{ $actions }}</div>

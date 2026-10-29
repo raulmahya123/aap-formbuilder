@@ -2,7 +2,7 @@
 @section('title', 'Dashboard Operasional')
 @section('content')
 <x-ui.page class="">
-  <x-ui.page-header>
+  <x-ui.page-header variant="dashboard">
   <div class="ui-page-header__copy"><div>
       <x-ui.page-title>Dashboard Operasional</x-ui.page-title>
       <x-ui.page-description>Ringkasan aktivitas HSE, Health Assesment Checklist, KPI, dan laporan operasional berdasarkan site.</x-ui.page-description>
@@ -12,10 +12,10 @@
     </div></x-ui.page-actions>
 
 <x-slot:filters>
-<x-ui.table-toolbar class="ui-card flex flex-col gap-3 rounded-lg border border-coal-100 bg-white shadow-none sm:flex-row sm:items-end">
+<x-ui.table-toolbar variant="dashboard">
     <div class="ui-filter-field min-w-0 flex-1">
       <label for="site_id" class="ui-filter-field__label">Site</label>
-      <select id="site_id" name="site_id" data-submit-on-change class="w-full rounded-lg border border-coal-200 bg-white px-3 py-2 text-sm">
+      <select id="site_id" name="site_id" data-submit-on-change class="w-full ui-input">
         <option value="">Semua site</option>
         @foreach($sites as $site)
           <option value="{{ $site->id }}" @selected($selectedSiteId === $site->id)>{{ $site->code }} — {{ $site->name }}</option>
@@ -24,12 +24,9 @@
     </div>
 
 <x-slot:actions>
-<x-ui.button type="submit" variant="primary" class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium">
-      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M6 12h12M10 20h4"/></svg>
-      Terapkan
-    </x-ui.button>
+<x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button>
     @if($selectedSiteId)
-      <x-ui.link variant="secondary" href="{{ route('admin.dashboard').'?site_id=' }}" class="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm">Reset</x-ui.link>
+      <x-ui.link variant="secondary" icon="rotate-ccw" href="{{ route('admin.dashboard').'?site_id=' }}">Reset</x-ui.link>
     @endif
 
 </x-slot:actions>

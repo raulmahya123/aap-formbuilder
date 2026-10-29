@@ -100,7 +100,7 @@
                 </tbody>
             </table>
         </div>
-    <x-slot:footer>{{ $employees->links() }}</x-slot:footer>
+    <x-slot:footer><x-ui.table-pagination :paginator="$employees" /></x-slot:footer>
     </x-hse.chart-card>
 </div>
 @endsection

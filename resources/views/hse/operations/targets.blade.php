@@ -9,6 +9,7 @@
         'subtitle' => 'Konfigurasi target tahunan & per-site untuk indikator keselamatan dan kinerja operasional.',
         'filters' => $filters,
         'options' => $options,
+        'filterMode' => 'listing',
     ])
 
     @if(session('ok'))

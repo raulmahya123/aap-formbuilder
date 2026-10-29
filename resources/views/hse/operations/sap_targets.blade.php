@@ -9,6 +9,7 @@
         'subtitle' => 'Konfigurasi target bulanan inspeksi, PTO, dan hazard report per karyawan/departemen/site.',
         'filters' => $filters,
         'options' => $options,
+        'filterMode' => 'listing',
     ])
 
     @if(session('ok'))
@@ -60,7 +61,7 @@
                 </tbody>
             </table>
         </div>
-    <x-slot:footer>{{ $targets->links() }}</x-slot:footer>
+    <x-slot:footer><x-ui.table-pagination :paginator="$targets" /></x-slot:footer>
     </x-hse.chart-card>
 </div>
 @endsection

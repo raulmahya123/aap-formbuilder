@@ -88,6 +88,7 @@
           <td class="ui-action-cell p-3 text-right"><x-ui.table-actions>
             <div class="inline-flex items-center gap-2">
               <x-ui.icon-button ability="view" :subject="$d" action="view" label="Lihat detail" href="{{ route('admin.documents.show',$d) }}" />
+              <x-ui.icon-button ability="export" :subject="$d" action="pdf" label="Unduh dokumen PDF" href="{{ route('admin.documents.export',$d) }}" />
               <x-ui.icon-button ability="update" :subject="$d" action="edit" label="Edit" href="{{ route('admin.documents.edit',$d) }}" />
               <form action="{{ route('admin.documents.destroy',$d) }}" method="POST" data-confirm="Hapus dokumen ini?" class="inline">
                 @csrf @method('DELETE')

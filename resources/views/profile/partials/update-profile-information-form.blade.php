@@ -1,6 +1,6 @@
 <section>
     <header>
-        <x-ui.section-title class="text-lg font-medium text-gray-900">
+        <x-ui.section-title >
             {{ __('Profile Information') }}
         </x-ui.section-title>
 
@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ secure_url(route('profile.update', [], false)) }}" enctype="multipart/form-data" class="mt-6 space-y-5">
+    <form method="post" action="{{ secure_url(route('profile.update', [], false)) }}" enctype="multipart/form-data" >
         @csrf
         @method('patch')
 
@@ -25,7 +25,7 @@
             @endif
             <div class="flex-1">
                 <x-input-label for="avatar" :value="__('Foto profil')" />
-                <input id="avatar" name="avatar" type="file" accept="image/*" class="mt-1 block w-full rounded-lg border border-gray-300 p-2 text-sm" />
+                <input id="avatar" name="avatar" type="file" accept="image/*" class="block w-full" />
                 <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
             </div>
         </div>
@@ -46,7 +46,7 @@
                     <p class="text-sm mt-2 text-gray-800">
                         {{ __('Your email address is unverified.') }}
 
-                        <x-ui.button variant="secondary" form="send-verification" class="underline text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <x-ui.button variant="secondary" form="send-verification" class="underline">
                             {{ __('Click here to re-send the verification email.') }}
                         </x-ui.button>
                     </p>

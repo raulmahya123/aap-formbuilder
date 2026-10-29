@@ -246,46 +246,40 @@
 </div>
 
 <!-- Modal Review Insiden -->
-<dialog id="modal-review" class="rounded-xl border border-slate-200 p-0 shadow-xl max-w-lg w-full backdrop:bg-slate-900/50">
-    <div class="p-5">
-        <h3 class="text-base font-bold text-[#0F172A] mb-3">Review & Verifikasi Laporan Insiden</h3>
-        <form action="{{ route('hse.dashboard.incidents.review', $incident->id) }}" method="POST" class="space-y-4">
+<x-ui.modal id="modal-review" title="Review & Verifikasi Laporan Insiden" description="Tambahkan catatan hasil pemeriksaan laporan." size="md" icon="clipboard-list" variant="info">
+        <form id="incident-review-form" action="{{ route('hse.dashboard.incidents.review', $incident->id) }}" method="POST" class="grid gap-4">
             @csrf
             <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan Hasil Review</label>
-                <textarea name="review_notes" rows="3" class="w-full text-xs rounded-lg border border-slate-300 p-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Masukkan catatan review kelengkapan data kejadian..."></textarea>
-            </div>
-            <div class="flex justify-end gap-2 pt-2">
-                <button type="button" onclick="document.getElementById('modal-review').close()" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Batal</button>
-                <x-ui.button variant="primary" icon="save" type="submit">Simpan Review</x-ui.button>
+                <label class="ui-form-label">Catatan Hasil Review</label>
+                <textarea name="review_notes" rows="3" class="w-full ui-form-input" placeholder="Masukkan catatan review kelengkapan data kejadian..."></textarea>
             </div>
         </form>
-    </div>
-</dialog>
+    <x-slot:footer>
+        <x-ui.button type="button" data-dialog-cancel>Batal</x-ui.button>
+        <x-ui.button variant="primary" icon="save" type="submit" form="incident-review-form">Simpan Review</x-ui.button>
+    </x-slot:footer>
+</x-ui.modal>
 
 <!-- Modal Input Hasil Investigasi -->
-<dialog id="modal-investigate" class="rounded-xl border border-slate-200 p-0 shadow-xl max-w-2xl w-full backdrop:bg-slate-900/50">
-    <div class="p-5">
-        <h3 class="text-base font-bold text-[#0F172A] mb-3">Input Hasil Investigasi Insiden</h3>
-        <form action="{{ route('hse.dashboard.incidents.investigate', $incident->id) }}" method="POST" class="space-y-4">
+<x-ui.modal id="modal-investigate" title="Input Hasil Investigasi Insiden" description="Catat akar masalah dan tindakan yang disepakati." size="lg" icon="clipboard-list" variant="info">
+        <form id="incident-investigation-form" action="{{ route('hse.dashboard.incidents.investigate', $incident->id) }}" method="POST" class="grid gap-4">
             @csrf
             <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Akar Masalah (Root Cause) <span class="text-rose-500">*</span></label>
-                <textarea name="root_cause" rows="3" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Jelaskan akar penyebab (5 Whys / Ishikawa)...">{{ $incident->root_cause }}</textarea>
+                <label class="ui-form-label">Akar Masalah (Root Cause) <span class="ui-required">*</span></label>
+                <textarea name="root_cause" rows="3" required class="w-full ui-form-input" placeholder="Jelaskan akar penyebab (5 Whys / Ishikawa)...">{{ $incident->root_cause }}</textarea>
             </div>
             <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Tindakan Korektif (Corrective Action) <span class="text-rose-500">*</span></label>
-                <textarea name="corrective_action" rows="2" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Tindakan koreksi langsung...">{{ $incident->corrective_action }}</textarea>
+                <label class="ui-form-label">Tindakan Korektif (Corrective Action) <span class="ui-required">*</span></label>
+                <textarea name="corrective_action" rows="2" required class="w-full ui-form-input" placeholder="Tindakan koreksi langsung...">{{ $incident->corrective_action }}</textarea>
             </div>
             <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Tindakan Pencegahan (Preventive Action) <span class="text-rose-500">*</span></label>
-                <textarea name="preventive_action" rows="2" required class="w-full text-xs rounded-lg border border-slate-300 p-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Tindakan agar tidak terulang...">{{ $incident->preventive_action }}</textarea>
-            </div>
-            <div class="flex justify-end gap-2 pt-2">
-                <button type="button" onclick="document.getElementById('modal-investigate').close()" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Batal</button>
-                <x-ui.button variant="primary" icon="save" type="submit">Simpan Investigasi</x-ui.button>
+                <label class="ui-form-label">Tindakan Pencegahan (Preventive Action) <span class="ui-required">*</span></label>
+                <textarea name="preventive_action" rows="2" required class="w-full ui-form-input" placeholder="Tindakan agar tidak terulang...">{{ $incident->preventive_action }}</textarea>
             </div>
         </form>
-    </div>
-</dialog>
+    <x-slot:footer>
+        <x-ui.button type="button" data-dialog-cancel>Batal</x-ui.button>
+        <x-ui.button variant="primary" icon="save" type="submit" form="incident-investigation-form">Simpan Investigasi</x-ui.button>
+    </x-slot:footer>
+</x-ui.modal>
 @endsection
