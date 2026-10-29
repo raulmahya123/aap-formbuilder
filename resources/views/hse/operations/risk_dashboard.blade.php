@@ -5,6 +5,7 @@
 @section('content')
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'showDashboardFilters' => true,
         'title' => 'Risk Dashboard',
         'subtitle' => 'Executive monitoring profil risiko, matriks 5×5 interaktif, dan status mitigasi kontrol.',
         'filters' => $filters,

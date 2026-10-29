@@ -5,6 +5,7 @@
 @section('content')
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'showDashboardFilters' => true,
         'title' => 'Document Management Dashboard',
         'subtitle' => 'Repository resmi dokumen kebijakan SHE, SOP, Instruksi Kerja, Form digital, revisi dan peninjauan berkala.',
         'filters' => $filters,

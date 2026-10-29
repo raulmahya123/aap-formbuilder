@@ -111,8 +111,8 @@
     </div>
 
     {{-- MODAL UPDATE KONTROL (ASSIGN PIC, DUE DATE, EVIDENCE, PROGRESS, VERIFICATION) --}}
-    <div x-show="openEditModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;" x-transition>
-        <div class="relative w-full max-w-xl bg-white rounded-xl shadow-2xl p-6" @click.away="openEditModal = false">
+    <div x-show="openEditModal" class="ui-modal-overlay" style="display: none;" x-transition>
+        <div class="ui-modal-panel ui-modal-panel--lg ui-modal-panel--form" @click.away="openEditModal = false">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <div>
                     <h3 class="text-base font-bold text-slate-900">Update Risk Control</h3>

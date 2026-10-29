@@ -42,6 +42,11 @@
 .ui-account-toggle:focus-visible,
 .ui-nav-section:focus-visible { outline: 2px solid #1D4ED8; outline-offset: 2px; }
 .ui-account-toggle { height: 40px; }
+.ui-layout-grid { width: 100%; min-width: 0; transition: grid-template-columns 180ms ease; }
+.ui-layout-grid > * { min-width: 0; }
+.ui-shell main { min-width: 0; }
+@media (prefers-reduced-motion: reduce) { .ui-layout-grid { transition: none; } }
+
 .ui-sidebar { scrollbar-width: none; }
 .ui-sidebar::-webkit-scrollbar { display: none; }
 .ui-drawer-close { position: absolute; top: 8px; right: 8px; }

@@ -10,6 +10,7 @@
 @endphp
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'showDashboardFilters' => true,
         'title' => 'HSE Executive Overview',
         'subtitle' => 'Ringkasan kinerja K3LH, insiden, inspeksi, training, lingkungan, risiko, dan corrective action.',
         'filters' => $filters,

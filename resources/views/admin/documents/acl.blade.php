@@ -212,7 +212,9 @@ function aclUI() {
           || (dept||'').toLowerCase().includes(q);
     },
     confirmDelete(formEl) {
-      if (confirm('Hapus akses ini?')) formEl.submit();
+      window.uiConfirmAction('Akses ini akan dihapus.', { destructive: true, title: 'Hapus akses?', confirmLabel: 'Hapus akses' }).then(confirmed => {
+        if (confirmed) formEl.requestSubmit();
+      });
     },
   }
 }

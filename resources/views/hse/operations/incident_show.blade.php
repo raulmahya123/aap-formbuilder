@@ -39,14 +39,14 @@
             @endif
 
             @if($incident->status === 'Under Review' || ($incident->investigation_status === 'Completed' && $incident->status !== 'Approved' && $incident->status !== 'Closed'))
-                <form action="{{ route('hse.dashboard.incidents.approve', $incident->id) }}" method="POST" onsubmit="return confirm('Setujui insiden ini secara resmi?')">
+                <form action="{{ route('hse.dashboard.incidents.approve', $incident->id) }}" method="POST" data-confirm="Setujui insiden ini secara resmi?">
                     @csrf
                     <x-ui.button variant="success" icon="circle-check" type="submit">Approve Insiden</x-ui.button>
                 </form>
             @endif
 
             @if($incident->status === 'Approved')
-                <form action="{{ route('hse.dashboard.incidents.close', $incident->id) }}" method="POST" onsubmit="return confirm('Tutup insiden ini secara permanen?')">
+                <form action="{{ route('hse.dashboard.incidents.close', $incident->id) }}" method="POST" data-confirm="Tutup insiden ini secara permanen?">
                     @csrf
                     <button type="submit" class="px-3 py-1.5 rounded-lg bg-slate-800 text-white text-xs font-semibold hover:bg-slate-900">
                         Tutup Insiden (Close)

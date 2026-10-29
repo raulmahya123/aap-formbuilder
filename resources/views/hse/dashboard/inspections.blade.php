@@ -5,22 +5,15 @@
 @section('content')
 @php $toBars = fn (array $chart) => array_combine($chart['labels'] ?? [], $chart['data'] ?? []); @endphp
 <div class="ui-page space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        @include('hse.dashboard.partials.header', [
+    @include('hse.dashboard.partials.header', [
+            'showDashboardFilters' => true,
             'title' => 'Inspection & Audit Findings',
             'subtitle' => 'Jadwal dan closure inspeksi, skor, temuan audit, severity, aging finding, dan status perbaikan.',
             'filters' => $filters,
             'options' => $options,
             'export' => 'inspections',
+            'create' => ['modal' => 'modal-input-inspection', 'label' => 'Catat Inspeksi / PTO Baru'],
         ])
-    </div>
-
-    <div class="flex justify-end -mt-4">
-        <button type="button" onclick="document.getElementById('modal-input-inspection').showModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold shadow-sm hover:bg-[#0B2345] transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            Catat Inspeksi / PTO Baru
-        </button>
-    </div>
 
     @if(session('ok'))
         <div class="rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-800 font-medium">

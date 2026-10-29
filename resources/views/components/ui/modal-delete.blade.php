@@ -2,7 +2,8 @@
 <dialog id="{{ $id }}" class="ui-modal ui-modal--sm ui-modal--delete" aria-labelledby="{{ $id }}-title" aria-describedby="{{ $id }}-desc">
   <div class="ui-modal__header">
     <div class="ui-modal__icon ui-modal__icon--danger">
-      <x-ui.lucide name="trash-2" />
+      <x-ui.lucide name="trash-2" data-confirmation-icon="danger" />
+      <x-ui.lucide name="alert-triangle" data-confirmation-icon="action" style="display:none" />
     </div>
     <div class="ui-modal__header-content">
       <h2 id="{{ $id }}-title" class="ui-modal__title" data-delete-title>Konfirmasi penghapusan</h2>

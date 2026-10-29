@@ -95,10 +95,15 @@ async function openRemote(url, restore = null) {
             const site = imported.querySelector('select[name="site_id"][onchange]');
             if (site && target.pathname.includes('/qa/create')) {
                 site.removeAttribute('onchange');
-                site.addEventListener('change', () => {
+                let selectedSite = site.value;
+                site.addEventListener('change', async () => {
                     const next = new URL(target); next.searchParams.set('site_id', site.value);
                     const values = Object.fromEntries(new FormData(imported)); delete values['recipient_ids[]'];
-                    if (imported.querySelector('input[type=file]')?.files.length && !confirm('Lampiran perlu dipilih ulang setelah mengganti site. Lanjutkan?')) return;
+                    if (imported.querySelector('input[type=file]')?.files.length && !await window.uiConfirmAction('Lampiran yang sudah dipilih perlu dipilih ulang setelah mengganti site.', { title: 'Ganti site?', confirmLabel: 'Lanjutkan' })) {
+                        site.value = selectedSite;
+                        return;
+                    }
+                    selectedSite = site.value;
                     openRemote(next.href, values);
                 });
             }

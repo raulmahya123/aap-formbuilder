@@ -5,6 +5,8 @@
 @section('content')
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'filterMode' => 'listing',
+        'showDashboardFilters' => true,
         'title' => $title,
         'subtitle' => 'Detail insiden, perbandingan target vs aktual, keparahan, investigasi, dan tindak lanjut PICA.',
         'filters' => $filters,

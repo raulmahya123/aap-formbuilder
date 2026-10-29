@@ -1,55 +1,54 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div class="ui-page-header__copy"><x-ui.page-title>Dashboard Hazard Report</x-ui.page-title><x-ui.page-description>Ringkasan laporan bahaya SHE-FM-007 dan tindak lanjutnya.</x-ui.page-description></div>
-            <x-ui.page-actions><x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.hazard.index') }}">Daftar Hazard</x-ui.link><x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.hazard.create') }}">Tambah Laporan</x-ui.link></x-ui.page-actions>
-        </div>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                @foreach($kpis as $k)
-                    <div class="bg-white border rounded-lg p-3 shadow-sm">
-                        <div class="text-[10px] uppercase text-slate-500">{{ $k['label'] }}</div>
-                        <div class="text-xl font-bold text-slate-900">{{ $k['value'] }} <span class="text-xs font-normal text-slate-500">{{ $k['unit'] }}</span></div>
-                    </div>
-                @endforeach
-            </div>
+@section('title', 'Dashboard Hazard Report')
 
-            <div class="bg-white border rounded-lg shadow-sm overflow-hidden">
-                <div class="px-4 py-2 border-b bg-slate-50 font-semibold text-sm">Hazard Report Terbaru</div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-slate-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left">No Hazard</th>
-                                <th class="px-4 py-2 text-left">Tanggal</th>
-                                <th class="px-4 py-2 text-left">Pelapor</th>
-                                <th class="px-4 py-2 text-left">Lokasi</th>
-                                <th class="px-4 py-2 text-left">Deskripsi</th>
-                                <th class="px-4 py-2 text-left">Risk</th>
-                                <th class="px-4 py-2 text-left">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($recent as $r)
-                            <tr class="border-t hover:bg-slate-50">
-                                <td class="px-4 py-2"><x-ui.table-actions><a class="text-[#1646A0] font-medium" href="{{ route('hse.dashboard.sap.hazard.show', $r->id) }}">{{ $r->hazard_no }}</a><x-ui.sap-record-actions module="hazard" :record="$r" /></x-ui.table-actions></td>
-                                <td class="px-4 py-2">{{ $r->report_date?->format('d/m/Y') }}</td>
-                                <td class="px-4 py-2">{{ $r->reporter?->name }}</td>
-                                <td class="px-4 py-2">{{ $r->location }}</td>
-                                <td class="px-4 py-2">{{ Str::limit($r->hazard_description, 50) }}</td>
-                                <td class="px-4 py-2">{{ $r->risk_level }} ({{ $r->risk_score }})</td>
-                                <td class="px-4 py-2">{{ $r->status }}</td>
-                            </tr>
-                            @empty
-                            <tr><td colspan="7" class="px-4 py-4 text-center text-slate-500">Belum ada data</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+@section('content')
+<x-ui.page>
+    <x-ui.page-header variant="dashboard">
+        <div class="ui-page-header__copy">
+            <x-ui.page-title>Dashboard Hazard Report</x-ui.page-title>
+            <x-ui.page-description>Ringkasan laporan bahaya SHE-FM-007 dan tindak lanjutnya.</x-ui.page-description>
         </div>
+        <x-ui.page-actions>
+            <x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.hazard.index') }}">Daftar Hazard</x-ui.link>
+            <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.hazard.create') }}">Tambah Laporan</x-ui.link>
+        </x-ui.page-actions>
+    </x-ui.page-header>
+
+    <x-ui.filter-panel variant="dashboard">
+        <div class="ui-filter-summary">
+            <span class="ui-filter-summary__title"><x-ui.lucide name="filter" /> Filter dashboard</span>
+            <span>{{ $filters['label'] }} · {{ $filters['from']->format('d M Y') }} – {{ $filters['to']->format('d M Y') }}</span>
+        </div>
+        <x-hse.filter-bar :filters="$filters" :options="$options" variant="dashboard" />
+    </x-ui.filter-panel>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        @foreach($kpis as $k)
+            <x-ui.metric-card :label="$k['label']" :value="trim($k['value'].' '.$k['unit'])" icon="alert-triangle" />
+        @endforeach
     </div>
-</x-app-layout>
+
+    <x-hse.chart-card title="Hazard Report Terbaru" subtitle="10 laporan bahaya terakhir">
+        <x-ui.table>
+            <thead><tr><th>No Hazard</th><th>Tanggal</th><th>Pelapor</th><th>Lokasi</th><th>Deskripsi</th><th>Risiko</th><th>Status</th><th class="text-right">Aksi</th></tr></thead>
+            <tbody>
+                @forelse($recent as $r)
+                    <tr>
+                        <td class="font-medium"><a class="text-blue-700 hover:underline" href="{{ route('hse.dashboard.sap.hazard.show', $r->id) }}">{{ $r->hazard_no }}</a></td>
+                        <td class="whitespace-nowrap">{{ $r->report_date?->format('d/m/Y') ?? '—' }}</td>
+                        <td>{{ $r->reporter?->name ?? '—' }}</td>
+                        <td><x-ui.truncated-text :value="$r->location" /></td>
+                        <td><x-ui.truncated-text :value="$r->hazard_description" /></td>
+                        <td><x-ui.status-badge :variant="match(strtolower((string) $r->risk_level)) { 'low'=>'success','medium'=>'warning','high','extreme'=>'danger',default=>'neutral' }">{{ $r->risk_level ?: '—' }}{{ $r->risk_score !== null ? ' ('.$r->risk_score.')' : '' }}</x-ui.status-badge></td>
+                        <td><x-ui.status-badge>{{ $r->status }}</x-ui.status-badge></td>
+                        <td class="ui-action-cell"><x-ui.table-actions><x-ui.icon-button action="view" label="Lihat laporan" href="{{ route('hse.dashboard.sap.hazard.show', $r->id) }}" /><x-ui.sap-record-actions module="hazard" :record="$r" /></x-ui.table-actions></td>
+                    </tr>
+                @empty
+                    <x-ui.table-empty-state colspan="8" title="Belum ada hazard report" message="Laporan bahaya terbaru akan muncul di sini." />
+                @endforelse
+            </tbody>
+        </x-ui.table>
+    </x-hse.chart-card>
+</x-ui.page>
+@endsection

@@ -5,6 +5,7 @@
 @section('content')
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'showDashboardFilters' => true,
         'title' => 'SHE Report Center',
         'subtitle' => 'Pusat unduhan dan pratinjau seluruh laporan resmi SHE. Nilai konsisten dengan metrik dashboard.',
         'filters' => $filters,

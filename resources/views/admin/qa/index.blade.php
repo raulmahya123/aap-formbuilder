@@ -895,11 +895,11 @@
   <div 
     x-show="modalNewChat" 
     x-cloak 
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
+    class="ui-modal-overlay"
   >
     <div 
       @click.outside="modalNewChat = false"
-      class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[85vh]"
+      class="ui-modal-panel ui-modal-panel--sm w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[85vh]"
     >
       <div class="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
         <div>
@@ -948,11 +948,11 @@
   <div 
     x-show="modalNewGroup" 
     x-cloak 
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
+    class="ui-modal-overlay"
   >
     <div 
       @click.outside="modalNewGroup = false"
-      class="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[90vh]"
+      class="ui-modal-panel ui-modal-panel--md w-full max-w-lg bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[90vh]"
     >
       <div class="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
         <div>
@@ -1080,11 +1080,11 @@
   <div 
     x-show="modalReport" 
     x-cloak 
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
+    class="ui-modal-overlay"
   >
     <div 
       @click.outside="modalReport = false"
-      class="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[90vh]"
+      class="ui-modal-panel ui-modal-panel--md w-full max-w-lg bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[90vh]"
     >
       <div class="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
         <div>
@@ -1171,11 +1171,11 @@
   <div 
     x-show="modalReportDetail" 
     x-cloak 
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
+    class="ui-modal-overlay"
   >
     <div 
       @click.outside="modalReportDetail = false"
-      class="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[90vh]"
+      class="ui-modal-panel ui-modal-panel--md w-full max-w-lg bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[90vh]"
     >
       <div class="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
         <h3 class="font-bold text-[#111827] text-sm">Riwayat & Update Laporan</h3>
@@ -1593,8 +1593,8 @@ function mandalaChat(config) {
       }
     },
 
-    openDeleteMessageModal(msg) {
-      if (confirm('Apakah Anda yakin ingin menghapus pesan ini?')) {
+    async openDeleteMessageModal(msg) {
+      if (await window.uiConfirmAction('Pesan ini akan dihapus.', { destructive: true, title: 'Hapus pesan?', confirmLabel: 'Hapus pesan' })) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         fetch(`/admin/qa/messages/${msg.id}`, {
           method: 'DELETE',
@@ -1882,7 +1882,7 @@ function mandalaChat(config) {
 
     async leaveActiveGroup() {
       if (!this.activeThread) return;
-      if (confirm('Apakah Anda yakin ingin keluar dari grup ini?')) {
+      if (await window.uiConfirmAction('Anda tidak lagi menerima pesan dari grup ini setelah keluar.', { title: 'Keluar dari grup?', confirmLabel: 'Keluar' })) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         await fetch(`/admin/qa/${this.activeThread.id}/leave`, {
           method: 'POST',
@@ -1896,7 +1896,7 @@ function mandalaChat(config) {
 
     async removeGroupMember(mem) {
       if (!this.activeThread) return;
-      if (confirm(`Keluarkan ${mem.name} dari grup?`)) {
+      if (await window.uiConfirmAction(`${mem.name} akan dikeluarkan dari grup.`, { destructive: true, title: 'Keluarkan anggota?', confirmLabel: 'Keluarkan' })) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         await fetch(`/admin/qa/${this.activeThread.id}/members`, {
           method: 'POST',

@@ -11,7 +11,7 @@
         </div>
         <div class="ui-page-actions">
             <a href="{{ route('hse.dashboard.sap.inspeksi.show', $inspection->id) }}" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700">Lihat Hasil</a>
-            <form action="{{ route('hse.dashboard.sap.inspeksi.submit', $inspection->id) }}" method="POST" onsubmit="return confirm('Ajukan inspeksi ini untuk review? Pastikan semua item telah diisi.')">
+            <form action="{{ route('hse.dashboard.sap.inspeksi.submit', $inspection->id) }}" method="POST" data-confirm="Ajukan inspeksi ini untuk review? Pastikan semua item telah diisi.">
                 @csrf
                 <button class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold">Ajukan untuk Review</button>
             </form>

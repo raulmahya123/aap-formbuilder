@@ -5,6 +5,8 @@
 @section('content')
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'filterMode' => 'listing',
+        'showDashboardFilters' => true,
         'title' => 'Employee SAP Performance',
         'subtitle' => 'Kinerja dan keterlibatan setiap karyawan dalam program akuntabilitas keselamatan (SAP) berdasarkan data riil.',
         'filters' => $filters,

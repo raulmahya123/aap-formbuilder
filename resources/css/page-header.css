@@ -44,6 +44,10 @@
 .ui-page-header :is(h1,h2) { margin: 0; color: var(--text-primary); font: 600 var(--type-page)/1.35 var(--font-sans); }
 .ui-hse-filters--dashboard .ui-filter-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .ui-hse-filters--listing .ui-filter-fields { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.ui-hse-filters.ui-table-toolbar { grid-template-columns: minmax(0, 1fr); align-items: end; }
+.ui-hse-filters .ui-filter-fields { grid-column: 1 / -1; width: 100%; }
+.ui-hse-filters .ui-filter-actions { grid-column: 1 / -1; justify-self: stretch; width: 100%; }
+.ui-hse-filters .ui-filter-actions > div { justify-content: flex-end; }
 .ui-hse-filters .ui-filter-fields > div { min-width: 0; }
 .ui-hse-filters .ui-filter-fields :is(input,select) { width: 100%; min-width: 0; max-width: 100%; }
 .ui-hse-listing-filter__heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; color: var(--gray); font-size: 12px; }

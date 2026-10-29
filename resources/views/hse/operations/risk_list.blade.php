@@ -116,7 +116,7 @@
                                         </form>
                                     @endif
                                     @if($r->status !== 'Archived')
-                                        <form action="{{ route('hse.dashboard.risk.close', $r->id) }}" method="POST" onsubmit="return confirm('Arsipkan asesmen risiko ini?')">
+                                        <form action="{{ route('hse.dashboard.risk.close', $r->id) }}" method="POST" data-confirm="Arsipkan asesmen risiko ini?">
                                             @csrf
                                             <x-ui.icon-button action="deactivate" label="Archive" type="submit" />
                                         </form>

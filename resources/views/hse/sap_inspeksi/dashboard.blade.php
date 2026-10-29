@@ -3,33 +3,35 @@
 @section('title', 'SAP Inspeksi SHE/HSE')
 
 @section('content')
-<div class="ui-page space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        @include('hse.dashboard.partials.header', [
-            'title' => 'SAP Inspeksi SHE/HSE',
-            'subtitle' => 'Modul Inspeksi SHE dengan template SHE-FM, checklist dinamis, penilaian, temuan & tindakan perbaikan',
-            'filters' => $filters,
-            'options' => $options,
-        ])
-    </div>
+<x-ui.page>
+    <x-ui.page-header variant="dashboard">
+        <div class="ui-page-header__copy">
+            <x-ui.page-title>SAP Inspeksi SHE/HSE</x-ui.page-title>
+            <x-ui.page-description>Modul inspeksi SHE dengan template SHE-FM, checklist, penilaian, temuan, dan tindak lanjut.</x-ui.page-description>
+        </div>
+        <x-ui.page-actions>
+            <x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.inspeksi.index') }}">Daftar Inspeksi</x-ui.link>
+            <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.sap.inspeksi.create') }}">Buat Inspeksi</x-ui.link>
+        </x-ui.page-actions>
+    </x-ui.page-header>
 
-    <div class="flex flex-wrap justify-end gap-2 -mt-4">
-        <a href="{{ route('hse.dashboard.sap.inspeksi.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold shadow-sm hover:bg-[#0B2345] transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            Buat Inspeksi Baru
-        </a>
-        <a href="{{ route('hse.dashboard.sap.inspeksi.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Daftar Inspeksi</a>
-        <a href="{{ route('hse.dashboard.sap.inspeksi.templates') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Template SHE-FM</a>
-        <a href="{{ route('hse.dashboard.sap.inspeksi.schedule.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Jadwal Inspeksi</a>
-        <a href="{{ route('hse.dashboard.sap.inspeksi.reports') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50">Laporan</a>
-    </div>
+    <x-ui.filter-panel variant="dashboard">
+        <div class="ui-filter-summary">
+            <span class="ui-filter-summary__title"><x-ui.lucide name="filter" /> Filter dashboard</span>
+            <span>{{ $filters['label'] }} · {{ $filters['from']->format('d M Y') }} – {{ $filters['to']->format('d M Y') }}</span>
+        </div>
+        <x-hse.filter-bar :filters="$filters" :options="$options" variant="dashboard" />
+    </x-ui.filter-panel>
+
+    <nav class="flex flex-wrap justify-end gap-2" aria-label="Navigasi Inspeksi SHE/HSE">
+        <x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.inspeksi.templates') }}">Template SHE-FM</x-ui.link>
+        <x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.inspeksi.schedule.index') }}">Jadwal Inspeksi</x-ui.link>
+        <x-ui.link variant="secondary" href="{{ route('hse.dashboard.sap.inspeksi.reports') }}">Laporan</x-ui.link>
+    </nav>
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         @foreach($kpis as $kpi)
-            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                <p class="text-xs font-medium text-slate-500">{{ $kpi['label'] }}</p>
-                <p class="mt-2 text-2xl font-bold text-slate-900">{{ number_format($kpi['value']) }} <span class="text-sm font-medium text-slate-500">{{ $kpi['unit'] }}</span></p>
-            </div>
+            <x-ui.metric-card :label="$kpi['label']" :value="trim(number_format($kpi['value']).' '.$kpi['unit'])" icon="chart-no-axes-combined" />
         @endforeach
     </div>
 
@@ -52,22 +54,19 @@
         <x-ui.dashboard-section-picker :items="$inspectionDashboardSections">
         <div x-show="active === 'templates'" x-cloak>
         <x-hse.chart-card title="Template Aktif" subtitle="Jumlah inspeksi per template">
-            <div class="ui-table-scroll">
-                <table class="ui-table">
+            <x-ui.table>
                     <thead><tr><th>Kode</th><th>Nama Template</th><th>Jumlah Inspeksi</th></tr></thead>
                     <tbody>
                         @foreach($templates as $t)
                         <tr><td class="font-medium">{{ $t->code }}</td><td>{{ $t->name }}</td><td>{{ $t->inspections_count }}</td></tr>
                         @endforeach
                     </tbody>
-                </table>
-            </div>
+            </x-ui.table>
         </x-hse.chart-card>
         </div>
         <div x-show="active === 'recent'" x-cloak>
     <x-hse.chart-card title="Inspeksi Terbaru" subtitle="10 inspeksi terakhir">
-        <div class="ui-table-scroll">
-            <table class="ui-table">
+        <x-ui.table>
                 <thead><tr><th>No. Inspeksi</th><th>Template</th><th>Site</th><th>Inspektor</th><th>Status</th><th>Skor</th><th class="text-right">Aksi</th></tr></thead>
                 <tbody>
                     @forelse($recent as $r)
@@ -76,18 +75,17 @@
                         <td>{{ $r->template->code ?? '-' }}</td>
                         <td>{{ $r->site->name ?? '-' }}</td>
                         <td>{{ $r->inspector->name ?? '-' }}</td>
-                        <td><span class="px-2 py-0.5 rounded-full text-xs">{{ $r->status }}</span></td>
+                        <td><x-ui.status-badge>{{ $r->status }}</x-ui.status-badge></td>
                         <td>{{ $r->percentage ? number_format($r->percentage,1).'%': '-' }}</td>
                         <td><x-ui.table-actions><x-ui.icon-button action="view" label="Lihat" href="{{ route('hse.dashboard.sap.inspeksi.show', $r->id) }}" /><x-ui.sap-record-actions module="inspeksi" :record="$r" /></x-ui.table-actions></td>
                     </tr>
                     @empty
-                    <tr><td colspan="7" class="text-center text-slate-500 text-xs py-4">Belum ada data</td></tr>
+                    <x-ui.table-empty-state colspan="7" title="Belum ada inspeksi" message="Data inspeksi terbaru akan muncul di sini." />
                     @endforelse
                 </tbody>
-            </table>
-        </div>
+        </x-ui.table>
     </x-hse.chart-card>
         </div>
         </x-ui.dashboard-section-picker>
-</div>
+</x-ui.page>
 @endsection

@@ -35,6 +35,7 @@ class SapHazardController extends Controller
         }
         if (!empty($filters['site_id'])) $base->where('site_id', $filters['site_id']);
         if (!empty($filters['department_id'])) $base->where('department_id', $filters['department_id']);
+        $base->whereBetween('report_date', [$filters['from']->toDateString(), $filters['to']->toDateString()]);
 
         $kpis = [
             ['label' => 'Total Hazard Report', 'value' => (clone $base)->count(), 'unit' => 'laporan'],
@@ -45,9 +46,8 @@ class SapHazardController extends Controller
             ['label' => 'High Risk', 'value' => (clone $base)->where('risk_level', 'High')->count(), 'unit' => 'laporan'],
         ];
 
-        $recent = SapHazardReport::with(['reporter', 'site', 'assignedPic'])
-            ->when($filters['scope_site_ids'] !== null, fn ($q) => $q->whereIn('site_id', $filters['scope_site_ids'] ?: [-1]))
-            ->latest()->limit(10)->get();
+        $recent = (clone $base)->with(['reporter', 'site', 'assignedPic'])
+            ->latest('report_date')->limit(10)->get();
 
         $caOpen = SapHazardCorrectiveAction::whereHas('hazard', function ($q) use ($filters) {
             if ($filters['scope_site_ids'] !== null) $q->whereIn('site_id', $filters['scope_site_ids'] ?: [-1]);

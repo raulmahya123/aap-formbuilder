@@ -6,6 +6,7 @@
 @php $toBars = fn (array $chart) => array_combine($chart['labels'] ?? [], $chart['data'] ?? []); @endphp
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'showDashboardFilters' => true,
         'title' => 'Site Performance Comparison',
         'subtitle' => 'Perbandingan insiden, near miss, skor inspeksi, open action, training, dan risiko antar site.',
         'filters' => $filters,

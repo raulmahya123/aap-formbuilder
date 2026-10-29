@@ -9,6 +9,7 @@
 @endphp
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'showDashboardFilters' => true,
         'title' => 'Corrective Action Tracking',
         'subtitle' => 'Status action, overdue, SLA, aging, closure trend, sumber temuan, dan prioritas.',
         'filters' => $filters,
@@ -82,8 +83,8 @@
                                 <div x-data="{ open: false }">
                                     <x-ui.icon-button action="edit" label="Update / Verifikasi" @click="open = true" type="button" />
 
-                                    <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" x-cloak>
-                                        <div @click.away="open = false" class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+                                    <div x-show="open" class="ui-modal-overlay" x-cloak>
+                                        <div @click.away="open = false" class="ui-modal-panel ui-modal-panel--sm ui-modal-panel--padded">
                                             <h3 class="text-base font-bold text-[#0F172A]">Update PICA: {{ $row['action_no'] }}</h3>
                                             <p class="mt-1 text-xs text-[#64748B]">{{ $row['title'] }}</p>
 

@@ -208,8 +208,8 @@
     </div>
 
     {{-- MODAL VERIFIKASI (APPROVE OR REJECT) --}}
-    <div x-show="openVerifyModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;" x-transition>
-        <div class="relative w-full max-w-lg bg-white rounded-xl shadow-2xl p-6" @click.away="openVerifyModal = false">
+    <div x-show="openVerifyModal" class="ui-modal-overlay" style="display: none;" x-transition>
+        <div class="ui-modal-panel ui-modal-panel--md ui-modal-panel--form" @click.away="openVerifyModal = false">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <h3 class="text-base font-bold text-slate-900" x-text="decision === 'approve' ? 'Verifikasi & Setujui PICA (Close)' : 'Tolak Evidence & Kembalikan ke In Progress'"></h3>
                 <button type="button" @click="openVerifyModal = false" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>

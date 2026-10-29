@@ -5,6 +5,7 @@
 @section('content')
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'showDashboardFilters' => true,
         'title' => 'PICA Management Dashboard',
         'subtitle' => 'Pusat kendali tindakan korektif & preventif terpadu (Audit, Investigasi, Inspeksi, PTO, Hazard Report).',
         'filters' => $filters,

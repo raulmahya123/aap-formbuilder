@@ -5,6 +5,8 @@
 @section('content')
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'filterMode' => 'listing',
+        'showDashboardFilters' => true,
         'title' => 'Manhours Management',
         'subtitle' => 'Input, validasi SHE, riwayat, dan rekap jam kerja tervalidasi per site dan kontraktor.',
         'filters' => $filters,
@@ -88,7 +90,7 @@
                                             <input type="hidden" name="action" value="validate" />
                                             <x-ui.icon-button action="approve" label="Validasi" type="submit" />
                                         </form>
-                                        <form action="{{ route('hse.dashboard.manhours.validate', $row->id) }}" method="POST" onsubmit="return confirm('Kembalikan entri manhours ini?')">
+                                        <form action="{{ route('hse.dashboard.manhours.validate', $row->id) }}" method="POST" data-confirm="Kembalikan entri manhours ini?">
                                             @csrf
                                             <input type="hidden" name="action" value="return" />
                                             <x-ui.icon-button action="deactivate" label="Return" type="submit" />

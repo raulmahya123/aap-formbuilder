@@ -5,6 +5,8 @@
 @section('content')
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'filterMode' => 'listing',
+        'showDashboardFilters' => true,
         'title' => 'Department SAP Performance',
         'subtitle' => 'Pemeringkatan dan pencapaian akuntabilitas keselamatan per departemen operasional berdasarkan data riil.',
         'filters' => $filters,

@@ -131,7 +131,7 @@
             @if($canReject)
               <x-ui.button variant="danger" name="action" value="reject"
                       class="px-3 py-2 rounded-lg transition text-sm"
-                      onclick="return confirm('Tolak entry ini?')">
+                      data-confirm="Tolak entry ini?">
                 Reject
               </x-ui.button>
             @endif

@@ -37,6 +37,7 @@ class SapPtoController extends Controller
         }
         if (!empty($filters['site_id'])) $base->where('site_id', $filters['site_id']);
         if (!empty($filters['department_id'])) $base->where('department_id', $filters['department_id']);
+        $base->whereBetween('observation_date', [$filters['from']->toDateString(), $filters['to']->toDateString()]);
 
         $kpis = [
             ['label' => 'Total PTO', 'value' => (clone $base)->count(), 'unit' => 'observasi'],
@@ -47,9 +48,8 @@ class SapPtoController extends Controller
             ['label' => 'Rata-rata Safe Rate', 'value' => round((clone $base)->whereNotNull('safe_rate')->avg('safe_rate') ?? 0, 1), 'unit' => '%'],
         ];
 
-        $recent = SapPtoRecord::with(['observer', 'site', 'observedEmployee'])
-            ->when($filters['scope_site_ids'] !== null, fn ($q) => $q->whereIn('site_id', $filters['scope_site_ids'] ?: [-1]))
-            ->latest()->limit(10)->get();
+        $recent = (clone $base)->with(['observer', 'site', 'observedEmployee'])
+            ->latest('observation_date')->limit(10)->get();
 
         $findingsOpen = SapPtoFinding::whereHas('pto', function ($q) use ($filters) {
             if ($filters['scope_site_ids'] !== null) $q->whereIn('site_id', $filters['scope_site_ids'] ?: [-1]);

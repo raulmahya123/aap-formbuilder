@@ -1,4 +1,4 @@
-@props(['title', 'subtitle', 'filters', 'options', 'export' => null, 'create' => null, 'panel' => null, 'showDashboardFilters' => true, 'filterMode' => 'dashboard'])
+@props(['title', 'subtitle', 'filters', 'options', 'export' => null, 'create' => null, 'panel' => null, 'showDashboardFilters' => false, 'filterMode' => 'dashboard'])
 <x-ui.page-header :variant="$filterMode">
         <div class="ui-page-header__copy">
             <h1 class="ui-page-title">{{ $title }}</h1>
@@ -6,7 +6,11 @@
         </div>
         <div class="ui-page-actions">
             @if($create)
-                <x-ui.link variant="primary" icon="plus" :href="route($create['route'])">{{ $create['label'] }}</x-ui.link>
+                @if(!empty($create['modal']))
+                    <x-ui.button variant="primary" icon="plus" type="button" onclick="document.getElementById('{{ $create['modal'] }}').showModal()">{{ $create['label'] }}</x-ui.button>
+                @else
+                    <x-ui.link variant="primary" icon="plus" :href="route($create['route'])">{{ $create['label'] }}</x-ui.link>
+                @endif
             @endif
             @if($export)
                 <a class="ui-button" href="{{ route('hse.dashboard.reports.export', ['report' => $export] + request()->query()) }}">

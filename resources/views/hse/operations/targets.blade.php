@@ -10,6 +10,7 @@
         'filters' => $filters,
         'options' => $options,
         'filterMode' => 'listing',
+        'showDashboardFilters' => true,
     ])
 
     @if(session('ok'))

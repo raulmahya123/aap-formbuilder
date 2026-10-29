@@ -5,11 +5,12 @@
 @section('content')
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'filterMode' => 'listing',
+        'showDashboardFilters' => true,
         'title' => $title,
         'subtitle' => 'Daftar aktivitas dan submission terverifikasi untuk ' . $title . '.',
         'filters' => $filters,
         'options' => $options,
-        'filterMode' => 'listing',
     ])
 
     <x-hse.chart-card title="Riwayat Aktivitas & Submission" subtitle="Data realisasi kegiatan karyawan">

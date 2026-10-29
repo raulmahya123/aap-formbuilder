@@ -27,19 +27,16 @@
   <!-- ========================================== -->
   <!-- 2. PAGE HEADER & BREADCRUMB               -->
   <!-- ========================================== -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#E2E8F0] pb-5">
-    <div>
-      <nav class="flex items-center gap-1.5 text-xs text-[#475569] mb-1.5" aria-label="Breadcrumb">
-        <a href="{{ route('dashboard') }}" class="hover:text-[#0057FF] transition">Dashboard</a>
-        <span>/</span>
-        <span>Pengaturan</span>
-        <span>/</span>
-        <span class="text-[#111827] font-semibold">Akun Saya</span>
-      </nav>
-      <h1 class="text-2xl sm:text-[28px] font-bold text-[#111827] tracking-tight">Akun Saya</h1>
-      <p class="text-xs sm:text-sm text-[#475569] mt-0.5">Kelola informasi pribadi, pekerjaan, serta keamanan akun Anda.</p>
+  <x-ui.page-header>
+    <x-slot:breadcrumbs>
+      <a href="{{ route('dashboard') }}">Dashboard</a><span aria-hidden="true">/</span>
+      <span>Pengaturan</span><span aria-hidden="true">/</span><span aria-current="page">Akun Saya</span>
+    </x-slot:breadcrumbs>
+    <div class="ui-page-header__copy">
+      <x-ui.page-title>Akun Saya</x-ui.page-title>
+      <x-ui.page-description>Kelola informasi pribadi, pekerjaan, serta keamanan akun Anda.</x-ui.page-description>
     </div>
-  </div>
+  </x-ui.page-header>
 
   <!-- Status Alert Messages -->
   @if (session('status') === 'profile-updated')
@@ -571,8 +568,7 @@
         <p class="text-xs text-[#475569] mt-0.5">Pantau sesi aktif dan catatan keamanan login perangkat Anda.</p>
       </div>
 
-      <div class="overflow-x-auto chat-scroll border border-[#E2E8F0] rounded-xl">
-        <table class="w-full text-left text-xs text-[#111827] divide-y divide-[#E2E8F0]">
+      <x-ui.table>
           <thead class="bg-[#F8FAFC] text-[11px] font-semibold text-[#475569] uppercase tracking-wider">
             <tr>
               <th class="px-4 py-3">Waktu</th>
@@ -589,9 +585,7 @@
               <td class="px-4 py-3 text-[#475569]">{{ request()->userAgent() ? Str::limit(request()->userAgent(), 45) : 'Web Browser' }}</td>
               <td class="px-4 py-3 text-[#475569]">{{ request()->ip() }}</td>
               <td class="px-4 py-3">
-                <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#DCFCE7] text-[#166534]">
-                  Online
-                </span>
+                <x-ui.status-badge variant="success">Online</x-ui.status-badge>
               </td>
             </tr>
             <tr>
@@ -600,14 +594,11 @@
               <td class="px-4 py-3 text-[#475569]">Mandala Web Client</td>
               <td class="px-4 py-3 text-[#475569]">{{ request()->ip() }}</td>
               <td class="px-4 py-3">
-                <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#1E40AF]">
-                  Success
-                </span>
+                <x-ui.status-badge variant="success">Success</x-ui.status-badge>
               </td>
             </tr>
           </tbody>
-        </table>
-      </div>
+      </x-ui.table>
     </div>
   </div>
 
@@ -619,11 +610,11 @@
   <div
     x-show="openAvatarModal"
     x-cloak
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
+    class="ui-modal-overlay"
   >
     <div
       @click.outside="openAvatarModal = false"
-      class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden"
+      class="ui-modal-panel ui-modal-panel--sm w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden"
     >
       <div class="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
         <h4 class="font-bold text-sm text-[#111827]">Ubah Foto Profil</h4>
@@ -676,11 +667,11 @@
   <div
     x-show="openEmploymentModal"
     x-cloak
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
+    class="ui-modal-overlay"
   >
     <div
       @click.outside="openEmploymentModal = false"
-      class="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden"
+      class="ui-modal-panel ui-modal-panel--md w-full max-w-lg bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden"
     >
       <div class="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
         <div>
@@ -749,11 +740,11 @@
   <div
     x-show="openDeleteModal"
     x-cloak
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
+    class="ui-modal-overlay"
   >
     <div
       @click.outside="openDeleteModal = false"
-      class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#FEE2E2] overflow-hidden"
+      class="ui-modal-panel ui-modal-panel--sm w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#FEE2E2] overflow-hidden"
     >
       <form method="POST" action="{{ route('profile.destroy') }}">
         @csrf
@@ -868,7 +859,7 @@ function profileManager(config) {
     },
 
     async deleteAvatar() {
-      if (!confirm('Apakah Anda yakin ingin menghapus foto profil dan kembali ke inisial nama?')) return;
+      if (!await window.uiConfirmAction('Foto profil akan dihapus dan avatar kembali ke inisial nama.', { destructive: true, title: 'Hapus foto profil?', confirmLabel: 'Hapus foto' })) return;
       try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const res = await fetch(this.routes.deleteAvatar, {

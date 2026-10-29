@@ -5,19 +5,15 @@
 @section('content')
 @php $toBars = fn (array $chart) => array_combine($chart['labels'] ?? [], $chart['data'] ?? []); @endphp
 <div class="ui-page space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        @include('hse.dashboard.partials.header', [
+    @include('hse.dashboard.partials.header', [
+            'showDashboardFilters' => true,
             'title' => 'Environmental Performance',
             'subtitle' => 'Waste, hazardous waste, recycling rate, energy, water, fuel, insiden lingkungan, dan target lingkungan.',
             'filters' => $filters,
             'options' => $options,
             'export' => 'environment',
+            'create' => ['route' => 'hse.dashboard.environment.create', 'label' => 'Form Lingkungan & Limbah'],
         ])
-    </div>
-
-    <div class="flex justify-end -mt-4">
-        <x-ui.link variant="primary" icon="plus" href="{{ route('hse.dashboard.environment.create') }}">Form Lingkungan & Limbah</x-ui.link>
-    </div>
 
     @if(session('ok'))
         <div class="rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-800 font-medium">

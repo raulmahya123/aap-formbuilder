@@ -5,6 +5,7 @@
 @section('content')
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'showDashboardFilters' => true,
         'title' => 'Safety Accountability Program (SAP)',
         'subtitle' => 'Monitoring kepatuhan dan pencapaian inspeksi pengawas, PTO, dan hazard report seluruh karyawan.',
         'filters' => $filters,

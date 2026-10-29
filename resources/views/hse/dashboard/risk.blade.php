@@ -6,6 +6,7 @@
 @php $toBars = fn (array $chart) => array_combine($chart['labels'] ?? [], $chart['data'] ?? []); @endphp
 <div class="ui-page space-y-6">
     @include('hse.dashboard.partials.header', [
+        'showDashboardFilters' => true,
         'title' => 'Risk Assessment & Compliance',
         'subtitle' => 'Matriks risiko 5×5, inherent vs residual, treatment, permit, dan status kepatuhan.',
         'filters' => $filters,

@@ -7,6 +7,50 @@ document.addEventListener('change', event => {
 let pendingConfirmation = null;
 let resetTrigger = null;
 
+function configureConfirmation(dialog, message, { destructive = false, title = '', confirmLabel = '' } = {}) {
+    const match = destructive ? message.match(/^Hapus\s+(.*?)\s*(\?|$)/i) : null;
+    const objectName = match?.[1] || '';
+    const titleEl = dialog.querySelector('[data-delete-title]') || dialog.querySelector('#ui-confirm-title');
+    if (titleEl) titleEl.textContent = title || (destructive ? (objectName ? `Hapus ${objectName}?` : 'Konfirmasi Penghapusan') : 'Konfirmasi Tindakan');
+    const descEl = dialog.querySelector('[data-delete-desc]') || dialog.querySelector('#ui-confirm-message');
+    if (descEl) {
+        const remaining = match ? message.slice(match[0].length).trim() : '';
+        descEl.textContent = destructive && objectName
+            ? `${objectName} akan dihapus.${remaining ? ` ${remaining}` : ''}`
+            : message;
+    }
+    const warningEl = dialog.querySelector('[data-delete-warning]');
+    if (warningEl) warningEl.style.display = destructive ? 'flex' : 'none';
+    const label = dialog.querySelector('[data-delete-btn-text]');
+    if (label) label.textContent = confirmLabel || (destructive ? (objectName ? `Hapus ${objectName.split(' ')[0]}` : 'Hapus') : 'Lanjutkan');
+    const button = dialog.querySelector('[data-dialog-confirm]');
+    if (button) {
+        button.classList.toggle('ui-button--danger', destructive);
+        button.classList.toggle('ui-button--primary', !destructive);
+    }
+    const icon = dialog.querySelector('.ui-modal__icon');
+    if (icon) icon.classList.toggle('ui-modal__icon--danger', destructive);
+    dialog.querySelectorAll('[data-confirmation-icon]').forEach(item => {
+        item.style.display = item.dataset.confirmationIcon === (destructive ? 'danger' : 'action') ? '' : 'none';
+    });
+}
+
+export function confirmAction(message, options = {}) {
+    return new Promise(resolve => {
+        const dialog = document.getElementById('ui-action-confirm');
+        if (!dialog || pendingConfirmation) {
+            resolve(false);
+            return;
+        }
+        pendingConfirmation = { resolve, trigger: document.activeElement };
+        configureConfirmation(dialog, message, options);
+        // Keep the originating form/detail modal underneath while this confirmation is shown.
+        if (!dialog.open) dialog.showModal();
+        dialog.querySelector('[data-dialog-cancel]')?.focus();
+    });
+}
+window.uiConfirmAction = confirmAction;
+
 export function isFormDirty(form) {
     if (!form || !(form instanceof HTMLFormElement)) return false;
     for (const el of form.elements) {
@@ -26,7 +70,15 @@ export function isFormDirty(form) {
 
 document.addEventListener('cancel', event => {
     const dialog = event.target;
-    if (dialog.matches?.('dialog[data-dirty-check="true"]') && isFormDirty(dialog.querySelector('form')) && !window.confirm('Ada perubahan yang belum disimpan. Yakin ingin menutup?')) event.preventDefault();
+    if (dialog.matches?.('dialog[data-dirty-check="true"]') && isFormDirty(dialog.querySelector('form')) && dialog.dataset.confirmingClose !== 'true') {
+        event.preventDefault();
+        confirmAction('Ada perubahan yang belum disimpan. Yakin ingin menutup?', { title: 'Perubahan belum disimpan', confirmLabel: 'Tutup tanpa menyimpan' }).then(confirmed => {
+            if (!confirmed) return;
+            dialog.dataset.confirmingClose = 'true';
+            dialog.close();
+            delete dialog.dataset.confirmingClose;
+        });
+    }
 }, true);
 
 document.addEventListener('submit', event => {
@@ -37,62 +89,24 @@ document.addEventListener('submit', event => {
         event.preventDefault();
         return;
     }
-    if (form.dataset.confirm && form.dataset.uiConfirmed !== 'true') {
+    const confirmationMessage = form.dataset.confirm || submitter?.dataset.confirm;
+    if (confirmationMessage && form.dataset.uiConfirmed !== 'true') {
         const dialog = document.getElementById('ui-action-confirm');
         if (dialog) {
             event.preventDefault();
             pendingConfirmation = { form, submitter };
             const destructive = form.querySelector('input[name="_method"]')?.value.toUpperCase() === 'DELETE'
                 || submitter?.classList.contains('ui-icon-button--delete');
-            const confirmMsg = form.dataset.confirm || 'Yakin ingin menghapus data ini?';
-
-            let objectName = '';
-            const match = confirmMsg.match(/^Hapus\s+(.*?)\s*(\?|$)/i);
-            if (match && match[1]) {
-                objectName = match[1];
-            }
-
-            const titleEl = dialog.querySelector('[data-delete-title]') || dialog.querySelector('#ui-confirm-title');
-            if (titleEl) {
-                if (destructive) {
-                    titleEl.textContent = objectName ? `Hapus ${objectName.charAt(0).toUpperCase() + objectName.slice(1)}?` : 'Konfirmasi Penghapusan';
-                } else {
-                    titleEl.textContent = 'Konfirmasi Tindakan';
-                }
-            }
-
-            const descEl = dialog.querySelector('[data-delete-desc]') || dialog.querySelector('#ui-confirm-message');
-            if (descEl) {
-                if (destructive && objectName) {
-                    const remaining = match ? confirmMsg.slice(match[0].length).trim() : '';
-                    descEl.textContent = `${objectName.charAt(0).toUpperCase() + objectName.slice(1)} akan dihapus.${remaining ? ' '+remaining : ''}`;
-                } else {
-                    descEl.textContent = confirmMsg;
-                }
-            }
-
-            const warningEl = dialog.querySelector('[data-delete-warning]');
-            if (warningEl) {
-                warningEl.style.display = destructive ? 'flex' : 'none';
-            }
-
-            const btnTextEl = dialog.querySelector('[data-delete-btn-text]');
-            if (btnTextEl) {
-                btnTextEl.textContent = destructive && objectName ? `Hapus ${objectName.split(' ')[0]}` : (destructive ? 'Hapus' : 'Lanjutkan');
-            }
-
-            const confirmButton = dialog.querySelector('[data-dialog-confirm]');
-            if (confirmButton) {
-                confirmButton.classList.toggle('ui-button--danger', destructive);
-                confirmButton.classList.toggle('ui-button--primary', !destructive);
-            }
-
-            openDialog(dialog);
+            const confirmMsg = confirmationMessage || 'Yakin ingin melanjutkan tindakan ini?';
+            configureConfirmation(dialog, confirmMsg, { destructive });
+            if (!dialog.open) dialog.showModal();
             dialog.querySelector('[data-dialog-cancel]')?.focus();
             return;
         }
-        // Keep confirmation functional for a standalone view without the shared dialog host.
-        if (!window.confirm(form.dataset.confirm)) { event.preventDefault(); return; }
+        // Never bypass the shared confirmation UI for a consequential action.
+        event.preventDefault();
+        window.dispatchEvent(new CustomEvent('ui:confirmation-unavailable'));
+        return;
     }
     form.dataset.uiSubmitting = 'true';
     if (submitter) {
@@ -112,7 +126,10 @@ document.addEventListener('click', event => {
         if (dialog) {
             const form = dialog.querySelector('form');
             if (dialog.dataset.dirtyCheck === 'true' && form && isFormDirty(form)) {
-                if (!window.confirm('Ada perubahan yang belum disimpan. Yakin ingin menutup?')) return;
+                confirmAction('Ada perubahan yang belum disimpan. Yakin ingin menutup?', { title: 'Perubahan belum disimpan', confirmLabel: 'Tutup tanpa menyimpan' }).then(confirmed => {
+                    if (confirmed) dialog.close();
+                });
+                return;
             }
             dialog.close();
         }
@@ -128,6 +145,7 @@ document.addEventListener('click', event => {
         if (dialog) dialog.close();
         btn.classList.remove('is-loading');
         if (!pending) return;
+        if (pending.resolve) { pending.resolve(true); return; }
         pending.form.dataset.uiConfirmed = 'true';
         try { pending.form.requestSubmit(pending.submitter || undefined); }
         finally { delete pending.form.dataset.uiConfirmed; }
@@ -156,8 +174,10 @@ document.addEventListener('input', event => {
 
 document.addEventListener('close', event => {
     if (event.target.id === 'ui-action-confirm') {
-        const trigger = pendingConfirmation?.submitter;
+        const pending = pendingConfirmation;
+        const trigger = pending?.submitter || pending?.trigger;
         pendingConfirmation = null;
+        pending?.resolve?.(false);
         trigger?.focus();
     }
     if (event.target.id === 'ui-password-reset') {

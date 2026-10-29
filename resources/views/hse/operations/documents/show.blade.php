@@ -47,7 +47,7 @@
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                     Ajukan Revisi Versi Baru
                 </button>
-                <form action="{{ route('hse.dashboard.documents.obsolete', $document->id) }}" method="POST" onsubmit="return confirm('Tandai dokumen ini sebagai Obsolete (Usang)?')">
+                <form action="{{ route('hse.dashboard.documents.obsolete', $document->id) }}" method="POST" data-confirm="Tandai dokumen ini sebagai Obsolete (Usang)?">
                     @csrf
                     <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-600 hover:text-rose-600 hover:border-rose-300 transition">
                         Mark Obsolete
@@ -179,8 +179,8 @@
     </div>
 
     {{-- MODAL AJUKAN REVISI BARU --}}
-    <div x-show="openReviseModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;" x-transition>
-        <div class="relative w-full max-w-lg bg-white rounded-xl shadow-2xl p-6" @click.away="openReviseModal = false">
+    <div x-show="openReviseModal" class="ui-modal-overlay" style="display: none;" x-transition>
+        <div class="ui-modal-panel ui-modal-panel--md ui-modal-panel--form" @click.away="openReviseModal = false">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <h3 class="text-base font-bold text-slate-900">Ajukan Revisi Dokumen Versi Baru</h3>
                 <button type="button" @click="openReviseModal = false" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
@@ -223,8 +223,8 @@
     </div>
 
     {{-- MODAL APPROVAL / REJECTION --}}
-    <div x-show="openApprovalModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style="display: none;" x-transition>
-        <div class="relative w-full max-w-md bg-white rounded-xl shadow-2xl p-6" @click.away="openApprovalModal = false">
+    <div x-show="openApprovalModal" class="ui-modal-overlay" style="display: none;" x-transition>
+        <div class="ui-modal-panel ui-modal-panel--sm ui-modal-panel--form" @click.away="openApprovalModal = false">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <h3 class="text-base font-bold text-slate-900" x-text="approvalAction === 'approve_publish' ? 'Setujui & Publikasikan Dokumen' : 'Tolak & Kembalikan Dokumen ke Draft'"></h3>
                 <button type="button" @click="openApprovalModal = false" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
