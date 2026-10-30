@@ -35,6 +35,7 @@
                         <th class="text-left py-3 px-3">Kategori</th>
                         <th class="text-left py-3 px-3">Risk</th>
                         <th class="text-left py-3 px-3">PIC</th>
+                        <th class="text-left py-3 px-3">Admin Site</th>
                         <th class="text-center py-3 px-3">Stop Work</th>
                         <th class="text-center py-3 px-3">Status</th>
                         <th class="text-center py-3 px-3">Aksi</th>
@@ -72,6 +73,9 @@
                         <td class="py-3 px-3 text-gray-600">
                             {{ $r->pic ?? '-' }}
                         </td>
+                        <td class="py-3 px-3 text-gray-600">
+                            {{ $r->assignedAdmin?->name ?? 'Belum ditugaskan' }}
+                        </td>
                         {{-- Stop Work --}}
                         <td class="py-3 px-3 text-center">
                             @if($r->stop_work)
@@ -103,7 +107,7 @@
                         </x-ui.table-actions></td>
                     </tr>
                     @empty
-<x-ui.table-empty-state colspan="9"></x-ui.table-empty-state>
+<x-ui.table-empty-state colspan="10"></x-ui.table-empty-state>
 @endforelse
                 </tbody>
             </x-ui.table>

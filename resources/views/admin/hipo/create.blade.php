@@ -59,6 +59,7 @@
                 <div>
                     <label >Jobsite</label>
                     <select
+                        id="hipo-site-id"
                         name="site_id"
                         required
                         class="w-full ui-input">
@@ -69,6 +70,22 @@
                             </option>
                         @endforeach
                     </select>
+                </div>
+
+                <div>
+                    <label for="hipo-assigned-admin-id">Admin Site penanggung jawab</label>
+                    <select id="hipo-assigned-admin-id" name="assigned_admin_id" class="w-full ui-input">
+                        <option value="">Belum ditugaskan</option>
+                        @foreach($siteAdmins as $admin)
+                            <option value="{{ $admin->id }}"
+                                data-site-ids="{{ $admin->sites->pluck('id')->implode(',') }}"
+                                @selected((string) old('assigned_admin_id') === (string) $admin->id)>
+                                {{ $admin->name }} — {{ $admin->roleLabel() }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <p id="hipo-admin-hint" class="mt-1 text-xs text-gray-500">Pilih site untuk melihat Admin Site yang memiliki akses. Admin yang ditugaskan dapat menutup temuan tersebut.</p>
+                    @error('assigned_admin_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 {{-- SHIFT --}}
@@ -234,6 +251,38 @@
         </div>
 
     </form>
+
+    <script>
+        (() => {
+            const siteSelect = document.getElementById('hipo-site-id');
+            const adminSelect = document.getElementById('hipo-assigned-admin-id');
+            const hint = document.getElementById('hipo-admin-hint');
+            if (!siteSelect || !adminSelect || !hint) return;
+
+            const updateAdminOptions = () => {
+                const siteId = siteSelect.value;
+                let eligibleCount = 0;
+                [...adminSelect.options].forEach((option) => {
+                    if (!option.value) return;
+                    const siteIds = (option.dataset.siteIds || '').split(',').filter(Boolean);
+                    const eligible = Boolean(siteId) && siteIds.includes(siteId);
+                    option.hidden = !eligible;
+                    option.disabled = !eligible;
+                    if (eligible) eligibleCount += 1;
+                    if (!eligible && option.selected) adminSelect.value = '';
+                });
+
+                hint.textContent = !siteId
+                    ? 'Pilih site untuk melihat Admin Site yang memiliki akses. Admin yang ditugaskan dapat menutup temuan tersebut.'
+                    : eligibleCount
+                        ? 'Admin Site ini memiliki akses ke site terpilih dan dapat menutup temuan tersebut.'
+                        : 'Belum ada Admin Site aktif yang ditugaskan ke site ini. Minta Super Admin mengatur akses site terlebih dahulu.';
+            };
+
+            siteSelect.addEventListener('change', updateAdminOptions);
+            updateAdminOptions();
+        })();
+    </script>
 
 </x-ui.page>
 @endsection

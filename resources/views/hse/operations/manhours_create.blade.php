@@ -26,7 +26,7 @@
     @endif
 
     {{-- IMPORT VIA EXCEL / CSV --}}
-    <div class="rounded-xl border border-dashed border-[#94A3B8] bg-slate-50 p-6 shadow-sm">
+    <div class="ui-card ui-form-callout">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h3 class="text-sm font-bold text-[#0F172A]">Opsi: Import Massal Excel / CSV</h3>
@@ -43,7 +43,7 @@
     </div>
 
     {{-- MANUAL INPUT FORM --}}
-    <div class="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+    <div class="ui-card">
         <h2 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3 mb-5">Formulir Input Manual</h2>
         <form action="{{ route('hse.dashboard.manhours.store') }}" method="POST" >
             @csrf

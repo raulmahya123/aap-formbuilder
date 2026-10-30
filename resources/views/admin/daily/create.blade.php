@@ -146,7 +146,7 @@ $computedReadonly = !$hasAnyAllowedSite;
       <div class="p-2.5 rounded-lg border {{ !empty($showLateWatermark) ? 'bg-amber-50/70 border-amber-200' : 'bg-emerald-50/70 border-emerald-200' }} flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-md flex items-center justify-center {{ !empty($showLateWatermark) ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' }}">
-            <x-ui.lucide name="{{ !empty($showLateWatermark) ? 'clock' : 'check-circle' }}" class="w-4 h-4" />
+            <x-ui.lucide name="{{ !empty($showLateWatermark) ? 'clock' : 'circle-check' }}" class="w-4 h-4" />
           </div>
           <div>
             <div class="text-xs font-bold {{ !empty($showLateWatermark) ? 'text-amber-950' : 'text-emerald-950' }}">

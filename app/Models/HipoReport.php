@@ -12,6 +12,9 @@ class HipoReport extends Model
     protected $fillable = [
         'user_id',
         'site_id',
+        'assigned_admin_id',
+        'closed_by',
+        'closed_at',
         'jobsite',
         'reporter_name',
         'report_time',
@@ -48,6 +51,7 @@ class HipoReport extends Model
     protected $casts = [
         'report_time' => 'datetime',
         'stop_work' => 'boolean',
+        'closed_at' => 'datetime',
     ];
 
     public function user()
@@ -63,6 +67,16 @@ class HipoReport extends Model
     public function site()
     {
         return $this->belongsTo(Site::class);
+    }
+
+    public function assignedAdmin()
+    {
+        return $this->belongsTo(User::class, 'assigned_admin_id');
+    }
+
+    public function closedBy()
+    {
+        return $this->belongsTo(User::class, 'closed_by');
     }
 
     public function getJobsiteDisplayAttribute(): string

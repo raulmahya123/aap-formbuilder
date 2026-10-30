@@ -25,7 +25,7 @@
                 @elseif($hipo->status === 'Rejected') bg-red-100 text-red-600
                 @elseif($hipo->status === 'On Progress') bg-blue-100 text-blue-600
                 @else bg-amber-100 text-amber-600 @endif">
-                <x-ui.lucide name="{{ $hipo->status === 'Closed' ? 'check-circle' : ($hipo->status === 'Rejected' ? 'x-circle' : ($hipo->status === 'On Progress' ? 'loader' : 'alert-circle')) }}" />
+            <x-ui.lucide name="{{ $hipo->status === 'Closed' ? 'circle-check' : ($hipo->status === 'Rejected' ? 'circle-x' : ($hipo->status === 'On Progress' ? 'loader-2' : 'alert-triangle')) }}" />
             </div>
             <div>
                 <div class="text-xs font-medium text-gray-500">Status Laporan</div>
@@ -36,6 +36,12 @@
                     @else text-amber-700 @endif">
                     {{ strtoupper($hipo->status) }}
                 </div>
+                @if($hipo->status === 'Closed')
+                    <p class="mt-1 text-xs text-gray-500">
+                        Ditutup oleh {{ $hipo->closedBy?->name ?? 'Admin' }}
+                        @if($hipo->closed_at) pada {{ $hipo->closed_at->format('d M Y, H:i') }} @endif
+                    </p>
+                @endif
             </div>
         </div>
         <div class="flex items-center gap-3">
@@ -63,16 +69,17 @@
 {{-- INFO CARDS --}}
 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
 @foreach([
-    ['icon' => 'user', 'label' => 'Pelapor', 'value' => $hipo->reporter_name],
+    ['icon' => 'users', 'label' => 'Pelapor', 'value' => $hipo->reporter_name],
     ['icon' => 'map-pin', 'label' => 'Jobsite', 'value' => $hipo->jobsite_display],
-    ['icon' => 'clock', 'label' => 'Waktu', 'value' => $hipo->report_time?->format('d M Y H:i')],
-    ['icon' => 'repeat', 'label' => 'Shift', 'value' => $hipo->shift],
-    ['icon' => 'radio', 'label' => 'Sumber', 'value' => $hipo->source],
+    ['icon' => 'calendar-days', 'label' => 'Waktu', 'value' => $hipo->report_time?->format('d M Y H:i')],
+    ['icon' => 'rotate-ccw', 'label' => 'Shift', 'value' => $hipo->shift],
+    ['icon' => 'file-text', 'label' => 'Sumber', 'value' => $hipo->source],
     ['icon' => 'tag', 'label' => 'Kategori', 'value' => $hipo->category],
     ['icon' => 'alert-triangle', 'label' => 'Jenis', 'value' => $hipo->jenis_hipo],
-    ['icon' => 'zap', 'label' => 'Konsekuensi', 'value' => $hipo->potential_consequence],
-    ['icon' => 'shield-alert', 'label' => 'Stop Work', 'value' => $hipo->stop_work ? 'YA' : 'TIDAK'],
+    ['icon' => 'activity', 'label' => 'Konsekuensi', 'value' => $hipo->potential_consequence],
+    ['icon' => 'shield', 'label' => 'Stop Work', 'value' => $hipo->stop_work ? 'YA' : 'TIDAK'],
     ['icon' => 'user-check', 'label' => 'PIC Utama', 'value' => $hipo->pic],
+    ['icon' => 'shield-check', 'label' => 'Admin Site', 'value' => $hipo->assignedAdmin?->name ?? 'Belum ditugaskan'],
 ] as $item)
 <x-ui.panel class="bg-white border rounded-xl shadow-none">
     <div class="flex items-start gap-2.5">
@@ -118,9 +125,9 @@
     </div>
     <div class="grid md:grid-cols-2 gap-4">
     @foreach([
-        'engineering' => ['label' => 'Rekayasa Engineering', 'icon' => 'cog', 'color' => 'blue'],
+        'engineering' => ['label' => 'Rekayasa Engineering', 'icon' => 'wrench', 'color' => 'blue'],
         'administrative' => ['label' => 'Administratif', 'icon' => 'clipboard-list', 'color' => 'violet'],
-        'work_practice' => ['label' => 'Praktek Kerja', 'icon' => 'hard-hat', 'color' => 'amber'],
+        'work_practice' => ['label' => 'Praktek Kerja', 'icon' => 'shield', 'color' => 'amber'],
         'ppe' => ['label' => 'APD', 'icon' => 'shield-check', 'color' => 'emerald'],
     ] as $key => $meta)
     <div class="rounded-xl border border-gray-200 overflow-hidden bg-gray-50/50 hover:shadow-sm transition-shadow">
@@ -153,14 +160,14 @@
 @method('PUT')
 
     {{-- Card Header --}}
-    <div class="px-6 py-4 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
+    <div class="px-6 py-4 bg-zinc-50 border-b border-gray-200">
         <div class="flex items-center gap-3">
-            <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600">
+            <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-100 text-blue-700">
                 <x-ui.lucide name="wrench" class="w-4.5 h-4.5" />
             </div>
             <div>
                 <h3 class="text-base font-bold text-gray-800">Tindakan Admin</h3>
-                <p class="text-xs text-gray-500">Kelola status laporan dan PIC penanggungjawab</p>
+                <p class="text-xs text-gray-500">Admin Site yang ditugaskan mengelola tindak lanjut dan penutupan temuan pada site ini.</p>
             </div>
         </div>
     </div>
@@ -192,13 +199,36 @@
                 <select name="status"
                         class="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow">
                     @foreach(['Open','On Progress','Closed','Rejected'] as $s)
-                        <option value="{{ $s }}" @selected($hipo->status===$s)>
-                            {{ $s === 'Open' ? '🟡 Open' : ($s === 'On Progress' ? '🔵 On Progress' : ($s === 'Closed' ? '🟢 Closed' : '🔴 Rejected')) }}
+                        <option value="{{ $s }}" @selected($hipo->status===$s)
+                            @disabled(!$canClose && $s !== $hipo->status && ($s === 'Closed' || $hipo->status === 'Closed'))>
+                            {{ $s }}
                         </option>
                     @endforeach
                 </select>
+                @unless($canClose)
+                    <p class="text-xs text-gray-500">Hanya Admin Site yang ditugaskan, Admin HO, atau Super Admin yang dapat menutup atau membuka kembali temuan.</p>
+                @endunless
                 @error('status') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
+        </div>
+
+        <div class="max-w-xl space-y-1.5">
+            <label for="assigned-admin-id" class="flex items-center gap-1.5 text-sm font-semibold text-gray-700">
+                <x-ui.lucide name="shield-check" class="w-4 h-4 text-gray-500" />
+                Admin Site penanggung jawab
+            </label>
+            <select id="assigned-admin-id" name="assigned_admin_id" class="w-full ui-input">
+                <option value="">Belum ditugaskan</option>
+                @foreach($siteAdmins as $admin)
+                    <option value="{{ $admin->id }}" @selected((string) old('assigned_admin_id', $hipo->assigned_admin_id) === (string) $admin->id)>
+                        {{ $admin->name }} — {{ $admin->roleLabel() }}
+                    </option>
+                @endforeach
+            </select>
+            <p class="text-xs text-gray-500">
+                {{ $siteAdmins->isEmpty() ? 'Belum ada Admin Site aktif dengan akses ke site laporan ini.' : 'Admin Site yang ditugaskan dapat menutup temuan untuk site ini. Admin HO dan Super Admin tetap dapat mengelola semua site.' }}
+            </p>
+            @error('assigned_admin_id') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
         </div>
 
         {{-- Catatan Admin --}}

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\HipoReport;
 use App\Models\Site;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -19,7 +20,7 @@ class HipoReportController extends Controller
     {
         $allowed = auth()->user()->allowedSiteIds();
         $siteId = \App\Support\SiteSelection::id($request);
-        $reports = HipoReport::with('site:id,code,name')->when(is_array($allowed), fn ($q) => $q->whereIn('site_id', $allowed ?: [-1]))
+        $reports = HipoReport::with(['site:id,code,name', 'assignedAdmin:id,name'])->when(is_array($allowed), fn ($q) => $q->whereIn('site_id', $allowed ?: [-1]))
             ->when($siteId, fn ($q) => $q->where('site_id', $siteId))
             ->when($request->filled('search'), fn ($q) => $q->where(fn ($w) => $w->where('jobsite', 'like', '%'.$request->string('search').'%')->orWhere('reporter_name', 'like', '%'.$request->string('search').'%')->orWhere('description', 'like', '%'.$request->string('search').'%')))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()))
@@ -35,9 +36,10 @@ class HipoReportController extends Controller
     public function create()
     {
         $sites = $this->siteOptions();
-        $picUsers = \App\Models\User::orderBy('name')->get(['id', 'name']);
+        $picUsers = User::active()->orderBy('name')->get(['id', 'name']);
+        $siteAdmins = $this->siteAdminOptions();
 
-        return view('admin.hipo.create', compact('sites', 'picUsers'));
+        return view('admin.hipo.create', compact('sites', 'picUsers', 'siteAdmins'));
     }
 
     // ==============================
@@ -48,6 +50,7 @@ class HipoReportController extends Controller
         $validated = $request->validate([
             'report_time' => 'required|date',
             'site_id' => 'required|integer|exists:sites,id',
+            'assigned_admin_id' => 'nullable|integer|exists:users,id',
             'shift' => 'required|string|max:100',
             'source' => 'required|string|max:100',
             'category' => 'required|string|max:100',
@@ -77,6 +80,7 @@ class HipoReportController extends Controller
         ]);
 
         Gate::authorize('site-access', (int) $validated['site_id']);
+        $this->validateSiteAdminAssignment($validated['assigned_admin_id'] ?? null, (int) $validated['site_id']);
 
         // ================= SYSTEM FIELDS =================
         $validated['status'] = 'Open';
@@ -112,8 +116,12 @@ class HipoReportController extends Controller
     public function show(HipoReport $hipo)
     {
         Gate::authorize('site-access', (int) $hipo->site_id);
-        $picUsers = \App\Models\User::orderBy('name')->get(['id', 'name']);
-        return view('admin.hipo.show', compact('hipo', 'picUsers'));
+        $hipo->load(['site:id,code,name', 'assignedAdmin:id,name,is_active', 'closedBy:id,name']);
+        $picUsers = User::active()->orderBy('name')->get(['id', 'name']);
+        $siteAdmins = $this->siteAdminOptions((int) $hipo->site_id);
+        $canClose = auth()->user()->isSuperAdmin()
+            || (auth()->user()->isSiteAdmin() && (int) $hipo->assigned_admin_id === (int) auth()->id());
+        return view('admin.hipo.show', compact('hipo', 'picUsers', 'siteAdmins', 'canClose'));
     }
 
     // ==============================
@@ -124,6 +132,7 @@ class HipoReportController extends Controller
         Gate::authorize('site-access', (int) $hipo->site_id);
         $validated = $request->validate([
             'status' => 'required|in:Open,On Progress,Closed,Rejected',
+            'assigned_admin_id' => 'nullable|integer|exists:users,id',
             'pic' => 'nullable|string|max:255',
             'description' => 'sometimes|required|string',
 
@@ -144,6 +153,27 @@ class HipoReportController extends Controller
             'evidence_work_practice' => 'nullable|image|max:2048',
             'evidence_ppe' => 'nullable|image|max:2048',
         ]);
+
+        $this->validateSiteAdminAssignment($validated['assigned_admin_id'] ?? null, (int) $hipo->site_id);
+
+        $canClose = auth()->user()->isSuperAdmin()
+            || (auth()->user()->isSiteAdmin() && (int) $hipo->assigned_admin_id === (int) auth()->id());
+        if (($validated['status'] === 'Closed' && $hipo->status !== 'Closed')
+            || ($hipo->status === 'Closed' && $validated['status'] !== 'Closed')) {
+            if (!$canClose) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'status' => 'Hanya Admin Site yang ditugaskan, Admin HO, atau Super Admin yang dapat menutup atau membuka kembali temuan ini.',
+                ]);
+            }
+        }
+
+        if ($validated['status'] === 'Closed' && $hipo->status !== 'Closed') {
+            $validated['closed_at'] = now();
+            $validated['closed_by'] = auth()->id();
+        } elseif ($validated['status'] !== 'Closed') {
+            $validated['closed_at'] = null;
+            $validated['closed_by'] = null;
+        }
 
         // Main PIC follows the existing per-control storage used by the reporting form.
         if (array_key_exists('pic', $validated)) {
@@ -205,6 +235,40 @@ class HipoReportController extends Controller
                 ];
             })
             ->values();
+    }
+
+    private function siteAdminOptions(?int $siteId = null)
+    {
+        $query = User::active()
+            ->where('role', 'admin_site')
+            ->with('sites:id')
+            ->orderBy('name');
+
+        if ($siteId) {
+            $query->whereHas('sites', fn ($sites) => $sites->where('sites.id', $siteId));
+        } elseif (is_array(auth()->user()->allowedSiteIds())) {
+            $allowed = auth()->user()->allowedSiteIds();
+            $query->whereHas('sites', fn ($sites) => $sites->whereIn('sites.id', $allowed ?: [-1]));
+        }
+
+        return $query->get(['id', 'name', 'email']);
+    }
+
+    private function validateSiteAdminAssignment(?int $userId, int $siteId): void
+    {
+        if (!$userId) return;
+
+        $eligible = User::active()
+            ->whereKey($userId)
+            ->where('role', 'admin_site')
+            ->whereHas('sites', fn ($sites) => $sites->where('sites.id', $siteId))
+            ->exists();
+
+        if (!$eligible) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'assigned_admin_id' => 'Pilih Admin Site aktif yang memiliki akses ke site laporan ini.',
+            ]);
+        }
     }
 
     private function jobsiteLabel(Site $site): string

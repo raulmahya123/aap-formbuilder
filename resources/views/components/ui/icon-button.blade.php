@@ -9,8 +9,8 @@
 @endphp
 @if($ability === null || \Illuminate\Support\Facades\Gate::allows($ability, $subject))
 @if($attributes->has('href'))
-    <a {{ $attrs }}><x-ui.lucide :name="$icons[$action] ?? 'ellipsis'" /></a>
+    <a {{ $attrs }}><x-ui.lucide :name="$icons[$action] ?? 'circle-help'" /></a>
 @else
-    <button {{ $attrs->merge(['type'=>'button']) }}><x-ui.lucide :name="$icons[$action] ?? 'ellipsis'" /></button>
+    <button {{ $attrs->merge(['type'=>'button']) }}><x-ui.lucide :name="$icons[$action] ?? 'circle-help'" /></button>
 @endif
 @endif
