@@ -219,6 +219,9 @@
             </label>
             <select id="assigned-admin-id" name="assigned_admin_id" class="w-full ui-input">
                 <option value="">Belum ditugaskan</option>
+                @if($siteAdmins->isEmpty())
+                    <option value="" disabled>Tidak ada Admin Site aktif untuk site ini</option>
+                @endif
                 @foreach($siteAdmins as $admin)
                     <option value="{{ $admin->id }}" @selected((string) old('assigned_admin_id', $hipo->assigned_admin_id) === (string) $admin->id)>
                         {{ $admin->name }} — {{ $admin->roleLabel() }}
@@ -228,6 +231,11 @@
             <p class="text-xs text-gray-500">
                 {{ $siteAdmins->isEmpty() ? 'Belum ada Admin Site aktif dengan akses ke site laporan ini.' : 'Admin Site yang ditugaskan dapat menutup temuan untuk site ini. Admin HO dan Super Admin tetap dapat mengelola semua site.' }}
             </p>
+            @if(auth()->user()->canUseFeature('site_access'))
+                <a href="{{ route('admin.site_access.index', ['site_id' => $hipo->site_id]) }}" class="inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:underline">
+                    <x-ui.lucide name="user-round-plus" class="h-3.5 w-3.5" /> Atur role dan akses site
+                </a>
+            @endif
             @error('assigned_admin_id') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
         </div>
 

@@ -76,6 +76,7 @@
                     <label for="hipo-assigned-admin-id">Admin Site penanggung jawab</label>
                     <select id="hipo-assigned-admin-id" name="assigned_admin_id" class="w-full ui-input">
                         <option value="">Belum ditugaskan</option>
+                        <option id="hipo-admin-empty-option" value="" disabled hidden>Pilih site untuk melihat Admin Site</option>
                         @foreach($siteAdmins as $admin)
                             <option value="{{ $admin->id }}"
                                 data-site-ids="{{ $admin->sites->pluck('id')->implode(',') }}"
@@ -85,6 +86,11 @@
                         @endforeach
                     </select>
                     <p id="hipo-admin-hint" class="mt-1 text-xs text-gray-500">Pilih site untuk melihat Admin Site yang memiliki akses. Admin yang ditugaskan dapat menutup temuan tersebut.</p>
+                    @if(auth()->user()->canUseFeature('site_access'))
+                        <a id="hipo-admin-access-link" href="{{ route('admin.site_access.index') }}" class="mt-1 inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:underline">
+                            <x-ui.lucide name="user-round-plus" class="h-3.5 w-3.5" /> Atur role dan akses site
+                        </a>
+                    @endif
                     @error('assigned_admin_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
@@ -257,6 +263,8 @@
             const siteSelect = document.getElementById('hipo-site-id');
             const adminSelect = document.getElementById('hipo-assigned-admin-id');
             const hint = document.getElementById('hipo-admin-hint');
+            const emptyOption = document.getElementById('hipo-admin-empty-option');
+            const accessLink = document.getElementById('hipo-admin-access-link');
             if (!siteSelect || !adminSelect || !hint) return;
 
             const updateAdminOptions = () => {
@@ -277,6 +285,16 @@
                     : eligibleCount
                         ? 'Admin Site ini memiliki akses ke site terpilih dan dapat menutup temuan tersebut.'
                         : 'Belum ada Admin Site aktif yang ditugaskan ke site ini. Minta Super Admin mengatur akses site terlebih dahulu.';
+
+                if (emptyOption) {
+                    emptyOption.textContent = !siteId ? 'Pilih site untuk melihat Admin Site' : 'Belum ada Admin Site aktif untuk site ini';
+                    emptyOption.hidden = Boolean(siteId && eligibleCount);
+                }
+                if (accessLink && siteId) {
+                    const url = new URL(accessLink.href);
+                    url.searchParams.set('site_id', siteId);
+                    accessLink.href = url.toString();
+                }
             };
 
             siteSelect.addEventListener('change', updateAdminOptions);
