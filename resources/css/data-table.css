@@ -9,9 +9,21 @@
 
 /* ─── Toolbar ─── */
 .ui-table-toolbar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
-  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  box-sizing: border-box; width: 100%; min-width: 0;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  margin: 0; padding: 12px;
+  border: 1px solid var(--border); border-radius: var(--radius);
   background: var(--surface);
+}
+.ui-table-toolbar.ui-table-toolbar--dashboard { padding: 16px; }
+.ui-table-toolbar.ui-table-toolbar--listing { padding: 12px; }
+.ui-filter-panel .ui-table-toolbar.ui-table-toolbar--dashboard,
+.ui-filter-panel .ui-table-toolbar.ui-table-toolbar--listing {
+  margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent;
+}
+.ui-data-table > form > .ui-table-toolbar {
+  margin: 0; padding: 12px 16px; border: 0; border-bottom: 1px solid var(--border);
+  border-radius: 0; background: var(--surface);
 }
 .ui-table-toolbar.ui-table-toolbar--listing,
 .ui-table-toolbar.ui-table-toolbar--dashboard {
@@ -54,6 +66,7 @@
 .ui-filter-field--search { width: 100%; }
 .ui-filter-field--search .ui-table-search { width: 100%; min-width: 0; flex: none; }
 .ui-filter-field__label { color: var(--text-primary); font-size: 13px; font-weight: 500; line-height: 1.4; }
+.ui-filter-panel .ui-filter-field__label { color: var(--text-primary); }
 .ui-filter-field > :is(input,select,textarea), .ui-filter-fields .ui-table-search { width: 100%; min-width: 0; }
 .ui-filter-field > :is(input,select) { min-height: 40px; }
 .ui-filter-chip {
@@ -110,6 +123,9 @@
   font: 400 13px/1.5 var(--font-sans);
   transition: border-color .15s;
 }
+/* Tailwind Forms styles input[type=search] with higher specificity than a
+   standalone class, so anchor the inset to the search wrapper explicitly. */
+.ui-table-search > input.ui-table-search__input { padding-left: 40px; }
 .ui-table-search__input::placeholder { color: var(--gray); }
 .ui-table-search__input:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 2px rgb(29 78 216 / .15); }
 .ui-table-search__clear {

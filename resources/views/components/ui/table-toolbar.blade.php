@@ -1,4 +1,5 @@
 @props(['action' => null, 'variant' => 'listing'])
+@php($variant = $variant === 'dashboard' ? 'dashboard' : 'listing')
 <form method="GET" action="{{ $action ?? url()->current() }}" {{ $attributes->class(['ui-table-toolbar', 'ui-table-toolbar--'.$variant])->merge(['x-data' => '']) }} data-listing-filters>
     <div class="ui-filter-fields">{{ $slot }}</div>
     @isset($actions)

@@ -1,4 +1,5 @@
 @props(['filters', 'options', 'showDepartment' => true, 'panel' => null, 'variant' => 'dashboard'])
+@php($variant = $variant === 'dashboard' ? 'dashboard' : 'listing')
 <form method="GET" action="{{ url()->current() }}" class="ui-table-toolbar ui-hse-filters ui-hse-filters--{{ $variant }}" data-listing-filters x-data="{ period: '{{ $filters['period'] }}' }">
     @if($panel)<input type="hidden" name="panel" value="{{ $panel }}">@endif
     <div class="ui-filter-fields">
@@ -20,7 +21,7 @@
         </select>
     </div>
 
-    <div class="grid gap-1" x-show="period === 'monthly'" x-cloak>
+    <div class="ui-filter-field" x-show="period === 'monthly'" x-cloak>
         <label class="ui-filter-field__label" for="hse-month">Bulan</label>
         <select id="hse-month" name="month" class="ui-input">
             @foreach(range(1, 12) as $month)
@@ -29,7 +30,7 @@
         </select>
     </div>
 
-    <div class="grid gap-1" x-show="period === 'quarterly'" x-cloak>
+    <div class="ui-filter-field" x-show="period === 'quarterly'" x-cloak>
         <label class="ui-filter-field__label" for="hse-quarter">Triwulan</label>
         <select id="hse-quarter" name="quarter" class="ui-input">
             @foreach(range(1, 4) as $quarter)

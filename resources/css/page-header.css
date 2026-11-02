@@ -43,7 +43,7 @@
 .ui-page-header__row > .flex:only-child { width: 100%; gap: 16px; flex-wrap: wrap; }
 .ui-page-header :is(h1,h2) { margin: 0; color: var(--text-primary); font: 600 var(--type-page)/1.35 var(--font-sans); }
 .ui-hse-filters--dashboard .ui-filter-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.ui-hse-filters--listing .ui-filter-fields { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.ui-hse-filters--listing .ui-filter-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; }
 .ui-hse-filters.ui-table-toolbar { grid-template-columns: minmax(0, 1fr); align-items: end; }
 .ui-hse-filters .ui-filter-fields { grid-column: 1 / -1; width: 100%; }
 .ui-hse-filters .ui-filter-actions { grid-column: 1 / -1; justify-self: stretch; width: 100%; }
@@ -53,7 +53,7 @@
 .ui-hse-listing-filter__heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; color: var(--gray); font-size: 12px; }
 .ui-hse-listing-filter__heading > span:first-child { display: inline-flex; align-items: center; gap: 8px; color: var(--text-primary); font-size: 13px; font-weight: 600; }
 .ui-hse-listing-filter__heading svg { width: 16px; height: 16px; }
-@media(max-width: 1023px) { .ui-hse-filters:has(> .ui-filter-fields) { grid-template-columns: minmax(0, 1fr); } .ui-hse-filters--dashboard .ui-filter-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ui-hse-filters--listing .ui-filter-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); } .ui-hse-filters > .ui-filter-actions { width: 100%; } }
+@media(max-width: 1023px) { .ui-hse-filters:has(> .ui-filter-fields) { grid-template-columns: minmax(0, 1fr); } .ui-hse-filters--dashboard .ui-filter-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ui-hse-filters--listing .ui-filter-fields { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); } .ui-hse-filters > .ui-filter-actions { width: 100%; } }
 @media(max-width: 639px) {
   .ui-filter-panel--dashboard,
   .ui-filter-panel--listing { padding: 12px; }

@@ -13,6 +13,7 @@ class TableExportController extends Controller
         // Only the visible table is supplied; this endpoint never queries other users' records.
         $data = $request->validate([
             'title' => ['required', 'string', 'max:200'],
+            'scope' => ['nullable', 'in:page,row'],
             'columns' => ['required', 'array', 'min:1', 'max:40'],
             'columns.*' => ['required', 'string', 'max:200'],
             'rows' => ['required', 'array', 'min:1', 'max:100'],
@@ -22,6 +23,8 @@ class TableExportController extends Controller
         foreach ($data['rows'] as $row) {
             abort_unless(count($row) === count($data['columns']), 422, 'Kolom tabel tidak sesuai.');
         }
+        $data['scope'] = $data['scope'] ?? 'page';
+        abort_if($data['scope'] === 'row' && count($data['rows']) !== 1, 422, 'Ekspor satu data harus berisi tepat satu baris.');
 
         return Pdf::loadView('exports.table', $data + ['exportedAt' => now()])
             ->setPaper('a4', 'portrait')

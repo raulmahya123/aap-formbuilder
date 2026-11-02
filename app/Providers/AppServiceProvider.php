@@ -22,8 +22,14 @@ class AppServiceProvider extends ServiceProvider
     {
         \Illuminate\Pagination\Paginator::defaultView('pagination.standard');
         // SSL terminates at Apache/proxy in production. Keep generated form,
-        // asset, and redirect URLs on HTTPS so uploads are not downgraded to HTTP.
-        if ($this->app->environment('production')) {
+        // asset, and redirect URLs on HTTPS there, but don't send local dev
+        // requests to HTTPS when `artisan serve` only speaks plain HTTP.
+        $host = request()->getHost();
+        $isLocalHost = in_array($host, ['localhost', '127.0.0.1', '::1'], true)
+            || str_ends_with($host, '.localhost')
+            || str_ends_with($host, '.test');
+
+        if ($this->app->environment('production') && ! $isLocalHost) {
             URL::forceScheme('https');
         }
     }

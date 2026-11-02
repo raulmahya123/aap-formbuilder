@@ -10,11 +10,11 @@
     x-data="{
       isSubmitting: false,
       showPassword: false,
-      email: '{{ old('email') }}',
+      email: @js(old('email', '')),
       password: '',
       errors: {
-        email: '{{ $errors->first('email') }}',
-        password: '{{ $errors->first('password') }}',
+        email: @js($errors->first('email')),
+        password: @js($errors->first('password')),
       },
       handleSubmit(e) {
         if (!this.email || !this.password) return;
@@ -45,7 +45,7 @@
       </div>
     @endif
 
-    <form method="POST" action="{{ route('login') }}" @submit="handleSubmit($event)" class="space-y-5">
+    <form method="POST" action="{{ route('login') }}" @submit="handleSubmit($event)" class="auth-login-form space-y-5" data-validation-language="en" data-manual-errors="true">
       @csrf
 
       <!-- Email Field -->
@@ -65,6 +65,7 @@
             autofocus 
             autocomplete="username"
             x-model="email"
+            @input="errors.email = ''"
             placeholder="nama@perusahaan.com"
             class="w-full h-12 pl-10 pr-4 text-xs bg-white border border-[#D1D5DB] rounded-[10px] text-[#111827] placeholder-[#94A3B8] focus:border-[#1455D9] focus:ring-1 focus:ring-[#1455D9] transition"
             :class="errors.email ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]' : ''"
@@ -101,6 +102,7 @@
             required 
             autocomplete="current-password"
             x-model="password"
+            @input="errors.email = ''"
             placeholder="Masukkan kata sandi Anda"
             class="w-full h-12 pl-10 pr-10 text-xs bg-white border border-[#D1D5DB] rounded-[10px] text-[#111827] placeholder-[#94A3B8] focus:border-[#1455D9] focus:ring-1 focus:ring-[#1455D9] transition"
             :class="errors.password ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]' : ''"

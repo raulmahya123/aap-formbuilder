@@ -1,7 +1,7 @@
 const template = document.getElementById('ui-table-export-template');
 const tables = new WeakMap();
 
-function collectTable(table) {
+function collectTable(table, onlyRow = null) {
     const header = table.tHead?.rows[table.tHead.rows.length - 1];
     if (!header) throw new Error('Tabel belum siap dicetak.');
     const bodyRows = [...table.tBodies].flatMap(body => [...body.rows]);
@@ -12,7 +12,8 @@ function collectTable(table) {
         return isAction ? [] : [index];
     });
     const columns = indexes.map(index => header.cells[index].textContent.trim() || `Kolom ${index + 1}`);
-    const rows = [...table.tBodies].flatMap(body => [...body.rows])
+    const sourceRows = onlyRow ? [onlyRow] : bodyRows;
+    const rows = sourceRows
         .filter(row => row.cells.length === header.cells.length && !row.querySelector('[colspan]'))
         .filter(row => !row.hidden && getComputedStyle(row).display !== 'none')
         .map(row => indexes.map(index => {
@@ -28,7 +29,12 @@ function collectTable(table) {
         }));
     if (!rows.length) throw new Error('Belum ada data untuk dicetak.');
     if (rows.length > 100) throw new Error('Pilih maksimal 100 baris per halaman untuk ekspor.');
-    return { title: (document.querySelector('main h1, main h2')?.textContent.trim() || 'Laporan Mandala').slice(0, 200), columns, rows };
+    return {
+        title: (document.querySelector('main h1, main h2')?.textContent.trim() || 'Laporan Mandala').slice(0, 200),
+        columns,
+        rows,
+        scope: onlyRow ? 'row' : 'page',
+    };
 }
 
 function printTable(data) {
@@ -52,7 +58,7 @@ function printTable(data) {
     doc.close();
     doc.title = data.title;
     const heading = doc.createElement('h1'); heading.textContent = data.title;
-    const note = doc.createElement('p'); note.textContent = `MANDALA · Halaman aktif · ${data.rows.length} baris`;
+    const note = doc.createElement('p'); note.textContent = `MANDALA · ${data.scope === 'row' ? 'Data terpilih' : 'Halaman aktif'} · ${data.rows.length} baris`;
     const table = doc.createElement('table');
     const head = table.createTHead().insertRow();
     data.columns.forEach(value => { const th = doc.createElement('th'); th.textContent = value; head.append(th); });
@@ -80,7 +86,9 @@ async function exportPdf(data) {
 function enhanceTables() {
     if (!template) return;
     document.querySelectorAll('main table').forEach(table => {
-        if (table.dataset.exportReady || !table.tHead || table.closest('dialog, [data-no-export]')) return;
+        if (!table.tHead || table.closest('dialog, [data-no-export]')) return;
+        addRowPdfActions(table);
+        if (table.dataset.exportReady) return;
         table.dataset.exportReady = 'true';
         const toolbar = template.content.firstElementChild.cloneNode(true);
         const wrapper = table.closest('.ui-table-scroll, .overflow-x-auto');
@@ -89,7 +97,53 @@ function enhanceTables() {
     });
 }
 
+function addRowPdfActions(table) {
+    const header = table.tHead?.rows[table.tHead.rows.length - 1];
+    if (!header) return;
+    const actionIndex = [...header.cells].findIndex(cell => /^(aksi|action|actions)$/i.test(cell.textContent.trim()));
+    if (actionIndex < 0) return;
+
+    [...table.tBodies].flatMap(body => [...body.rows]).forEach(row => {
+        if (row.hidden || getComputedStyle(row).display === 'none' || row.cells.length !== header.cells.length || row.querySelector('[colspan]')) return;
+        const cell = row.cells[actionIndex];
+        if (!cell || cell.querySelector('[data-row-table-export="pdf"], .ui-icon-button--pdf')) return;
+
+        let actions = cell.querySelector('.ui-table-actions');
+        if (!actions) {
+            actions = document.createElement('div');
+            actions.className = 'ui-table-actions';
+            while (cell.firstChild) actions.append(cell.firstChild);
+            cell.append(actions);
+        }
+
+        const menu = actions.querySelector('.ui-action-menu');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'ui-icon-button ui-icon-button--pdf';
+        button.dataset.rowTableExport = 'pdf';
+        button.title = 'Unduh PDF data ini';
+        button.setAttribute('aria-label', 'Unduh PDF data ini');
+        button.innerHTML = '<svg class="ui-lucide" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M12 12v6m-3-3 3 3 3-3"></path></svg>';
+        (menu || actions).append(button);
+    });
+}
+
 document.addEventListener('click', async event => {
+    const rowButton = event.target.closest('[data-row-table-export="pdf"]');
+    if (rowButton) {
+        const table = rowButton.closest('table');
+        if (!table || rowButton.disabled) return;
+        rowButton.disabled = true;
+        try {
+            await exportPdf(collectTable(table, rowButton.closest('tr')));
+        } catch (error) {
+            window.dispatchEvent(new CustomEvent('ui:toast', { detail: { type: 'error', message: error.message } }));
+        } finally {
+            rowButton.disabled = false;
+        }
+        return;
+    }
+
     const button = event.target.closest('[data-table-export]');
     if (!button) return;
     const toolbar = button.closest('.ui-table-export');

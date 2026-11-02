@@ -32,6 +32,15 @@ class LoginRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'Enter your company email address.',
+            'email.email' => 'Enter a valid email address.',
+            'password.required' => 'Enter your password.',
+        ];
+    }
+
     /**
      * Attempt to authenticate the request's credentials.
      *
@@ -46,7 +55,7 @@ class LoginRequest extends FormRequest
     if ($user && !$user->is_active) {
         RateLimiter::hit($this->throttleKey());
         throw \Illuminate\Validation\ValidationException::withMessages([
-            'email' => 'Akun Anda dinonaktifkan. Silakan hubungi admin.',
+            'email' => 'Your account is inactive. Please contact an administrator.',
         ]);
     }
 
@@ -57,7 +66,7 @@ class LoginRequest extends FormRequest
         RateLimiter::hit($this->throttleKey());
 
         throw \Illuminate\Validation\ValidationException::withMessages([
-            'email' => trans('auth.failed'),
+            'email' => 'The provided credentials do not match our records.',
         ]);
     }
 
@@ -81,10 +90,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'email' => "Too many login attempts. Please try again in {$seconds} seconds.",
         ]);
     }
 

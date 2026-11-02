@@ -11,7 +11,7 @@
 @section('pdf-content')
     <p class="pdf-eyebrow">Laporan Data Mandala</p>
     <h1 class="pdf-title">{{ $title }}</h1>
-    <p class="pdf-subtitle">Data pada halaman aktif · {{ count($rows) }} baris</p>
+    <p class="pdf-subtitle">{{ ($scope ?? 'page') === 'row' ? 'Data terpilih' : 'Data pada halaman aktif' }} · {{ count($rows) }} data</p>
     <p class="pdf-meta">Dibuat {{ $exportedAt->format('d/m/Y H:i') }} WIB</p>
     <table class="pdf-table table-export {{ count($columns) > 5 ? 'pdf-table--compact' : '' }}">
         <thead><tr>@foreach($columns as $column)<th>{{ $column }}</th>@endforeach</tr></thead>

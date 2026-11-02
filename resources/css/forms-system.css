@@ -1,18 +1,43 @@
 /* Shared create/update page and field treatment. */
+.auth-login-form input:-webkit-autofill,
+.auth-login-form input:-webkit-autofill:hover,
+.auth-login-form input:-webkit-autofill:focus,
+.auth-login-form input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset;
+  -webkit-text-fill-color: #18181B;
+  caret-color: #18181B;
+}
+.auth-login-form input[aria-invalid='true'] { background-color: #fff; border-color: var(--red); }
+
 .ui-form-page {
   min-width: 0;
 }
 .ui-form-page > .ui-page,
 .ui-form-page > .ui-page:not(.flex):not(.grid) {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 72rem;
   margin-inline: auto;
   min-width: 0;
   gap: var(--section-gap);
 }
+.ui-form-page > .ui-page > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0;
+}
 .ui-form-page .ui-page-header__row {
   min-height: 56px;
   align-items: center;
+}
+.ui-form-page :is(.ui-page-title, h1.ui-page-title) {
+  margin: 0;
+  color: var(--text-primary);
+  font: 600 24px/1.3 var(--font-sans);
+}
+.ui-form-page .ui-page-description {
+  margin: var(--space-1) 0 0;
+  color: var(--gray);
+  font: 400 14px/1.5 var(--font-sans);
 }
 .ui-form-page .ui-page-header__row > a:not(.ui-button),
 .ui-form-page .ui-page-actions > a:not(.ui-button) {
@@ -60,6 +85,10 @@
   background: var(--surface);
   box-shadow: none;
 }
+.ui-form-page :is(.ui-card, .ui-panel, form.ui-card, form.ui-panel) {
+  box-sizing: border-box;
+  border-radius: var(--radius);
+}
 .ui-form-page form > :not([hidden]) ~ :not([hidden]) {
   margin-top: 0;
 }
@@ -72,6 +101,10 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+}
+.ui-form-page form :is(.grid, [class*='grid-cols-']) {
+  column-gap: var(--space-4) !important;
+  row-gap: var(--space-4) !important;
 }
 .ui-form-page :is(.ui-card, .ui-panel) > form {
   padding: 0;
@@ -163,6 +196,25 @@
   padding-top: var(--space-4);
   border-top: 1px solid var(--border);
 }
+.ui-form-page form > :is(.flex:last-child, div.flex:last-child) > a:not(.ui-button),
+.ui-form-page form > :is(.flex:last-child, div.flex:last-child) > button:not([type='submit']):not(.ui-button) {
+  display: inline-flex;
+  min-height: var(--button-height);
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-primary);
+  font: 500 var(--type-button)/1.3 var(--font-sans);
+  text-decoration: none;
+  box-shadow: none;
+}
+.ui-form-page form > :is(.flex:last-child, div.flex:last-child) > a:not(.ui-button):hover,
+.ui-form-page form > :is(.flex:last-child, div.flex:last-child) > button:not([type='submit']):not(.ui-button):hover {
+  background: var(--surface-secondary);
+}
 .ui-form-page form :is(.ui-button, button[type='submit']) {
   min-height: var(--button-height);
   border-radius: var(--radius);
@@ -214,6 +266,31 @@
   margin-bottom: var(--space-1);
   color: var(--red);
   font-weight: 600;
+}
+.ui-form-page > [role='alert'],
+.ui-form-page > .ui-page > [role='alert'] {
+  padding: var(--space-4);
+  border: 1px solid var(--red);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+.ui-form-page > .ui-page > :is(.bg-red-100, .bg-rose-50)[class*='border'] {
+  padding: var(--space-4);
+  border-color: var(--red);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--red);
+  box-shadow: none;
+}
+.ui-form-page :is(form, .ui-standalone-form) :is(.border-blue-100, .border-emerald-100, .border-amber-100) {
+  border-color: var(--border);
+}
+.ui-form-page :is(form, .ui-standalone-form) :is(.bg-blue-50\/50, .bg-emerald-50\/50, .bg-amber-50\/50, .bg-gray-50, .bg-slate-50) {
+  background-color: var(--surface-secondary);
 }
 @media (max-width: 639px) {
   .ui-form-page :is(form.ui-card, form.ui-panel),

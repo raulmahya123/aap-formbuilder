@@ -41,6 +41,7 @@ function describeError(field, error) {
 }
 function nativeError(field) {
     let error = fieldErrors.get(field);
+    const english = field.form?.dataset.validationLanguage === 'en';
     const group = field.type === 'radio' ? [...field.form.elements].filter(el => el.type === 'radio' && el.name === field.name) : [field];
     if (!error) error = group.map(el => fieldErrors.get(el)).find(Boolean);
     if (!error) {
@@ -49,8 +50,11 @@ function nativeError(field) {
     }
     group.forEach(el => describeError(el, error));
     error.hidden = false;
-    error.textContent = field.validity.valueMissing ? (field.type === 'radio' ? 'Pilih salah satu pilihan.' : 'Isian ini wajib diisi.')
-        : field.validity.typeMismatch && field.type === 'email' ? 'Masukkan alamat email yang valid.' : field.validationMessage;
+    error.textContent = field.validity.valueMissing
+        ? (english ? (field.type === 'radio' ? 'Select an option.' : 'This field is required.') : (field.type === 'radio' ? 'Pilih salah satu pilihan.' : 'Isian ini wajib diisi.'))
+        : field.validity.typeMismatch && field.type === 'email'
+            ? (english ? 'Enter a valid email address.' : 'Masukkan alamat email yang valid.')
+            : field.validationMessage;
 }
 // Capture invalid events because native constraint validation happens before submit.
 document.addEventListener('invalid', event => {
@@ -96,6 +100,7 @@ function connectServerErrors() {
             if (restoringModal) fields = fields.filter(field => field.closest('[data-remote-form]'));
             else if (fields.some(field => field.form?.method.toUpperCase() === 'POST')) fields = fields.filter(field => field.form?.method.toUpperCase() === 'POST');
             for (const field of fields) {
+                if (field.form?.dataset.manualErrors === 'true') continue;
                 const wrapper = field.closest('[data-form-field],fieldset') || (field.type === 'radio' ? field.closest('label')?.parentElement : null) || field.parentElement;
                 let error = [...wrapper.querySelectorAll('.form-error,[data-field-error],.text-red-600')].find(el => errors.some(message => el.textContent.includes(message)));
                 if (!error) { error = document.createElement('p'); error.className = 'form-error'; error.textContent = errors.join(' '); wrapper.append(error); }
