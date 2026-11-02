@@ -4,7 +4,7 @@
 <x-ui.page>
 <x-ui.page-header><div class="ui-page-header__copy"><x-ui.page-title>Health Assesment Checklist</x-ui.page-title><x-ui.page-description>Rekap pemeriksaan kesiapan kerja sebelum shift.</x-ui.page-description></div><x-ui.page-actions><x-ui.link variant="secondary" :href="route('wellness.create')" target="_blank" rel="noopener">Buka Form Publik</x-ui.link></x-ui.page-actions>
 <x-slot:filters>
-<x-ui.table-toolbar><x-ui.table-search name="q" placeholder="Cari nama atau NIK…" aria-label="Cari karyawan" /><x-ui.table-search name="site" placeholder="Cari site…" aria-label="Cari site" /><x-ui.table-filter name="work_readiness" :options="['ya'=>'Siap bekerja','tidak'=>'Tidak siap','off_day'=>'Off day']" label="Kesiapan kerja" placeholder="Semua kesiapan" />
+<x-ui.table-toolbar><x-ui.table-search name="q" label="Karyawan" placeholder="Cari nama atau NIK…" aria-label="Cari karyawan" /><x-ui.table-search name="site" label="Site" placeholder="Cari site…" aria-label="Cari site" /><x-ui.table-filter name="work_readiness" :options="['ya'=>'Siap bekerja','tidak'=>'Tidak siap','off_day'=>'Off day']" label="Kesiapan kerja" placeholder="Semua kesiapan" />
 <x-slot:actions>
 <x-ui.link variant="secondary" :href="route('admin.wellness.index')">Reset</x-ui.link>
 </x-slot:actions>

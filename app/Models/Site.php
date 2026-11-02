@@ -3,12 +3,31 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Site extends Model
 {
     public function displayLabel(): string
     {
-        return $this->code ? $this->code.' — '.$this->name : $this->name;
+        $code = trim((string) $this->code);
+        $name = trim((string) $this->name);
+
+        if ($code === '') return $name;
+        if ($name === '') return $code;
+
+        $containsToken = static function (string $text, string $token): bool {
+            return preg_match(
+                '/(^|[^\p{L}\p{N}])'.preg_quote(Str::upper($token), '/').'($|[^\p{L}\p{N}])/u',
+                Str::upper($text)
+            ) === 1;
+        };
+
+        // Some records include their code inside the display name (for example,
+        // code "DBK" and name "AAP-DBK"). Keep the more descriptive value once.
+        if ($containsToken($name, $code)) return $name;
+        if ($containsToken($code, $name)) return $code;
+
+        return $code.' — '.$name;
     }
 
     // Kolom yang boleh di-mass assign (WAJIB ada company_id)

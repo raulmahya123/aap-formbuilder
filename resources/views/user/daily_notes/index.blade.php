@@ -30,7 +30,7 @@
 <x-ui.table-toolbar class="ui-daily-note-filters">
   <div class="ui-daily-note-filter ui-daily-note-filter--search">
     <label for="daily-note-search">Pencarian</label>
-    <x-ui.table-search id="daily-note-search" name="q" :value="$query ?? ''" placeholder="Cari judul atau deskripsi…" />
+    <x-ui.table-search id="daily-note-search" name="q" :value="$query ?? ''" :label="false" placeholder="Cari judul atau deskripsi…" />
   </div>
   <div class="ui-daily-note-filter">
     <label for="daily-note-date">Tanggal</label>
