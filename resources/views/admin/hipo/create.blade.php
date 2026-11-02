@@ -15,7 +15,7 @@
 
     {{-- ERROR ALERT --}}
     @if ($errors->any())
-        <div class="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
+        <div role="alert" class="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
             <ul class="text-sm list-disc ml-4">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>

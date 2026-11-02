@@ -115,30 +115,30 @@
   </div>
   {{-- KPI Cards --}}
   <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-    <div class="rounded-lg border border-coal-200 dark:border-coal-800 bg-ivory-50 dark:bg-coal-950 p-4">
+    <div class="rounded-lg border border-[var(--border)] dark:border-coal-800 bg-ivory-50 dark:bg-coal-950 p-4">
       <div class="text-xs text-coal-500 dark:text-coal-400">Fatality</div>
       <div class="mt-1 text-2xl font-bold">{{ (int)$kpis['FATALITY'] }}</div>
     </div>
-    <div class="rounded-lg border border-coal-200 dark:border-coal-800 bg-ivory-50 dark:bg-coal-950 p-4">
+    <div class="rounded-lg border border-[var(--border)] dark:border-coal-800 bg-ivory-50 dark:bg-coal-950 p-4">
       <div class="text-xs text-coal-500 dark:text-coal-400">LTI</div>
       <div class="mt-1 text-2xl font-bold">{{ (int)$kpis['LTI'] }}</div>
     </div>
-    <div class="rounded-lg border border-coal-200 dark:border-coal-800 bg-ivory-50 dark:bg-coal-950 p-4">
+    <div class="rounded-lg border border-[var(--border)] dark:border-coal-800 bg-ivory-50 dark:bg-coal-950 p-4">
       <div class="text-xs text-coal-500 dark:text-coal-400">Injury Non LTI</div>
       <div class="mt-1 text-2xl font-bold">{{ (int)$kpis['INJURY_NON_LTI'] }}</div>
     </div>
-    <div class="rounded-lg border border-coal-200 dark:border-coal-800 bg-ivory-50 dark:bg-coal-950 p-4">
+    <div class="rounded-lg border border-[var(--border)] dark:border-coal-800 bg-ivory-50 dark:bg-coal-950 p-4">
       <div class="text-xs text-coal-500 dark:text-coal-400">Property Damage (PD)</div>
       <div class="mt-1 text-2xl font-bold">{{ (int)$kpis['PD'] }}</div>
     </div>
-    <div class="rounded-lg border border-coal-200 dark:border-coal-800 bg-ivory-50 dark:bg-coal-950 p-4">
+    <div class="rounded-lg border border-[var(--border)] dark:border-coal-800 bg-ivory-50 dark:bg-coal-950 p-4">
       <div class="text-xs text-coal-500 dark:text-coal-400">Man Hours</div>
       <div class="mt-1 text-2xl font-bold">{{ number_format((int)$kpis['MAN_HOURS']) }}</div>
     </div>
   </div>
   {{-- Shortcuts --}}
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
-    <x-ui.panel class="rounded-lg border border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-900">
+    <x-ui.panel class="rounded-lg border border-[var(--border)] dark:border-coal-800 bg-white dark:bg-coal-900">
       <div class="font-semibold mb-1">Catat Hari Ini</div>
       <p class="text-sm text-coal-600 dark:text-coal-400 mb-3">Input data harian untuk periode aktif.</p>
       @if(Route::has('daily.create'))
@@ -149,7 +149,7 @@
            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20"><x-ui.lucide name="pencil" /> Mulai</x-ui.link>
       @endif
     </x-ui.panel>
-    <x-ui.panel class="rounded-lg border border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-900">
+    <x-ui.panel class="rounded-lg border border-[var(--border)] dark:border-coal-800 bg-white dark:bg-coal-900">
       <div class="font-semibold mb-1">Rekap Bulanan</div>
       <p class="text-sm text-coal-600 dark:text-coal-400 mb-3">Lihat ringkasan indikator per bulan.</p>
       @if(Route::has('admin.reports.monthly'))
@@ -157,7 +157,7 @@
            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-coal-700 dark:hover:bg-coal-800"><x-ui.lucide name="chart-no-axes-combined" /> Buka</x-ui.link>
       @endif
     </x-ui.panel>
-    <x-ui.panel class="rounded-lg border border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-900">
+    <x-ui.panel class="rounded-lg border border-[var(--border)] dark:border-coal-800 bg-white dark:bg-coal-900">
       <div class="font-semibold mb-1">Form</div>
       <p class="text-sm text-coal-600 dark:text-coal-400 mb-3">Kumpulkan data/permintaan dengan form.</p>
       @if(Route::has('front.forms.index'))
@@ -167,14 +167,14 @@
     </x-ui.panel>
   </div>
   {{-- Tabel Entri Terbaru --}}
-  <div class="rounded-lg border border-coal-200 dark:border-coal-800 overflow-hidden">
-    <div class="px-4 py-3 border-b border-coal-200 dark:border-coal-800 bg-ivory-50 dark:bg-coal-950">
+  <div class="rounded-lg border border-[var(--border)] dark:border-coal-800 overflow-hidden">
+    <div class="px-4 py-3 border-b border-[var(--border)] dark:border-coal-800 bg-ivory-50 dark:bg-coal-950">
       <div class="font-semibold">Entri Terbaru</div>
     </div>
     <div class="overflow-auto">
       <x-ui.table :paginator="$entries" class="min-w-full text-sm">
         <thead>
-          <tr class="text-left border-b border-coal-200 dark:border-coal-800">
+          <tr class="text-left border-b border-[var(--border)] dark:border-coal-800">
             <th class="px-4 py-2">Tanggal</th>
             <th class="px-4 py-2">Site</th>
             <th class="px-4 py-2">Pelapor</th>
@@ -199,7 +199,7 @@
                 $showUrl = route('admin.daily.show', $e->id);
               }
             @endphp
-            <tr class="border-b border-coal-100 dark:border-coal-900">
+            <tr class="border-b border-[var(--border)] dark:border-coal-900">
               <td class="px-4 py-2 whitespace-nowrap">{{ $date }}</td>
               <td class="px-4 py-2 whitespace-nowrap">{{ $siteCode }}</td>
               <td class="px-4 py-2 whitespace-nowrap">{{ $userName }}</td>

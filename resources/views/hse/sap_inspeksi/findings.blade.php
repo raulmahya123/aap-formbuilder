@@ -16,7 +16,7 @@
 
     @if(session('ok'))<div class="rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-800">{{ session('ok') }}</div>@endif
 
-    <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div class="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
             <h2 class="text-base font-bold text-slate-900">Daftar Temuan</h2>
         </div>
@@ -76,7 +76,7 @@
                                 <input type="date" name="target_completion_date" class="w-full text-sm rounded-lg border border-slate-300 p-2">
                             </div>
                         </div>
-                        <button class="px-4 py-2 rounded-lg bg-[#1646A0] text-white text-xs font-semibold">Ajukan Tindakan Perbaikan</button>
+                        <button class="px-4 py-2 rounded-lg bg-[var(--blue)] text-white text-xs font-semibold">Ajukan Tindakan Perbaikan</button>
                     </form>
                 </div>
 

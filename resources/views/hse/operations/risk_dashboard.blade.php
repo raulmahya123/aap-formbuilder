@@ -13,9 +13,9 @@
     ])
 
     {{-- Top Action Toolbar --}}
-    <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+    <div class="ui-card flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2">
-            <span class="inline-flex h-3 w-3 rounded-full bg-[#1646A0]"></span>
+            <span class="inline-flex h-3 w-3 rounded-full bg-[var(--blue)]"></span>
             <span class="text-sm font-semibold text-slate-800">Risk Register Core Overview</span>
         </div>
         <div class="flex items-center gap-2">
@@ -29,14 +29,14 @@
     {{-- KPI Cards --}}
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
         {{-- Total Risks --}}
-        <a href="{{ route('hse.dashboard.risk.list') }}" class="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-[#1646A0] transition">
+        <a href="{{ route('hse.dashboard.risk.list') }}" class="ui-dashboard-card group">
             <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Total Risks</p>
-            <p class="mt-2 text-2xl font-bold text-slate-900 group-hover:text-[#1646A0]">{{ number_format($totalRisks) }}</p>
+            <p class="mt-2 text-2xl font-bold text-slate-900 group-hover:text-[var(--blue)]">{{ number_format($totalRisks) }}</p>
             <p class="mt-1 text-[11px] text-slate-400">Seluruh asesmen aktif</p>
         </a>
 
         {{-- Low risks --}}
-        <a href="{{ route('hse.dashboard.risk.list', ['level' => 'Low']) }}" class="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-emerald-500 transition">
+        <a href="{{ route('hse.dashboard.risk.list', ['level' => 'Low']) }}" class="ui-dashboard-card group">
             <div class="flex items-center justify-between">
                 <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Low</p>
                 <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
@@ -46,7 +46,7 @@
         </a>
 
         {{-- Medium risks --}}
-        <a href="{{ route('hse.dashboard.risk.list', ['level' => 'Medium']) }}" class="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-amber-500 transition">
+        <a href="{{ route('hse.dashboard.risk.list', ['level' => 'Medium']) }}" class="ui-dashboard-card group">
             <div class="flex items-center justify-between">
                 <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Medium</p>
                 <span class="h-2 w-2 rounded-full bg-amber-400"></span>
@@ -56,7 +56,7 @@
         </a>
 
         {{-- High risks --}}
-        <a href="{{ route('hse.dashboard.risk.list', ['level' => 'High']) }}" class="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-orange-500 transition">
+        <a href="{{ route('hse.dashboard.risk.list', ['level' => 'High']) }}" class="ui-dashboard-card group">
             <div class="flex items-center justify-between">
                 <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">High</p>
                 <span class="h-2 w-2 rounded-full bg-orange-500"></span>
@@ -66,7 +66,7 @@
         </a>
 
         {{-- Extreme risks --}}
-        <a href="{{ route('hse.dashboard.risk.list', ['level' => 'Extreme']) }}" class="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-rose-600 transition">
+        <a href="{{ route('hse.dashboard.risk.list', ['level' => 'Extreme']) }}" class="ui-dashboard-card group">
             <div class="flex items-center justify-between">
                 <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Extreme</p>
                 <span class="h-2 w-2 rounded-full bg-rose-600"></span>
@@ -76,21 +76,21 @@
         </a>
 
         {{-- Open risk treatments --}}
-        <a href="{{ route('hse.dashboard.risk.controls', ['status' => 'In Progress']) }}" class="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-blue-500 transition">
+        <a href="{{ route('hse.dashboard.risk.controls', ['status' => 'In Progress']) }}" class="ui-dashboard-card group">
             <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Open Treatments</p>
-            <p class="mt-2 text-2xl font-bold text-[#1646A0]">{{ number_format($openTreatments) }}</p>
+            <p class="mt-2 text-2xl font-bold text-[var(--blue)]">{{ number_format($openTreatments) }}</p>
             <p class="mt-1 text-[11px] text-slate-400">Mitigasi berjalan</p>
         </a>
 
         {{-- Completed controls --}}
-        <a href="{{ route('hse.dashboard.risk.controls', ['status' => 'Closed']) }}" class="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-emerald-500 transition">
+        <a href="{{ route('hse.dashboard.risk.controls', ['status' => 'Closed']) }}" class="ui-dashboard-card group">
             <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Completed Controls</p>
             <p class="mt-2 text-2xl font-bold text-emerald-600">{{ number_format($completedControls) }}</p>
             <p class="mt-1 text-[11px] text-slate-400">Kontrol terverifikasi</p>
         </a>
 
         {{-- Overdue controls --}}
-        <a href="{{ route('hse.dashboard.risk.controls', ['overdue' => 1]) }}" class="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-red-600 transition">
+        <a href="{{ route('hse.dashboard.risk.controls', ['overdue' => 1]) }}" class="ui-dashboard-card group">
             <p class="text-[11px] font-medium text-rose-600 uppercase tracking-wider">Overdue Controls</p>
             <p class="mt-2 text-2xl font-bold text-rose-600">{{ number_format($overdueControls) }}</p>
             <p class="mt-1 text-[11px] text-rose-500">Melewati due date</p>
@@ -100,17 +100,17 @@
     {{-- Interactive 5x5 Matrix & High Risk Activities Overview --}}
     <div class="grid gap-6 lg:grid-cols-12">
         {{-- 5x5 Matrix (7 cols) --}}
-        <div class="lg:col-span-7 bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="lg:col-span-7 bg-white rounded-lg border border-slate-200 p-5 shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
                 <div>
                     <h3 class="text-base font-semibold text-slate-900">Interactive 5×5 Risk Matrix</h3>
                     <p class="text-xs text-slate-500">Likelihood (L) vs Consequence (C). Klik sel matriks untuk memfilter detail risiko.</p>
                 </div>
                 <div class="flex items-center gap-2 text-xs">
-                    <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[#16A34A]"></span>L</span>
-                    <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[#FCD34D]"></span>M</span>
-                    <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[#F59E0B]"></span>H</span>
-                    <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[#DC2626]"></span>E</span>
+                    <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[var(--green)]"></span>L</span>
+                    <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[var(--orange)]"></span>M</span>
+                    <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[var(--orange)]"></span>H</span>
+                    <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[var(--red)]"></span>E</span>
                 </div>
             </div>
 
@@ -174,14 +174,14 @@
         </div>
 
         {{-- High Risk Activities Quick Feed (5 cols) --}}
-        <div class="lg:col-span-5 bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
+        <div class="lg:col-span-5 bg-white rounded-lg border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
                     <div>
                         <h3 class="text-base font-semibold text-slate-900">High & Extreme Risks</h3>
                         <p class="text-xs text-slate-500">Risiko berprioritas tinggi yang memerlukan tindakan mitigasi cepat.</p>
                     </div>
-                    <a href="{{ route('hse.dashboard.risk.high_activities') }}" class="text-xs font-semibold text-[#1646A0] hover:underline">
+                    <a href="{{ route('hse.dashboard.risk.high_activities') }}" class="text-xs font-semibold text-[var(--blue)] hover:underline">
                         Lihat Selengkapnya →
                     </a>
                 </div>
@@ -194,7 +194,7 @@
                                     <span class="text-xs font-bold text-slate-800">{{ $risk->activity }}</span>
                                     <p class="text-xs text-slate-500 mt-0.5">Bahaya: {{ $risk->hazard }}</p>
                                 </div>
-                                <span class="px-2 py-0.5 rounded text-[11px] font-bold text-white {{ $risk->risk_level === 'Extreme' ? 'bg-[#DC2626]' : 'bg-[#F59E0B]' }}">
+                                <span class="px-2 py-0.5 rounded text-[11px] font-bold text-white {{ $risk->risk_level === 'Extreme' ? 'bg-[var(--red)]' : 'bg-[var(--orange)]' }}">
                                     {{ $risk->risk_level }} ({{ $risk->inherent_score }})
                                 </span>
                             </div>
@@ -220,13 +220,13 @@
     </div>
 
     {{-- Recent Risk Controls Monitoring Table --}}
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
         <div class="flex flex-wrap items-center justify-between gap-3 p-4 border-b border-slate-100">
             <div>
                 <h3 class="text-base font-semibold text-slate-900">Risk Control Monitoring (PICA Actions)</h3>
                 <p class="text-xs text-slate-500">Pelaksanaan kontrol risiko, due date, bukti implementasi dan verifikasi.</p>
             </div>
-            <a href="{{ route('hse.dashboard.risk.controls') }}" class="text-xs font-semibold text-[#1646A0] hover:underline">
+            <a href="{{ route('hse.dashboard.risk.controls') }}" class="text-xs font-semibold text-[var(--blue)] hover:underline">
                 Monitoring Lengkap →
             </a>
         </div>

@@ -66,7 +66,7 @@
   {{-- Daftar Akses --}}
   <x-ui.panel :padded="false" class="bg-white border rounded-lg overflow-x-auto">
     <x-ui.table class="w-full text-sm">
-      <thead class="bg-[#1D1C1A] text-white">
+      <thead class="bg-[var(--primary-dark)] text-white">
         <tr>
           <th class="p-2 text-left">Dokumen</th>
           <th class="p-2 text-left">User</th>

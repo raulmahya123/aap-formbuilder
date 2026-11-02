@@ -96,7 +96,7 @@
       <x-ui.button variant="primary" type="submit"
               ::disabled="selectedIds.length===0 || (!userId && !departmentId)"
               class="px-4 py-2 rounded-lg disabled:opacity-50"
-              ::class="selectedIds.length>0 && (userId || departmentId) ? 'bg-[#713F12] hover:opacity-90' : 'bg-[#713F12]'">
+              ::class="selectedIds.length>0 && (userId || departmentId) ? 'bg-[var(--brown)] hover:opacity-90' : 'bg-[var(--brown)]'">
         Tambah Akses
       </x-ui.button>
       <x-ui.button variant="secondary" type="button" @click="clearSelection()" class="px-3 py-2 rounded-lg border">
@@ -121,7 +121,7 @@
     </div>
     <div class="overflow-x-auto">
       <x-ui.table class="w-full text-sm">
-        <thead class="bg-[#1D1C1A] text-white">
+        <thead class="bg-[var(--primary-dark)] text-white">
           <tr>
             <th class="p-3 text-left">Dokumen</th>
             <th class="p-3 text-left">User</th>

@@ -31,7 +31,7 @@
   @endif
   {{-- Info Card --}}
   <div class="rounded-lg border shadow-none overflow-hidden">
-    <div class="px-4 py-3 bg-[#713F12] text-white">
+    <div class="px-4 py-3 bg-[var(--brown)] text-white">
       <div class="font-semibold">Informasi Kontrak</div>
     </div>
     <div class="p-4 grid sm:grid-cols-2 gap-4 text-sm">

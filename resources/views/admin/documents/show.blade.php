@@ -45,7 +45,7 @@
   {{-- PREVIEW --}}
   <x-ui.panel class="bg-white border rounded-lg">
     <div class="flex items-center justify-between">
-      <x-ui.section-title class="font-semibold text-[#1D1C1A]">Preview</x-ui.section-title>
+      <x-ui.section-title class="font-semibold text-[var(--primary-dark)]">Preview</x-ui.section-title>
       <div class="flex items-center gap-2 text-sm">
         <x-ui.button variant="secondary" type="button" class="px-2 py-1 border rounded-lg" @click="zoomOut()">–</x-ui.button>
         <span x-text="Math.round(preview.zoom*100)+'%'"></span>

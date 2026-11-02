@@ -15,11 +15,11 @@
     </x-ui.page-header>
 
     <!-- TAB NAVIGATION: Menyatukan Flow Manage Users & Site Access -->
-    <div class="border-b border-[#E2E8F0] dark:border-coal-800 mb-5">
+    <div class="border-b border-[var(--border)] dark:border-coal-800 mb-5">
       <div class="flex items-center gap-6">
         <a 
           href="{{ route('admin.users.active.index') }}" 
-          class="pb-3 text-sm font-semibold transition relative border-b-2 text-[#0057FF] border-[#0057FF] flex items-center gap-2"
+          class="pb-3 text-sm font-semibold transition relative border-b-2 text-[var(--blue)] border-[var(--blue)] flex items-center gap-2"
         >
           <x-ui.lucide name="users" class="w-4 h-4" />
           <span>Status Akun & Pengguna</span>
@@ -27,7 +27,7 @@
 
         <a 
           href="{{ route('admin.site_access.index') }}" 
-          class="pb-3 text-sm font-medium transition relative border-b-2 border-transparent text-[#64748B] hover:text-[#0F172A] hover:border-slate-300 flex items-center gap-2"
+          class="pb-3 text-sm font-medium transition relative border-b-2 border-transparent text-[var(--gray)] hover:text-[var(--primary-dark)] hover:border-slate-300 flex items-center gap-2"
         >
           <x-ui.lucide name="shield-check" class="w-4 h-4" />
           <span>Site, Role & Hak Akses Fitur</span>
@@ -53,7 +53,7 @@
     @endif
 
     <!-- TABLE -->
-    <div class="rounded-lg border bg-white dark:bg-coal-900 border-[#E2E8F0] dark:border-coal-800 shadow-none overflow-x-auto">
+    <div class="rounded-lg border bg-white dark:bg-coal-900 border-[var(--border)] dark:border-coal-800 shadow-none overflow-x-auto">
       <x-ui.table :paginator="$users" class="w-full text-sm min-w-[860px]">
         <thead class="bg-slate-50 dark:bg-coal-800/60 text-slate-700 dark:text-coal-300">
           <tr>
@@ -65,7 +65,7 @@
             <th class="px-4 py-3 text-left w-36">Aksi & Akses</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-[#E2E8F0] dark:divide-coal-800">
+        <tbody class="divide-y divide-[var(--border)] dark:divide-coal-800">
           @forelse ($users as $user)
             <tr class="hover:bg-slate-50/80 dark:hover:bg-coal-800/50 transition-colors">
               <td class="px-4 py-3 font-medium text-slate-900 dark:text-white">{{ $user->name }}</td>

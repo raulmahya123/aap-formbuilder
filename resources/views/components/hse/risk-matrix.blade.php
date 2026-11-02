@@ -16,18 +16,18 @@
 <div {{ $attributes->class(['w-full']) }}>
     @if($total <= 0)
         <div class="flex h-40 flex-col items-center justify-center gap-1 text-center">
-            <p class="text-sm font-medium text-[#475569]">Belum ada risiko aktif</p>
-            <p class="text-xs text-[#94A3B8]">Matriks akan tampil setelah risk assessment tersedia.</p>
+            <p class="text-sm font-medium text-[var(--gray)]">Belum ada risiko aktif</p>
+            <p class="text-xs text-[var(--gray)]">Matriks akan tampil setelah risk assessment tersedia.</p>
         </div>
     @else
         <div class="grid gap-1" style="grid-template-columns: 72px repeat(5, minmax(0, 1fr));">
             <div></div>
             @foreach(range(1, 5) as $consequence)
-                <div class="pb-1 text-center text-[10px] font-semibold text-[#64748B]">C{{ $consequence }}</div>
+                <div class="pb-1 text-center text-[10px] font-semibold text-[var(--gray)]">C{{ $consequence }}</div>
             @endforeach
 
             @for($likelihood = 5; $likelihood >= 1; $likelihood--)
-                <div class="flex items-center justify-end pr-2 text-[10px] font-semibold text-[#64748B]">L{{ $likelihood }}</div>
+                <div class="flex items-center justify-end pr-2 text-[10px] font-semibold text-[var(--gray)]">L{{ $likelihood }}</div>
                 @foreach(range(1, 5) as $consequence)
                     @php
                         [$background, $foreground] = $cellColor($likelihood * $consequence);
@@ -42,13 +42,13 @@
             @endfor
 
             <div></div>
-            <div class="col-span-5 pt-1 text-center text-[10px] text-[#64748B]">Consequence →</div>
+            <div class="col-span-5 pt-1 text-center text-[10px] text-[var(--gray)]">Consequence →</div>
         </div>
-        <div class="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-[#64748B]">
-            <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[#16A34A]"></span>Low</span>
-            <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[#FCD34D]"></span>Medium</span>
-            <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[#F59E0B]"></span>High</span>
-            <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[#DC2626]"></span>Extreme</span>
+        <div class="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-[var(--gray)]">
+            <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[var(--green)]"></span>Low</span>
+            <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[var(--orange)]"></span>Medium</span>
+            <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[var(--orange)]"></span>High</span>
+            <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded bg-[var(--red)]"></span>Extreme</span>
         </div>
     @endif
 </div>

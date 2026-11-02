@@ -33,7 +33,7 @@
         <option value="private">Grup privat (anggota yang dipilih)</option>
       </select>
 
-      <div class="mt-3 rounded-lg border border-coal-200 bg-ivory-50 p-3">
+      <div class="mt-3 rounded-lg border border-[var(--border)] bg-ivory-50 p-3">
         <label class="block">Anggota grup privat <span class="font-normal text-coal-500">(opsional)</span></label>
         <p class="mt-1 text-xs text-coal-500">Pilihan ini digunakan jika tipe diskusi diubah menjadi grup privat.</p>
         @if($members->isEmpty())

@@ -60,11 +60,11 @@
             <tr class="border-t">
               <td class="p-3 align-top">
                 @if($isSuper)
-                  <a href="{{ route('admin.contracts.show',$c) }}" class="font-medium hover:underline text-[#1D1C1A]">
+                  <a href="{{ route('admin.contracts.show',$c) }}" class="font-medium hover:underline text-[var(--primary-dark)]">
                     {{ $c->title }}
                   </a>
                 @else
-                  <span class="font-medium text-[#1D1C1A]">{{ $c->title }}</span>
+                  <span class="font-medium text-[var(--primary-dark)]">{{ $c->title }}</span>
                 @endif
                 @if(!empty($c->uuid))
                   <div class="text-[11px] text-coal-500 font-mono">#{{ $c->uuid }}</div>

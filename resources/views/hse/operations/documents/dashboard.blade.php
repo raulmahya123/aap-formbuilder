@@ -13,9 +13,9 @@
     ])
 
     {{-- Top Action Toolbar --}}
-    <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+    <div class="ui-card flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2">
-            <span class="inline-flex h-3 w-3 rounded-full bg-[#1646A0]"></span>
+            <span class="inline-flex h-3 w-3 rounded-full bg-[var(--blue)]"></span>
             <span class="text-sm font-semibold text-slate-800">Controlled SHE Document Repository</span>
         </div>
         <div class="flex items-center gap-2">
@@ -29,14 +29,14 @@
     {{-- 5 KPI CARDS --}}
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {{-- Total Documents --}}
-        <a href="{{ route('hse.dashboard.documents.index') }}" class="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-[#1646A0] transition">
+        <a href="{{ route('hse.dashboard.documents.index') }}" class="ui-dashboard-card group">
             <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Total Documents</p>
-            <p class="mt-2 text-2xl font-bold text-slate-900 group-hover:text-[#1646A0]">{{ number_format($totalDocs) }}</p>
+            <p class="mt-2 text-2xl font-bold text-slate-900 group-hover:text-[var(--blue)]">{{ number_format($totalDocs) }}</p>
             <p class="mt-1 text-[11px] text-slate-400">Seluruh kategori terkontrol</p>
         </a>
 
         {{-- Published --}}
-        <a href="{{ route('hse.dashboard.documents.index', ['status' => 'Published']) }}" class="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-emerald-500 transition">
+        <a href="{{ route('hse.dashboard.documents.index', ['status' => 'Published']) }}" class="ui-dashboard-card group">
             <div class="flex items-center justify-between">
                 <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Published</p>
                 <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
@@ -46,7 +46,7 @@
         </a>
 
         {{-- In Review / Submitted --}}
-        <a href="{{ route('hse.dashboard.documents.index', 'approval') }}" class="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-blue-500 transition">
+        <a href="{{ route('hse.dashboard.documents.index', 'approval') }}" class="ui-dashboard-card group">
             <div class="flex items-center justify-between">
                 <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">In Review</p>
                 <span class="h-2 w-2 rounded-full bg-blue-500"></span>
@@ -56,7 +56,7 @@
         </a>
 
         {{-- Expiring / Review Due --}}
-        <a href="{{ route('hse.dashboard.documents.index', 'expiring') }}" class="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-amber-500 transition">
+        <a href="{{ route('hse.dashboard.documents.index', 'expiring') }}" class="ui-dashboard-card group">
             <div class="flex items-center justify-between">
                 <p class="text-[11px] font-medium text-amber-600 uppercase tracking-wider">Expiring / Review Due</p>
                 <span class="h-2 w-2 rounded-full bg-amber-500"></span>
@@ -66,7 +66,7 @@
         </a>
 
         {{-- Obsolete --}}
-        <a href="{{ route('hse.dashboard.documents.index', ['status' => 'Obsolete']) }}" class="group block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-slate-400 transition">
+        <a href="{{ route('hse.dashboard.documents.index', ['status' => 'Obsolete']) }}" class="ui-dashboard-card group">
             <div class="flex items-center justify-between">
                 <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Obsolete</p>
                 <span class="h-2 w-2 rounded-full bg-slate-400"></span>
@@ -79,48 +79,48 @@
     {{-- KATEGORI REPOSITORY CARDS (Policy, SOP, IK, Form) --}}
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {{-- Policy --}}
-        <a href="{{ route('hse.dashboard.documents.index', 'policy') }}" class="group block rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-[#1646A0] hover:shadow-md transition">
+        <a href="{{ route('hse.dashboard.documents.index', 'policy') }}" class="ui-dashboard-card group">
             <div class="flex items-center justify-between">
-                <span class="p-2.5 rounded-lg bg-blue-50 text-[#1646A0]">
+                <span class="p-2.5 rounded-lg bg-blue-50 text-[var(--blue)]">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </span>
-                <span class="text-xl font-bold text-slate-900 group-hover:text-[#1646A0]">{{ $byCategory['Policy'] }}</span>
+                <span class="text-xl font-bold text-slate-900 group-hover:text-[var(--blue)]">{{ $byCategory['Policy'] }}</span>
             </div>
             <h4 class="mt-3 text-sm font-bold text-slate-800">Kebijakan (Policy)</h4>
             <p class="text-xs text-slate-500 mt-1">Komitmen puncak manajemen SHE & Lingkungan Hidup.</p>
         </a>
 
         {{-- SOP --}}
-        <a href="{{ route('hse.dashboard.documents.index', 'sop') }}" class="group block rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-[#1646A0] hover:shadow-md transition">
+        <a href="{{ route('hse.dashboard.documents.index', 'sop') }}" class="ui-dashboard-card group">
             <div class="flex items-center justify-between">
                 <span class="p-2.5 rounded-lg bg-emerald-50 text-emerald-700">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                 </span>
-                <span class="text-xl font-bold text-slate-900 group-hover:text-[#1646A0]">{{ $byCategory['SOP'] }}</span>
+                <span class="text-xl font-bold text-slate-900 group-hover:text-[var(--blue)]">{{ $byCategory['SOP'] }}</span>
             </div>
             <h4 class="mt-3 text-sm font-bold text-slate-800">Prosedur Standar (SOP)</h4>
             <p class="text-xs text-slate-500 mt-1">Standar operasional prosedur lintas departemen.</p>
         </a>
 
         {{-- Instruksi Kerja (IK) --}}
-        <a href="{{ route('hse.dashboard.documents.index', 'ik') }}" class="group block rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-[#1646A0] hover:shadow-md transition">
+        <a href="{{ route('hse.dashboard.documents.index', 'ik') }}" class="ui-dashboard-card group">
             <div class="flex items-center justify-between">
                 <span class="p-2.5 rounded-lg bg-amber-50 text-amber-700">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
                 </span>
-                <span class="text-xl font-bold text-slate-900 group-hover:text-[#1646A0]">{{ $byCategory['IK'] }}</span>
+                <span class="text-xl font-bold text-slate-900 group-hover:text-[var(--blue)]">{{ $byCategory['IK'] }}</span>
             </div>
             <h4 class="mt-3 text-sm font-bold text-slate-800">Instruksi Kerja (IK)</h4>
             <p class="text-xs text-slate-500 mt-1">Petunjuk teknis pelaksanaan tugas spesifik operasional.</p>
         </a>
 
         {{-- Form Documents --}}
-        <a href="{{ route('hse.dashboard.documents.index', 'form') }}" class="group block rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-[#1646A0] hover:shadow-md transition">
+        <a href="{{ route('hse.dashboard.documents.index', 'form') }}" class="ui-dashboard-card group">
             <div class="flex items-center justify-between">
                 <span class="p-2.5 rounded-lg bg-indigo-50 text-indigo-700">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </span>
-                <span class="text-xl font-bold text-slate-900 group-hover:text-[#1646A0]">{{ $byCategory['Form'] }}</span>
+                <span class="text-xl font-bold text-slate-900 group-hover:text-[var(--blue)]">{{ $byCategory['Form'] }}</span>
             </div>
             <h4 class="mt-3 text-sm font-bold text-slate-800">Form Documents</h4>
             <p class="text-xs text-slate-500 mt-1">Template dokumen form standar (bukan form digital builder).</p>
@@ -130,13 +130,13 @@
     {{-- RECENT PUBLISHED & EXPIRING DOCUMENTS --}}
     <div class="grid gap-6 lg:grid-cols-12">
         {{-- Recent Published Documents (7 cols) --}}
-        <div class="lg:col-span-7 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="lg:col-span-7 bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
             <div class="p-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
                     <h3 class="text-base font-semibold text-slate-900">Dokumen Terbaru</h3>
                     <p class="text-xs text-slate-500">Dokumen resmi yang baru diterbitkan atau diperbarui.</p>
                 </div>
-                <a href="{{ route('hse.dashboard.documents.index') }}" class="text-xs font-semibold text-[#1646A0] hover:underline">
+                <a href="{{ route('hse.dashboard.documents.index') }}" class="text-xs font-semibold text-[var(--blue)] hover:underline">
                     Lihat Semua Dokumen →
                 </a>
             </div>
@@ -159,7 +159,7 @@
                             <tr class="hover:bg-slate-50/70 transition">
                                 <td class="font-bold text-slate-900">{{ $doc->document_code }}</td>
                                 <td class="font-semibold text-slate-800 max-w-xs truncate">{{ $doc->title }}</td>
-                                <td><span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-[#1646A0] border border-blue-200">{{ $doc->category }}</span></td>
+                                <td><span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-[var(--blue)] border border-blue-200">{{ $doc->category }}</span></td>
                                 <td>{{ $doc->department?->name ?? '—' }}</td>
                                 <td class="font-bold text-slate-700">v{{ $doc->version }}</td>
                                 <td><x-hse.status :value="$doc->status" /></td>
@@ -179,14 +179,14 @@
         </div>
 
         {{-- Expiring & Review Due List (5 cols) --}}
-        <div class="lg:col-span-5 bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
+        <div class="lg:col-span-5 bg-white rounded-lg border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
                     <div>
                         <h3 class="text-base font-semibold text-slate-900">Jadwal Review & Expiring</h3>
                         <p class="text-xs text-slate-500">Dokumen yang perlu ditinjau ulang (Review Due ≤ 30 hari).</p>
                     </div>
-                    <a href="{{ route('hse.dashboard.documents.index', 'expiring') }}" class="text-xs font-semibold text-[#1646A0] hover:underline">
+                    <a href="{{ route('hse.dashboard.documents.index', 'expiring') }}" class="text-xs font-semibold text-[var(--blue)] hover:underline">
                         Lihat Semua →
                     </a>
                 </div>

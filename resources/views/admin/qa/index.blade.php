@@ -63,37 +63,37 @@
       startPersonal: '{{ route('admin.qa.personal.start') }}',
       createGroup: '{{ route('admin.qa.groups.create') }}',
     }
-  })" 
-  x-init="initChat()" 
-  class="mandala-chat-container flex overflow-hidden bg-[#F8FAFC] border-t border-[#E2E8F0]"
+  })"
+  x-init="initChat()"
+  class="mandala-chat-container flex overflow-hidden bg-[var(--surface-secondary)] border-t border-[var(--border)]"
   @keydown.escape.window="closeAllModals()"
 >
 
   <!-- ======================================================== -->
   <!-- B. CONVERSATION SIDEBAR (320px - 360px)                 -->
   <!-- ======================================================== -->
-  <aside 
-    class="w-full md:w-[340px] lg:w-[360px] shrink-0 border-r border-[#E2E8F0] bg-white flex flex-col h-full z-10"
+  <aside
+    class="w-full md:w-[340px] lg:w-[360px] shrink-0 border-r border-[var(--border)] bg-white flex flex-col h-full z-10"
     :class="{'hidden md:flex': activeThread !== null, 'flex': activeThread === null}"
   >
     <!-- Sidebar Header -->
-    <div class="px-4 py-3.5 border-b border-[#E2E8F0] flex items-center justify-between gap-2 bg-white">
+    <div class="px-4 py-3.5 border-b border-[var(--border)] flex items-center justify-between gap-2 bg-white">
       <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-[#1565D8] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+        <div class="w-8 h-8 rounded-lg bg-[var(--blue)] text-white flex items-center justify-center font-bold text-sm shadow-sm">
           <x-ui-icon name="message-circle" class="w-4 h-4 text-white" />
         </div>
         <div>
-          <h1 class="text-base font-bold text-[#111827] leading-tight">Mandala Chat</h1>
-          <p class="text-[11px] text-[#475569] leading-none mt-0.5">Komunikasi Internal</p>
+          <h1 class="text-base font-bold text-[var(--primary-dark)] leading-tight">Mandala Chat</h1>
+          <p class="text-[11px] text-[var(--gray)] leading-none mt-0.5">Komunikasi Internal</p>
         </div>
       </div>
 
       <!-- Action Buttons Dropdown -->
       <div class="flex items-center gap-1" x-data="{ openMenu: false }">
-        <button 
-          type="button" 
+        <button
+          type="button"
           @click="openNewChatModal()"
-          class="p-2 text-[#475569] hover:text-[#1565D8] hover:bg-[#F1F5F9] rounded-lg transition"
+          class="p-2 text-[var(--gray)] hover:text-[var(--blue)] hover:bg-[var(--surface-secondary)] rounded-lg transition"
           title="Mulai Chat Pribadi"
           aria-label="New Chat"
         >
@@ -101,37 +101,37 @@
         </button>
 
         <div class="relative">
-          <button 
-            type="button" 
-            @click="openMenu = !openMenu" 
+          <button
+            type="button"
+            @click="openMenu = !openMenu"
             @click.outside="openMenu = false"
-            class="p-2 text-[#475569] hover:text-[#111827] hover:bg-[#F1F5F9] rounded-lg transition"
+            class="p-2 text-[var(--gray)] hover:text-[var(--primary-dark)] hover:bg-[var(--surface-secondary)] rounded-lg transition"
             title="Menu lainnya"
             aria-label="More Options"
           >
             <x-ui-icon name="more-vertical" class="w-5 h-5" />
           </button>
 
-          <div 
-            x-show="openMenu" 
-            x-transition 
+          <div
+            x-show="openMenu"
+            x-transition
             x-cloak
-            class="absolute right-0 mt-1 w-48 bg-white border border-[#E2E8F0] rounded-xl shadow-lg py-1.5 z-50 text-sm"
+            class="absolute right-0 mt-1 w-48 bg-white border border-[var(--border)] rounded-lg shadow-lg py-1.5 z-50 text-sm"
           >
-            <button 
-              type="button" 
-              @click="openMenu = false; openNewGroupModal()" 
-              class="w-full text-left px-3.5 py-2 text-[#111827] hover:bg-[#F8FAFC] flex items-center gap-2.5"
+            <button
+              type="button"
+              @click="openMenu = false; openNewGroupModal()"
+              class="w-full text-left px-3.5 py-2 text-[var(--primary-dark)] hover:bg-[var(--surface-secondary)] flex items-center gap-2.5"
             >
-              <x-ui-icon name="groups" class="w-4 h-4 text-[#1565D8]" />
+              <x-ui-icon name="groups" class="w-4 h-4 text-[var(--blue)]" />
               <span>Buat Grup Baru</span>
             </button>
-            <button 
-              type="button" 
-              @click="openMenu = false; fetchConversations()" 
-              class="w-full text-left px-3.5 py-2 text-[#111827] hover:bg-[#F8FAFC] flex items-center gap-2.5"
+            <button
+              type="button"
+              @click="openMenu = false; fetchConversations()"
+              class="w-full text-left px-3.5 py-2 text-[var(--primary-dark)] hover:bg-[var(--surface-secondary)] flex items-center gap-2.5"
             >
-              <x-ui-icon name="check" class="w-4 h-4 text-[#475569]" />
+              <x-ui-icon name="check" class="w-4 h-4 text-[var(--gray)]" />
               <span>Segarkan Percakapan</span>
             </button>
           </div>
@@ -140,58 +140,58 @@
     </div>
 
     <!-- Search Input -->
-    <div class="p-3 border-b border-[#E2E8F0] bg-white">
+    <div class="p-3 border-b border-[var(--border)] bg-white">
       <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#94A3B8]">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[var(--gray)]">
           <x-ui-icon name="search" class="w-4 h-4" />
         </div>
-        <input 
-          type="text" 
-          x-model="searchQuery" 
+        <input
+          type="text"
+          x-model="searchQuery"
           @input.debounce.350ms="fetchConversations()"
           placeholder="Cari pegawai, grup, site..."
-          class="w-full pl-9 pr-8 py-2 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-[#111827] placeholder-[#94A3B8] focus:bg-white focus:border-[#1565D8] focus:ring-1 focus:ring-[#1565D8] transition"
+          class="w-full pl-9 pr-8 py-2 text-xs bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg text-[var(--primary-dark)] placeholder-[var(--gray)] focus:bg-white focus:border-[var(--blue)] focus:ring-1 focus:ring-[var(--blue)] transition"
         />
-        <button 
-          x-show="searchQuery" 
-          @click="searchQuery = ''; fetchConversations()" 
-          class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-[#94A3B8] hover:text-[#475569]"
+        <button
+          x-show="searchQuery"
+          @click="searchQuery = ''; fetchConversations()"
+          class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-[var(--gray)] hover:text-[var(--gray)]"
         >
           <x-ui-icon name="x" class="w-3.5 h-3.5" />
         </button>
       </div>
 
       <!-- Filter Tabs -->
-      <div class="flex items-center gap-1 mt-2.5 bg-[#F1F5F9] p-0.5 rounded-lg text-xs font-medium">
-        <button 
+      <div class="flex items-center gap-1 mt-2.5 bg-[var(--surface-secondary)] p-0.5 rounded-lg text-xs font-medium">
+        <button
           type="button"
           @click="activeTab = 'all'; fetchConversations()"
           class="flex-1 py-1.5 rounded-md transition text-center"
-          :class="activeTab === 'all' ? 'bg-white text-[#1565D8] font-semibold shadow-xs' : 'text-[#475569] hover:text-[#111827]'"
+          :class="activeTab === 'all' ? 'bg-white text-[var(--blue)] font-semibold shadow-xs' : 'text-[var(--gray)] hover:text-[var(--primary-dark)]'"
         >
           Semua
         </button>
-        <button 
+        <button
           type="button"
           @click="activeTab = 'personal'; fetchConversations()"
           class="flex-1 py-1.5 rounded-md transition text-center"
-          :class="activeTab === 'personal' ? 'bg-white text-[#1565D8] font-semibold shadow-xs' : 'text-[#475569] hover:text-[#111827]'"
+          :class="activeTab === 'personal' ? 'bg-white text-[var(--blue)] font-semibold shadow-xs' : 'text-[var(--gray)] hover:text-[var(--primary-dark)]'"
         >
           Personal
         </button>
-        <button 
+        <button
           type="button"
           @click="activeTab = 'group'; fetchConversations()"
           class="flex-1 py-1.5 rounded-md transition text-center"
-          :class="activeTab === 'group' ? 'bg-white text-[#1565D8] font-semibold shadow-xs' : 'text-[#475569] hover:text-[#111827]'"
+          :class="activeTab === 'group' ? 'bg-white text-[var(--blue)] font-semibold shadow-xs' : 'text-[var(--gray)] hover:text-[var(--primary-dark)]'"
         >
           Grup
         </button>
-        <button 
+        <button
           type="button"
           @click="activeTab = 'unread'; fetchConversations()"
           class="flex-1 py-1.5 rounded-md transition text-center"
-          :class="activeTab === 'unread' ? 'bg-white text-[#1565D8] font-semibold shadow-xs' : 'text-[#475569] hover:text-[#111827]'"
+          :class="activeTab === 'unread' ? 'bg-white text-[var(--blue)] font-semibold shadow-xs' : 'text-[var(--gray)] hover:text-[var(--primary-dark)]'"
         >
           Unread
         </button>
@@ -205,10 +205,10 @@
         <div class="p-3 space-y-3">
           <template x-for="i in 5" :key="i">
             <div class="flex items-center gap-3 p-2 rounded-lg chat-pulse">
-              <div class="w-11 h-11 rounded-full bg-[#E2E8F0] shrink-0"></div>
+              <div class="w-11 h-11 rounded-full bg-[var(--surface-secondary)] shrink-0"></div>
               <div class="flex-1 space-y-1.5">
-                <div class="h-3.5 bg-[#E2E8F0] rounded w-3/4"></div>
-                <div class="h-2.5 bg-[#E2E8F0] rounded w-1/2"></div>
+                <div class="h-3.5 bg-[var(--surface-secondary)] rounded w-3/4"></div>
+                <div class="h-2.5 bg-[var(--surface-secondary)] rounded w-1/2"></div>
               </div>
             </div>
           </template>
@@ -217,16 +217,16 @@
 
       <!-- Empty State -->
       <template x-if="!loadingConversations && conversations.length === 0">
-        <div class="p-8 text-center text-[#475569] flex flex-col items-center justify-center h-48">
-          <div class="w-12 h-12 rounded-full bg-[#F1F5F9] flex items-center justify-center text-[#94A3B8] mb-3">
+        <div class="p-8 text-center text-[var(--gray)] flex flex-col items-center justify-center h-48">
+          <div class="w-12 h-12 rounded-full bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--gray)] mb-3">
             <x-ui-icon name="message-circle" class="w-6 h-6" />
           </div>
-          <p class="text-sm font-medium text-[#111827]">Belum ada obrolan</p>
-          <p class="text-xs text-[#94A3B8] mt-1">Mulai obrolan baru dengan rekan kerja Anda.</p>
-          <button 
-            type="button" 
+          <p class="text-sm font-medium text-[var(--primary-dark)]">Belum ada obrolan</p>
+          <p class="text-xs text-[var(--gray)] mt-1">Mulai obrolan baru dengan rekan kerja Anda.</p>
+          <button
+            type="button"
             @click="openNewChatModal()"
-            class="mt-3 px-3 py-1.5 text-xs font-semibold text-white bg-[#1565D8] rounded-lg hover:bg-[#0B4DB3] transition"
+            class="mt-3 px-3 py-1.5 text-xs font-semibold text-white bg-[var(--blue)] rounded-lg hover:bg-[var(--action-primary-hover)] transition"
           >
             Chat Baru
           </button>
@@ -235,29 +235,29 @@
 
       <!-- Conversation Item -->
       <template x-for="conv in conversations" :key="conv.id">
-        <div 
+        <div
           @click="selectConversation(conv)"
           @contextmenu.prevent="openContextMenu($event, conv)"
           class="flex items-center gap-3 px-3.5 py-3 cursor-pointer transition select-none group relative"
-          :class="activeThread && activeThread.id === conv.id ? 'bg-[#EFF6FF] border-l-4 border-[#1565D8]' : 'hover:bg-[#F8FAFC] border-l-4 border-transparent'"
+          :class="activeThread && activeThread.id === conv.id ? 'bg-[var(--surface-secondary)] border-l-4 border-[var(--blue)]' : 'hover:bg-[var(--surface-secondary)] border-l-4 border-transparent'"
         >
           <!-- Avatar with Online / Type badge -->
           <div class="relative shrink-0">
             <template x-if="conv.avatar_url">
-              <img :src="conv.avatar_url" class="w-11 h-11 rounded-full object-cover border border-[#E2E8F0]" alt="" />
+              <img :src="conv.avatar_url" class="w-11 h-11 rounded-full object-cover border border-[var(--border)]" alt="" />
             </template>
             <template x-if="!conv.avatar_url">
-              <div 
+              <div
                 class="w-11 h-11 rounded-full flex items-center justify-center font-bold text-xs"
-                :class="conv.type === 'personal' ? 'bg-[#E0E7FF] text-[#3730A3]' : (conv.type === 'site' ? 'bg-[#DCFCE7] text-[#166534]' : 'bg-[#FEF3C7] text-[#92400E]')"
+                :class="conv.type === 'personal' ? 'bg-[var(--surface-secondary)] text-[var(--blue)]' : (conv.type === 'site' ? 'bg-[var(--surface-secondary)] text-[var(--green)]' : 'bg-[var(--surface-secondary)] text-[var(--orange)]')"
                 x-text="conv.initials"
               ></div>
             </template>
 
             <!-- Site badge if applicable -->
             <template x-if="conv.site">
-              <span 
-                class="absolute -bottom-1 -right-1 text-[9px] font-bold px-1 py-0.2 rounded bg-[#111827] text-white border border-white"
+              <span
+                class="absolute -bottom-1 -right-1 text-[9px] font-bold px-1 py-0.2 rounded bg-[var(--primary-dark)] text-white border border-white"
                 x-text="conv.site.code"
               ></span>
             </template>
@@ -267,37 +267,37 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-1 mb-0.5">
               <div class="flex items-center gap-1.5 min-w-0">
-                <span class="text-xs font-semibold text-[#111827] truncate" x-text="conv.subject"></span>
+                <span class="text-xs font-semibold text-[var(--primary-dark)] truncate" x-text="conv.subject"></span>
                 <template x-if="conv.is_pinned">
-                  <x-ui-icon name="pin" class="w-3 h-3 text-[#1565D8] shrink-0" />
+                  <x-ui-icon name="pin" class="w-3 h-3 text-[var(--blue)] shrink-0" />
                 </template>
                 <template x-if="conv.is_muted">
-                  <x-ui-icon name="bell-off" class="w-3 h-3 text-[#94A3B8] shrink-0" />
+                  <x-ui-icon name="bell-off" class="w-3 h-3 text-[var(--gray)] shrink-0" />
                 </template>
               </div>
-              <span 
-                class="text-[10px] text-[#94A3B8] shrink-0" 
+              <span
+                class="text-[10px] text-[var(--gray)] shrink-0"
                 x-text="conv.last_message ? conv.last_message.created_at : ''"
               ></span>
             </div>
 
             <div class="flex items-center justify-between gap-2">
-              <p class="text-xs text-[#475569] truncate">
+              <p class="text-xs text-[var(--gray)] truncate">
                 <template x-if="conv.last_message">
                   <span>
-                    <strong x-show="conv.type !== 'personal' && conv.last_message.user_id !== currentUserId" x-text="conv.last_message.user_name + ': '" class="font-medium text-[#111827]"></strong>
+                    <strong x-show="conv.type !== 'personal' && conv.last_message.user_id !== currentUserId" x-text="conv.last_message.user_name + ': '" class="font-medium text-[var(--primary-dark)]"></strong>
                     <span x-text="conv.last_message.body"></span>
                   </span>
                 </template>
                 <template x-if="!conv.last_message">
-                  <span class="text-[#94A3B8] italic">Belum ada pesan</span>
+                  <span class="text-[var(--gray)] italic">Belum ada pesan</span>
                 </template>
               </p>
 
               <!-- Unread Badge -->
               <template x-if="conv.unread_count > 0">
-                <span 
-                  class="shrink-0 bg-[#1565D8] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
+                <span
+                  class="shrink-0 bg-[var(--blue)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
                   x-text="conv.unread_count"
                 ></span>
               </template>
@@ -312,23 +312,23 @@
   <!-- C. MAIN CONVERSATION PANEL                               -->
   <!-- ======================================================== -->
   <section aria-label="Percakapan"
-    class="flex-1 flex flex-col h-full bg-[#F8FAFC] relative overflow-hidden"
+    class="flex-1 flex flex-col h-full bg-[var(--surface-secondary)] relative overflow-hidden"
     :class="{'hidden md:flex': activeThread === null, 'flex': activeThread !== null}"
   >
     <!-- Placeholder when no thread is selected -->
     <template x-if="!activeThread">
       <div class="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <div class="w-16 h-16 rounded-2xl bg-white border border-[#E2E8F0] shadow-sm flex items-center justify-center text-[#1565D8] mb-4">
+        <div class="w-16 h-16 rounded-lg bg-white border border-[var(--border)] shadow-sm flex items-center justify-center text-[var(--blue)] mb-4">
           <x-ui-icon name="message-circle" class="w-8 h-8" />
         </div>
-        <h2 class="text-lg font-bold text-[#111827]">Pilih Percakapan</h2>
-        <p class="text-xs text-[#475569] max-w-sm mt-1">
+        <h2 class="text-lg font-bold text-[var(--primary-dark)]">Pilih Percakapan</h2>
+        <p class="text-xs text-[var(--gray)] max-w-sm mt-1">
           Pilih salah satu percakapan di bilah kiri atau mulai percakapan baru untuk mengirim pesan, berbagi dokumen, atau membuat laporan pekerjaan.
         </p>
-        <button 
+        <button
           type="button"
           @click="openNewChatModal()"
-          class="mt-4 px-4 py-2 text-xs font-semibold text-white bg-[#1565D8] rounded-lg hover:bg-[#0B4DB3] transition shadow-sm inline-flex items-center gap-2"
+          class="mt-4 px-4 py-2 text-xs font-semibold text-white bg-[var(--blue)] rounded-lg hover:bg-[var(--action-primary-hover)] transition shadow-sm inline-flex items-center gap-2"
         >
           <x-ui-icon name="plus" class="w-4 h-4" />
           <span>Mulai Chat Baru</span>
@@ -339,15 +339,15 @@
     <!-- Active Thread Container -->
     <template x-if="activeThread">
       <div class="flex-1 flex flex-col h-full overflow-hidden">
-        
+
         <!-- Header -->
-        <header class="px-4 py-3 bg-white border-b border-[#E2E8F0] flex items-center justify-between gap-3 shrink-0 z-10 shadow-xs">
+        <header class="px-4 py-3 bg-white border-b border-[var(--border)] flex items-center justify-between gap-3 shrink-0 z-10 shadow-xs">
           <div class="flex items-center gap-3 min-w-0">
             <!-- Back button for mobile -->
-            <button 
-              type="button" 
+            <button
+              type="button"
               @click="activeThread = null"
-              class="md:hidden p-1.5 -ml-1 text-[#475569] hover:text-[#111827] rounded-lg"
+              class="md:hidden p-1.5 -ml-1 text-[var(--gray)] hover:text-[var(--primary-dark)] rounded-lg"
               title="Kembali ke daftar"
             >
               <x-ui-icon name="arrow-left" class="w-5 h-5" />
@@ -355,7 +355,7 @@
 
             <!-- Conversation Avatar -->
             <div class="w-10 h-10 rounded-full shrink-0 flex items-center justify-center font-bold text-xs"
-              :class="activeThread.type === 'personal' ? 'bg-[#E0E7FF] text-[#3730A3]' : (activeThread.type === 'site' ? 'bg-[#DCFCE7] text-[#166534]' : 'bg-[#FEF3C7] text-[#92400E]')"
+              :class="activeThread.type === 'personal' ? 'bg-[var(--surface-secondary)] text-[var(--blue)]' : (activeThread.type === 'site' ? 'bg-[var(--surface-secondary)] text-[var(--green)]' : 'bg-[var(--surface-secondary)] text-[var(--orange)]')"
             >
               <template x-if="activeThread.avatar_url">
                 <img :src="activeThread.avatar_url" class="w-full h-full rounded-full object-cover" alt="" />
@@ -367,13 +367,13 @@
 
             <!-- Subject & Status -->
             <div class="min-w-0">
-              <h2 class="text-sm font-bold text-[#111827] truncate flex items-center gap-1.5">
+              <h2 class="text-sm font-bold text-[var(--primary-dark)] truncate flex items-center gap-1.5">
                 <span x-text="activeThread.subject"></span>
                 <template x-if="activeThread.site">
-                  <span class="text-[10px] px-1.5 py-0.5 rounded font-medium bg-[#F1F5F9] text-[#475569]" x-text="activeThread.site.code"></span>
+                  <span class="text-[10px] px-1.5 py-0.5 rounded font-medium bg-[var(--surface-secondary)] text-[var(--gray)]" x-text="activeThread.site.code"></span>
                 </template>
               </h2>
-              <p class="text-[11px] text-[#475569] truncate">
+              <p class="text-[11px] text-[var(--gray)] truncate">
                 <template x-if="activeThread.type === 'personal'">
                   <span>Personal Chat</span>
                 </template>
@@ -387,22 +387,22 @@
           <!-- Actions -->
           <div class="flex items-center gap-1.5">
             <!-- Create Report Button -->
-            <button 
+            <button
               type="button"
               @click="openReportModal()"
-              class="px-2.5 py-1.5 text-xs font-semibold text-[#1565D8] bg-[#EFF6FF] border border-[#BFDBFE] hover:bg-[#DBEAFE] rounded-lg transition inline-flex items-center gap-1.5"
+              class="px-2.5 py-1.5 text-xs font-semibold text-[var(--blue)] bg-[var(--surface-secondary)] border border-[var(--border)] hover:bg-[var(--surface-secondary)] rounded-lg transition inline-flex items-center gap-1.5"
               title="Buat Laporan Pekerjaan"
             >
-              <x-ui-icon name="report" class="w-4 h-4 text-[#1565D8]" />
+              <x-ui-icon name="report" class="w-4 h-4 text-[var(--blue)]" />
               <span class="hidden sm:inline">Buat Laporan</span>
             </button>
 
             <!-- Toggle Info Panel -->
-            <button 
-              type="button" 
+            <button
+              type="button"
               @click="infoPanelOpen = !infoPanelOpen"
-              class="p-2 text-[#475569] hover:text-[#111827] hover:bg-[#F1F5F9] rounded-lg transition"
-              :class="{'text-[#1565D8] bg-[#EFF6FF]': infoPanelOpen}"
+              class="p-2 text-[var(--gray)] hover:text-[var(--primary-dark)] hover:bg-[var(--surface-secondary)] rounded-lg transition"
+              :class="{'text-[var(--blue)] bg-[var(--surface-secondary)]': infoPanelOpen}"
               title="Informasi Percakapan"
               aria-label="Info"
             >
@@ -413,30 +413,30 @@
 
         <!-- Pinned Messages Banner -->
         <template x-if="activeThread.pinned_messages && activeThread.pinned_messages.length > 0">
-          <div class="bg-[#F8FAFC] border-b border-[#E2E8F0] px-4 py-2 flex items-center justify-between text-xs text-[#111827] shrink-0">
+          <div class="bg-[var(--surface-secondary)] border-b border-[var(--border)] px-4 py-2 flex items-center justify-between text-xs text-[var(--primary-dark)] shrink-0">
             <div class="flex items-center gap-2 min-w-0">
-              <x-ui-icon name="pin" class="w-3.5 h-3.5 text-[#1565D8] shrink-0" />
+              <x-ui-icon name="pin" class="w-3.5 h-3.5 text-[var(--blue)] shrink-0" />
               <span class="font-semibold shrink-0">Pesan Tersemat:</span>
-              <span class="truncate text-[#475569]" x-text="activeThread.pinned_messages[0].user_name + ': ' + activeThread.pinned_messages[0].body"></span>
+              <span class="truncate text-[var(--gray)]" x-text="activeThread.pinned_messages[0].user_name + ': ' + activeThread.pinned_messages[0].body"></span>
             </div>
           </div>
         </template>
 
         <!-- Message Body -->
-        <div 
+        <div
           x-ref="messageList"
           @scroll="handleScroll()"
-          class="flex-1 overflow-y-auto chat-scroll p-4 space-y-3 bg-[#F8FAFC]"
+          class="flex-1 overflow-y-auto chat-scroll p-4 space-y-3 bg-[var(--surface-secondary)]"
         >
           <!-- Load older messages indicator -->
           <template x-if="loadingOlderMessages">
             <div class="text-center py-2">
-              <span class="text-xs text-[#94A3B8] font-medium">Memuat pesan terdahulu...</span>
+              <span class="text-xs text-[var(--gray)] font-medium">Memuat pesan terdahulu...</span>
             </div>
           </template>
 
           <template x-if="messages.length === 0 && !loadingMessages">
-            <div class="text-center py-12 text-[#94A3B8]">
+            <div class="text-center py-12 text-[var(--gray)]">
               <p class="text-xs">Belum ada pesan dalam percakapan ini.</p>
               <p class="text-[11px] mt-0.5">Jadilah yang pertama mengirimkan pesan!</p>
             </div>
@@ -448,26 +448,26 @@
               <!-- Date Separator -->
               <template x-if="index === 0 || msg.created_date !== messages[index - 1].created_date">
                 <div class="flex items-center justify-center my-3">
-                  <span class="bg-[#E2E8F0] text-[#475569] text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider" x-text="msg.created_date_label"></span>
+                  <span class="bg-[var(--surface-secondary)] text-[var(--gray)] text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider" x-text="msg.created_date_label"></span>
                 </div>
               </template>
 
               <!-- System Message -->
               <template x-if="msg.message_type === 'system'">
                 <div class="flex items-center justify-center my-2">
-                  <span class="bg-[#F1F5F9] border border-[#E2E8F0] text-[#475569] text-[11px] px-3 py-1 rounded-full text-center" x-text="msg.body"></span>
+                  <span class="bg-[var(--surface-secondary)] border border-[var(--border)] text-[var(--gray)] text-[11px] px-3 py-1 rounded-full text-center" x-text="msg.body"></span>
                 </div>
               </template>
 
               <!-- Standard / Report Message -->
               <template x-if="msg.message_type !== 'system'">
-                <div 
+                <div
                   class="flex items-end gap-2 group"
                   :class="msg.is_mine ? 'justify-end' : 'justify-start'"
                 >
                   <!-- Avatar for incoming -->
                   <template x-if="!msg.is_mine">
-                    <div class="w-7 h-7 rounded-full bg-[#E2E8F0] text-[#475569] flex items-center justify-center font-bold text-[10px] shrink-0 mb-1">
+                    <div class="w-7 h-7 rounded-full bg-[var(--surface-secondary)] text-[var(--gray)] flex items-center justify-center font-bold text-[10px] shrink-0 mb-1">
                       <template x-if="msg.user_avatar">
                         <img :src="msg.user_avatar" class="w-full h-full rounded-full object-cover" alt="" />
                       </template>
@@ -479,27 +479,27 @@
 
                   <!-- Message Bubble Container -->
                   <div class="max-w-[85%] sm:max-w-[70%] relative group">
-                    
+
                     <!-- Bubble Content -->
-                    <div 
-                      class="rounded-2xl px-3.5 py-2.5 text-xs shadow-xs relative"
-                      :class="msg.is_mine ? 'bg-[#1565D8] text-white rounded-br-xs' : 'bg-[#F1F5F9] text-[#111827] border border-[#E2E8F0] rounded-bl-xs'"
+                    <div
+                      class="rounded-lg px-3.5 py-2.5 text-xs shadow-xs relative"
+                      :class="msg.is_mine ? 'bg-[var(--blue)] text-white rounded-br-xs' : 'bg-[var(--surface-secondary)] text-[var(--primary-dark)] border border-[var(--border)] rounded-bl-xs'"
                     >
                       <!-- Sender name in group -->
                       <template x-if="!msg.is_mine && activeThread.type !== 'personal'">
-                        <div class="font-bold text-[11px] text-[#0B4DB3] mb-1 flex items-center gap-1.5">
+                        <div class="font-bold text-[11px] text-[var(--blue)] mb-1 flex items-center gap-1.5">
                           <span x-text="msg.user_name"></span>
                           <template x-if="['super_admin','admin_ho','admin_site','admin'].includes(msg.user_role)">
-                            <span class="text-[9px] px-1 rounded bg-[#DBEAFE] text-[#1E40AF]">Admin</span>
+                            <span class="text-[9px] px-1 rounded bg-[var(--surface-secondary)] text-[var(--blue)]">Admin</span>
                           </template>
                         </div>
                       </template>
 
                       <!-- Reply Context Preview -->
                       <template x-if="msg.parent">
-                        <div 
+                        <div
                           class="mb-2 p-2 rounded-lg text-[11px] border-l-2 cursor-pointer"
-                          :class="msg.is_mine ? 'bg-white/10 border-white text-white/90' : 'bg-white border-[#1565D8] text-[#475569]'"
+                          :class="msg.is_mine ? 'bg-white/10 border-white text-white/90' : 'bg-white border-[var(--blue)] text-[var(--gray)]'"
                         >
                           <p class="font-bold text-[10px]" x-text="msg.parent.user_name"></p>
                           <p class="truncate" x-text="msg.parent.body"></p>
@@ -508,27 +508,27 @@
 
                       <!-- STRUCTURED REPORT CARD (Phase 4.4) -->
                       <template x-if="msg.report">
-                        <div class="p-3 bg-white text-[#111827] rounded-xl border border-[#CBD5E1] my-1 shadow-xs space-y-2">
-                          <div class="flex items-start justify-between gap-2 border-b border-[#E2E8F0] pb-2">
+                        <div class="p-3 bg-white text-[var(--primary-dark)] rounded-lg border border-[var(--border)] my-1 shadow-xs space-y-2">
+                          <div class="flex items-start justify-between gap-2 border-b border-[var(--border)] pb-2">
                             <div>
-                              <span class="text-[10px] font-bold uppercase tracking-wider text-[#1565D8]" x-text="msg.report.report_type"></span>
-                              <h4 class="font-bold text-sm text-[#111827]" x-text="msg.report.title"></h4>
+                              <span class="text-[10px] font-bold uppercase tracking-wider text-[var(--blue)]" x-text="msg.report.report_type"></span>
+                              <h4 class="font-bold text-sm text-[var(--primary-dark)]" x-text="msg.report.title"></h4>
                             </div>
-                            <span 
+                            <span
                               class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase"
                               :class="{
-                                'bg-[#FEF3C7] text-[#92400E]': msg.report.status === 'open',
-                                'bg-[#DBEAFE] text-[#1E40AF]': msg.report.status === 'in_progress',
-                                'bg-[#DCFCE7] text-[#166534]': msg.report.status === 'resolved',
-                                'bg-[#F1F5F9] text-[#475569]': msg.report.status === 'closed'
+                                'bg-[var(--surface-secondary)] text-[var(--orange)]': msg.report.status === 'open',
+                                'bg-[var(--surface-secondary)] text-[var(--blue)]': msg.report.status === 'in_progress',
+                                'bg-[var(--surface-secondary)] text-[var(--green)]': msg.report.status === 'resolved',
+                                'bg-[var(--surface-secondary)] text-[var(--gray)]': msg.report.status === 'closed'
                               }"
                               x-text="msg.report.status.replace('_', ' ')"
                             ></span>
                           </div>
 
-                          <p class="text-xs text-[#334155] whitespace-pre-line" x-text="msg.report.description"></p>
+                          <p class="text-xs text-[var(--gray)] whitespace-pre-line" x-text="msg.report.description"></p>
 
-                          <div class="grid grid-cols-2 gap-2 text-[10px] text-[#64748B] pt-1 border-t border-[#F1F5F9]">
+                          <div class="grid grid-cols-2 gap-2 text-[10px] text-[var(--gray)] pt-1 border-t border-[var(--border)]">
                             <div><strong>Site:</strong> <span x-text="msg.report.site_code || '-'"></span></div>
                             <div><strong>Prioritas:</strong> <span class="capitalize" x-text="msg.report.priority"></span></div>
                             <div><strong>Dept:</strong> <span x-text="msg.report.department_name || '-'"></span></div>
@@ -536,11 +536,11 @@
                           </div>
 
                           <!-- Action to update status -->
-                          <div class="pt-2 flex items-center justify-between border-t border-[#F1F5F9]">
-                            <button 
-                              type="button" 
+                          <div class="pt-2 flex items-center justify-between border-t border-[var(--border)]">
+                            <button
+                              type="button"
                               @click="openReportDetailModal(msg.report)"
-                              class="text-[11px] font-semibold text-[#1565D8] hover:underline"
+                              class="text-[11px] font-semibold text-[var(--blue)] hover:underline"
                             >
                               Lihat Riwayat & Ubah Status →
                             </button>
@@ -567,10 +567,10 @@
 
                               <!-- File download button -->
                               <template x-if="!att.is_image">
-                                <a 
-                                  :href="att.url" 
+                                <a
+                                  :href="att.url"
                                   class="flex items-center gap-2 p-2 rounded-lg border text-[11px] font-medium transition"
-                                  :class="msg.is_mine ? 'bg-white/15 border-white/20 text-white hover:bg-white/25' : 'bg-white border-[#E2E8F0] text-[#111827] hover:bg-[#F8FAFC]'"
+                                  :class="msg.is_mine ? 'bg-white/15 border-white/20 text-white hover:bg-white/25' : 'bg-white border-[var(--border)] text-[var(--primary-dark)] hover:bg-[var(--surface-secondary)]'"
                                 >
                                   <x-ui-icon name="file" class="w-4 h-4 shrink-0" />
                                   <span class="truncate flex-1" x-text="att.name"></span>
@@ -583,9 +583,9 @@
                       </template>
 
                       <!-- Meta timestamp & status -->
-                      <div 
+                      <div
                         class="flex items-center justify-end gap-1 mt-1 text-[9px]"
-                        :class="msg.is_mine ? 'text-white/75' : 'text-[#64748B]'"
+                        :class="msg.is_mine ? 'text-white/75' : 'text-[var(--gray)]'"
                       >
                         <span x-show="msg.is_edited" class="italic mr-0.5">diedit</span>
                         <span x-text="msg.created_at"></span>
@@ -599,11 +599,11 @@
                     <template x-if="msg.reactions && msg.reactions.length > 0">
                       <div class="flex items-center gap-1 mt-1">
                         <template x-for="rx in msg.reactions" :key="rx.emoji">
-                          <button 
+                          <button
                             type="button"
                             @click="toggleReaction(msg, rx.emoji)"
                             class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] border transition"
-                            :class="rx.has_mine ? 'bg-[#EFF6FF] border-[#1565D8] text-[#1565D8] font-bold' : 'bg-white border-[#E2E8F0] text-[#475569]'"
+                            :class="rx.has_mine ? 'bg-[var(--surface-secondary)] border-[var(--blue)] text-[var(--blue)] font-bold' : 'bg-white border-[var(--border)] text-[var(--gray)]'"
                           >
                             <span x-text="rx.emoji"></span>
                             <span x-text="rx.count"></span>
@@ -613,38 +613,38 @@
                     </template>
 
                     <!-- Hover Quick Actions Toolbar -->
-                    <div 
-                      class="absolute -top-3 right-2 hidden group-hover:flex items-center gap-0.5 bg-white border border-[#E2E8F0] rounded-lg shadow-sm px-1 py-0.5 z-20"
+                    <div
+                      class="absolute -top-3 right-2 hidden group-hover:flex items-center gap-0.5 bg-white border border-[var(--border)] rounded-lg shadow-sm px-1 py-0.5 z-20"
                     >
                       <!-- Quick reaction -->
-                      <button type="button" @click="toggleReaction(msg, '👍')" class="p-1 hover:bg-[#F1F5F9] rounded text-xs" title="Suka" aria-label="Suka"><x-ui.lucide name="thumbs-up" /></button>
-                      <button type="button" @click="toggleReaction(msg, '❤️')" class="p-1 hover:bg-[#F1F5F9] rounded text-xs" title="Love" aria-label="Suka dengan hati"><x-ui.lucide name="heart" /></button>
-                      
+                      <button type="button" @click="toggleReaction(msg, '👍')" class="p-1 hover:bg-[var(--surface-secondary)] rounded text-xs" title="Suka" aria-label="Suka"><x-ui.lucide name="thumbs-up" /></button>
+                      <button type="button" @click="toggleReaction(msg, '❤️')" class="p-1 hover:bg-[var(--surface-secondary)] rounded text-xs" title="Love" aria-label="Suka dengan hati"><x-ui.lucide name="heart" /></button>
+
                       <!-- Reply -->
-                      <button type="button" @click="setReplyTo(msg)" class="p-1 text-[#475569] hover:text-[#111827] hover:bg-[#F1F5F9] rounded" title="Balas">
+                      <button type="button" @click="setReplyTo(msg)" class="p-1 text-[var(--gray)] hover:text-[var(--primary-dark)] hover:bg-[var(--surface-secondary)] rounded" title="Balas">
                         <x-ui-icon name="reply" class="w-3.5 h-3.5" />
                       </button>
 
                       <!-- Copy -->
-                      <button type="button" @click="copyMessage(msg)" class="p-1 text-[#475569] hover:text-[#111827] hover:bg-[#F1F5F9] rounded" title="Salin">
+                      <button type="button" @click="copyMessage(msg)" class="p-1 text-[var(--gray)] hover:text-[var(--primary-dark)] hover:bg-[var(--surface-secondary)] rounded" title="Salin">
                         <x-ui-icon name="copy" class="w-3.5 h-3.5" />
                       </button>
 
                       <!-- Pin -->
-                      <button type="button" @click="togglePinMessage(msg)" class="p-1 text-[#475569] hover:text-[#111827] hover:bg-[#F1F5F9] rounded" title="Pin Pesan">
+                      <button type="button" @click="togglePinMessage(msg)" class="p-1 text-[var(--gray)] hover:text-[var(--primary-dark)] hover:bg-[var(--surface-secondary)] rounded" title="Pin Pesan">
                         <x-ui-icon name="pin" class="w-3.5 h-3.5" />
                       </button>
 
                       <!-- Edit if mine -->
                       <template x-if="msg.can_edit && !msg.report">
-                        <button type="button" @click="openEditMessageModal(msg)" class="p-1 text-[#475569] hover:text-[#111827] hover:bg-[#F1F5F9] rounded" title="Edit">
+                        <button type="button" @click="openEditMessageModal(msg)" class="p-1 text-[var(--gray)] hover:text-[var(--primary-dark)] hover:bg-[var(--surface-secondary)] rounded" title="Edit">
                           <x-ui-icon name="edit" class="w-3.5 h-3.5" />
                         </button>
                       </template>
 
                       <!-- Delete if allowed -->
                       <template x-if="msg.can_delete">
-                        <button type="button" @click="openDeleteMessageModal(msg)" class="p-1 text-[#DC2626] hover:bg-[#FEF2F2] rounded" title="Hapus">
+                        <button type="button" @click="openDeleteMessageModal(msg)" class="p-1 text-[var(--red)] hover:bg-[var(--surface-secondary)] rounded" title="Hapus">
                           <x-ui-icon name="trash" class="w-3.5 h-3.5" />
                         </button>
                       </template>
@@ -658,30 +658,30 @@
         </div>
 
         <!-- Sticky Jump to Latest Button -->
-        <button 
-          type="button" 
+        <button
+          type="button"
           x-show="showScrollDown"
           @click="scrollToBottom(true)"
-          class="absolute bottom-24 right-8 p-2.5 bg-white border border-[#E2E8F0] shadow-md rounded-full text-[#1565D8] hover:bg-[#F8FAFC] transition z-30"
+          class="absolute bottom-24 right-8 p-2.5 bg-white border border-[var(--border)] shadow-md rounded-full text-[var(--blue)] hover:bg-[var(--surface-secondary)] transition z-30"
           title="Ke pesan terbaru"
         >
           <x-ui-icon name="arrow-down" class="w-4 h-4" />
         </button>
 
         <!-- Composer (Sticky Bottom) -->
-        <footer class="p-3 bg-white border-t border-[#E2E8F0] shrink-0 z-20">
-          
+        <footer class="p-3 bg-white border-t border-[var(--border)] shrink-0 z-20">
+
           <!-- Reply Preview Bar -->
           <template x-if="replyingTo">
-            <div class="flex items-center justify-between bg-[#EFF6FF] border border-[#BFDBFE] px-3 py-1.5 rounded-lg mb-2 text-xs">
+            <div class="flex items-center justify-between bg-[var(--surface-secondary)] border border-[var(--border)] px-3 py-1.5 rounded-lg mb-2 text-xs">
               <div class="flex items-center gap-2 min-w-0">
-                <x-ui-icon name="reply" class="w-3.5 h-3.5 text-[#1565D8] shrink-0" />
+                <x-ui-icon name="reply" class="w-3.5 h-3.5 text-[var(--blue)] shrink-0" />
                 <div class="min-w-0">
-                  <span class="font-bold text-[#1565D8]" x-text="'Membalas ' + replyingTo.user_name"></span>
-                  <p class="truncate text-[#475569]" x-text="replyingTo.body"></p>
+                  <span class="font-bold text-[var(--blue)]" x-text="'Membalas ' + replyingTo.user_name"></span>
+                  <p class="truncate text-[var(--gray)]" x-text="replyingTo.body"></p>
                 </div>
               </div>
-              <button type="button" @click="replyingTo = null" class="text-[#94A3B8] hover:text-[#475569]">
+              <button type="button" @click="replyingTo = null" class="text-[var(--gray)] hover:text-[var(--gray)]">
                 <x-ui-icon name="x" class="w-4 h-4" />
               </button>
             </div>
@@ -689,12 +689,12 @@
 
           <!-- Attachments pending preview -->
           <template x-if="pendingAttachments.length > 0">
-            <div class="flex flex-wrap gap-2 mb-2 p-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg">
+            <div class="flex flex-wrap gap-2 mb-2 p-2 bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg">
               <template x-for="(file, idx) in pendingAttachments" :key="idx">
-                <div class="flex items-center gap-1.5 px-2 py-1 bg-white border border-[#E2E8F0] rounded text-xs text-[#111827]">
-                  <x-ui-icon name="file" class="w-3.5 h-3.5 text-[#1565D8]" />
+                <div class="flex items-center gap-1.5 px-2 py-1 bg-white border border-[var(--border)] rounded text-xs text-[var(--primary-dark)]">
+                  <x-ui-icon name="file" class="w-3.5 h-3.5 text-[var(--blue)]" />
                   <span class="truncate max-w-[120px]" x-text="file.name"></span>
-                  <button type="button" @click="removePendingAttachment(idx)" class="text-[#DC2626] hover:opacity-80">
+                  <button type="button" @click="removePendingAttachment(idx)" class="text-[var(--red)] hover:opacity-80">
                     <x-ui-icon name="x" class="w-3 h-3" />
                   </button>
                 </div>
@@ -705,38 +705,38 @@
           <!-- Input Row -->
           <div class="flex items-end gap-2">
             <!-- Attachment Button -->
-            <label 
-              class="p-2.5 text-[#475569] hover:text-[#1565D8] hover:bg-[#F1F5F9] rounded-lg cursor-pointer transition shrink-0"
+            <label
+              class="p-2.5 text-[var(--gray)] hover:text-[var(--blue)] hover:bg-[var(--surface-secondary)] rounded-lg cursor-pointer transition shrink-0"
               title="Lampirkan Dokumen / Gambar"
             >
               <x-ui-icon name="paperclip" class="w-5 h-5" />
-              <input 
-                type="file" 
-                multiple 
-                @change="handleFileSelect($event)" 
-                class="sr-only" 
+              <input
+                type="file"
+                multiple
+                @change="handleFileSelect($event)"
+                class="sr-only"
                 accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt,.webp"
               />
             </label>
 
             <!-- Textarea -->
             <div class="flex-1 min-w-0 relative">
-              <textarea 
+              <textarea
                 x-ref="messageInput"
-                x-model="messageBody" 
+                x-model="messageBody"
                 @keydown.enter="handleEnterKey($event)"
                 rows="1" aria-label="Pesan" @input="$el.style.height = '40px'; $el.style.height = Math.min($el.scrollHeight, 128) + 'px'"
                 placeholder="Ketik pesan..."
-                class="chat-composer-input w-full resize-none py-2.5 px-3.5 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[#111827] placeholder-[#94A3B8] focus:bg-white focus:border-[#1565D8] focus:ring-1 focus:ring-[#1565D8] transition max-h-32"
+                class="chat-composer-input w-full resize-none py-2.5 px-3.5 text-xs bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg text-[var(--primary-dark)] placeholder-[var(--gray)] focus:bg-white focus:border-[var(--blue)] focus:ring-1 focus:ring-[var(--blue)] transition max-h-32"
               ></textarea>
             </div>
 
             <!-- Send Button -->
-            <button 
-              type="button" 
+            <button
+              type="button"
               @click="sendMessage()"
               :disabled="sendingMessage || (messageBody.trim() === '' && pendingAttachments.length === 0)"
-              class="p-2.5 text-white bg-[#1565D8] hover:bg-[#0B4DB3] disabled:opacity-50 disabled:pointer-events-none rounded-xl transition shadow-xs shrink-0"
+              class="p-2.5 text-white bg-[var(--blue)] hover:bg-[var(--action-primary-hover)] disabled:opacity-50 disabled:pointer-events-none rounded-lg transition shadow-xs shrink-0"
               title="Kirim (Enter)"
             >
               <x-ui-icon name="send" class="w-5 h-5" />
@@ -751,16 +751,16 @@
   <!-- ======================================================== -->
   <!-- D. INFORMATION SIDEBAR (300px)                           -->
   <!-- ======================================================== -->
-  <aside 
+  <aside
     x-show="infoPanelOpen && activeThread"
     x-transition
     x-cloak
-    class="w-full sm:w-[300px] shrink-0 border-l border-[#E2E8F0] bg-white flex flex-col h-full z-20 shadow-lg sm:shadow-none"
+    class="w-full sm:w-[300px] shrink-0 border-l border-[var(--border)] bg-white flex flex-col h-full z-20 shadow-lg sm:shadow-none"
   >
     <!-- Header -->
-    <div class="px-4 py-3.5 border-b border-[#E2E8F0] flex items-center justify-between">
-      <h3 class="text-sm font-bold text-[#111827]">Info Percakapan</h3>
-      <button type="button" @click="infoPanelOpen = false" class="p-1 text-[#475569] hover:text-[#111827] rounded-lg">
+    <div class="px-4 py-3.5 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="text-sm font-bold text-[var(--primary-dark)]">Info Percakapan</h3>
+      <button type="button" @click="infoPanelOpen = false" class="p-1 text-[var(--gray)] hover:text-[var(--primary-dark)] rounded-lg">
         <x-ui-icon name="x" class="w-4 h-4" />
       </button>
     </div>
@@ -768,10 +768,10 @@
     <!-- Body -->
     <div class="flex-1 overflow-y-auto chat-scroll p-4 space-y-5 text-xs">
       <!-- Profile Header -->
-      <div class="text-center pb-4 border-b border-[#E2E8F0]">
-        <div 
+      <div class="text-center pb-4 border-b border-[var(--border)]">
+        <div
           class="w-16 h-16 rounded-full mx-auto flex items-center justify-center font-bold text-lg mb-2"
-          :class="activeThread && activeThread.type === 'personal' ? 'bg-[#E0E7FF] text-[#3730A3]' : 'bg-[#FEF3C7] text-[#92400E]'"
+          :class="activeThread && activeThread.type === 'personal' ? 'bg-[var(--surface-secondary)] text-[var(--blue)]' : 'bg-[var(--surface-secondary)] text-[var(--orange)]'"
         >
           <template x-if="activeThread && activeThread.avatar_url">
             <img :src="activeThread.avatar_url" class="w-full h-full rounded-full object-cover" alt="" />
@@ -780,24 +780,24 @@
             <span x-text="activeThread ? activeThread.initials : ''"></span>
           </template>
         </div>
-        <h4 class="font-bold text-sm text-[#111827]" x-text="activeThread ? activeThread.subject : ''"></h4>
-        <p class="text-[11px] text-[#475569] mt-0.5" x-text="activeThread && activeThread.other_user ? activeThread.other_user.email : (activeThread ? activeThread.group_type : '')"></p>
+        <h4 class="font-bold text-sm text-[var(--primary-dark)]" x-text="activeThread ? activeThread.subject : ''"></h4>
+        <p class="text-[11px] text-[var(--gray)] mt-0.5" x-text="activeThread && activeThread.other_user ? activeThread.other_user.email : (activeThread ? activeThread.group_type : '')"></p>
       </div>
 
       <!-- Detail Info -->
       <template x-if="activeThread && activeThread.type === 'personal' && activeThread.other_user">
         <div class="space-y-3">
           <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Jabatan / Role</span>
-            <p class="text-xs text-[#111827] font-medium capitalize" x-text="activeThread.other_user.role.replace('_', ' ')"></p>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-[var(--gray)]">Jabatan / Role</span>
+            <p class="text-xs text-[var(--primary-dark)] font-medium capitalize" x-text="activeThread.other_user.role.replace('_', ' ')"></p>
           </div>
           <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Departemen</span>
-            <p class="text-xs text-[#111827] font-medium" x-text="activeThread.other_user.department"></p>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-[var(--gray)]">Departemen</span>
+            <p class="text-xs text-[var(--primary-dark)] font-medium" x-text="activeThread.other_user.department"></p>
           </div>
           <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Site Penugasan</span>
-            <p class="text-xs text-[#111827] font-medium" x-text="activeThread.other_user.site"></p>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-[var(--gray)]">Site Penugasan</span>
+            <p class="text-xs text-[var(--primary-dark)] font-medium" x-text="activeThread.other_user.site"></p>
           </div>
         </div>
       </template>
@@ -806,19 +806,19 @@
       <template x-if="activeThread && activeThread.type !== 'personal'">
         <div class="space-y-4">
           <div x-show="activeThread.description">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Deskripsi</span>
-            <p class="text-xs text-[#334155] mt-0.5" x-text="activeThread.description"></p>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-[var(--gray)]">Deskripsi</span>
+            <p class="text-xs text-[var(--gray)] mt-0.5" x-text="activeThread.description"></p>
           </div>
 
           <!-- Members List -->
           <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]" x-text="'Anggota (' + (activeThread.members ? activeThread.members.length : 0) + ')'"></span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-[var(--gray)]" x-text="'Anggota (' + (activeThread.members ? activeThread.members.length : 0) + ')'"></span>
               <template x-if="activeThread.can_manage">
-                <button 
-                  type="button" 
-                  @click="openAddMemberModal()" 
-                  class="text-[11px] font-bold text-[#1565D8] hover:underline"
+                <button
+                  type="button"
+                  @click="openAddMemberModal()"
+                  class="text-[11px] font-bold text-[var(--blue)] hover:underline"
                 >
                   + Tambah
                 </button>
@@ -829,20 +829,20 @@
               <template x-for="mem in activeThread.members" :key="mem.id">
                 <div class="flex items-center justify-between py-1.5">
                   <div class="flex items-center gap-2 min-w-0">
-                    <div class="w-6 h-6 rounded-full bg-[#E2E8F0] flex items-center justify-center font-bold text-[9px] text-[#475569]">
+                    <div class="w-6 h-6 rounded-full bg-[var(--surface-secondary)] flex items-center justify-center font-bold text-[9px] text-[var(--gray)]">
                       <span x-text="mem.name.substring(0, 2).toUpperCase()"></span>
                     </div>
                     <div class="min-w-0">
-                      <p class="font-medium text-xs text-[#111827] truncate" x-text="mem.name"></p>
-                      <span class="text-[9px] text-[#94A3B8] capitalize" x-text="mem.chat_role"></span>
+                      <p class="font-medium text-xs text-[var(--primary-dark)] truncate" x-text="mem.name"></p>
+                      <span class="text-[9px] text-[var(--gray)] capitalize" x-text="mem.chat_role"></span>
                     </div>
                   </div>
 
                   <template x-if="activeThread.can_manage && mem.id !== currentUserId">
-                    <x-ui.button variant="danger" icon="trash-2" 
-                      type="button" 
-                      @click="removeGroupMember(mem)" 
-                     
+                    <x-ui.button variant="danger" icon="trash-2"
+                      type="button"
+                      @click="removeGroupMember(mem)"
+
                     >Hapus</x-ui.button>
                   </template>
                 </div>
@@ -851,11 +851,11 @@
           </div>
 
           <!-- Leave Group Button -->
-          <div class="pt-3 border-t border-[#E2E8F0]">
-            <button 
-              type="button" 
+          <div class="pt-3 border-t border-[var(--border)]">
+            <button
+              type="button"
               @click="leaveActiveGroup()"
-              class="w-full py-2 px-3 text-xs font-semibold text-[#DC2626] bg-[#FEF2F2] hover:bg-[#FEE2E2] rounded-lg transition text-center"
+              class="w-full py-2 px-3 text-xs font-semibold text-[var(--red)] bg-[var(--surface-secondary)] hover:bg-[var(--surface-secondary)] rounded-lg transition text-center"
             >
               Keluar dari Grup
             </button>
@@ -864,21 +864,21 @@
       </template>
 
       <!-- Notification Settings -->
-      <div class="pt-3 border-t border-[#E2E8F0] space-y-2">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Pengaturan Obrolan</span>
-        <button 
-          type="button" 
+      <div class="pt-3 border-t border-[var(--border)] space-y-2">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-[var(--gray)]">Pengaturan Obrolan</span>
+        <button
+          type="button"
           @click="togglePinCurrentConversation()"
-          class="w-full flex items-center justify-between py-1.5 text-xs text-[#111827] hover:text-[#1565D8]"
+          class="w-full flex items-center justify-between py-1.5 text-xs text-[var(--primary-dark)] hover:text-[var(--blue)]"
         >
           <span x-text="activeThread && activeThread.is_pinned ? 'Lepas Sematan (Unpin)' : 'Sematkan Percakapan (Pin)'"></span>
           <x-ui-icon name="pin" class="w-3.5 h-3.5" />
         </button>
 
-        <button 
-          type="button" 
+        <button
+          type="button"
           @click="toggleMuteCurrentConversation()"
-          class="w-full flex items-center justify-between py-1.5 text-xs text-[#111827] hover:text-[#1565D8]"
+          class="w-full flex items-center justify-between py-1.5 text-xs text-[var(--primary-dark)] hover:text-[var(--blue)]"
         >
           <span x-text="activeThread && activeThread.is_muted ? 'Bunyikan Notifikasi' : 'Senapkan Notifikasi (Mute)'"></span>
           <x-ui-icon name="bell-off" class="w-3.5 h-3.5" />
@@ -892,32 +892,32 @@
   <!-- ======================================================== -->
 
   <!-- 1. Modal: New Personal Chat -->
-  <div 
-    x-show="modalNewChat" 
-    x-cloak 
+  <div
+    x-show="modalNewChat"
+    x-cloak
     class="ui-modal-overlay"
   >
-    <div 
+    <div
       @click.outside="modalNewChat = false"
-      class="ui-modal-panel ui-modal-panel--sm w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[85vh]"
+      class="ui-modal-panel ui-modal-panel--sm flex flex-col max-h-[85vh]"
     >
-      <div class="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
+      <div class="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between">
         <div>
-          <h3 class="font-bold text-[#111827] text-sm">Mulai Chat Baru</h3>
-          <p class="text-xs text-[#475569]">Pilih rekan kerja untuk memulai komunikasi pribadi</p>
+          <h3 class="font-bold text-[var(--primary-dark)] text-sm">Mulai Chat Baru</h3>
+          <p class="text-xs text-[var(--gray)]">Pilih rekan kerja untuk memulai komunikasi pribadi</p>
         </div>
-        <button type="button" @click="modalNewChat = false" class="text-[#94A3B8] hover:text-[#475569]">
+        <button type="button" @click="modalNewChat = false" class="text-[var(--gray)] hover:text-[var(--gray)]">
           <x-ui-icon name="x" class="w-5 h-5" />
         </button>
       </div>
 
-      <div class="p-4 border-b border-[#E2E8F0]">
-        <input 
-          type="text" 
-          x-model="employeeSearchQuery" 
+      <div class="p-4 border-b border-[var(--border)]">
+        <input
+          type="text"
+          x-model="employeeSearchQuery"
           @input.debounce.300ms="searchEmployees()"
           placeholder="Cari nama, NIK, atau email..."
-          class="w-full px-3 py-2 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-[#111827] placeholder-[#94A3B8] focus:bg-white focus:border-[#1565D8]"
+          class="w-full px-3 py-2 text-xs bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg text-[var(--primary-dark)] placeholder-[var(--gray)] focus:bg-white focus:border-[var(--blue)]"
         />
       </div>
 
@@ -926,61 +926,61 @@
         <template x-for="emp in employeeList" :key="emp.id">
           <button type="button" :disabled="startingPersonalChat" :aria-busy="startingPersonalChat"
             @click="startPersonalChatWith(emp)"
-            class="w-full text-left flex items-center gap-3 p-2.5 rounded-lg hover:bg-[#F8FAFC] cursor-pointer transition disabled:opacity-50"
+            class="w-full text-left flex items-center gap-3 p-2.5 rounded-lg hover:bg-[var(--surface-secondary)] cursor-pointer transition disabled:opacity-50"
           >
-            <div class="w-9 h-9 rounded-full bg-[#E0E7FF] text-[#3730A3] flex items-center justify-center font-bold text-xs shrink-0">
+            <div class="w-9 h-9 rounded-full bg-[var(--surface-secondary)] text-[var(--blue)] flex items-center justify-center font-bold text-xs shrink-0">
               <span x-text="emp.initials"></span>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-xs font-semibold text-[#111827] truncate" x-text="emp.name"></p>
-              <p class="text-[10px] text-[#475569] truncate" x-text="(emp.nik ? emp.nik + ' · ' : '') + emp.departments"></p>
+              <p class="text-xs font-semibold text-[var(--primary-dark)] truncate" x-text="emp.name"></p>
+              <p class="text-[10px] text-[var(--gray)] truncate" x-text="(emp.nik ? emp.nik + ' · ' : '') + emp.departments"></p>
             </div>
           </button>
         </template>
         <template x-if="employeeList.length === 0">
-          <p class="text-xs text-center py-6 text-[#94A3B8]">Pegawai tidak ditemukan.</p>
+          <p class="text-xs text-center py-6 text-[var(--gray)]">Pegawai tidak ditemukan.</p>
         </template>
       </div>
     </div>
   </div>
 
   <!-- 2. Modal: New Group Wizard -->
-  <div 
-    x-show="modalNewGroup" 
-    x-cloak 
+  <div
+    x-show="modalNewGroup"
+    x-cloak
     class="ui-modal-overlay"
   >
-    <div 
+    <div
       @click.outside="modalNewGroup = false"
-      class="ui-modal-panel ui-modal-panel--md w-full max-w-lg bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[90vh]"
+      class="ui-modal-panel ui-modal-panel--md flex flex-col max-h-[90vh]"
     >
-      <div class="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
+      <div class="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between">
         <div>
-          <h3 class="font-bold text-[#111827] text-sm">Buat Grup Baru</h3>
-          <p class="text-xs text-[#475569]">Kolaborasi tim internal berdasarkan proyek, divisi, atau site</p>
+          <h3 class="font-bold text-[var(--primary-dark)] text-sm">Buat Grup Baru</h3>
+          <p class="text-xs text-[var(--gray)]">Kolaborasi tim internal berdasarkan proyek, divisi, atau site</p>
         </div>
-        <button type="button" @click="modalNewGroup = false" class="text-[#94A3B8] hover:text-[#475569]">
+        <button type="button" @click="modalNewGroup = false" class="text-[var(--gray)] hover:text-[var(--gray)]">
           <x-ui-icon name="x" class="w-5 h-5" />
         </button>
       </div>
 
       <div class="p-5 overflow-y-auto chat-scroll space-y-4 text-xs">
         <div>
-          <label class="block font-semibold text-[#111827] mb-1">Nama Grup *</label>
-          <input 
-            type="text" 
-            x-model="newGroupData.name" 
+          <label class="block font-semibold text-[var(--primary-dark)] mb-1">Nama Grup *</label>
+          <input
+            type="text"
+            x-model="newGroupData.name"
             placeholder="Contoh: Operasional Pit 3, HSE Tanggap Darurat..."
-            class="w-full px-3 py-2 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg focus:bg-white focus:border-[#1565D8]"
+            class="w-full px-3 py-2 text-xs bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg focus:bg-white focus:border-[var(--blue)]"
           />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-semibold text-[#111827] mb-1">Tipe Grup *</label>
-            <select 
-              x-model="newGroupData.group_type" 
-              class="w-full px-3 py-2 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg focus:bg-white focus:border-[#1565D8]"
+            <label class="block font-semibold text-[var(--primary-dark)] mb-1">Tipe Grup *</label>
+            <select
+              x-model="newGroupData.group_type"
+              class="w-full px-3 py-2 text-xs bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg focus:bg-white focus:border-[var(--blue)]"
             >
               <option value="project">Project</option>
               <option value="department">Department</option>
@@ -990,10 +990,10 @@
           </div>
 
           <div>
-            <label class="block font-semibold text-[#111827] mb-1">Site Scope</label>
-            <select 
-              x-model="newGroupData.site_id" 
-              class="w-full px-3 py-2 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg focus:bg-white focus:border-[#1565D8]"
+            <label class="block font-semibold text-[var(--primary-dark)] mb-1">Site Scope</label>
+            <select
+              x-model="newGroupData.site_id"
+              class="w-full px-3 py-2 text-xs bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg focus:bg-white focus:border-[var(--blue)]"
             >
               <option value="">Semua Site (Lintas)</option>
               @foreach($sites as $site)
@@ -1004,32 +1004,32 @@
         </div>
 
         <div>
-          <label class="block font-semibold text-[#111827] mb-1">Deskripsi</label>
-          <textarea 
-            x-model="newGroupData.description" 
-            rows="2" 
+          <label class="block font-semibold text-[var(--primary-dark)] mb-1">Deskripsi</label>
+          <textarea
+            x-model="newGroupData.description"
+            rows="2"
             placeholder="Tujuan dibuatnya grup ini..."
-            class="w-full px-3 py-2 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg focus:bg-white focus:border-[#1565D8]"
+            class="w-full px-3 py-2 text-xs bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg focus:bg-white focus:border-[var(--blue)]"
           ></textarea>
         </div>
 
         <!-- Member Selection -->
         <div>
-          <label class="block font-semibold text-[#111827] mb-1">Pilih Anggota *</label>
-          <input 
-            type="text" 
-            x-model="groupMemberSearch" 
+          <label class="block font-semibold text-[var(--primary-dark)] mb-1">Pilih Anggota *</label>
+          <input
+            type="text"
+            x-model="groupMemberSearch"
             @input.debounce.300ms="searchEmployeesForGroup()"
             placeholder="Cari anggota untuk ditambahkan..."
-            class="w-full px-3 py-1.5 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg mb-2"
+            class="w-full px-3 py-1.5 text-xs bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg mb-2"
           />
 
           <!-- Selected chips -->
           <div class="flex flex-wrap gap-1.5 mb-2" x-show="selectedGroupMembers.length > 0">
             <template x-for="m in selectedGroupMembers" :key="m.id">
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EFF6FF] text-[#1565D8] font-medium text-[11px] border border-[#BFDBFE]">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--surface-secondary)] text-[var(--blue)] font-medium text-[11px] border border-[var(--border)]">
                 <span x-text="m.name"></span>
-                <button type="button" @click="toggleGroupMember(m)" class="hover:text-[#DC2626]">
+                <button type="button" @click="toggleGroupMember(m)" class="hover:text-[var(--red)]">
                   <x-ui-icon name="x" class="w-3 h-3" />
                 </button>
               </span>
@@ -1037,20 +1037,20 @@
           </div>
 
           <!-- Options list -->
-          <div class="max-h-36 overflow-y-auto chat-scroll border border-[#E2E8F0] rounded-lg divide-y divide-[#F1F5F9]">
+          <div class="max-h-36 overflow-y-auto chat-scroll border border-[var(--border)] rounded-lg divide-y divide-[#F1F5F9]">
             <template x-for="emp in groupCandidateList" :key="emp.id">
-              <div 
+              <div
                 @click="toggleGroupMember(emp)"
-                class="flex items-center justify-between p-2 hover:bg-[#F8FAFC] cursor-pointer"
+                class="flex items-center justify-between p-2 hover:bg-[var(--surface-secondary)] cursor-pointer"
               >
                 <div class="min-w-0">
-                  <p class="font-medium text-xs text-[#111827]" x-text="emp.name"></p>
-                  <p class="text-[10px] text-[#475569]" x-text="emp.departments || emp.email"></p>
+                  <p class="font-medium text-xs text-[var(--primary-dark)]" x-text="emp.name"></p>
+                  <p class="text-[10px] text-[var(--gray)]" x-text="emp.departments || emp.email"></p>
                 </div>
-                <input 
-                  type="checkbox" 
-                  :checked="selectedGroupMembers.some(x => x.id === emp.id)" 
-                  class="rounded border-[#CBD5E1] text-[#1565D8] focus:ring-[#1565D8]" 
+                <input
+                  type="checkbox"
+                  :checked="selectedGroupMembers.some(x => x.id === emp.id)"
+                  class="rounded border-[var(--border)] text-[var(--blue)] focus:ring-[var(--blue)]"
                 />
               </div>
             </template>
@@ -1058,61 +1058,61 @@
         </div>
       </div>
 
-      <div class="px-5 py-3 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-2">
-        <button 
-          type="button" 
-          @click="modalNewGroup = false" 
-          class="px-4 py-2 text-xs font-semibold text-[#475569] hover:bg-[#E2E8F0] rounded-lg transition"
+      <div class="px-5 py-3 border-t border-[var(--border)] bg-[var(--surface-secondary)] flex justify-end gap-2">
+        <button
+          type="button"
+          @click="modalNewGroup = false"
+          class="px-4 py-2 text-xs font-semibold text-[var(--gray)] hover:bg-[var(--surface-secondary)] rounded-lg transition"
         >
           Batal
         </button>
-        <x-ui.button variant="primary" icon="plus" 
-          type="button" 
-          @click="submitCreateGroup()" 
+        <x-ui.button variant="primary" icon="plus"
+          type="button"
+          @click="submitCreateGroup()"
           ::disabled="creatingGroup || !newGroupData.name || selectedGroupMembers.length === 0"
-         
+
         >Buat Grup</x-ui.button>
       </div>
     </div>
   </div>
 
   <!-- 3. Modal: Create Report (Reporting Conversation) -->
-  <div 
-    x-show="modalReport" 
-    x-cloak 
+  <div
+    x-show="modalReport"
+    x-cloak
     class="ui-modal-overlay"
   >
-    <div 
+    <div
       @click.outside="modalReport = false"
-      class="ui-modal-panel ui-modal-panel--md w-full max-w-lg bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[90vh]"
+      class="ui-modal-panel ui-modal-panel--md flex flex-col max-h-[90vh]"
     >
-      <div class="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
+      <div class="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between">
         <div>
-          <h3 class="font-bold text-[#111827] text-sm">Buat Laporan Pekerjaan</h3>
-          <p class="text-xs text-[#475569]">Kirimkan laporan terstruktur yang dapat dilacak statusnya di chat</p>
+          <h3 class="font-bold text-[var(--primary-dark)] text-sm">Buat Laporan Pekerjaan</h3>
+          <p class="text-xs text-[var(--gray)]">Kirimkan laporan terstruktur yang dapat dilacak statusnya di chat</p>
         </div>
-        <button type="button" @click="modalReport = false" class="text-[#94A3B8] hover:text-[#475569]">
+        <button type="button" @click="modalReport = false" class="text-[var(--gray)] hover:text-[var(--gray)]">
           <x-ui-icon name="x" class="w-5 h-5" />
         </button>
       </div>
 
       <div class="p-5 overflow-y-auto chat-scroll space-y-4 text-xs">
         <div>
-          <label class="block font-semibold text-[#111827] mb-1">Judul Laporan *</label>
-          <input 
-            type="text" 
-            x-model="reportFormData.title" 
+          <label class="block font-semibold text-[var(--primary-dark)] mb-1">Judul Laporan *</label>
+          <input
+            type="text"
+            x-model="reportFormData.title"
             placeholder="Contoh: Temuan KTA di Workshop, Kerusakan Pompa Air Pit..."
-            class="w-full px-3 py-2 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg focus:bg-white focus:border-[#1565D8]"
+            class="w-full px-3 py-2 text-xs bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg focus:bg-white focus:border-[var(--blue)]"
           />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-semibold text-[#111827] mb-1">Jenis Laporan *</label>
-            <select 
-              x-model="reportFormData.report_type" 
-              class="w-full px-3 py-2 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg focus:bg-white focus:border-[#1565D8]"
+            <label class="block font-semibold text-[var(--primary-dark)] mb-1">Jenis Laporan *</label>
+            <select
+              x-model="reportFormData.report_type"
+              class="w-full px-3 py-2 text-xs bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg focus:bg-white focus:border-[var(--blue)]"
             >
               <option value="HSE / Keselamatan">HSE / Keselamatan</option>
               <option value="Maintenance / Perbaikan">Maintenance / Perbaikan</option>
@@ -1123,10 +1123,10 @@
           </div>
 
           <div>
-            <label class="block font-semibold text-[#111827] mb-1">Prioritas *</label>
-            <select 
-              x-model="reportFormData.priority" 
-              class="w-full px-3 py-2 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg focus:bg-white focus:border-[#1565D8]"
+            <label class="block font-semibold text-[var(--primary-dark)] mb-1">Prioritas *</label>
+            <select
+              x-model="reportFormData.priority"
+              class="w-full px-3 py-2 text-xs bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg focus:bg-white focus:border-[var(--blue)]"
             >
               <option value="low">Rendah (Low)</option>
               <option value="medium">Sedang (Medium)</option>
@@ -1137,29 +1137,29 @@
         </div>
 
         <div>
-          <label class="block font-semibold text-[#111827] mb-1">Deskripsi Masalah / Laporan *</label>
-          <textarea 
-            x-model="reportFormData.description" 
-            rows="3" 
+          <label class="block font-semibold text-[var(--primary-dark)] mb-1">Deskripsi Masalah / Laporan *</label>
+          <textarea
+            x-model="reportFormData.description"
+            rows="3"
             placeholder="Jelaskan detail kronologi, lokasi spesifik, atau kebutuhan penanganan..."
-            class="w-full px-3 py-2 text-xs bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg focus:bg-white focus:border-[#1565D8]"
+            class="w-full px-3 py-2 text-xs bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg focus:bg-white focus:border-[var(--blue)]"
           ></textarea>
         </div>
       </div>
 
-      <div class="px-5 py-3 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-2">
-        <button 
-          type="button" 
-          @click="modalReport = false" 
-          class="px-4 py-2 text-xs font-semibold text-[#475569] hover:bg-[#E2E8F0] rounded-lg transition"
+      <div class="px-5 py-3 border-t border-[var(--border)] bg-[var(--surface-secondary)] flex justify-end gap-2">
+        <button
+          type="button"
+          @click="modalReport = false"
+          class="px-4 py-2 text-xs font-semibold text-[var(--gray)] hover:bg-[var(--surface-secondary)] rounded-lg transition"
         >
           Batal
         </button>
-        <button 
-          type="button" 
-          @click="submitCreateReport()" 
+        <button
+          type="button"
+          @click="submitCreateReport()"
           :disabled="submittingReport || !reportFormData.title || !reportFormData.description"
-          class="px-4 py-2 text-xs font-semibold text-white bg-[#1565D8] hover:bg-[#0B4DB3] disabled:opacity-50 rounded-lg transition"
+          class="px-4 py-2 text-xs font-semibold text-white bg-[var(--blue)] hover:bg-[var(--action-primary-hover)] disabled:opacity-50 rounded-lg transition"
         >
           Kirim Laporan
         </button>
@@ -1168,60 +1168,60 @@
   </div>
 
   <!-- 4. Modal: Report Details & Update Status -->
-  <div 
-    x-show="modalReportDetail" 
-    x-cloak 
+  <div
+    x-show="modalReportDetail"
+    x-cloak
     class="ui-modal-overlay"
   >
-    <div 
+    <div
       @click.outside="modalReportDetail = false"
-      class="ui-modal-panel ui-modal-panel--md w-full max-w-lg bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden flex flex-col max-h-[90vh]"
+      class="ui-modal-panel ui-modal-panel--md flex flex-col max-h-[90vh]"
     >
-      <div class="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
-        <h3 class="font-bold text-[#111827] text-sm">Riwayat & Update Laporan</h3>
-        <button type="button" @click="modalReportDetail = false" class="text-[#94A3B8] hover:text-[#475569]">
+      <div class="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between">
+        <h3 class="font-bold text-[var(--primary-dark)] text-sm">Riwayat & Update Laporan</h3>
+        <button type="button" @click="modalReportDetail = false" class="text-[var(--gray)] hover:text-[var(--gray)]">
           <x-ui-icon name="x" class="w-5 h-5" />
         </button>
       </div>
 
       <div class="p-5 overflow-y-auto chat-scroll space-y-4 text-xs" x-if="selectedReport">
         <div>
-          <span class="text-[10px] font-bold text-[#1565D8] uppercase tracking-wider" x-text="selectedReport.report_type"></span>
-          <h4 class="text-base font-bold text-[#111827]" x-text="selectedReport.title"></h4>
-          <p class="text-xs text-[#475569] mt-1" x-text="selectedReport.description"></p>
+          <span class="text-[10px] font-bold text-[var(--blue)] uppercase tracking-wider" x-text="selectedReport.report_type"></span>
+          <h4 class="text-base font-bold text-[var(--primary-dark)]" x-text="selectedReport.title"></h4>
+          <p class="text-xs text-[var(--gray)] mt-1" x-text="selectedReport.description"></p>
         </div>
 
-        <div class="p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl space-y-3">
-          <label class="block font-semibold text-[#111827]">Perbarui Status Laporan</label>
+        <div class="p-3 bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg space-y-3">
+          <label class="block font-semibold text-[var(--primary-dark)]">Perbarui Status Laporan</label>
           <div class="flex items-center gap-2">
-            <select 
-              x-model="newReportStatus" 
-              class="flex-1 px-3 py-2 text-xs bg-white border border-[#E2E8F0] rounded-lg"
+            <select
+              x-model="newReportStatus"
+              class="flex-1 px-3 py-2 text-xs bg-white border border-[var(--border)] rounded-lg"
             >
               <option value="open">Open (Terbuka)</option>
               <option value="in_progress">In Progress (Sedang Dikerjakan)</option>
               <option value="resolved">Resolved (Terselesaikan)</option>
               <option value="closed">Closed (Ditutup)</option>
             </select>
-            <x-ui.button variant="primary" icon="save" 
-              type="button" 
+            <x-ui.button variant="primary" icon="save"
+              type="button"
               @click="submitUpdateReportStatus()"
-             
+
             >Update</x-ui.button>
           </div>
         </div>
 
         <!-- Audit Trail / Status History -->
         <div>
-          <span class="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] block mb-2">Riwayat Perubahan Status</span>
-          <div class="space-y-2 border-l-2 border-[#E2E8F0] pl-3">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-[var(--gray)] block mb-2">Riwayat Perubahan Status</span>
+          <div class="space-y-2 border-l-2 border-[var(--border)] pl-3">
             <template x-for="hist in (selectedReport.histories || [])" :key="hist.time + hist.to">
               <div class="text-[11px]">
-                <p class="font-semibold text-[#111827]">
+                <p class="font-semibold text-[var(--primary-dark)]">
                   <span class="capitalize" x-text="hist.to.replace('_', ' ')"></span>
-                  <span class="text-[#94A3B8] font-normal" x-text="'oleh ' + hist.user + ' · ' + hist.time"></span>
+                  <span class="text-[var(--gray)] font-normal" x-text="'oleh ' + hist.user + ' · ' + hist.time"></span>
                 </p>
-                <p x-show="hist.notes" class="text-[#475569] italic" x-text="hist.notes"></p>
+                <p x-show="hist.notes" class="text-[var(--gray)] italic" x-text="hist.notes"></p>
               </div>
             </template>
           </div>
@@ -1231,36 +1231,36 @@
   </div>
 
   <!-- 5. Context Menu Floating -->
-  <div 
-    x-show="contextMenu.open" 
-    x-cloak 
+  <div
+    x-show="contextMenu.open"
+    x-cloak
     @click.outside="contextMenu.open = false"
     :style="`top: ${contextMenu.y}px; left: ${contextMenu.x}px;`"
-    class="fixed z-50 w-44 bg-white border border-[#E2E8F0] rounded-xl shadow-lg py-1.5 text-xs text-[#111827]"
+    class="fixed z-50 w-44 bg-white border border-[var(--border)] rounded-lg shadow-lg py-1.5 text-xs text-[var(--primary-dark)]"
   >
-    <button 
-      type="button" 
-      @click="togglePinContextMenu()" 
-      class="w-full text-left px-3 py-2 hover:bg-[#F8FAFC] flex items-center justify-between"
+    <button
+      type="button"
+      @click="togglePinContextMenu()"
+      class="w-full text-left px-3 py-2 hover:bg-[var(--surface-secondary)] flex items-center justify-between"
     >
       <span x-text="contextMenu.thread && contextMenu.thread.is_pinned ? 'Lepas Pin' : 'Sematkan (Pin)'"></span>
-      <x-ui-icon name="pin" class="w-3.5 h-3.5 text-[#1565D8]" />
+      <x-ui-icon name="pin" class="w-3.5 h-3.5 text-[var(--blue)]" />
     </button>
-    <button 
-      type="button" 
-      @click="toggleMuteContextMenu()" 
-      class="w-full text-left px-3 py-2 hover:bg-[#F8FAFC] flex items-center justify-between"
+    <button
+      type="button"
+      @click="toggleMuteContextMenu()"
+      class="w-full text-left px-3 py-2 hover:bg-[var(--surface-secondary)] flex items-center justify-between"
     >
       <span x-text="contextMenu.thread && contextMenu.thread.is_muted ? 'Bunyikan' : 'Senyapkan'"></span>
-      <x-ui-icon name="bell-off" class="w-3.5 h-3.5 text-[#94A3B8]" />
+      <x-ui-icon name="bell-off" class="w-3.5 h-3.5 text-[var(--gray)]" />
     </button>
-    <button 
-      type="button" 
-      @click="markAsReadContextMenu()" 
-      class="w-full text-left px-3 py-2 hover:bg-[#F8FAFC] flex items-center justify-between"
+    <button
+      type="button"
+      @click="markAsReadContextMenu()"
+      class="w-full text-left px-3 py-2 hover:bg-[var(--surface-secondary)] flex items-center justify-between"
     >
       <span>Tandai Sudah Dibaca</span>
-      <x-ui-icon name="check-check" class="w-3.5 h-3.5 text-[#15803D]" />
+      <x-ui-icon name="check-check" class="w-3.5 h-3.5 text-[var(--green)]" />
     </button>
   </div>
 

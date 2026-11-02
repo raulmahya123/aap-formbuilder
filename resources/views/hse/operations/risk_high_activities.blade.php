@@ -18,7 +18,7 @@
     @endphp
 
     <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-label="Pilih daftar monitoring">
-        <a href="{{ $panelUrl('high') }}" class="group rounded-lg border border-zinc-300 bg-white p-5 transition hover:border-orange-700 hover:ring-1 hover:ring-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">
+        <a href="{{ $panelUrl('high') }}" class="ui-dashboard-card">
             <div class="flex items-center justify-between gap-3">
                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 text-orange-800"><x-ui.lucide name="alert-triangle" /></span>
                 <span class="text-2xl font-semibold text-zinc-900">{{ number_format($highCount) }}</span>
@@ -28,7 +28,7 @@
             <span class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-700">Lihat daftar <x-ui.lucide name="chevron-right" /></span>
         </a>
 
-        <a href="{{ $panelUrl('extreme') }}" class="group rounded-lg border border-zinc-300 bg-white p-5 transition hover:border-red-700 hover:ring-1 hover:ring-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">
+        <a href="{{ $panelUrl('extreme') }}" class="ui-dashboard-card">
             <div class="flex items-center justify-between gap-3">
                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 text-red-800"><x-ui.lucide name="alert-triangle" /></span>
                 <span class="text-2xl font-semibold text-zinc-900">{{ number_format($extremeCount) }}</span>
@@ -38,7 +38,7 @@
             <span class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-700">Lihat daftar <x-ui.lucide name="chevron-right" /></span>
         </a>
 
-        <a href="{{ $panelUrl('ccm') }}" class="group rounded-lg border border-zinc-300 bg-white p-5 transition hover:border-blue-700 hover:ring-1 hover:ring-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">
+        <a href="{{ $panelUrl('ccm') }}" class="ui-dashboard-card">
             <div class="flex items-center justify-between gap-3">
                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-800"><x-ui.lucide name="shield" /></span>
                 <span class="text-2xl font-semibold text-zinc-900">{{ number_format($ccmCount) }}</span>
@@ -61,7 +61,7 @@
     </div>
 
     {{-- Filter Search --}}
-    <div class="ui-filter-panel ui-module-filter-toolbar">
+    <x-ui.filter-panel variant="listing">
         <x-ui.table-toolbar action="{{ route('hse.dashboard.risk.high_activities', array_merge(request()->except(['page', 'q']), ['panel' => $selectedPanel])) }}">
             <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari data monitoring" :placeholder="$selectedPanel === 'ccm' ? 'Cari jobsite atau pelapor…' : 'Cari aktivitas atau bahaya…'" />
             @if($selectedPanel !== 'ccm')
@@ -74,12 +74,12 @@
                 Critical Focus Area
             </span>
         </div>
-    </div>
+    </x-ui.filter-panel>
     @endif
 
     {{-- High Risk Activities Table --}}
     @if(in_array($selectedPanel, ['high', 'extreme'], true))
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <x-ui.data-table>
         <div class="p-4 border-b border-slate-100 flex items-center justify-between">
             <div>
                 <h3 class="text-base font-semibold text-slate-900">{{ $selectedPanel === 'high' ? 'Aktivitas Risiko Tinggi' : 'Aktivitas Risiko Ekstrem' }}</h3>
@@ -146,22 +146,20 @@
                 </tbody>
             </table>
         </div>
-        <div class="ui-pagination-footer">
-            <x-ui.table-pagination :paginator="$activities" />
-        </div>
-    </div>
+        <x-slot:pagination><x-ui.table-pagination :paginator="$activities" /></x-slot:pagination>
+    </x-ui.data-table>
     @endif
 
     {{-- Critical Control Management (CCM) Reports Integration Feed --}}
     @if($selectedPanel === 'ccm')
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <x-ui.data-table>
         <div class="p-4 border-b border-slate-100 flex items-center justify-between">
             <div>
                 <h3 class="text-base font-semibold text-slate-900">Critical Control Management (CCM) Monitoring Feed</h3>
                 <p class="text-xs text-slate-500">Pekerjaan kritis operasional (Kendaraan, Izin Kerja, Tebing/Disposal, Air/Lumpur, Chainsaw, LOTO, Lifting, Blasting).</p>
             </div>
             @if(Route::has('ccm-reports.index'))
-                <a href="{{ route('ccm-reports.index') }}" class="text-xs font-semibold text-[#1646A0] hover:underline">
+                <a href="{{ route('ccm-reports.index') }}" class="text-xs font-semibold text-[var(--blue)] hover:underline">
                     Buka Modul CCM Lengkap →
                 </a>
             @endif
@@ -198,7 +196,7 @@
                             <td>
                                 <div class="flex flex-wrap gap-1">
                                     @forelse($kritisList as $k)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-[#1646A0] border border-blue-200">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-[var(--blue)] border border-blue-200">
                                             {{ $k }}
                                         </span>
                                     @empty
@@ -220,8 +218,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="ui-pagination-footer"><x-ui.table-pagination :paginator="$ccmReports" /></div>
-    </div>
+        <x-slot:pagination><x-ui.table-pagination :paginator="$ccmReports" /></x-slot:pagination>
+    </x-ui.data-table>
     @endif
 </div>
 @endsection

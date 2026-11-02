@@ -20,7 +20,7 @@
   {{-- LIST --}}
   <x-ui.panel :padded="false" class="bg-white border rounded-lg overflow-hidden">
     <x-ui.table :paginator="$templates" class="w-full text-sm">
-      <thead class="bg-[#1D1C1A] text-white">
+      <thead>
         <tr>
           <th class="p-3 text-left">#</th>
           <th class="p-3 text-left">Foto</th> {{-- ← kolom baru untuk photo_path --}}
@@ -72,7 +72,7 @@
             $footerSummary = $legacyFooterText ? (\Illuminate\Support\Str::limit($legacyFooterText, 40).$legacyFooterShow) : '—';
           }
         @endphp
-        <tr class="border-b hover:bg-[#713F12]/5">
+        <tr class="border-b hover:bg-[var(--surface-secondary)]">
           <td class="p-3 align-middle">{{ $tpl->id }}</td>
           {{-- FOTO --}}
           <td class="p-3 align-middle">

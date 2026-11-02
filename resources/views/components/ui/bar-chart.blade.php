@@ -5,8 +5,8 @@
 @endphp
 @if(empty($series))
     <div class="flex h-32 flex-col items-center justify-center gap-1 text-center">
-        <p class="text-sm font-medium text-[#475569]">Belum ada data pada periode ini</p>
-        <p class="text-xs text-[#94A3B8]">Data akan tampil setelah tersedia.</p>
+        <p class="text-sm font-medium text-[var(--gray)]">Belum ada data pada periode ini</p>
+        <p class="text-xs text-[var(--gray)]">Data akan tampil setelah tersedia.</p>
     </div>
 @else
 <div {{ $attributes->class(['ui-bar-chart']) }} role="img" aria-label="{{ $label }}: {{ collect($series)->map(fn ($value, $key) => $key.': '.$value)->implode(', ') }}">

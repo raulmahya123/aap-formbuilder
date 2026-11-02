@@ -8,11 +8,11 @@
     <x-ui.page-header>
         <div class="ui-page-header__copy">
             <div class="flex items-center gap-2">
-                <a href="{{ route('hse.dashboard.documents.index') }}" class="text-xs font-semibold text-[#1646A0] hover:underline flex items-center gap-1">
+                <a href="{{ route('hse.dashboard.documents.index') }}" class="text-xs font-semibold text-[var(--blue)] hover:underline flex items-center gap-1">
                     ← Kembali ke Repository
                 </a>
                 <span class="text-slate-300">|</span>
-                <span class="px-2.5 py-0.5 rounded text-xs font-bold bg-blue-50 text-[#1646A0] border border-blue-200">
+                <span class="px-2.5 py-0.5 rounded text-xs font-bold bg-blue-50 text-[var(--blue)] border border-blue-200">
                     {{ $document->category }}
                 </span>
             </div>
@@ -33,7 +33,7 @@
             @endif
 
             @if(in_array($document->status, ['Submitted', 'In Review']))
-                <button type="button" @click="approvalAction = 'approve_publish'; openApprovalModal = true" class="inline-flex items-center gap-1.5 rounded-lg bg-[#1646A0] px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#123880] transition">
+                <button type="button" @click="approvalAction = 'approve_publish'; openApprovalModal = true" class="inline-flex items-center gap-1.5 rounded-lg bg-[var(--blue)] px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[var(--action-primary-hover)] transition">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     Review / Setujui
                 </button>
@@ -63,7 +63,7 @@
         $wfCurrent = array_search($document->status, $wfSteps);
         if ($wfCurrent === false && $document->status === 'Obsolete') $wfCurrent = 5;
     @endphp
-    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+    <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
         <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Document Lifecycle & Approval Workflow</h3>
         <div class="grid grid-cols-5 gap-2">
             @foreach($wfSteps as $idx => $step)
@@ -71,9 +71,9 @@
                     $isPass = $idx <= $wfCurrent;
                     $isThis = $idx === $wfCurrent;
                 @endphp
-                <div class="p-3 rounded-lg border {{ $isThis ? 'border-[#1646A0] bg-blue-50/60' : ($isPass ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-slate-50/50') }}">
+                <div class="p-3 rounded-lg border {{ $isThis ? 'border-[var(--blue)] bg-blue-50/60' : ($isPass ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-slate-50/50') }}">
                     <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-bold {{ $isPass ? ($isThis ? 'text-[#1646A0]' : 'text-emerald-700') : 'text-slate-400' }}">
+                        <span class="text-[11px] font-bold {{ $isPass ? ($isThis ? 'text-[var(--blue)]' : 'text-emerald-700') : 'text-slate-400' }}">
                             Langkah {{ $idx + 1 }}
                         </span>
                         @if($isPass && !$isThis)
@@ -89,7 +89,7 @@
     {{-- Details & Revisions Grid --}}
     <div class="grid gap-6 lg:grid-cols-12">
         {{-- Left: Metadata Details (6 cols) --}}
-        <div class="lg:col-span-6 bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="lg:col-span-6 bg-white rounded-lg border border-slate-200 p-5 shadow-sm space-y-4">
             <h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">Informasi Metadata Dokumen</h3>
 
             <div class="grid grid-cols-2 gap-4 text-xs">
@@ -153,7 +153,7 @@
         </div>
 
         {{-- Right: Revision History (6 cols) --}}
-        <div class="lg:col-span-6 bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="lg:col-span-6 bg-white rounded-lg border border-slate-200 p-5 shadow-sm space-y-4">
             <h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">Riwayat Revisi (Revision History)</h3>
 
             <div class="space-y-3">
@@ -190,33 +190,33 @@
                 @csrf
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Versi Baru *</label>
-                    <input type="text" name="version" required placeholder="Contoh: 2.0" class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
+                    <input type="text" name="version" required placeholder="Contoh: 2.0" class="w-full text-xs rounded-lg border-slate-300 focus:border-[var(--blue)]">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Ringkasan Perubahan (Change Summary) *</label>
-                    <textarea name="change_summary" rows="3" required placeholder="Jelaskan pasal atau poin yang direvisi..." class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]"></textarea>
+                    <textarea name="change_summary" rows="3" required placeholder="Jelaskan pasal atau poin yang direvisi..." class="w-full text-xs rounded-lg border-slate-300 focus:border-[var(--blue)]"></textarea>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Efektif Baru *</label>
-                        <input type="date" name="effective_date" required value="{{ date('Y-m-d') }}" class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
+                        <input type="date" name="effective_date" required value="{{ date('Y-m-d') }}" class="w-full text-xs rounded-lg border-slate-300 focus:border-[var(--blue)]">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Jadwal Review Selanjutnya</label>
-                        <input type="date" name="review_date" value="{{ date('Y-m-d', strtotime('+1 year')) }}" class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
+                        <input type="date" name="review_date" value="{{ date('Y-m-d', strtotime('+1 year')) }}" class="w-full text-xs rounded-lg border-slate-300 focus:border-[var(--blue)]">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Unggah Dokumen Revisi (PDF, DOCX) *</label>
-                    <input type="file" name="file_document" required class="w-full text-xs rounded-lg border border-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#1646A0]">
+                    <input type="file" name="file_document" required class="w-full text-xs rounded-lg border border-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[var(--blue)]">
                 </div>
 
                 <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
                     <button type="button" @click="openReviseModal = false" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
-                    <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-[#1646A0] hover:bg-[#123880] rounded-lg shadow-sm">Submit Revisi untuk Review</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-[var(--blue)] hover:bg-[var(--action-primary-hover)] rounded-lg shadow-sm">Submit Revisi untuk Review</button>
                 </div>
             </form>
         </div>
@@ -240,7 +240,7 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1" x-text="approvalAction === 'approve_publish' ? 'Catatan Persetujuan (Optional)' : 'Alasan Penolakan *'"></label>
-                    <textarea name="notes" rows="3" placeholder="Tuliskan catatan atau alasan penolakan..." class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]"></textarea>
+                    <textarea name="notes" rows="3" placeholder="Tuliskan catatan atau alasan penolakan..." class="w-full text-xs rounded-lg border-slate-300 focus:border-[var(--blue)]"></textarea>
                 </div>
 
                 <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">

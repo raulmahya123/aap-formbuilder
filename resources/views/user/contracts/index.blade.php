@@ -41,7 +41,7 @@
           @forelse($contracts as $c)
             <tr class="border-t">
               <td class="p-3 align-top">
-                <a href="{{ route('user.contracts.show',$c) }}" class="font-medium hover:underline text-[#1D1C1A]">
+                <a href="{{ route('user.contracts.show',$c) }}" class="font-medium hover:underline text-[var(--primary-dark)]">
                   {{ $c->title }}
                 </a>
               </td>

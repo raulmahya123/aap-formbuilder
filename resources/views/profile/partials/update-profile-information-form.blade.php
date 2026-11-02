@@ -19,9 +19,9 @@
 
         <div class="flex items-center gap-4">
             @if($user->avatar_path)
-                <img src="{{ asset('storage/'.$user->avatar_path) }}" alt="Foto profil" class="h-20 w-20 rounded-lg object-cover ring-2 ring-[#713F12]/30">
+                <img src="{{ asset('storage/'.$user->avatar_path) }}" alt="Foto profil" class="h-20 w-20 rounded-lg object-cover ring-2 ring-[var(--brown)]/30">
             @else
-                <div class="flex h-20 w-20 items-center justify-center rounded-lg bg-[#713F12] text-xl font-semibold text-white">{{ strtoupper(substr($user->name, 0, 2)) }}</div>
+                <div class="flex h-20 w-20 items-center justify-center rounded-lg bg-[var(--brown)] text-xl font-semibold text-white">{{ strtoupper(substr($user->name, 0, 2)) }}</div>
             @endif
             <div class="flex-1">
                 <x-input-label for="avatar" :value="__('Foto profil')" />

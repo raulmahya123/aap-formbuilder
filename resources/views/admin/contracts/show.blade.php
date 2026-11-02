@@ -29,12 +29,12 @@
     {{-- Left: Info Card --}}
     <div class="lg:col-span-1">
       <div class="rounded-lg border shadow-none overflow-hidden">
-        <div class="px-4 py-3 bg-[#713F12] text-white">
+        <div class="px-4 py-3 bg-[var(--brown)] text-white">
           <div class="font-semibold">Informasi Kontrak</div>
         </div>
         <div class="p-4 space-y-4">
           <div class="flex items-start gap-3">
-            <div class="shrink-0 w-10 h-10 rounded-full bg-[#713F12] text-white flex items-center justify-center">
+            <div class="shrink-0 w-10 h-10 rounded-full bg-[var(--brown)] text-white flex items-center justify-center">
               {{ strtoupper(Str::of($contract->owner->name)->explode(' ')->map(fn($s)=>Str::substr($s,0,1))->take(2)->implode('')) }}
             </div>
             <div class="min-w-0">
@@ -67,7 +67,7 @@
     {{-- Right: ACL Card --}}
     <div class="lg:col-span-2">
       <div class="rounded-lg border shadow-none overflow-hidden">
-        <div class="px-4 py-3 bg-[#713F12] text-white flex items-center justify-between">
+        <div class="px-4 py-3 bg-[var(--brown)] text-white flex items-center justify-between">
           <div class="font-semibold">Akses Viewer</div>
           <span class="text-xs bg-white/20 px-2 py-1 rounded-md">{{ $contract->viewers->count() }} user</span>
         </div>
@@ -79,7 +79,7 @@
               @csrf
               @isset($users)
                 <select name="emails[]" multiple size="6"
-                        class="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:border-[#713F12]">
+                        class="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--brown)]">
                   @foreach($users as $u)
                     <option value="{{ $u->email }}">{{ $u->name }} — {{ $u->email }}</option>
                   @endforeach
@@ -87,7 +87,7 @@
               @else
                 <input type="text" name="emails"
                        placeholder="email1@contoh.com, email2@contoh.com"
-                       class="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:border-[#713F12]" required>
+                       class="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--brown)]" required>
               @endisset
               <x-ui.button variant="primary" class="shrink-0 px-4 py-2 rounded-lg hover:opacity-90">
                 Tambah Akses
@@ -136,7 +136,7 @@
   </div>
   {{-- Preview PDF --}}
   <div class="rounded-lg border shadow-none overflow-hidden">
-    <div class="px-4 py-3 bg-[#713F12] text-white">
+    <div class="px-4 py-3 bg-[var(--brown)] text-white">
       <div class="font-semibold">Preview Dokumen</div>
     </div>
     <div class="p-4">

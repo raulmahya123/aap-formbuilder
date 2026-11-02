@@ -21,17 +21,17 @@
     @endphp
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+        <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
             <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Departemen Terdata</p>
-            <p class="text-2xl font-bold text-[#0F172A] mt-1">{{ number_format($totalDeptCount) }}</p>
+            <p class="text-2xl font-bold text-[var(--primary-dark)] mt-1">{{ number_format($totalDeptCount) }}</p>
             <p class="text-xs text-slate-400 mt-0.5">Departemen aktif operasional</p>
         </div>
-        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+        <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
             <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Realisasi Kegiatan</p>
-            <p class="text-2xl font-bold text-[#1646A0] mt-1">{{ number_format($totalActivities) }}</p>
+            <p class="text-2xl font-bold text-[var(--blue)] mt-1">{{ number_format($totalActivities) }}</p>
             <p class="text-xs text-slate-400 mt-0.5">Inspeksi, PTO, dan Laporan Bahaya (HIPO)</p>
         </div>
-        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+        <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
             <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Rata-rata Pencapaian Target</p>
             <p class="text-2xl font-bold {{ $overallRate !== null && $overallRate >= 80 ? 'text-emerald-600' : 'text-slate-700' }} mt-1">
                 {{ $overallRate !== null ? $overallRate . '%' : '—' }}
@@ -64,7 +64,7 @@
                                 </span>
                             </td>
                             <td>
-                                <strong class="text-[#0F172A] block">{{ $dept->name }}</strong>
+                                <strong class="text-[var(--primary-dark)] block">{{ $dept->name }}</strong>
                             </td>
                             <td><code>{{ $dept->code ?? '—' }}</code></td>
                             <td>{{ number_format($dept->users_count) }} orang</td>
@@ -85,7 +85,7 @@
                                 @if($row['target'] > 0)
                                     <div>
                                         <div class="flex items-center justify-between text-xs mb-1">
-                                            <span class="font-semibold text-[#0F172A]">{{ $row['total_actual'] }} / {{ $row['target'] }}</span>
+                                            <span class="font-semibold text-[var(--primary-dark)]">{{ $row['total_actual'] }} / {{ $row['target'] }}</span>
                                             <span class="font-bold {{ ($row['achievement_rate'] ?? 0) >= 80 ? 'text-emerald-700' : 'text-slate-600' }}">{{ $row['achievement_rate'] }}%</span>
                                         </div>
                                         <div class="w-28 bg-slate-100 rounded-full h-1.5 overflow-hidden">

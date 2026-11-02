@@ -72,9 +72,9 @@
                             <td>{{ $row['due_date'] }}</td>
                             <td>
                                 @if($row['days_overdue'] > 0)
-                                    <span class="font-semibold text-[#B91C1C]">{{ $row['days_overdue'] }} hari</span>
+                                    <span class="font-semibold text-[var(--danger-text)]">{{ $row['days_overdue'] }} hari</span>
                                 @else
-                                    <span class="text-[#94A3B8]">—</span>
+                                    <span class="text-[var(--gray)]">—</span>
                                 @endif
                             </td>
                             <td><x-hse.status :value="$row['verification']" /></td>
@@ -85,14 +85,14 @@
 
                                     <div x-show="open" class="ui-modal-overlay" x-cloak>
                                         <div @click.away="open = false" class="ui-modal-panel ui-modal-panel--sm ui-modal-panel--padded">
-                                            <h3 class="text-base font-bold text-[#0F172A]">Update PICA: {{ $row['action_no'] }}</h3>
-                                            <p class="mt-1 text-xs text-[#64748B]">{{ $row['title'] }}</p>
+                                            <h3 class="text-base font-bold text-[var(--primary-dark)]">Update PICA: {{ $row['action_no'] }}</h3>
+                                            <p class="mt-1 text-xs text-[var(--gray)]">{{ $row['title'] }}</p>
 
                                             <form action="{{ route('hse.dashboard.actions.update', $row['id']) }}" method="POST" enctype="multipart/form-data" class="mt-4 space-y-4">
                                                 @csrf
                                                 <div>
-                                                    <label class="block text-xs font-semibold text-[#475569]">Status Baru</label>
-                                                    <select name="status" class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm">
+                                                    <label class="block text-xs font-semibold text-[var(--gray)]">Status Baru</label>
+                                                    <select name="status" class="mt-1 w-full rounded-lg border border-[var(--border)] p-2 text-sm">
                                                         <option value="Open" {{ $row['status'] === 'Open' ? 'selected' : '' }}>Open</option>
                                                         <option value="In Progress" {{ $row['status'] === 'In Progress' ? 'selected' : '' }}>In Progress</option>
                                                         <option value="Pending Verification" {{ $row['status'] === 'Pending Verification' ? 'selected' : '' }}>Pending Verification</option>
@@ -101,13 +101,13 @@
                                                 </div>
 
                                                 <div>
-                                                    <label class="block text-xs font-semibold text-[#475569]">Upload Evidence / Bukti Perbaikan</label>
+                                                    <label class="block text-xs font-semibold text-[var(--gray)]">Upload Evidence / Bukti Perbaikan</label>
                                                     <input type="file" name="evidence_file" class="mt-1 w-full text-xs text-slate-500 file:mr-2 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100" />
                                                 </div>
 
                                                 <div>
-                                                    <label class="block text-xs font-semibold text-[#475569]">Catatan Verifikasi</label>
-                                                    <textarea name="action_note" rows="2" placeholder="Catatan tindakan korektif / alasan verifikasi..." class="mt-1 w-full rounded-lg border border-[#CBD5E1] p-2 text-sm"></textarea>
+                                                    <label class="block text-xs font-semibold text-[var(--gray)]">Catatan Verifikasi</label>
+                                                    <textarea name="action_note" rows="2" placeholder="Catatan tindakan korektif / alasan verifikasi..." class="mt-1 w-full rounded-lg border border-[var(--border)] p-2 text-sm"></textarea>
                                                 </div>
 
                                                 <div class="flex justify-end gap-2 pt-2">

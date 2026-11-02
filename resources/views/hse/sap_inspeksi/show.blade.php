@@ -30,13 +30,13 @@
     @if(session('error'))<div class="rounded-lg bg-rose-50 border border-rose-200 p-3 text-xs text-rose-800">{{ session('error') }}</div>@endif
 
     <div class="grid gap-4 md:grid-cols-4">
-        <div class="rounded-xl border border-slate-200 bg-white p-4"><p class="text-xs text-slate-500">Site</p><p class="font-semibold text-slate-900">{{ $inspection->site->name ?? '-' }}</p></div>
-        <div class="rounded-xl border border-slate-200 bg-white p-4"><p class="text-xs text-slate-500">Inspektor</p><p class="font-semibold text-slate-900">{{ $inspection->inspector->name ?? '-' }}</p></div>
-        <div class="rounded-xl border border-slate-200 bg-white p-4"><p class="text-xs text-slate-500">Skor</p><p class="font-semibold text-slate-900">{{ $inspection->score ?? '-' }} / {{ $inspection->max_score }} ({{ $inspection->percentage ? number_format($inspection->percentage,1).'%' : '-' }})</p></div>
-        <div class="rounded-xl border border-slate-200 bg-white p-4"><p class="text-xs text-slate-500">Diajukan</p><p class="font-semibold text-slate-900">{{ $inspection->submitted_at ? $inspection->submitted_at->format('d/m/Y H:i') : '-' }}</p></div>
+        <div class="rounded-lg border border-slate-200 bg-white p-4"><p class="text-xs text-slate-500">Site</p><p class="font-semibold text-slate-900">{{ $inspection->site->name ?? '-' }}</p></div>
+        <div class="rounded-lg border border-slate-200 bg-white p-4"><p class="text-xs text-slate-500">Inspektor</p><p class="font-semibold text-slate-900">{{ $inspection->inspector->name ?? '-' }}</p></div>
+        <div class="rounded-lg border border-slate-200 bg-white p-4"><p class="text-xs text-slate-500">Skor</p><p class="font-semibold text-slate-900">{{ $inspection->score ?? '-' }} / {{ $inspection->max_score }} ({{ $inspection->percentage ? number_format($inspection->percentage,1).'%' : '-' }})</p></div>
+        <div class="rounded-lg border border-slate-200 bg-white p-4"><p class="text-xs text-slate-500">Diajukan</p><p class="font-semibold text-slate-900">{{ $inspection->submitted_at ? $inspection->submitted_at->format('d/m/Y H:i') : '-' }}</p></div>
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div class="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-200"><h2 class="text-base font-bold text-slate-900">Rekap Jawaban Checklist</h2></div>
         <div class="divide-y divide-slate-100">
             @foreach($inspection->template->sections as $section)
@@ -65,7 +65,7 @@
     </div>
 
     @if($inspection->approvals->count() > 0)
-    <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div class="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-200"><h2 class="text-base font-bold text-slate-900">Audit Trail Persetujuan</h2></div>
         <div class="divide-y divide-slate-100">
             @foreach($inspection->approvals as $ap)

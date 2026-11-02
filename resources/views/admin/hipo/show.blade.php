@@ -5,7 +5,7 @@
 {{-- HEADER --}}
 <x-ui.page-header>
   <div class="ui-page-header__copy"><div class="flex items-center gap-3">
-        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 border border-amber-200 text-amber-600">
+        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-50 border border-amber-200 text-amber-600">
             <x-ui-icon name="warning" class="h-6 w-6" />
         </div>
         <div>
@@ -17,7 +17,7 @@
 </x-ui.page-header>
 
 {{-- STATUS + RISK LEVEL BANNER --}}
-<x-ui.panel class="bg-white border rounded-xl overflow-hidden shadow-none">
+<x-ui.panel class="bg-white border rounded-lg overflow-hidden shadow-none">
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex items-center gap-3">
             <div class="flex items-center justify-center h-10 w-10 rounded-lg
@@ -81,7 +81,7 @@
     ['icon' => 'user-check', 'label' => 'PIC Utama', 'value' => $hipo->pic],
     ['icon' => 'shield-check', 'label' => 'Admin Site', 'value' => $hipo->assignedAdmin?->name ?? 'Belum ditugaskan'],
 ] as $item)
-<x-ui.panel class="bg-white border rounded-xl shadow-none">
+<x-ui.panel class="bg-white border rounded-lg shadow-none">
     <div class="flex items-start gap-2.5">
         <div class="flex-shrink-0 mt-0.5 text-gray-400"><x-ui.lucide name="{{ $item['icon'] }}" class="w-4 h-4" /></div>
         <div class="min-w-0">
@@ -94,7 +94,7 @@
 </div>
 
 {{-- RINCIAN KEJADIAN --}}
-<x-ui.panel class="bg-white border rounded-xl shadow-none space-y-5">
+<x-ui.panel class="bg-white border rounded-lg shadow-none space-y-5">
     <div class="flex items-center gap-2 pb-3 border-b border-gray-100">
         <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600">
             <x-ui.lucide name="file-text" class="w-4 h-4" />
@@ -116,7 +116,7 @@
 </x-ui.panel>
 
 {{-- KONTROL RISIKO --}}
-<x-ui.panel class="bg-white border rounded-xl shadow-none space-y-4">
+<x-ui.panel class="bg-white border rounded-lg shadow-none space-y-4">
     <div class="flex items-center gap-2 pb-3 border-b border-gray-100">
         <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600">
             <x-ui.lucide name="shield" class="w-4 h-4" />
@@ -130,7 +130,7 @@
         'work_practice' => ['label' => 'Praktek Kerja', 'icon' => 'shield', 'color' => 'amber'],
         'ppe' => ['label' => 'APD', 'icon' => 'shield-check', 'color' => 'emerald'],
     ] as $key => $meta)
-    <div class="rounded-xl border border-gray-200 overflow-hidden bg-gray-50/50 hover:shadow-sm transition-shadow">
+    <div class="rounded-lg border border-gray-200 overflow-hidden bg-gray-50/50 hover:shadow-sm transition-shadow">
         <div class="px-4 py-2.5 bg-white border-b border-gray-100 flex items-center gap-2">
             <x-ui.lucide name="{{ $meta['icon'] }}" class="w-4 h-4 text-gray-500" />
             <h4 class="text-sm font-bold text-gray-700">{{ $meta['label'] }}</h4>
@@ -155,7 +155,7 @@
 {{-- ======================== TINDAKAN ADMIN (REDESIGNED) ======================== --}}
 <form method="POST"
       action="{{ route('admin.hipo.update', $hipo->id) }}"
-      class="rounded-xl border border-gray-200 bg-white shadow-none overflow-hidden">
+      class="rounded-lg border border-gray-200 bg-white shadow-none overflow-hidden">
 @csrf
 @method('PUT')
 

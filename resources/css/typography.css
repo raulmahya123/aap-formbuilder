@@ -30,5 +30,3 @@ button, input, select, textarea { font-family: inherit; }
 .ui-shell label, .ui-auth label, main label, .ui-label { font-size: var(--type-label); font-weight: 500; line-height: 1.5; text-transform: none; letter-spacing: normal; }
 .form-error, .ui-helper, .ui-status { font-size: var(--type-helper); line-height: 1.5; }
 .ui-breadcrumb, .ui-breadcrumb :is(a, span) { font-size: var(--type-breadcrumb); font-weight: 400; line-height: 1.5; text-transform: none; letter-spacing: normal; }
-main .ui-table thead th { font-size: var(--type-table-head); font-weight: 600; line-height: 1.5; text-transform: none; letter-spacing: normal; }
-main .ui-table tbody td { font-size: var(--type-table-cell); font-weight: 400; line-height: 1.5; }

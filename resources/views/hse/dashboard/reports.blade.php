@@ -22,11 +22,11 @@
 
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             @foreach($data['catalog'] as $report)
-                <article class="flex h-full flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-[#1646A0] hover:shadow-md transition">
+                <article class="ui-dashboard-card h-full">
                     <div>
                         <div class="flex items-center justify-between gap-2">
                             <h3 class="text-sm font-bold text-slate-900">{{ $report['title'] }}</h3>
-                            <span class="p-1.5 rounded-lg bg-blue-50 text-[#1646A0]">
+                            <span class="p-1.5 rounded-lg bg-blue-50 text-[var(--blue)]">
                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             </span>
                         </div>
@@ -45,7 +45,7 @@
                                 <x-ui.lucide name="file-down" /> PDF
                             </a>
                         </div>
-                        <a class="text-xs font-semibold text-[#1646A0] hover:underline" href="{{ route($report['route'], request()->query()) }}">
+                        <a class="text-xs font-semibold text-[var(--blue)] hover:underline" href="{{ route($report['route'], request()->query()) }}">
                             Preview Dashboard →
                         </a>
                     </div>
@@ -55,7 +55,7 @@
     </section>
 
     {{-- REPORT RUN HISTORY TABLE --}}
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-4 border-b border-slate-100 flex items-center justify-between">
             <div>
                 <h3 class="text-base font-semibold text-slate-900">Riwayat Unduhan Laporan (Report History)</h3>

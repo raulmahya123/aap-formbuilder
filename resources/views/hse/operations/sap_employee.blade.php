@@ -42,7 +42,7 @@
                         @endphp
                         <tr>
                             <td>
-                                <strong class="text-[#0F172A] block">{{ $emp->name }}</strong>
+                                <strong class="text-[var(--primary-dark)] block">{{ $emp->name }}</strong>
                                 @if($emp->employee_id)
                                     <span class="text-xs text-slate-400">NIK: {{ $emp->employee_id }}</span>
                                 @endif
@@ -78,7 +78,7 @@
                                 @if($st['target'] !== null && $st['target'] > 0)
                                     <div>
                                         <div class="flex items-center justify-between text-xs mb-1">
-                                            <span class="font-semibold text-[#0F172A]">{{ $st['total_actual'] }} / {{ $st['target'] }}</span>
+                                            <span class="font-semibold text-[var(--primary-dark)]">{{ $st['total_actual'] }} / {{ $st['target'] }}</span>
                                             <span class="font-bold {{ $pct >= 80 ? 'text-emerald-700' : ($pct >= 50 ? 'text-blue-700' : 'text-amber-700') }}">{{ $pct }}%</span>
                                         </div>
                                         <div class="w-28 bg-slate-100 rounded-full h-1.5 overflow-hidden">

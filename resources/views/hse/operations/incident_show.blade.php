@@ -7,7 +7,7 @@
     <x-ui.page-header>
         <div class="ui-page-header__copy">
             <div class="flex items-center gap-2">
-                <a href="{{ route('hse.dashboard.incidents') }}" class="text-xs font-medium text-slate-500 hover:text-[#1646A0]">
+                <a href="{{ route('hse.dashboard.incidents') }}" class="text-xs font-medium text-slate-500 hover:text-[var(--blue)]">
                     &larr; Kembali ke Incident Register
                 </a>
                 <span class="text-slate-300">/</span>
@@ -70,8 +70,8 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Informasi Utama Kejadian -->
         <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-                <h3 class="text-sm font-bold text-[#0F172A] border-b border-slate-100 pb-2">Informasi Kejadian & Dampak</h3>
+            <div class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm space-y-4">
+                <h3 class="text-sm font-bold text-[var(--primary-dark)] border-b border-slate-100 pb-2">Informasi Kejadian & Dampak</h3>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs">
                     <div>
                         <span class="text-slate-400 block">Kategori Kejadian</span>
@@ -139,9 +139,9 @@
             </div>
 
             <!-- Hasil Investigasi & Root Cause -->
-            <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+            <div class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <h3 class="text-sm font-bold text-[#0F172A]">Hasil Investigasi & Akar Penyebab</h3>
+                    <h3 class="text-sm font-bold text-[var(--primary-dark)]">Hasil Investigasi & Akar Penyebab</h3>
                     <x-hse.status :value="$incident->investigation_status" />
                 </div>
 
@@ -168,8 +168,8 @@
             </div>
 
             <!-- Tindakan Korektif Terkait (PICA) -->
-            <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
-                <h3 class="text-sm font-bold text-[#0F172A] border-b border-slate-100 pb-2">Tindakan Korektif Terintegrasi (PICA)</h3>
+            <div class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm space-y-3">
+                <h3 class="text-sm font-bold text-[var(--primary-dark)] border-b border-slate-100 pb-2">Tindakan Korektif Terintegrasi (PICA)</h3>
                 @if($picas->count() > 0)
                     <div class="ui-table-scroll">
                         <table class="ui-table text-xs">
@@ -207,8 +207,8 @@
 
         <!-- Sidebar Workflow & Audit Trail -->
         <div class="space-y-6">
-            <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-                <h3 class="text-sm font-bold text-[#0F172A] border-b border-slate-100 pb-2">Status & Pelacak Workflow</h3>
+            <div class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm space-y-4">
+                <h3 class="text-sm font-bold text-[var(--primary-dark)] border-b border-slate-100 pb-2">Status & Pelacak Workflow</h3>
 
                 <div class="space-y-3 text-xs">
                     <div class="flex items-center justify-between pb-2 border-b border-slate-100">

@@ -21,17 +21,17 @@
 
     {{-- STATS CARDS --}}
     <div class="grid gap-4 sm:grid-cols-3">
-        <div class="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[#64748B]">Total Manhours Tervalidasi</span>
-            <div class="mt-2 text-2xl font-bold text-[#1646A0]">{{ number_format($stats['total_hours'], 0, ',', '.') }} <span class="text-xs font-normal text-[#64748B]">jam</span></div>
+        <div class="rounded-lg border border-[var(--border)] bg-white p-5 shadow-sm">
+            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--gray)]">Total Manhours Tervalidasi</span>
+            <div class="mt-2 text-2xl font-bold text-[var(--blue)]">{{ number_format($stats['total_hours'], 0, ',', '.') }} <span class="text-xs font-normal text-[var(--gray)]">jam</span></div>
         </div>
-        <div class="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[#64748B]">Menunggu Validasi SHE</span>
-            <div class="mt-2 text-2xl font-bold text-amber-600">{{ $stats['pending_validation'] }} <span class="text-xs font-normal text-[#64748B]">record</span></div>
+        <div class="rounded-lg border border-[var(--border)] bg-white p-5 shadow-sm">
+            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--gray)]">Menunggu Validasi SHE</span>
+            <div class="mt-2 text-2xl font-bold text-amber-600">{{ $stats['pending_validation'] }} <span class="text-xs font-normal text-[var(--gray)]">record</span></div>
         </div>
-        <div class="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[#64748B]">Total Riwayat Input</span>
-            <div class="mt-2 text-2xl font-bold text-[#0F172A]">{{ $stats['total_records'] }} <span class="text-xs font-normal text-[#64748B]">entri</span></div>
+        <div class="rounded-lg border border-[var(--border)] bg-white p-5 shadow-sm">
+            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--gray)]">Total Riwayat Input</span>
+            <div class="mt-2 text-2xl font-bold text-[var(--primary-dark)]">{{ $stats['total_records'] }} <span class="text-xs font-normal text-[var(--gray)]">entri</span></div>
         </div>
     </div>
 
@@ -40,7 +40,7 @@
             <h2 class="text-base font-bold text-slate-900">Riwayat & Validasi Manhours</h2>
             <p class="text-xs text-slate-500">Antrean pencatatan jam kerja aman untuk divalidasi oleh SHE Department.</p>
         </div>
-        <a href="{{ route('hse.dashboard.manhours.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-[#1646A0] px-4 py-2.5 text-xs font-semibold text-white shadow hover:bg-[#123880] transition">
+        <a href="{{ route('hse.dashboard.manhours.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-[var(--blue)] px-4 py-2.5 text-xs font-semibold text-white shadow hover:bg-[var(--action-primary-hover)] transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             + Input Jam Kerja (Manhours)
         </a>
@@ -67,7 +67,7 @@
                     @forelse($records as $row)
                         <tr>
                             <td>{{ $row->date->format('d M Y') }}</td>
-                            <td><span class="font-medium text-[#0F172A]">{{ $row->site?->name ?? '—' }}</span></td>
+                            <td><span class="font-medium text-[var(--primary-dark)]">{{ $row->site?->name ?? '—' }}</span></td>
                             <td>{{ $row->company?->name ?? 'Internal' }}</td>
                             <td>{{ number_format($row->employee_count) }}</td>
                             <td><strong>{{ number_format($row->manhours, 1) }}</strong> jam</td>
@@ -97,7 +97,7 @@
                                         </form>
                                     </div>
                                 @else
-                                    <span class="text-xs text-[#94A3B8]">Selesai</span>
+                                    <span class="text-xs text-[var(--gray)]">Selesai</span>
                                 @endif
                             </td>
                         </tr>

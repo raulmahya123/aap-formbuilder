@@ -38,8 +38,6 @@
 }
 .ui-filter-summary { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 16px; color: var(--gray); font-size: 12px; }
 .ui-filter-summary__title { display: inline-flex; align-items: center; gap: 8px; color: var(--primary-dark); font-size: 13px; font-weight: 600; }
-.ui-module-filter-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
-.ui-module-filter-toolbar > .ui-table-toolbar { flex: 1 1 480px; min-width: 0; }
 .ui-page-header__row > .flex:only-child { width: 100%; gap: 16px; flex-wrap: wrap; }
 .ui-page-header :is(h1,h2) { margin: 0; color: var(--text-primary); font: 600 var(--type-page)/1.35 var(--font-sans); }
 .ui-hse-filters--dashboard .ui-filter-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }

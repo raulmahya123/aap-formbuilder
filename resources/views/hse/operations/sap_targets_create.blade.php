@@ -3,7 +3,7 @@
 @section('title', 'Tetapkan Target SAP Baru')
 
 @section('content')
-<div class="ui-page max-w-4xl mx-auto space-y-6">
+<x-ui.page>
     <x-ui.page-header>
         <div class="ui-page-header__copy">
             <h1 class="ui-page-title">Tetapkan Target SAP Baru</h1>
@@ -16,7 +16,7 @@
     </x-ui.page-header>
 
     @if($errors->any())
-        <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
+        <div role="alert" class="rounded-lg border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
             <ul class="list-disc list-inside space-y-1">
                 @foreach($errors->all() as $err)
                     <li>{{ $err }}</li>
@@ -25,7 +25,7 @@
         </div>
     @endif
 
-    <div class="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+    <section class="ui-card">
         <form action="{{ route('hse.dashboard.sap.targets.store') }}" method="POST" >
             @csrf
 
@@ -86,7 +86,7 @@
                 <p class="text-xs text-slate-500 mb-4">Jumlah minimum kegiatan yang wajib diselesaikan setiap bulannya.</p>
 
                 <div class="grid gap-4 sm:grid-cols-3">
-                    <div class="rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+                    <div class="rounded-lg border border-blue-100 bg-blue-50/50 p-4">
                         <label class="block">Target Inspeksi</label>
                         <div class="mt-2 flex items-center gap-2">
                             <input type="number" name="target_inspection" min="0" value="4" required class="w-full ui-input" />
@@ -94,7 +94,7 @@
                         </div>
                     </div>
 
-                    <div class="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
+                    <div class="rounded-lg border border-emerald-100 bg-emerald-50/50 p-4">
                         <label class="block">Target PTO (Observasi)</label>
                         <div class="mt-2 flex items-center gap-2">
                             <input type="number" name="target_pto" min="0" value="2" required class="w-full ui-input" />
@@ -102,7 +102,7 @@
                         </div>
                     </div>
 
-                    <div class="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+                    <div class="rounded-lg border border-amber-100 bg-amber-50/50 p-4">
                         <label class="block">Target Hazard Report</label>
                         <div class="mt-2 flex items-center gap-2">
                             <input type="number" name="target_hazard" min="0" value="6" required class="w-full ui-input" />
@@ -119,6 +119,6 @@
                 <x-ui.button variant="primary" icon="save" type="submit">Simpan Target SAP</x-ui.button>
             </div>
         </form>
-    </div>
-</div>
+    </section>
+</x-ui.page>
 @endsection

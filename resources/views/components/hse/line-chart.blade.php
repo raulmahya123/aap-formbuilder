@@ -31,8 +31,8 @@
 <div {{ $attributes->class(['w-full']) }}>
     @if(empty($labels) || $total <= 0)
         <div class="flex h-40 flex-col items-center justify-center gap-1 text-center">
-            <p class="text-sm font-medium text-[#475569]">Belum ada data pada periode ini</p>
-            <p class="text-xs text-[#94A3B8]">Data akan tampil setelah tersedia.</p>
+            <p class="text-sm font-medium text-[var(--gray)]">Belum ada data pada periode ini</p>
+            <p class="text-xs text-[var(--gray)]">Data akan tampil setelah tersedia.</p>
         </div>
     @else
         <svg viewBox="0 0 {{ $width }} {{ $height }}" class="h-auto w-full" role="img"
@@ -63,7 +63,7 @@
 
         <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
             @foreach($series as $s)
-                <span class="inline-flex items-center gap-1.5 text-xs text-[#475569]">
+                <span class="inline-flex items-center gap-1.5 text-xs text-[var(--gray)]">
                     <span class="inline-block h-2.5 w-2.5 rounded-full" style="background:{{ $s['color'] ?? '#1646A0' }}"></span>
                     {{ $s['name'] ?? '' }}
                 </span>

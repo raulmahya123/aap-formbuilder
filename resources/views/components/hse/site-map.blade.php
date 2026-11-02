@@ -15,11 +15,11 @@
 <div {{ $attributes->class(['w-full']) }}>
     @if(empty($points))
         <div class="flex h-48 flex-col items-center justify-center gap-1 text-center">
-            <p class="text-sm font-medium text-[#475569]">Belum ada koordinat site</p>
-            <p class="text-xs text-[#94A3B8]">Lengkapi latitude dan longitude pada master site.</p>
+            <p class="text-sm font-medium text-[var(--gray)]">Belum ada koordinat site</p>
+            <p class="text-xs text-[var(--gray)]">Lengkapi latitude dan longitude pada master site.</p>
         </div>
     @else
-        <svg viewBox="0 0 {{ $width }} {{ $height }}" class="h-auto w-full rounded bg-[#F8FAFC]" role="img" aria-label="Peta sebaran site">
+        <svg viewBox="0 0 {{ $width }} {{ $height }}" class="h-auto w-full rounded bg-[var(--surface-secondary)]" role="img" aria-label="Peta sebaran site">
             @for($i = 1; $i < 6; $i++)
                 <line x1="{{ $pad }}" y1="{{ $pad + ($i * (($height - 2 * $pad) / 6)) }}" x2="{{ $width - $pad }}" y2="{{ $pad + ($i * (($height - 2 * $pad) / 6)) }}" stroke="#E2E8F0" stroke-width="1" />
                 <line x1="{{ $pad + ($i * (($width - 2 * $pad) / 6)) }}" y1="{{ $pad }}" x2="{{ $pad + ($i * (($width - 2 * $pad) / 6)) }}" y2="{{ $height - $pad }}" stroke="#E2E8F0" stroke-width="1" />
@@ -36,7 +36,7 @@
             @endforeach
         </svg>
         @if($missing > 0)
-            <p class="mt-2 text-xs text-[#94A3B8]">{{ $missing }} site belum memiliki koordinat dan tidak ditampilkan pada peta.</p>
+            <p class="mt-2 text-xs text-[var(--gray)]">{{ $missing }} site belum memiliki koordinat dan tidak ditampilkan pada peta.</p>
         @endif
     @endif
 </div>

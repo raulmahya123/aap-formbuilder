@@ -15,16 +15,16 @@
 
     {{-- STATS & TARGET SUMMARY --}}
     <div class="grid gap-4 sm:grid-cols-3">
-        <div class="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[#64748B]">Total Kasus Periode Ini</span>
-            <div class="mt-2 text-3xl font-extrabold text-[#1646A0]">{{ number_format($actualCount) }}</div>
+        <div class="rounded-lg border border-[var(--border)] bg-white p-5 shadow-sm">
+            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--gray)]">Total Kasus Periode Ini</span>
+            <div class="mt-2 text-3xl font-extrabold text-[var(--blue)]">{{ number_format($actualCount) }}</div>
         </div>
-        <div class="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[#64748B]">Target KPI (Tahun {{ $filters['year'] }})</span>
-            <div class="mt-2 text-3xl font-extrabold text-[#0F172A]">{{ number_format($target) }}</div>
+        <div class="rounded-lg border border-[var(--border)] bg-white p-5 shadow-sm">
+            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--gray)]">Target KPI (Tahun {{ $filters['year'] }})</span>
+            <div class="mt-2 text-3xl font-extrabold text-[var(--primary-dark)]">{{ number_format($target) }}</div>
         </div>
-        <div class="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[#64748B]">Status Kepatuhan</span>
+        <div class="rounded-lg border border-[var(--border)] bg-white p-5 shadow-sm">
+            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--gray)]">Status Kepatuhan</span>
             <div class="mt-2">
                 @if($actualCount <= $target)
                     <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-sm font-bold text-emerald-800">Memenuhi Target</span>
@@ -55,7 +55,7 @@
                 <tbody>
                     @forelse($records as $row)
                         <tr>
-                            <td><strong class="text-[#0F172A]">{{ $row->incident_no ?? ('#' . $row->id) }}</strong></td>
+                            <td><strong class="text-[var(--primary-dark)]">{{ $row->incident_no ?? ('#' . $row->id) }}</strong></td>
                             <td>{{ $row->occurred_at ? $row->occurred_at->format('d M Y H:i') : '—' }}</td>
                             <td>{{ $row->site?->name ?? '—' }}</td>
                             <td>{{ $row->department?->name ?? '—' }}</td>

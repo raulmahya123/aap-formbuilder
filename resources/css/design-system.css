@@ -81,52 +81,25 @@ body { font-family: var(--font-sans); background: var(--background); color: var(
 .ui-auth input[type='file']:hover::file-selector-button { background: var(--border); }
 .ui-shell input[type='file']:disabled { cursor: not-allowed; opacity: .6; }
 .ui-shell input[type='file']:disabled::file-selector-button { cursor: not-allowed; }
-.ui-table-scroll { width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
-main .ui-table { width: 100%; border-collapse: collapse; background: #fff; }
-main .ui-table thead th { padding: .75rem 1rem; border-top: 0; border-bottom: 1px solid var(--border); background: var(--surface-secondary); color: var(--text-primary); white-space: nowrap; }
-main .ui-table tbody td { padding: .75rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-primary); font-size: .8125rem; }
-main .ui-table tbody tr:last-child td { border-bottom: 0; }
-main .ui-table tbody tr:hover { background: var(--surface-secondary); }
-main .ui-table :is(th, td).text-right { text-align: right; }
-main .ui-table :is(th, td).text-center { text-align: center; }
 .ui-shell { background: var(--background); }
 .ui-shell main { width: 100%; min-width: 0; max-width: none; padding: var(--page-padding); }
 .ui-shell main > .ui-page > :first-child { margin-top: 0; }
-.ui-shell main :is(.rounded-2xl, .rounded-3xl) { border-radius: var(--radius); }
-.ui-shell main :is(.border-coal-100, .border-coal-200) { border-color: var(--border); }
-.ui-shell main .shadow-soft { box-shadow: none; }
-.ui-shell main .font-serif { font-family: var(--font-sans); }
-.ui-topbar { min-height: 4.25rem; border-color: var(--border); }
-.ui-sidebar { border-color: var(--border); }
-.ui-sidebar nav { padding: var(--space-4); }
-.ui-sidebar nav a { min-height: 2.5rem; font-size: .8125rem; font-weight: 500; }
-.ui-sidebar nav a.is-active { background: var(--brown); color: #fff; border-color: var(--brown); font-weight: 600; box-shadow: none; }
-.ui-sidebar nav a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .ui-auth { background: var(--background); }
 .ui-auth-card { border: 1px solid var(--border); border-radius: var(--radius); box-shadow: none; }
-.action-icon { display: inline-flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: .5rem; }
-.action-icon:not(.ui-button) { border: 1px solid var(--border); background: var(--surface); color: var(--blue); }
-.action-icon.danger:not(.ui-button) { color: var(--red); }
-.nice-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-.nice-scroll::-webkit-scrollbar-thumb { background: #cbd1c8; border-radius: 8px; }
 .ui-skip { position: fixed; top: -5rem; left: 1rem; z-index: 150; padding: .75rem 1rem; background: #fff; border: 2px solid var(--brand-primary); border-radius: .5rem; }
 .ui-skip:focus { top: .5rem; }
-@media (min-width: 1024px) { .ui-sidebar { position: sticky; top: 0; align-self: start; height: 100dvh; min-height: 0; overflow-x: hidden; overflow-y: auto; } }
-@media (max-width: 1023px) { .ui-topbar { padding-left: 64px; } }
 @media (max-width: 640px) {
   .ui-page > .flex:has(> .ui-heading) { flex-wrap: wrap; align-items: flex-start; }
   .ui-page > .flex:has(> .ui-heading) > .flex { flex-wrap: wrap; }
-  main .ui-table :is(th, td) { padding: .75rem; }
 }
 
 .ui-panel { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: none; }
 .ui-auth-card { padding: var(--card-padding); }
-.ui-heading--inverse { color: #fff; }
 .ui-auth .ui-heading { margin-bottom: .5rem; }
 .ui-auth .ui-button svg { color: inherit; stroke: currentColor; }
 .ui-auth label { color: var(--text-secondary); }
-.ui-auth a:where(:not(.ui-button):not(.ui-icon-button)), main a:where(:not(.ui-button):not(.action-icon):not(.ui-icon-button):not([class*='bg-']):not([class*='text-white'])) { color: var(--blue); }
-.ui-auth a:where(:not(.ui-button):not(.ui-icon-button)):hover, main a:where(:not(.ui-button):not(.action-icon):not(.ui-icon-button):not([class*='bg-']):not([class*='text-white'])):hover { color: var(--action-primary-hover); }
+.ui-auth a:where(:not(.ui-button):not(.ui-icon-button)), main a:where(:not(.ui-button):not(.ui-icon-button):not([class*='bg-']):not([class*='text-white'])) { color: var(--blue); }
+.ui-auth a:where(:not(.ui-button):not(.ui-icon-button)):hover, main a:where(:not(.ui-button):not(.ui-icon-button):not([class*='bg-']):not([class*='text-white'])):hover { color: var(--action-primary-hover); }
 /* The specified red is AA on white; small red text on neutral surfaces needs this darker tone. */
 :is(.text-red-500, .text-red-600, .text-red-700, .text-red-800, .text-rose-500, .text-rose-600, .text-rose-700, .text-rose-800, .form-error) { color: var(--danger-text); }
 .ui-status { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .5rem; border: 1px solid var(--border); border-radius: .375rem; font-size: .75rem; font-weight: 600; line-height: 1.5; background: var(--surface-secondary); color: var(--gray); }

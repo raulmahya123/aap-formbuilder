@@ -101,7 +101,7 @@
                                 <td class="font-medium">{{ $row['activity'] }}</td>
                                 <td>{{ $row['site'] }}</td>
                                 <td>{{ $row['score'] }}</td>
-                                <td class="text-[#B91C1C]">{{ $row['due_date'] }}</td>
+                                <td class="text-[var(--danger-text)]">{{ $row['due_date'] }}</td>
                                 <td><x-hse.status :value="$row['treatment_status']" /></td>
                             </tr>
                         @empty

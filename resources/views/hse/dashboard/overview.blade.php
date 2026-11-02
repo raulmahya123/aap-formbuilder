@@ -21,16 +21,16 @@
     @if(!empty($data['alerts']))
         <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
             @foreach($data['alerts'] as $alert)
-                <a href="{{ $alert['href'] }}" class="flex items-start gap-2 rounded-lg border border-[#E2E8F0] bg-white p-3 text-sm hover:border-[#94A3B8]">
+                <a href="{{ $alert['href'] }}" class="flex items-start gap-2 rounded-lg border border-[var(--border)] bg-white p-3 text-sm hover:border-[var(--border)]">
                     <span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style="background:{{ $alert['level'] === 'danger' ? '#DC2626' : '#F59E0B' }}">!</span>
-                    <span class="text-[#334155]">{{ $alert['title'] }}</span>
+                    <span class="text-[var(--gray)]">{{ $alert['title'] }}</span>
                 </a>
             @endforeach
         </div>
     @endif
 
     <section>
-        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-[#64748B]">Key Performance Indicators</h2>
+        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--gray)]">Key Performance Indicators</h2>
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             @foreach($data['kpis'] as $kpi)
                 <x-hse.kpi-card :kpi="$kpi" />
@@ -68,15 +68,15 @@
         </x-hse.chart-card>
         <x-hse.chart-card title="Kepatuhan & Lingkungan" subtitle="Ringkasan compliance dan metrik lingkungan">
             <div class="grid gap-3">
-                <div class="rounded-lg bg-[#F8FAFC] p-3">
-                    <div class="flex items-center justify-between text-xs text-[#64748B]">
+                <div class="rounded-lg bg-[var(--surface-secondary)] p-3">
+                    <div class="flex items-center justify-between text-xs text-[var(--gray)]">
                         <span>Compliance (finding closed)</span>
-                        <strong class="text-[#0F172A]">{{ number_format((float) ($compliance['percentage'] ?? 0), 1, ',', '.') }}%</strong>
+                        <strong class="text-[var(--primary-dark)]">{{ number_format((float) ($compliance['percentage'] ?? 0), 1, ',', '.') }}%</strong>
                     </div>
-                    <div class="mt-2 h-2 overflow-hidden rounded-full bg-[#E2E8F0]">
-                        <div class="h-full rounded-full bg-[#16A34A]" style="width:{{ min(100, (float) ($compliance['percentage'] ?? 0)) }}%"></div>
+                    <div class="mt-2 h-2 overflow-hidden rounded-full bg-[var(--surface-secondary)]">
+                        <div class="h-full rounded-full bg-[var(--green)]" style="width:{{ min(100, (float) ($compliance['percentage'] ?? 0)) }}%"></div>
                     </div>
-                    <p class="mt-1 text-[11px] text-[#94A3B8]">{{ $compliance['compliant'] ?? 0 }} compliant · {{ $compliance['non_compliant'] ?? 0 }} non-compliant · {{ $compliance['expired'] ?? 0 }} expired</p>
+                    <p class="mt-1 text-[11px] text-[var(--gray)]">{{ $compliance['compliant'] ?? 0 }} compliant · {{ $compliance['non_compliant'] ?? 0 }} non-compliant · {{ $compliance['expired'] ?? 0 }} expired</p>
                 </div>
                 @if(!empty($environment))
                     <x-ui.bar-chart :series="$environment" label="Metrik lingkungan" />
@@ -156,7 +156,7 @@
                             <td class="font-medium">{{ $row['action_no'] }}</td>
                             <td>{{ $row['title'] }}</td>
                             <td>{{ $row['pic'] }}</td>
-                            <td class="text-[#B91C1C]">{{ $row['due_date'] }}</td>
+                            <td class="text-[var(--danger-text)]">{{ $row['due_date'] }}</td>
                             <td><x-hse.status :value="$row['status']" /></td>
                         </tr>
                     @empty

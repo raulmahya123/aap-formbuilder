@@ -3,7 +3,7 @@
 @section('title', 'Input Jam Kerja (Manhours) Harian')
 
 @section('content')
-<div class="ui-page max-w-4xl mx-auto space-y-6">
+<x-ui.page>
     <x-ui.page-header>
         <div class="ui-page-header__copy">
             <h1 class="ui-page-title">Input Jam Kerja (Manhours)</h1>
@@ -16,7 +16,7 @@
     </x-ui.page-header>
 
     @if($errors->any())
-        <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
+        <div role="alert" class="rounded-lg border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
             <ul class="list-disc list-inside space-y-1">
                 @foreach($errors->all() as $err)
                     <li>{{ $err }}</li>
@@ -26,24 +26,24 @@
     @endif
 
     {{-- IMPORT VIA EXCEL / CSV --}}
-    <div class="ui-card ui-form-callout">
+    <section class="ui-card ui-form-callout">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <h3 class="text-sm font-bold text-[#0F172A]">Opsi: Import Massal Excel / CSV</h3>
-                <p class="mt-1 text-xs text-[#64748B]">Kolom: <code>Tanggal (YYYY-MM-DD), Jumlah Karyawan, Jam Kerja, Lost Hours</code>.</p>
+                <h3 class="text-sm font-bold text-[var(--primary-dark)]">Opsi: Import Massal Excel / CSV</h3>
+                <p class="mt-1 text-xs text-[var(--gray)]">Kolom: <code>Tanggal (YYYY-MM-DD), Jumlah Karyawan, Jam Kerja, Lost Hours</code>.</p>
             </div>
             <form action="{{ route('hse.dashboard.manhours.import') }}" method="POST" enctype="multipart/form-data" class="flex items-center">
                 @csrf
                 <input type="file" name="file" required accept=".csv,.xlsx,.xls"  />
-                <button type="submit" class="rounded-lg bg-[#0F172A] px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+                <button type="submit" class="rounded-lg bg-[var(--primary-dark)] px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
                     Proses Import
                 </button>
             </form>
         </div>
-    </div>
+    </section>
 
     {{-- MANUAL INPUT FORM --}}
-    <div class="ui-card">
+    <section class="ui-card">
         <h2 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3 mb-5">Formulir Input Manual</h2>
         <form action="{{ route('hse.dashboard.manhours.store') }}" method="POST" >
             @csrf
@@ -114,6 +114,6 @@
                 <x-ui.button variant="primary" icon="save" type="submit">Simpan Jam Kerja</x-ui.button>
             </div>
         </form>
-    </div>
-</div>
+    </section>
+</x-ui.page>
 @endsection

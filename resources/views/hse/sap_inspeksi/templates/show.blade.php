@@ -16,7 +16,7 @@
     </x-ui.page-header>
 
     @foreach($template->sections as $section)
-    <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div class="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="px-6 py-4 bg-slate-50 border-b border-slate-200">
             <h2 class="text-base font-bold text-slate-900">{{ $section->title }}</h2>
         </div>

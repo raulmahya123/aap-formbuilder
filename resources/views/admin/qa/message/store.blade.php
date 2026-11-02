@@ -36,7 +36,7 @@
         $isMe = auth()->id() === $msg->user_id;
       @endphp
       <div class="flex {{ $isMe ? 'justify-end' : 'justify-start' }}">
-        <x-ui.panel class="max-w-[78%] rounded-2xl shadow-sm border {{ $isMe ? 'bg-emerald-600 text-white border-emerald-700' : 'bg-white dark:bg-coal-900 border-coal-200/70 dark:border-coal-800' }}">
+        <x-ui.panel class="max-w-[78%] rounded-lg shadow-sm border {{ $isMe ? 'bg-emerald-600 text-white border-emerald-700' : 'bg-white dark:bg-coal-900 border-coal-200/70 dark:border-coal-800' }}">
           <div class="text-sm leading-relaxed whitespace-pre-line break-words">
             {{ $msg->message }}
           </div>

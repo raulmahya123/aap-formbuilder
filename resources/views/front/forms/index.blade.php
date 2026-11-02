@@ -124,19 +124,19 @@
   {{-- Tabs --}}
   <div class="flex flex-wrap items-center gap-2 mb-6 text-sm">
     <x-ui.link variant="secondary" href="{{ request()->fullUrlWithQuery($preserveQ(['doc_type'=>null, 'page'=>null])) }}"
-       class="px-3 py-1.5 rounded-xl {{ $tabClass(!$dt) }}">
+       class="px-3 py-1.5 rounded-lg {{ $tabClass(!$dt) }}">
       Semua @if($counts && isset($counts['ALL'])) <span class="opacity-80">({{ $counts['ALL'] }})</span> @endif
     </x-ui.link>
     <x-ui.link variant="secondary" href="{{ request()->fullUrlWithQuery($preserveQ(['doc_type'=>'SOP', 'page'=>null])) }}"
-       class="px-3 py-1.5 rounded-xl {{ $tabClass($dt==='SOP') }}">
+       class="px-3 py-1.5 rounded-lg {{ $tabClass($dt==='SOP') }}">
       SOP @if($counts && isset($counts['SOP'])) <span class="opacity-80">({{ $counts['SOP'] }})</span> @endif
     </x-ui.link>
     <x-ui.link variant="secondary" href="{{ request()->fullUrlWithQuery($preserveQ(['doc_type'=>'IK', 'page'=>null])) }}"
-       class="px-3 py-1.5 rounded-xl {{ $tabClass($dt==='IK') }}">
+       class="px-3 py-1.5 rounded-lg {{ $tabClass($dt==='IK') }}">
       IK @if($counts && isset($counts['IK'])) <span class="opacity-80">({{ $counts['IK'] }})</span> @endif
     </x-ui.link>
     <x-ui.link variant="secondary" href="{{ request()->fullUrlWithQuery($preserveQ(['doc_type'=>'FORM', 'page'=>null])) }}"
-       class="px-3 py-1.5 rounded-xl {{ $tabClass($dt==='FORM') }}">
+       class="px-3 py-1.5 rounded-lg {{ $tabClass($dt==='FORM') }}">
       FORM @if($counts && isset($counts['FORM'])) <span class="opacity-80">({{ $counts['FORM'] }})</span> @endif
     </x-ui.link>
   </div>
@@ -152,7 +152,7 @@
         $hex      = $d->color ?: '#e61caf';
       @endphp
 
-      <x-ui.panel class="relative group rounded-2xl border bg-white dark:bg-coal-900 border-slate-200/70 dark:border-coal-700/70 shadow-sm hover:shadow-md transition overflow-hidden {{ $isActive ? 'ring-2 ring-slate-300 dark:ring-slate-600' : '' }}">
+      <x-ui.panel class="relative group rounded-lg border bg-white dark:bg-coal-900 border-slate-200/70 dark:border-coal-700/70 shadow-sm hover:shadow-md transition overflow-hidden {{ $isActive ? 'ring-2 ring-slate-300 dark:ring-slate-600' : '' }}">
         <div class="h-40 p-3 flex flex-col">
           <div class="flex items-center gap-2">
             <div class="h-9 w-9 rounded-lg flex items-center justify-center" style="background: {{ $hex }};">
@@ -202,7 +202,7 @@
   {{-- LIST FORM --}}
   @if($forms->count() > 0)
     <x-ui.data-table>
-      <div class="hidden md:grid grid-cols-12 gap-3 px-4 py-3 text-xs font-semibold bg-ivory-100 dark:bg-coal-900/40 border-b border-coal-200 dark:border-coal-800">
+      <div class="hidden md:grid grid-cols-12 gap-3 px-4 py-3 text-xs font-semibold bg-ivory-100 dark:bg-coal-900/40 border-b border-[var(--border)] dark:border-coal-800">
         <div class="md:col-span-6">Info</div>
         <div class="md:col-span-4">Lokasi</div>
         <div class="md:col-span-2 text-right">Aksi</div>
@@ -228,7 +228,7 @@
           };
         @endphp
 
-        <x-ui.panel class="grid grid-cols-1 md:grid-cols-12 gap-3 border-t border-coal-200 dark:border-coal-800 bg-white dark:bg-coal-950">
+        <x-ui.panel class="grid grid-cols-1 md:grid-cols-12 gap-3 border-t border-[var(--border)] dark:border-coal-800 bg-white dark:bg-coal-950">
           <div class="md:col-span-6">
             <div class="flex items-start gap-2">
               <x-ui.card-title class="font-semibold leading-snug">{{ $title }}</x-ui.card-title>

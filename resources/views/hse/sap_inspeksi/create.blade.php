@@ -3,7 +3,7 @@
 @section('title', 'Buat Inspeksi Baru')
 
 @section('content')
-<div class="ui-page space-y-6 max-w-4xl mx-auto">
+<x-ui.page>
     <x-ui.page-header>
         <div class="ui-page-header__copy">
             <h1 class="ui-page-title">Buat Inspeksi SHE/HSE Baru</h1>
@@ -67,5 +67,5 @@
             <x-ui.button variant="primary" icon="plus" type="submit">Buat & Lanjut Isi Checklist</x-ui.button>
         </div>
     </form>
-</div>
+</x-ui.page>
 @endsection

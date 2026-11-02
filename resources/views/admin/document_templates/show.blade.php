@@ -96,7 +96,7 @@
       Kanvas — <span x-text="layout.page.width"></span>×<span x-text="layout.page.height"></span> px
     </div>
 
-    <div class="relative bg-white rounded-b-xl shadow-none overflow-hidden"
+    <div class="relative bg-white rounded-b-lg shadow-none overflow-hidden"
          :style="{ width: layout.page.width+'px', height: layout.page.height+'px', outline: pageBorder ? ('1px solid '+colors.pageBorder) : 'none' }"
          x-ref="page"
          tabindex="-1">

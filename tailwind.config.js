@@ -18,14 +18,12 @@ export default {
     extend: {
       borderRadius: {
         DEFAULT: '8px', sm: '8px', md: '8px', lg: '8px',
-        xl: '8px', '2xl': '8px', '3xl': '8px',
       },
       fontSize: {
         base: ['14px', { lineHeight: '1.5' }],
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
-        serif: ['Inter', 'sans-serif'], // Compatibility alias; UI never switches to a serif font.
       },
       colors: {
         'primary-dark': '#18181B',
@@ -67,9 +65,6 @@ export default {
           500: '#d4d4d4',
         },
         gold: '#D4AF37',
-      },
-      boxShadow: {
-        soft: 'none',
       },
       dropShadow: {
         gold: '0 0 12px rgba(212,175,55,.35)',

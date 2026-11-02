@@ -49,11 +49,7 @@
 
 .ui-sidebar {
   box-sizing: border-box;
-  height: 100vh;
-  height: 100dvh;
   min-height: 0;
-  max-height: 100dvh;
-  overscroll-behavior: contain;
   overflow-x: hidden;
   overflow-y: auto;
   scroll-padding-block: 12px;
@@ -108,7 +104,7 @@
 .ui-sidebar--collapsed nav > div + div { border-top: 1px solid #D4D4D8; padding-top: 12px; }
 @media (min-width: 1024px) {
   .ui-drawer-close { display: none; }
-  .ui-sidebar { position: sticky; top: 0; align-self: start; height: 100dvh; min-height: 0; overflow-x: hidden; overflow-y: auto; }
+  .ui-sidebar { position: static; align-self: stretch; height: auto; min-height: 100dvh; max-height: none; overflow: visible; }
 }
 @media (max-width: 1023px) {
   .ui-topbar { padding-inline: 16px; }

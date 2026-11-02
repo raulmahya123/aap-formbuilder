@@ -72,9 +72,9 @@
 
     {{-- INPUT: Nama Template --}}
     <div class="px-4 pt-4">
-      <label class="block text-sm font-medium text-[#1D1C1A]">Nama Template</label>
+      <label class="block text-sm font-medium text-[var(--primary-dark)]">Nama Template</label>
       <input type="text" name="name" required
-             class="mt-1 w-full rounded-lg px-3 py-2 border-2 border-gray-400 focus:border-[#713F12] focus:ring-0 focus:outline-none"
+             class="mt-1 w-full rounded-lg px-3 py-2 border-2 border-gray-400 focus:border-[var(--brown)] focus:ring-0 focus:outline-none"
              placeholder="Contoh: Template Surat Jalan"
              value="{{ old('name') }}">
       @error('name') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
@@ -82,7 +82,7 @@
 
     {{-- INPUT: Foto Template (photo_path) --}}
     <div class="px-4 pt-3">
-      <label class="block text-sm font-medium text-[#1D1C1A]">Foto Template (opsional)</label>
+      <label class="block text-sm font-medium text-[var(--primary-dark)]">Foto Template (opsional)</label>
       <div class="mt-2 flex items-center gap-3">
         <input type="file"
                name="photo_path"
@@ -444,12 +444,12 @@
 
       {{-- Canvas --}}
       <div class="p-4">
-        <div class="bg-[#1D1C1A] text-white px-3 py-2 text-sm rounded-t-xl">
+        <div class="bg-[var(--primary-dark)] text-white px-3 py-2 text-sm rounded-t-lg">
           Kanvas (Custom) — <span x-text="layout.page.width"></span>×<span x-text="layout.page.height"></span> px
         </div>
 
         {{-- Wrapper kanvas --}}
-        <div class="relative bg-white rounded-b-xl shadow-none"
+        <div class="relative bg-white rounded-b-lg shadow-none"
              :style="{ width: layout.page.width+'px', height: layout.page.height+'px', outline: pageBorder ? ('1px solid '+colors.pageBorder) : 'none' }"
              x-ref="page"
              @mousedown="pointerDown($event)"

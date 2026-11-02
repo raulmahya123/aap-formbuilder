@@ -14,7 +14,7 @@
     ])
 
     {{-- Filter Toolbar & Actions --}}
-    <div class="ui-filter-panel ui-module-filter-toolbar">
+    <x-ui.filter-panel variant="listing">
         <x-ui.table-toolbar action="{{ route('hse.dashboard.risk.list') }}">
             @if(request('likelihood') && request('consequence'))
                 <input type="hidden" name="likelihood" value="{{ request('likelihood') }}">
@@ -46,12 +46,10 @@
 
         <x-slot:actions><x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button><x-ui.link href="{{ url()->current() }}" icon="rotate-ccw">Reset</x-ui.link></x-slot:actions></x-ui.table-toolbar>
 
-    </div>
+    </x-ui.filter-panel>
 
     {{-- Main Table --}}
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="ui-table-scroll">
-            <table class="ui-table">
+    <x-ui.table :paginator="$risks">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -130,12 +128,7 @@
                         <x-ui.table-empty-state :colspan="13" title="Belum ada data Risk Assessment" message="Silakan tambahkan data asesmen baru atau ubah filter pencarian." />
                     @endforelse
                 </tbody>
-            </table>
-        </div>
-        <div class="ui-pagination-footer">
-            <x-ui.table-pagination :paginator="$risks" />
-        </div>
-    </div>
+    </x-ui.table>
 
 </div>
 @endsection

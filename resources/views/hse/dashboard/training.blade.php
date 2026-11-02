@@ -82,7 +82,7 @@
                 <table class="ui-table">
                     <thead>
                         <tr>
-                            <th class="sticky left-0 bg-[#F8FAFC]">Karyawan</th>
+                            <th class="sticky left-0 bg-[var(--surface-secondary)]">Karyawan</th>
                             @foreach($data['matrix']['courses'] as $course)
                                 <th class="whitespace-nowrap" title="{{ $course->category }}">{{ $course->name }}</th>
                             @endforeach

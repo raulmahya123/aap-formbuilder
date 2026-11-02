@@ -14,7 +14,7 @@
     ])
 
     {{-- Filter Toolbar --}}
-    <div class="ui-filter-panel ui-module-filter-toolbar">
+    <x-ui.filter-panel variant="listing">
         <x-ui.table-toolbar action="{{ route('hse.dashboard.pica.list', $source ?: '') }}">
             <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari PICA" placeholder="Cari nomor PICA, judul, temuan, atau root cause…" />
             <x-hse.module-scope-filters :options="$options" :filters="$filters" />
@@ -39,12 +39,10 @@
 
         <x-slot:actions><x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button><x-ui.link href="{{ url()->current() }}" icon="rotate-ccw">Reset</x-ui.link></x-slot:actions></x-ui.table-toolbar>
 
-    </div>
+    </x-ui.filter-panel>
 
     {{-- Main Table --}}
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="ui-table-scroll">
-            <table class="ui-table">
+    <x-ui.table :paginator="$records">
                 <thead>
                     <tr>
                         <th>PICA Number</th>
@@ -66,7 +64,7 @@
                         @endphp
                         <tr class="hover:bg-slate-50/70 transition">
                             <td class="font-bold text-slate-900">
-                                <a href="{{ route('hse.dashboard.pica.detail', $pica->id) }}" class="text-[#1646A0] hover:underline">
+                                <a href="{{ route('hse.dashboard.pica.detail', $pica->id) }}" class="text-[var(--blue)] hover:underline">
                                     {{ $pica->action_no }}
                                 </a>
                             </td>
@@ -115,12 +113,7 @@
                         <x-ui.table-empty-state :colspan="10" title="Tidak ada data PICA" message="Belum ada tindakan korektif yang sesuai dengan kriteria filter." />
                     @endforelse
                 </tbody>
-            </table>
-        </div>
-        <div class="ui-pagination-footer">
-            <x-ui.table-pagination :paginator="$records" />
-        </div>
-    </div>
+    </x-ui.table>
 
 </div>
 @endsection

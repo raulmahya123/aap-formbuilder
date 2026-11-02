@@ -24,8 +24,8 @@
 <div {{ $attributes->class(['w-full']) }}>
     @if($total <= 0)
         <div class="flex h-40 flex-col items-center justify-center gap-1 text-center">
-            <p class="text-sm font-medium text-[#475569]">Belum ada data pada periode ini</p>
-            <p class="text-xs text-[#94A3B8]">Data akan tampil setelah tersedia.</p>
+            <p class="text-sm font-medium text-[var(--gray)]">Belum ada data pada periode ini</p>
+            <p class="text-xs text-[var(--gray)]">Data akan tampil setelah tersedia.</p>
         </div>
     @else
         <div class="flex flex-col items-center gap-4 sm:flex-row">
@@ -48,11 +48,11 @@
             <ul class="grid w-full gap-1.5">
                 @foreach($segments as $segment)
                     <li class="flex items-center justify-between gap-3 text-xs">
-                        <span class="flex min-w-0 items-center gap-2 text-[#475569]">
+                        <span class="flex min-w-0 items-center gap-2 text-[var(--gray)]">
                             <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style="background:{{ $segment['color'] }}"></span>
                             <span class="truncate">{{ $segment['label'] }}</span>
                         </span>
-                        <span class="shrink-0 font-semibold text-[#0F172A]">{{ number_format($segment['value'], 0, ',', '.') }} <span class="font-normal text-[#94A3B8]">({{ number_format($segment['percent'], 1, ',', '.') }}%)</span></span>
+                        <span class="shrink-0 font-semibold text-[var(--primary-dark)]">{{ number_format($segment['value'], 0, ',', '.') }} <span class="font-normal text-[var(--gray)]">({{ number_format($segment['percent'], 1, ',', '.') }}%)</span></span>
                     </li>
                 @endforeach
             </ul>

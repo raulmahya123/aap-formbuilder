@@ -16,28 +16,28 @@
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         @forelse($data['cards'] as $card)
-            <article class="rounded-lg border border-[#E2E8F0] bg-white p-4">
+            <article class="rounded-lg border border-[var(--border)] bg-white p-4">
                 <header class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
-                        <h2 class="truncate text-sm font-semibold text-[#0F172A]">{{ $card['name'] }}</h2>
-                        <p class="text-xs text-[#64748B]">{{ $card['code'] ?: '—' }} · {{ $card['company'] ?? '—' }}</p>
+                        <h2 class="truncate text-sm font-semibold text-[var(--primary-dark)]">{{ $card['name'] }}</h2>
+                        <p class="text-xs text-[var(--gray)]">{{ $card['code'] ?: '—' }} · {{ $card['company'] ?? '—' }}</p>
                     </div>
                     @if($card['high_risk'] > 0)
-                        <span class="rounded bg-[#FEE2E2] px-2 py-0.5 text-[11px] font-semibold text-[#991B1B]">{{ $card['high_risk'] }} high risk</span>
+                        <span class="rounded bg-[var(--surface-secondary)] px-2 py-0.5 text-[11px] font-semibold text-[var(--danger-text)]">{{ $card['high_risk'] }} high risk</span>
                     @endif
                 </header>
                 <dl class="mt-3 grid grid-cols-2 gap-2 text-xs">
-                    <div class="rounded bg-[#F8FAFC] p-2"><dt class="text-[#64748B]">Insiden</dt><dd class="text-base font-bold text-[#0F172A]">{{ $card['incidents'] }}</dd></div>
-                    <div class="rounded bg-[#F8FAFC] p-2"><dt class="text-[#64748B]">Near Miss</dt><dd class="text-base font-bold text-[#0F172A]">{{ $card['near_miss'] }}</dd></div>
-                    <div class="rounded bg-[#F8FAFC] p-2"><dt class="text-[#64748B]">Skor Inspeksi</dt><dd class="text-base font-bold text-[#0F172A]">{{ $card['inspection_score'] === null ? 'N/A' : number_format((float) $card['inspection_score'], 1, ',', '.') }}</dd></div>
-                    <div class="rounded bg-[#F8FAFC] p-2"><dt class="text-[#64748B]">Open Action</dt><dd class="text-base font-bold {{ $card['open_actions'] > 0 ? 'text-[#B91C1C]' : 'text-[#0F172A]' }}">{{ $card['open_actions'] }}</dd></div>
-                    <div class="col-span-2 rounded bg-[#F8FAFC] p-2">
+                    <div class="rounded bg-[var(--surface-secondary)] p-2"><dt class="text-[var(--gray)]">Insiden</dt><dd class="text-base font-bold text-[var(--primary-dark)]">{{ $card['incidents'] }}</dd></div>
+                    <div class="rounded bg-[var(--surface-secondary)] p-2"><dt class="text-[var(--gray)]">Near Miss</dt><dd class="text-base font-bold text-[var(--primary-dark)]">{{ $card['near_miss'] }}</dd></div>
+                    <div class="rounded bg-[var(--surface-secondary)] p-2"><dt class="text-[var(--gray)]">Skor Inspeksi</dt><dd class="text-base font-bold text-[var(--primary-dark)]">{{ $card['inspection_score'] === null ? 'N/A' : number_format((float) $card['inspection_score'], 1, ',', '.') }}</dd></div>
+                    <div class="rounded bg-[var(--surface-secondary)] p-2"><dt class="text-[var(--gray)]">Open Action</dt><dd class="text-base font-bold {{ $card['open_actions'] > 0 ? 'text-[var(--danger-text)]' : 'text-[var(--primary-dark)]' }}">{{ $card['open_actions'] }}</dd></div>
+                    <div class="col-span-2 rounded bg-[var(--surface-secondary)] p-2">
                         <div class="flex items-center justify-between">
-                            <dt class="text-[#64748B]">Training Completion</dt>
-                            <dd class="font-semibold text-[#0F172A]">{{ $card['training_completion'] === null ? 'N/A' : number_format((float) $card['training_completion'], 1, ',', '.').'%' }}</dd>
+                            <dt class="text-[var(--gray)]">Training Completion</dt>
+                            <dd class="font-semibold text-[var(--primary-dark)]">{{ $card['training_completion'] === null ? 'N/A' : number_format((float) $card['training_completion'], 1, ',', '.').'%' }}</dd>
                         </div>
-                        <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-[#E2E8F0]">
-                            <div class="h-full rounded-full bg-[#16A34A]" style="width:{{ min(100, (float) ($card['training_completion'] ?? 0)) }}%"></div>
+                        <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-[var(--surface-secondary)]">
+                            <div class="h-full rounded-full bg-[var(--green)]" style="width:{{ min(100, (float) ($card['training_completion'] ?? 0)) }}%"></div>
                         </div>
                     </div>
                 </dl>

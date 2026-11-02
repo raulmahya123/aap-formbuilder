@@ -53,7 +53,7 @@
                         <label class="text-xs text-slate-600">Catatan Review</label>
                         <textarea name="review_notes" class="w-full mt-1 border rounded px-2 py-1.5" rows="2"></textarea>
                     </div>
-                    <button class="px-4 py-2 rounded bg-[#0B2345] text-white text-sm">Proses</button>
+                    <button class="px-4 py-2 rounded bg-[var(--blue)] text-white text-sm">Proses</button>
                 </form>
             </div>
             @endif

@@ -33,7 +33,7 @@
                         </select>
                     </div>
                     <div class="flex items-end">
-                        <button class="px-4 py-2 rounded bg-[#0B2345] text-white text-sm">Hitung & Simpan Penilaian</button>
+                        <button class="px-4 py-2 rounded bg-[var(--blue)] text-white text-sm">Hitung & Simpan Penilaian</button>
                     </div>
                     <div class="md:col-span-3">
                         <label >Catatan Penilaian</label>

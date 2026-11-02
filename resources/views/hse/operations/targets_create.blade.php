@@ -3,7 +3,7 @@
 @section('title', 'Tetapkan Target KPI Baru')
 
 @section('content')
-<div class="ui-page max-w-4xl mx-auto space-y-6">
+<x-ui.page>
     <x-ui.page-header>
         <div class="ui-page-header__copy">
             <h1 class="ui-page-title">Tetapkan Target KPI Baru</h1>
@@ -16,7 +16,7 @@
     </x-ui.page-header>
 
     @if($errors->any())
-        <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
+        <div role="alert" class="rounded-lg border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
             <ul class="list-disc list-inside space-y-1">
                 @foreach($errors->all() as $err)
                     <li>{{ $err }}</li>
@@ -25,7 +25,7 @@
         </div>
     @endif
 
-    <div class="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-sm">
+    <section class="ui-card">
         <form action="{{ route('hse.dashboard.targets.store') }}" method="POST" >
             @csrf
 
@@ -76,12 +76,12 @@
                 <a href="{{ route('hse.dashboard.targets.index') }}" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
                     Batal
                 </a>
-                <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-[#1646A0] px-5 py-2 text-xs font-semibold text-white hover:bg-[#123880] shadow transition">
+                <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-[var(--blue)] px-5 py-2 text-xs font-semibold text-white hover:bg-[var(--action-primary-hover)] shadow transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     Simpan Target KPI
                 </button>
             </div>
         </form>
-    </div>
-</div>
+    </section>
+</x-ui.page>
 @endsection

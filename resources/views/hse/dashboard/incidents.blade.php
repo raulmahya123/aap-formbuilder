@@ -84,7 +84,7 @@
                     @forelse($data['rows'] as $row)
                         <tr>
                             <td>
-                                <a href="{{ route('hse.dashboard.incidents.show', $row['id']) }}" class="font-bold text-[#1646A0] hover:underline">
+                                <a href="{{ route('hse.dashboard.incidents.show', $row['id']) }}" class="font-bold text-[var(--blue)] hover:underline">
                                     {{ $row['incident_no'] }}
                                 </a>
                             </td>

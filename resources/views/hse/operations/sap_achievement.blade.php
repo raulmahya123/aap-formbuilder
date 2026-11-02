@@ -40,9 +40,9 @@
                             </td>
                             <td>
                                 @if($type === 'hazard')
-                                    <strong class="text-[#0F172A]">{{ $row->reporter_name ?? ($row->user?->name ?? '—') }}</strong>
+                                    <strong class="text-[var(--primary-dark)]">{{ $row->reporter_name ?? ($row->user?->name ?? '—') }}</strong>
                                 @else
-                                    <strong class="text-[#0F172A]">{{ $row->inspector?->name ?? '—' }}</strong>
+                                    <strong class="text-[var(--primary-dark)]">{{ $row->inspector?->name ?? '—' }}</strong>
                                 @endif
                             </td>
                             <td>{{ $row->site?->name ?? '—' }}</td>

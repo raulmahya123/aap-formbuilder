@@ -13,7 +13,7 @@
     ])
 
     {{-- Filter Toolbar --}}
-    <div class="ui-filter-panel ui-module-filter-toolbar">
+    <x-ui.filter-panel variant="listing">
         <x-ui.table-toolbar action="{{ route('hse.dashboard.risk.controls') }}">
             <x-hse.module-scope-filters :options="$options" :filters="$filters" />
             <div class="ui-filter-field"><label class="ui-filter-field__label" for="risk-control-status">Status</label><select id="risk-control-status" name="status" class="w-full ui-input" onchange="this.form.submit()">
@@ -36,12 +36,10 @@
         <div class="flex items-center gap-2 text-xs text-slate-500">
             <span>Terhubung ke Risk Register & PICA Engine</span>
         </div>
-    </div>
+    </x-ui.filter-panel>
 
     {{-- Table of Controls --}}
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="ui-table-scroll">
-            <table class="ui-table">
+    <x-ui.table :paginator="$controls">
                 <thead>
                     <tr>
                         <th>PICA No</th>
@@ -103,12 +101,7 @@
                         <x-ui.table-empty-state :colspan="10" title="Tidak ada tindakan kontrol risiko" message="Belum ada corrective action atau kontrol risiko yang cocok dengan filter." />
                     @endforelse
                 </tbody>
-            </table>
-        </div>
-        <div class="ui-pagination-footer">
-            <x-ui.table-pagination :paginator="$controls" />
-        </div>
-    </div>
+    </x-ui.table>
 
     {{-- MODAL UPDATE KONTROL (ASSIGN PIC, DUE DATE, EVIDENCE, PROGRESS, VERIFICATION) --}}
     <div x-show="openEditModal" class="ui-modal-overlay" style="display: none;" x-transition>
@@ -131,7 +124,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Assign PIC</label>
-                        <select name="assigned_to" class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
+                        <select name="assigned_to" class="w-full text-xs rounded-lg border-slate-300 focus:border-[var(--blue)]">
                             <option value="">-- Tetap / Pilih PIC --</option>
                             @foreach($users as $u)
                                 <option value="{{ $u->id }}">{{ $u->name }}</option>
@@ -140,13 +133,13 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Due Date</label>
-                        <input type="date" name="due_date" :value="activePica ? (activePica.due_date ? activePica.due_date.substring(0,10) : '') : ''" class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]">
+                        <input type="date" name="due_date" :value="activePica ? (activePica.due_date ? activePica.due_date.substring(0,10) : '') : ''" class="w-full text-xs rounded-lg border-slate-300 focus:border-[var(--blue)]">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Update Status *</label>
-                    <select name="status" required class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]" x-model="activePica ? activePica.status : 'Open'">
+                    <select name="status" required class="w-full text-xs rounded-lg border-slate-300 focus:border-[var(--blue)]" x-model="activePica ? activePica.status : 'Open'">
                         <option value="Open">Open</option>
                         <option value="In Progress">In Progress (Sedang Dikerjakan)</option>
                         <option value="Pending Verification">Waiting Verification (Menunggu Verifikasi)</option>
@@ -156,12 +149,12 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Progress Notes / Tindakan Implementasi</label>
-                    <textarea name="action_note" rows="2" placeholder="Tuliskan perkembangan implementasi kontrol..." class="w-full text-xs rounded-lg border-slate-300 focus:border-[#1646A0]"></textarea>
+                    <textarea name="action_note" rows="2" placeholder="Tuliskan perkembangan implementasi kontrol..." class="w-full text-xs rounded-lg border-slate-300 focus:border-[var(--blue)]"></textarea>
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Upload Bukti Implementasi (Evidence)</label>
-                    <input type="file" name="evidence_file" class="w-full text-xs rounded-lg border border-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#1646A0] hover:file:bg-blue-100">
+                    <input type="file" name="evidence_file" class="w-full text-xs rounded-lg border border-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[var(--blue)] hover:file:bg-blue-100">
                     <p class="text-[10px] text-slate-400 mt-1">Format: PDF, JPG, PNG (Maks 10MB)</p>
                 </div>
 

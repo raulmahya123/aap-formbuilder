@@ -40,15 +40,15 @@
 
   <!-- Status Alert Messages -->
   @if (session('status') === 'profile-updated')
-    <div class="p-3.5 bg-[#DCFCE7] border border-[#BBF7D0] text-[#166534] rounded-xl text-xs font-semibold flex items-center gap-2">
-      <x-ui-icon name="check" class="w-4 h-4 text-[#166534]" />
+    <div class="p-3.5 bg-[var(--surface-secondary)] border border-[var(--green)] text-[var(--green)] rounded-lg text-xs font-semibold flex items-center gap-2">
+      <x-ui-icon name="check" class="w-4 h-4 text-[var(--green)]" />
       <span>Profil berhasil diperbarui.</span>
     </div>
   @endif
 
   @if (session('status') === 'password-updated')
-    <div class="p-3.5 bg-[#DCFCE7] border border-[#BBF7D0] text-[#166534] rounded-xl text-xs font-semibold flex items-center gap-2">
-      <x-ui-icon name="check" class="w-4 h-4 text-[#166534]" />
+    <div class="p-3.5 bg-[var(--surface-secondary)] border border-[var(--green)] text-[var(--green)] rounded-lg text-xs font-semibold flex items-center gap-2">
+      <x-ui-icon name="check" class="w-4 h-4 text-[var(--green)]" />
       <span>Password berhasil diubah.</span>
     </div>
   @endif
@@ -56,15 +56,15 @@
   <!-- ========================================== -->
   <!-- 2. PROFILE SUMMARY CARD                   -->
   <!-- ========================================== -->
-  <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+  <div class="bg-white border border-[var(--border)] rounded-lg p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-5">
     <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-5">
       <!-- Circular Avatar with Camera Trigger -->
       <div class="relative group shrink-0">
         <template x-if="avatarUrl">
-          <img :src="avatarUrl" alt="{{ $user->name }}" class="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-[#E2E8F0] shadow-xs">
+          <img :src="avatarUrl" alt="{{ $user->name }}" class="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-[var(--border)] shadow-xs">
         </template>
         <template x-if="!avatarUrl">
-          <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#EFF6FF] border-2 border-[#BFDBFE] text-[#0057FF] font-bold text-2xl flex items-center justify-center">
+          <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[var(--surface-secondary)] border-2 border-[var(--border)] text-[var(--blue)] font-bold text-2xl flex items-center justify-center">
             {{ strtoupper(substr($user->name, 0, 2)) }}
           </div>
         </template>
@@ -73,7 +73,7 @@
         <button
           type="button"
           @click="openAvatarModal = true"
-          class="absolute bottom-0 right-0 p-2 bg-[#0057FF] hover:bg-[#0046CC] text-white rounded-full shadow-md transition transform group-hover:scale-105"
+          class="absolute bottom-0 right-0 p-2 bg-[var(--blue)] hover:bg-[var(--action-primary-hover)] text-white rounded-full shadow-md transition transform group-hover:scale-105"
           title="Ubah Foto Profil"
           aria-label="Ubah Foto Profil"
         >
@@ -84,18 +84,18 @@
       <!-- Info Details -->
       <div class="space-y-1">
         <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-          <h2 class="text-lg sm:text-xl font-bold text-[#111827]">{{ $user->name }}</h2>
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold {{ $user->is_active ? 'bg-[#DCFCE7] text-[#166534]' : 'bg-[#FEE2E2] text-[#991B1B]' }}">
+          <h2 class="text-lg sm:text-xl font-bold text-[var(--primary-dark)]">{{ $user->name }}</h2>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold {{ $user->is_active ? 'bg-[var(--surface-secondary)] text-[var(--green)]' : 'bg-[var(--surface-secondary)] text-[var(--danger-text)]' }}">
             {{ $user->is_active ? 'Aktif' : 'Non-Aktif' }}
           </span>
         </div>
-        <p class="text-xs text-[#475569]">{{ $user->email }}</p>
-        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-1 text-xs text-[#334155]">
-          <span class="font-medium text-[#111827]">{{ $user->position ?: 'Pegawai' }}</span>
-          <span class="text-[#CBD5E1]">•</span>
-          <span class="capitalize px-2 py-0.5 rounded bg-[#F1F5F9] font-semibold text-[11px] text-[#475569]">{{ str_replace('_', ' ', $user->role ?? 'user') }}</span>
-          <span class="text-[#CBD5E1]">•</span>
-          <span>Site: <strong class="text-[#111827]">{{ $user->isSuperAdmin() ? 'Semua Site (HO)' : ($user->sites->pluck('code')->join(', ') ?: 'Belum Ada Site') }}</strong></span>
+        <p class="text-xs text-[var(--gray)]">{{ $user->email }}</p>
+        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-1 text-xs text-[var(--gray)]">
+          <span class="font-medium text-[var(--primary-dark)]">{{ $user->position ?: 'Pegawai' }}</span>
+          <span class="text-[var(--border)]">•</span>
+          <span class="capitalize px-2 py-0.5 rounded bg-[var(--surface-secondary)] font-semibold text-[11px] text-[var(--gray)]">{{ str_replace('_', ' ', $user->role ?? 'user') }}</span>
+          <span class="text-[var(--border)]">•</span>
+          <span>Site: <strong class="text-[var(--primary-dark)]">{{ $user->isSuperAdmin() ? 'Semua Site (HO)' : ($user->sites->pluck('code')->join(', ') ?: 'Belum Ada Site') }}</strong></span>
         </div>
       </div>
     </div>
@@ -105,9 +105,9 @@
       <button
         type="button"
         @click="openAvatarModal = true"
-        class="w-full sm:w-auto px-4 py-2 border border-[#E2E8F0] hover:bg-[#F8FAFC] text-xs font-semibold text-[#111827] rounded-xl transition inline-flex items-center justify-center gap-2"
+        class="w-full sm:w-auto px-4 py-2 border border-[var(--border)] hover:bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--primary-dark)] rounded-lg transition inline-flex items-center justify-center gap-2"
       >
-        <x-ui-icon name="camera" class="w-4 h-4 text-[#475569]" />
+        <x-ui-icon name="camera" class="w-4 h-4 text-[var(--gray)]" />
         <span>Ganti Foto</span>
       </button>
       @if($user->avatar_path)
@@ -122,13 +122,13 @@
   <!-- ========================================== -->
   <!-- 3. TAB NAVIGATION                         -->
   <!-- ========================================== -->
-  <div class="border-b border-[#E2E8F0] overflow-x-auto chat-scroll">
+  <div class="border-b border-[var(--border)] overflow-x-auto chat-scroll">
     <div class="flex items-center gap-8 min-w-max">
       <button
         type="button"
         @click="switchTab('personal')"
         class="pb-3 text-xs sm:text-sm font-semibold transition relative"
-        :class="currentTab === 'personal' ? 'text-[#0057FF] border-b-2 border-[#0057FF]' : 'text-[#475569] hover:text-[#111827] border-b-2 border-transparent'"
+        :class="currentTab === 'personal' ? 'text-[var(--blue)] border-b-2 border-[var(--blue)]' : 'text-[var(--gray)] hover:text-[var(--primary-dark)] border-b-2 border-transparent'"
       >
         Informasi Pribadi
       </button>
@@ -137,7 +137,7 @@
         type="button"
         @click="switchTab('employment')"
         class="pb-3 text-xs sm:text-sm font-semibold transition relative"
-        :class="currentTab === 'employment' ? 'text-[#0057FF] border-b-2 border-[#0057FF]' : 'text-[#475569] hover:text-[#111827] border-b-2 border-transparent'"
+        :class="currentTab === 'employment' ? 'text-[var(--blue)] border-b-2 border-[var(--blue)]' : 'text-[var(--gray)] hover:text-[var(--primary-dark)] border-b-2 border-transparent'"
       >
         Informasi Pekerjaan
       </button>
@@ -146,7 +146,7 @@
         type="button"
         @click="switchTab('security')"
         class="pb-3 text-xs sm:text-sm font-semibold transition relative"
-        :class="currentTab === 'security' ? 'text-[#0057FF] border-b-2 border-[#0057FF]' : 'text-[#475569] hover:text-[#111827] border-b-2 border-transparent'"
+        :class="currentTab === 'security' ? 'text-[var(--blue)] border-b-2 border-[var(--blue)]' : 'text-[var(--gray)] hover:text-[var(--primary-dark)] border-b-2 border-transparent'"
       >
         Keamanan Akun
       </button>
@@ -155,7 +155,7 @@
         type="button"
         @click="switchTab('activity')"
         class="pb-3 text-xs sm:text-sm font-semibold transition relative"
-        :class="currentTab === 'activity' ? 'text-[#0057FF] border-b-2 border-[#0057FF]' : 'text-[#475569] hover:text-[#111827] border-b-2 border-transparent'"
+        :class="currentTab === 'activity' ? 'text-[var(--blue)] border-b-2 border-[var(--blue)]' : 'text-[var(--gray)] hover:text-[var(--primary-dark)] border-b-2 border-transparent'"
       >
         Aktivitas Akun
       </button>
@@ -170,15 +170,15 @@
       @csrf
       @method('patch')
 
-      <div class="mb-6 pb-4 border-b border-[#E2E8F0]">
-        <h3 class="text-base sm:text-lg font-bold text-[#111827]">Identitas & Data Pribadi</h3>
-        <p class="text-xs text-[#475569] mt-0.5">Lengkapi identitas diri Anda untuk keperluan operasional perusahaan.</p>
+      <div class="mb-6 pb-4 border-b border-[var(--border)]">
+        <h3 class="text-base sm:text-lg font-bold text-[var(--primary-dark)]">Identitas & Data Pribadi</h3>
+        <p class="text-xs text-[var(--gray)] mt-0.5">Lengkapi identitas diri Anda untuk keperluan operasional perusahaan.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
         <!-- Nama Lengkap -->
         <div>
-          <label class="block">Nama Lengkap <span class="text-[#DC2626]">*</span></label>
+          <label class="block">Nama Lengkap <span class="text-[var(--red)]">*</span></label>
           <input
             type="text"
             name="name"
@@ -186,7 +186,7 @@
             required
             class="w-full ui-input"
           />
-          @error('name') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
+          @error('name') <p class="text-[11px] text-[var(--red)] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Nama Panggilan -->
@@ -199,7 +199,7 @@
             placeholder="Panggilan akrab"
             class="w-full ui-input"
           />
-          @error('nickname') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
+          @error('nickname') <p class="text-[11px] text-[var(--red)] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- NIK -->
@@ -213,7 +213,7 @@
             placeholder="16 digit angka sesuai KTP"
             class="w-full ui-input"
           />
-          @error('nik') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
+          @error('nik') <p class="text-[11px] text-[var(--red)] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Jenis Kelamin -->
@@ -227,7 +227,7 @@
             <option value="L" @selected(old('gender', $user->gender) === 'L')>Laki-laki</option>
             <option value="P" @selected(old('gender', $user->gender) === 'P')>Perempuan</option>
           </select>
-          @error('gender') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
+          @error('gender') <p class="text-[11px] text-[var(--red)] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Tempat Lahir -->
@@ -240,7 +240,7 @@
             placeholder="Kota / Kabupaten kelahiran"
             class="w-full ui-input"
           />
-          @error('birth_place') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
+          @error('birth_place') <p class="text-[11px] text-[var(--red)] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Tanggal Lahir -->
@@ -252,12 +252,12 @@
             value="{{ old('birth_date', optional($user->birth_date)->format('Y-m-d')) }}"
             class="w-full ui-input"
           />
-          @error('birth_date') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
+          @error('birth_date') <p class="text-[11px] text-[var(--red)] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Email -->
         <div>
-          <label class="block">Email Perusahaan / Login <span class="text-[#DC2626]">*</span></label>
+          <label class="block">Email Perusahaan / Login <span class="text-[var(--red)]">*</span></label>
           <input
             type="email"
             name="email"
@@ -265,7 +265,7 @@
             required
             class="w-full ui-input"
           />
-          @error('email') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
+          @error('email') <p class="text-[11px] text-[var(--red)] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Nomor Telepon -->
@@ -278,7 +278,7 @@
             placeholder="Contoh: 081234567890"
             class="w-full ui-input"
           />
-          @error('phone') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
+          @error('phone') <p class="text-[11px] text-[var(--red)] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- WhatsApp -->
@@ -291,7 +291,7 @@
             placeholder="Contoh: 081234567890"
             class="w-full ui-input"
           />
-          @error('whatsapp') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
+          @error('whatsapp') <p class="text-[11px] text-[var(--red)] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Alamat Lengkap -->
@@ -303,7 +303,7 @@
             placeholder="Alamat jalan, nomor rumah, RT/RW..."
             class="w-full ui-input"
           >{{ old('address', $user->address) }}</textarea>
-          @error('address') <p class="text-[11px] text-[#DC2626] mt-1">{{ $message }}</p> @enderror
+          @error('address') <p class="text-[11px] text-[var(--red)] mt-1">{{ $message }}</p> @enderror
         </div>
 
         <!-- Provinsi & Kota -->
@@ -330,8 +330,8 @@
         </div>
 
         <!-- Kontak Darurat -->
-        <div class="md:col-span-2 pt-4 border-t border-[#E2E8F0]">
-          <h4 class="font-bold text-[#111827] mb-3">Kontak Darurat (Emergency Contact)</h4>
+        <div class="md:col-span-2 pt-4 border-t border-[var(--border)]">
+          <h4 class="font-bold text-[var(--primary-dark)] mb-3">Kontak Darurat (Emergency Contact)</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block">Nama Kontak Darurat</label>
@@ -358,13 +358,13 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="mt-8 pt-5 border-t border-[#E2E8F0] flex items-center justify-end gap-3">
-        <a href="{{ route('profile.edit') }}" class="px-5 py-2.5 text-xs font-semibold text-[#475569] hover:bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl transition">
+      <div class="mt-8 pt-5 border-t border-[var(--border)] flex items-center justify-end gap-3">
+        <a href="{{ route('profile.edit') }}" class="px-5 py-2.5 text-xs font-semibold text-[var(--gray)] hover:bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg transition">
           Batal
         </a>
         <button
           type="submit"
-          class="px-6 py-2.5 text-xs font-semibold text-white bg-[#0057FF] hover:bg-[#0046CC] rounded-xl transition shadow-xs inline-flex items-center gap-2"
+          class="px-6 py-2.5 text-xs font-semibold text-white bg-[var(--blue)] hover:bg-[var(--action-primary-hover)] rounded-lg transition shadow-xs inline-flex items-center gap-2"
         >
           <x-ui-icon name="save" class="w-4 h-4 text-white" />
           <span>Simpan Perubahan</span>
@@ -377,69 +377,69 @@
   <!-- 5. TAB 2: INFORMASI PEKERJAAN             -->
   <!-- ========================================== -->
   <div x-show="currentTab === 'employment'" x-transition class="space-y-6">
-    <div class="bg-white border border-[#E2E8F0] rounded-2xl p-6 sm:p-8 shadow-xs">
-      <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#E2E8F0]">
+    <div class="bg-white border border-[var(--border)] rounded-lg p-6 sm:p-8 shadow-xs">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border)]">
         <div>
-          <h3 class="text-base sm:text-lg font-bold text-[#111827]">Informasi Pekerjaan & Organisasi</h3>
-          <p class="text-xs text-[#475569] mt-0.5">Penugasan, site penempatan, struktur divisi, dan wewenang akun.</p>
+          <h3 class="text-base sm:text-lg font-bold text-[var(--primary-dark)]">Informasi Pekerjaan & Organisasi</h3>
+          <p class="text-xs text-[var(--gray)] mt-0.5">Penugasan, site penempatan, struktur divisi, dan wewenang akun.</p>
         </div>
         @if($user->isSuperAdmin())
           <button
             type="button"
             @click="openEditEmploymentModal()"
-            class="px-4 py-2 text-xs font-semibold text-[#0057FF] bg-[#EFF6FF] border border-[#BFDBFE] hover:bg-[#DBEAFE] rounded-xl transition inline-flex items-center gap-1.5"
+            class="px-4 py-2 text-xs font-semibold text-[var(--blue)] bg-[var(--surface-secondary)] border border-[var(--border)] hover:bg-[var(--surface-secondary)] rounded-lg transition inline-flex items-center gap-1.5"
           >
-            <x-ui-icon name="edit" class="w-3.5 h-3.5 text-[#0057FF]" />
+            <x-ui-icon name="edit" class="w-3.5 h-3.5 text-[var(--blue)]" />
             <span>Ubah Data Pekerjaan (Super Admin)</span>
           </button>
         @endif
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-xs">
-        <div class="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-          <span class="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider">Employee ID / NIK</span>
-          <p class="text-sm font-bold text-[#111827] mt-1">{{ $user->nik ?: '-' }}</p>
+        <div class="p-4 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border)]">
+          <span class="text-[11px] font-semibold text-[var(--gray)] uppercase tracking-wider">Employee ID / NIK</span>
+          <p class="text-sm font-bold text-[var(--primary-dark)] mt-1">{{ $user->nik ?: '-' }}</p>
         </div>
 
-        <div class="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-          <span class="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider">Jabatan / Position</span>
-          <p class="text-sm font-bold text-[#111827] mt-1">{{ $user->position ?: 'Staff Operasional' }}</p>
+        <div class="p-4 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border)]">
+          <span class="text-[11px] font-semibold text-[var(--gray)] uppercase tracking-wider">Jabatan / Position</span>
+          <p class="text-sm font-bold text-[var(--primary-dark)] mt-1">{{ $user->position ?: 'Staff Operasional' }}</p>
         </div>
 
-        <div class="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-          <span class="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider">Role Kewenangan</span>
-          <p class="text-sm font-bold text-[#0057FF] mt-1 capitalize">{{ str_replace('_', ' ', $user->role ?? 'User') }}</p>
+        <div class="p-4 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border)]">
+          <span class="text-[11px] font-semibold text-[var(--gray)] uppercase tracking-wider">Role Kewenangan</span>
+          <p class="text-sm font-bold text-[var(--blue)] mt-1 capitalize">{{ str_replace('_', ' ', $user->role ?? 'User') }}</p>
         </div>
 
-        <div class="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-          <span class="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider">Departemen</span>
-          <p class="text-sm font-bold text-[#111827] mt-1">{{ $userDepartment ? $userDepartment->name : 'Operasional Umum' }}</p>
+        <div class="p-4 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border)]">
+          <span class="text-[11px] font-semibold text-[var(--gray)] uppercase tracking-wider">Departemen</span>
+          <p class="text-sm font-bold text-[var(--primary-dark)] mt-1">{{ $userDepartment ? $userDepartment->name : 'Operasional Umum' }}</p>
         </div>
 
-        <div class="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-          <span class="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider">Divisi</span>
-          <p class="text-sm font-bold text-[#111827] mt-1">{{ $user->division ?: 'Divisi Lapangan' }}</p>
+        <div class="p-4 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border)]">
+          <span class="text-[11px] font-semibold text-[var(--gray)] uppercase tracking-wider">Divisi</span>
+          <p class="text-sm font-bold text-[var(--primary-dark)] mt-1">{{ $user->division ?: 'Divisi Lapangan' }}</p>
         </div>
 
-        <div class="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-          <span class="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider">Status Karyawan</span>
-          <p class="text-sm font-bold text-[#111827] mt-1">{{ $user->employee_status ?: 'PKWT' }}</p>
+        <div class="p-4 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border)]">
+          <span class="text-[11px] font-semibold text-[var(--gray)] uppercase tracking-wider">Status Karyawan</span>
+          <p class="text-sm font-bold text-[var(--primary-dark)] mt-1">{{ $user->employee_status ?: 'PKWT' }}</p>
         </div>
 
-        <div class="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] sm:col-span-2 lg:col-span-3">
-          <span class="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider">Assigned Sites (Hak Akses Site)</span>
+        <div class="p-4 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border)] sm:col-span-2 lg:col-span-3">
+          <span class="text-[11px] font-semibold text-[var(--gray)] uppercase tracking-wider">Assigned Sites (Hak Akses Site)</span>
           <div class="mt-2 flex flex-wrap gap-2">
             @if($user->isSuperAdmin())
-              <span class="px-3 py-1 rounded-lg bg-[#DBEAFE] text-[#1E40AF] font-bold text-xs">
+              <span class="px-3 py-1 rounded-lg bg-[var(--surface-secondary)] text-[var(--action-primary-hover)] font-bold text-xs">
                 Akses Penuh Seluruh Site (Super Administrator)
               </span>
             @else
               @forelse($user->sites as $site)
-                <span class="px-3 py-1 rounded-lg bg-white border border-[#CBD5E1] text-[#111827] font-semibold text-xs">
+                <span class="px-3 py-1 rounded-lg bg-white border border-[var(--border)] text-[var(--primary-dark)] font-semibold text-xs">
                   {{ $site->code }} — {{ $site->name }}
                 </span>
               @empty
-                <span class="text-[#94A3B8] italic">Belum ada site yang ditugaskan kepada akun ini.</span>
+                <span class="text-[var(--gray)] italic">Belum ada site yang ditugaskan kepada akun ini.</span>
               @endforelse
             @endif
           </div>
@@ -457,15 +457,15 @@
       @csrf
       @method('put')
 
-      <div class="mb-6 pb-4 border-b border-[#E2E8F0]">
-        <h3 class="text-base sm:text-lg font-bold text-[#111827]">Ubah Kata Sandi</h3>
-        <p class="text-xs text-[#475569] mt-0.5">Pastikan akun Anda menggunakan kombinasi kata sandi yang aman dan tidak mudah ditebak.</p>
+      <div class="mb-6 pb-4 border-b border-[var(--border)]">
+        <h3 class="text-base sm:text-lg font-bold text-[var(--primary-dark)]">Ubah Kata Sandi</h3>
+        <p class="text-xs text-[var(--gray)] mt-0.5">Pastikan akun Anda menggunakan kombinasi kata sandi yang aman dan tidak mudah ditebak.</p>
       </div>
 
       <div class="max-w-xl space-y-4 text-xs" x-data="{ showPass1: false, showPass2: false, showPass3: false }">
         <!-- Current Password -->
         <div>
-          <label class="block">Kata Sandi Saat Ini <span class="text-[#DC2626]">*</span></label>
+          <label class="block">Kata Sandi Saat Ini <span class="text-[var(--red)]">*</span></label>
           <div class="relative">
             <input
               :type="showPass1 ? 'text' : 'password'"
@@ -475,19 +475,19 @@
               placeholder="Masukkan kata sandi saat ini"
               class="w-full ui-input"
             />
-            <button type="button" @click="showPass1 = !showPass1" class="absolute inset-y-0 right-0 pr-3 flex items-center text-[#94A3B8] hover:text-[#475569]">
+            <button type="button" @click="showPass1 = !showPass1" class="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--gray)] hover:text-[var(--gray)]">
               <x-ui-icon name="eye" class="w-4 h-4" x-show="!showPass1" />
               <x-ui-icon name="eye-off" class="w-4 h-4" x-show="showPass1" />
             </button>
           </div>
           @if ($errors->updatePassword->has('current_password'))
-            <p class="text-[11px] text-[#DC2626] mt-1">{{ $errors->updatePassword->first('current_password') }}</p>
+            <p class="text-[11px] text-[var(--red)] mt-1">{{ $errors->updatePassword->first('current_password') }}</p>
           @endif
         </div>
 
         <!-- New Password -->
         <div>
-          <label class="block">Kata Sandi Baru <span class="text-[#DC2626]">*</span></label>
+          <label class="block">Kata Sandi Baru <span class="text-[var(--red)]">*</span></label>
           <div class="relative">
             <input
               :type="showPass2 ? 'text' : 'password'"
@@ -497,19 +497,19 @@
               placeholder="Minimal 8 karakter"
               class="w-full ui-input"
             />
-            <button type="button" @click="showPass2 = !showPass2" class="absolute inset-y-0 right-0 pr-3 flex items-center text-[#94A3B8] hover:text-[#475569]">
+            <button type="button" @click="showPass2 = !showPass2" class="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--gray)] hover:text-[var(--gray)]">
               <x-ui-icon name="eye" class="w-4 h-4" x-show="!showPass2" />
               <x-ui-icon name="eye-off" class="w-4 h-4" x-show="showPass2" />
             </button>
           </div>
           @if ($errors->updatePassword->has('password'))
-            <p class="text-[11px] text-[#DC2626] mt-1">{{ $errors->updatePassword->first('password') }}</p>
+            <p class="text-[11px] text-[var(--red)] mt-1">{{ $errors->updatePassword->first('password') }}</p>
           @endif
         </div>
 
         <!-- Confirm Password -->
         <div>
-          <label class="block">Konfirmasi Kata Sandi Baru <span class="text-[#DC2626]">*</span></label>
+          <label class="block">Konfirmasi Kata Sandi Baru <span class="text-[var(--red)]">*</span></label>
           <div class="relative">
             <input
               :type="showPass3 ? 'text' : 'password'"
@@ -519,7 +519,7 @@
               placeholder="Ulangi kata sandi baru"
               class="w-full ui-input"
             />
-            <button type="button" @click="showPass3 = !showPass3" class="absolute inset-y-0 right-0 pr-3 flex items-center text-[#94A3B8] hover:text-[#475569]">
+            <button type="button" @click="showPass3 = !showPass3" class="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--gray)] hover:text-[var(--gray)]">
               <x-ui-icon name="eye" class="w-4 h-4" x-show="!showPass3" />
               <x-ui-icon name="eye-off" class="w-4 h-4" x-show="showPass3" />
             </button>
@@ -529,7 +529,7 @@
         <div class="pt-4">
           <button
             type="submit"
-            class="px-6 py-2.5 text-xs font-semibold text-white bg-[#0057FF] hover:bg-[#0046CC] rounded-xl transition shadow-xs inline-flex items-center gap-2"
+            class="px-6 py-2.5 text-xs font-semibold text-white bg-[var(--blue)] hover:bg-[var(--action-primary-hover)] rounded-lg transition shadow-xs inline-flex items-center gap-2"
           >
             <x-ui-icon name="lock" class="w-4 h-4 text-white" />
             <span>Perbarui Kata Sandi</span>
@@ -539,10 +539,10 @@
     </form>
 
     <!-- Danger Zone (Delete Account) -->
-    <div class="bg-white border border-[#FEE2E2] rounded-2xl p-6 sm:p-8 shadow-xs">
+    <div class="bg-white border border-[var(--red)] rounded-lg p-6 sm:p-8 shadow-xs">
       <div class="mb-4">
-        <h4 class="text-base font-bold text-[#DC2626]">Danger Zone — Hapus Akun</h4>
-        <p class="text-xs text-[#475569] mt-0.5">
+        <h4 class="text-base font-bold text-[var(--red)]">Danger Zone — Hapus Akun</h4>
+        <p class="text-xs text-[var(--gray)] mt-0.5">
           Setelah akun dihapus, seluruh data, sesi login, dan hak akses yang terkait dengan akun ini akan dinonaktifkan secara permanen.
         </p>
       </div>
@@ -550,7 +550,7 @@
       <button
         type="button"
         @click="openDeleteModal = true"
-        class="px-5 py-2.5 text-xs font-semibold text-white bg-[#DC2626] hover:bg-[#B91C1C] rounded-xl transition shadow-xs inline-flex items-center gap-2"
+        class="px-5 py-2.5 text-xs font-semibold text-white bg-[var(--red)] hover:bg-[var(--danger-text)] rounded-lg transition shadow-xs inline-flex items-center gap-2"
       >
         <x-ui-icon name="trash" class="w-4 h-4 text-white" />
         <span>Hapus Akun Ini</span>
@@ -562,14 +562,14 @@
   <!-- 8. TAB 4: AKTIVITAS AKUN                  -->
   <!-- ========================================== -->
   <div x-show="currentTab === 'activity'" x-transition class="space-y-6">
-    <div class="bg-white border border-[#E2E8F0] rounded-2xl p-6 sm:p-8 shadow-xs">
-      <div class="mb-6 pb-4 border-b border-[#E2E8F0]">
-        <h3 class="text-base sm:text-lg font-bold text-[#111827]">Riwayat Sesi & Aktivitas Akun</h3>
-        <p class="text-xs text-[#475569] mt-0.5">Pantau sesi aktif dan catatan keamanan login perangkat Anda.</p>
+    <div class="bg-white border border-[var(--border)] rounded-lg p-6 sm:p-8 shadow-xs">
+      <div class="mb-6 pb-4 border-b border-[var(--border)]">
+        <h3 class="text-base sm:text-lg font-bold text-[var(--primary-dark)]">Riwayat Sesi & Aktivitas Akun</h3>
+        <p class="text-xs text-[var(--gray)] mt-0.5">Pantau sesi aktif dan catatan keamanan login perangkat Anda.</p>
       </div>
 
       <x-ui.table>
-          <thead class="bg-[#F8FAFC] text-[11px] font-semibold text-[#475569] uppercase tracking-wider">
+          <thead class="bg-[var(--surface-secondary)] text-[11px] font-semibold text-[var(--gray)] uppercase tracking-wider">
             <tr>
               <th class="px-4 py-3">Waktu</th>
               <th class="px-4 py-3">Aktivitas</th>
@@ -580,19 +580,19 @@
           </thead>
           <tbody class="divide-y divide-[#F1F5F9] bg-white">
             <tr>
-              <td class="px-4 py-3 text-[#475569]">Hari Ini, {{ now()->format('H:i') }}</td>
-              <td class="px-4 py-3 font-semibold text-[#111827]">Sesi Aktif Sekarang</td>
-              <td class="px-4 py-3 text-[#475569]">{{ request()->userAgent() ? Str::limit(request()->userAgent(), 45) : 'Web Browser' }}</td>
-              <td class="px-4 py-3 text-[#475569]">{{ request()->ip() }}</td>
+              <td class="px-4 py-3 text-[var(--gray)]">Hari Ini, {{ now()->format('H:i') }}</td>
+              <td class="px-4 py-3 font-semibold text-[var(--primary-dark)]">Sesi Aktif Sekarang</td>
+              <td class="px-4 py-3 text-[var(--gray)]">{{ request()->userAgent() ? Str::limit(request()->userAgent(), 45) : 'Web Browser' }}</td>
+              <td class="px-4 py-3 text-[var(--gray)]">{{ request()->ip() }}</td>
               <td class="px-4 py-3">
                 <x-ui.status-badge variant="success">Online</x-ui.status-badge>
               </td>
             </tr>
             <tr>
-              <td class="px-4 py-3 text-[#475569]">{{ $user->updated_at?->format('d M Y H:i') ?: '-' }}</td>
-              <td class="px-4 py-3 font-semibold text-[#111827]">Pembaruan Data Akun</td>
-              <td class="px-4 py-3 text-[#475569]">Mandala Web Client</td>
-              <td class="px-4 py-3 text-[#475569]">{{ request()->ip() }}</td>
+              <td class="px-4 py-3 text-[var(--gray)]">{{ $user->updated_at?->format('d M Y H:i') ?: '-' }}</td>
+              <td class="px-4 py-3 font-semibold text-[var(--primary-dark)]">Pembaruan Data Akun</td>
+              <td class="px-4 py-3 text-[var(--gray)]">Mandala Web Client</td>
+              <td class="px-4 py-3 text-[var(--gray)]">{{ request()->ip() }}</td>
               <td class="px-4 py-3">
                 <x-ui.status-badge variant="success">Success</x-ui.status-badge>
               </td>
@@ -614,23 +614,23 @@
   >
     <div
       @click.outside="openAvatarModal = false"
-      class="ui-modal-panel ui-modal-panel--sm w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden"
+      class="ui-modal-panel ui-modal-panel--sm"
     >
-      <div class="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
-        <h4 class="font-bold text-sm text-[#111827]">Ubah Foto Profil</h4>
-        <button type="button" @click="openAvatarModal = false" class="text-[#94A3B8] hover:text-[#475569]">
+      <div class="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between">
+        <h4 class="font-bold text-sm text-[var(--primary-dark)]">Ubah Foto Profil</h4>
+        <button type="button" @click="openAvatarModal = false" class="text-[var(--gray)] hover:text-[var(--gray)]">
           <x-ui-icon name="x" class="w-5 h-5" />
         </button>
       </div>
 
       <div class="p-6 text-center space-y-4 text-xs">
         <!-- Preview Box -->
-        <div class="w-28 h-28 mx-auto rounded-full overflow-hidden border-2 border-dashed border-[#CBD5E1] flex items-center justify-center bg-[#F8FAFC] relative">
+        <div class="w-28 h-28 mx-auto rounded-full overflow-hidden border-2 border-dashed border-[var(--border)] flex items-center justify-center bg-[var(--surface-secondary)] relative">
           <template x-if="avatarPreview">
             <img :src="avatarPreview" class="w-full h-full object-cover" alt="Preview" />
           </template>
           <template x-if="!avatarPreview">
-            <div class="text-[#94A3B8] flex flex-col items-center">
+            <div class="text-[var(--gray)] flex flex-col items-center">
               <x-ui-icon name="camera" class="w-8 h-8 mb-1" />
               <span class="text-[10px]">Pilih file</span>
             </div>
@@ -642,19 +642,19 @@
             <span>Pilih Berkas Foto</span>
             <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" @change="previewFile($event)" />
           </label>
-          <p class="text-[10px] text-[#94A3B8] mt-2">Format: JPG, PNG, atau WebP (Maksimal 3MB)</p>
+          <p class="text-[10px] text-[var(--gray)] mt-2">Format: JPG, PNG, atau WebP (Maksimal 3MB)</p>
         </div>
       </div>
 
-      <div class="px-5 py-3.5 bg-[#F8FAFC] border-t border-[#E2E8F0] flex justify-end gap-2 text-xs">
-        <button type="button" @click="openAvatarModal = false; avatarPreview = null" class="px-4 py-2 font-semibold text-[#475569] hover:bg-[#E2E8F0] rounded-xl transition">
+      <div class="px-5 py-3.5 bg-[var(--surface-secondary)] border-t border-[var(--border)] flex justify-end gap-2 text-xs">
+        <button type="button" @click="openAvatarModal = false; avatarPreview = null" class="px-4 py-2 font-semibold text-[var(--gray)] hover:bg-[var(--surface-secondary)] rounded-lg transition">
           Batal
         </button>
         <button
           type="button"
           @click="submitAvatarUpload()"
           :disabled="!avatarFile || uploadingAvatar"
-          class="px-5 py-2 font-semibold text-white bg-[#0057FF] hover:bg-[#0046CC] disabled:opacity-50 rounded-xl transition"
+          class="px-5 py-2 font-semibold text-white bg-[var(--blue)] hover:bg-[var(--action-primary-hover)] disabled:opacity-50 rounded-lg transition"
         >
           <span x-show="!uploadingAvatar">Simpan Foto</span>
           <span x-show="uploadingAvatar">Menyimpan...</span>
@@ -671,14 +671,14 @@
   >
     <div
       @click.outside="openEmploymentModal = false"
-      class="ui-modal-panel ui-modal-panel--md w-full max-w-lg bg-white rounded-2xl shadow-xl border border-[#E2E8F0] overflow-hidden"
+      class="ui-modal-panel ui-modal-panel--md"
     >
-      <div class="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
+      <div class="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between">
         <div>
-          <h4 class="font-bold text-sm text-[#111827]">Ubah Informasi Pekerjaan</h4>
-          <p class="text-xs text-[#475569]">Khusus otorisasi Super Administrator</p>
+          <h4 class="font-bold text-sm text-[var(--primary-dark)]">Ubah Informasi Pekerjaan</h4>
+          <p class="text-xs text-[var(--gray)]">Khusus otorisasi Super Administrator</p>
         </div>
-        <button type="button" @click="openEmploymentModal = false" class="text-[#94A3B8] hover:text-[#475569]">
+        <button type="button" @click="openEmploymentModal = false" class="text-[var(--gray)] hover:text-[var(--gray)]">
           <x-ui-icon name="x" class="w-5 h-5" />
         </button>
       </div>
@@ -716,7 +716,7 @@
 
         <div>
           <label class="block">Assigned Sites</label>
-          <div class="grid grid-cols-2 gap-2 p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl max-h-36 overflow-y-auto">
+          <div class="grid grid-cols-2 gap-2 p-3 bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg max-h-36 overflow-y-auto">
             @foreach($allSites as $s)
               <label class="flex items-center">
                 <input type="checkbox" value="{{ $s->id }}" x-model="employmentForm.site_ids" class="w-full ui-input" />
@@ -727,8 +727,8 @@
         </div>
       </div>
 
-      <div class="px-5 py-3.5 bg-[#F8FAFC] border-t border-[#E2E8F0] flex justify-end gap-2 text-xs">
-        <button type="button" @click="openEmploymentModal = false" class="px-4 py-2 font-semibold text-[#475569] hover:bg-[#E2E8F0] rounded-xl transition">
+      <div class="px-5 py-3.5 bg-[var(--surface-secondary)] border-t border-[var(--border)] flex justify-end gap-2 text-xs">
+        <button type="button" @click="openEmploymentModal = false" class="px-4 py-2 font-semibold text-[var(--gray)] hover:bg-[var(--surface-secondary)] rounded-lg transition">
           Batal
         </button>
         <x-ui.button variant="primary" icon="save" type="button" @click="submitEmploymentUpdate()">Simpan Perubahan</x-ui.button>
@@ -744,18 +744,18 @@
   >
     <div
       @click.outside="openDeleteModal = false"
-      class="ui-modal-panel ui-modal-panel--sm w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#FEE2E2] overflow-hidden"
+      class="ui-modal-panel ui-modal-panel--sm ui-modal-panel--danger"
     >
       <form method="POST" action="{{ route('profile.destroy') }}">
         @csrf
         @method('delete')
 
         <div class="p-6 text-center space-y-3">
-          <div class="w-12 h-12 mx-auto rounded-full bg-[#FEF2F2] text-[#DC2626] flex items-center justify-center">
-            <x-ui-icon name="warning" class="w-6 h-6 text-[#DC2626]" />
+          <div class="w-12 h-12 mx-auto rounded-full bg-[var(--surface-secondary)] text-[var(--red)] flex items-center justify-center">
+            <x-ui-icon name="warning" class="w-6 h-6 text-[var(--red)]" />
           </div>
-          <h4 class="font-bold text-base text-[#111827]">Hapus Akun Anda?</h4>
-          <p class="text-xs text-[#475569]">
+          <h4 class="font-bold text-base text-[var(--primary-dark)]">Hapus Akun Anda?</h4>
+          <p class="text-xs text-[var(--gray)]">
             Tindakan ini tidak dapat dibatalkan. Masukkan kata sandi akun Anda untuk mengonfirmasi penghapusan.
           </p>
 
@@ -771,11 +771,11 @@
           </div>
         </div>
 
-        <div class="px-5 py-3.5 bg-[#F8FAFC] border-t border-[#E2E8F0] flex justify-end gap-2 text-xs">
-          <button type="button" @click="openDeleteModal = false" class="px-4 py-2 font-semibold text-[#475569] hover:bg-[#E2E8F0] rounded-xl transition">
+        <div class="px-5 py-3.5 bg-[var(--surface-secondary)] border-t border-[var(--border)] flex justify-end gap-2 text-xs">
+          <button type="button" @click="openDeleteModal = false" class="px-4 py-2 font-semibold text-[var(--gray)] hover:bg-[var(--surface-secondary)] rounded-lg transition">
             Batal
           </button>
-          <button type="submit" class="px-5 py-2 font-semibold text-white bg-[#DC2626] hover:bg-[#B91C1C] rounded-xl transition">
+          <button type="submit" class="px-5 py-2 font-semibold text-white bg-[var(--red)] hover:bg-[var(--danger-text)] rounded-lg transition">
             Ya, Hapus Permanen
           </button>
         </div>

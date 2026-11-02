@@ -221,7 +221,7 @@ foreach ($categoryCharts as $key => $chart) {
         <p class="text-xs text-coal-500">Data lengkap tetap tersedia tanpa membuat grafik memanjang.</p>
       </div>
       <div class="flex items-center gap-3 text-xs">
-        <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-[#1D4ED8]"></span>Normal</span>
+        <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-[var(--blue)]"></span>Normal</span>
         <span class="inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-rose-600"></span>Lewat threshold</span>
         <span class="inline-flex items-center gap-1"><span class="h-3 w-0.5 bg-amber-500"></span>Threshold</span>
       </div>

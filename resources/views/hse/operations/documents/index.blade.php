@@ -14,7 +14,7 @@
     ])
 
     {{-- Filter Toolbar --}}
-    <div class="ui-filter-panel ui-module-filter-toolbar">
+    <x-ui.filter-panel variant="listing">
         <x-ui.table-toolbar action="{{ route('hse.dashboard.documents.index', $category ?: '') }}">
             <x-ui.table-search name="q" :value="request('q')" :auto-submit="false" aria-label="Cari dokumen" placeholder="Cari kode, judul, atau deskripsi dokumen…" />
             <x-hse.module-scope-filters :options="$options" :filters="$filters" :show-department="false" />
@@ -39,12 +39,10 @@
 
         <x-slot:actions><x-ui.button type="submit" variant="primary" icon="filter">Terapkan</x-ui.button><x-ui.link href="{{ url()->current() }}" icon="rotate-ccw">Reset</x-ui.link></x-slot:actions></x-ui.table-toolbar>
 
-    </div>
+    </x-ui.filter-panel>
 
     {{-- Main Documents Table --}}
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="ui-table-scroll">
-            <table class="ui-table">
+    <x-ui.table :paginator="$documents">
                 <thead>
                     <tr>
                         <th>Kode Dokumen</th>
@@ -66,7 +64,7 @@
                         @endphp
                         <tr class="hover:bg-slate-50/70 transition">
                             <td class="font-bold text-slate-900">
-                                <a href="{{ route('hse.dashboard.documents.show', $doc->id) }}" class="text-[#1646A0] hover:underline">
+                                <a href="{{ route('hse.dashboard.documents.show', $doc->id) }}" class="text-[var(--blue)] hover:underline">
                                     {{ $doc->document_code }}
                                 </a>
                             </td>
@@ -74,7 +72,7 @@
                                 <div class="font-semibold text-slate-800 max-w-sm">{{ $doc->title }}</div>
                                 <div class="text-[11px] text-slate-400 truncate max-w-sm" title="{{ $doc->description }}">{{ $doc->description }}</div>
                             </td>
-                            <td><span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-[#1646A0] border border-blue-200">{{ $doc->category }}</span></td>
+                            <td><span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-[var(--blue)] border border-blue-200">{{ $doc->category }}</span></td>
                             <td>{{ $doc->department?->name ?? '—' }}</td>
                             <td class="font-bold text-slate-700">v{{ $doc->version }}</td>
                             <td>{{ $doc->effective_date ? $doc->effective_date->format('d M Y') : '—' }}</td>
@@ -105,12 +103,7 @@
                         <x-ui.table-empty-state :colspan="10" title="Tidak ada dokumen ditemukan" message="Belum ada dokumen yang sesuai dengan kategori atau filter yang dipilih." />
                     @endforelse
                 </tbody>
-            </table>
-        </div>
-        <div class="ui-pagination-footer">
-            <x-ui.table-pagination :paginator="$documents" />
-        </div>
-    </div>
+    </x-ui.table>
 
 </div>
 @endsection

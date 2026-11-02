@@ -13,11 +13,11 @@
   </x-ui.page-header>
 
   <!-- TAB NAVIGATION: Menyatukan Flow Manage Users & Site Access -->
-  <div class="border-b border-[#E2E8F0] dark:border-coal-800 mb-5">
+  <div class="border-b border-[var(--border)] dark:border-coal-800 mb-5">
     <div class="flex items-center gap-6">
       <a 
         href="{{ route('admin.users.active.index') }}" 
-        class="pb-3 text-sm font-medium transition relative border-b-2 border-transparent text-[#64748B] hover:text-[#0F172A] hover:border-slate-300 flex items-center gap-2"
+        class="pb-3 text-sm font-medium transition relative border-b-2 border-transparent text-[var(--gray)] hover:text-[var(--primary-dark)] hover:border-slate-300 flex items-center gap-2"
       >
         <x-ui.lucide name="users" class="w-4 h-4" />
         <span>Status Akun & Pengguna</span>
@@ -25,7 +25,7 @@
 
       <a 
         href="{{ route('admin.site_access.index') }}" 
-        class="pb-3 text-sm font-semibold transition relative border-b-2 text-[#0057FF] border-[#0057FF] flex items-center gap-2"
+        class="pb-3 text-sm font-semibold transition relative border-b-2 text-[var(--blue)] border-[var(--blue)] flex items-center gap-2"
       >
         <x-ui.lucide name="shield-check" class="w-4 h-4" />
         <span>Site, Role & Hak Akses Fitur</span>

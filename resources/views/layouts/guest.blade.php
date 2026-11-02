@@ -29,7 +29,7 @@
       }
     </style>
 </head>
-<body class="h-full bg-white font-sans text-[#111827] antialiased">
+<body class="h-full bg-white font-sans text-[var(--primary-dark)] antialiased">
     <div class="min-h-screen flex flex-col lg:flex-row overflow-hidden">
         
         <!-- ======================================================== -->
@@ -48,7 +48,7 @@
               }, 7000);
             }
           }"
-          class="hidden lg:flex lg:w-[55%] relative overflow-hidden bg-[#0F172A] flex-col justify-between p-12 select-none"
+          class="hidden lg:flex lg:w-[55%] relative overflow-hidden bg-[var(--primary-dark)] flex-col justify-between p-12 select-none"
         >
           <!-- Background Slides with Ken Burns and Crossfade -->
           <template x-for="(slide, index) in slides" :key="index">
@@ -74,7 +74,7 @@
           <!-- Bottom: Headline & Subheadline -->
           <div class="relative z-10 max-w-xl text-white space-y-4">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[11px] font-semibold tracking-wider uppercase text-white/90">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#1455D9] ring-2 ring-white/50"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-[var(--blue)] ring-2 ring-white/50"></span>
               <span>MANDALA · ANDALAN GROUP</span>
             </div>
 
@@ -93,7 +93,7 @@
                   type="button" 
                   @click="currentSlide = index"
                   class="h-1.5 rounded-full transition-all duration-300"
-                  :class="currentSlide === index ? 'w-8 bg-[#1455D9]' : 'w-2 bg-white/40 hover:bg-white/70'"
+                  :class="currentSlide === index ? 'w-8 bg-[var(--blue)]' : 'w-2 bg-white/40 hover:bg-white/70'"
                   :aria-label="'Slide ' + (index + 1)"
                 ></button>
               </template>
@@ -109,7 +109,7 @@
           <!-- Top Desktop Branding Bar -->
           <div class="hidden lg:flex items-center justify-between">
             <img src="{{ asset('assets/images/logomandala.png') }}" alt="MANDALA" class="h-9 w-auto object-contain" />
-            <span class="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Enterprise Portal</span>
+            <span class="text-[11px] font-semibold text-[var(--gray)] uppercase tracking-wider">Enterprise Portal</span>
           </div>
 
           <!-- Centered Form Wrapper (Max 420px) -->

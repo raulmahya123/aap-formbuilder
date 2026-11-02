@@ -24,7 +24,7 @@
             <h2 class="text-base font-bold text-slate-900">Daftar Target KPI</h2>
             <p class="text-xs text-slate-500">Konfigurasi target tahunan &amp; per-site untuk indikator keselamatan dan kinerja operasional.</p>
         </div>
-        <a href="{{ route('hse.dashboard.targets.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-[#1646A0] px-4 py-2.5 text-xs font-semibold text-white shadow hover:bg-[#123880] transition">
+        <a href="{{ route('hse.dashboard.targets.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-[var(--blue)] px-4 py-2.5 text-xs font-semibold text-white shadow hover:bg-[var(--action-primary-hover)] transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Tetapkan Target KPI Baru
         </a>
@@ -49,10 +49,10 @@
                     @forelse($targets as $t)
                         <tr>
                             <td><code>{{ $t->kpi_key }}</code></td>
-                            <td><strong class="text-[#0F172A]">{{ $kpiKeys[$t->kpi_key]['label'] ?? $t->kpi_key }}</strong></td>
+                            <td><strong class="text-[var(--primary-dark)]">{{ $kpiKeys[$t->kpi_key]['label'] ?? $t->kpi_key }}</strong></td>
                             <td>{{ $t->site?->name ?? 'Seluruh Site (Corporate)' }}</td>
                             <td>{{ $t->year }}</td>
-                            <td><span class="font-bold text-[#1646A0]">{{ number_format($t->target_value, 2) }}</span> {{ $t->unit ?? ($kpiKeys[$t->kpi_key]['unit'] ?? '') }}</td>
+                            <td><span class="font-bold text-[var(--blue)]">{{ number_format($t->target_value, 2) }}</span> {{ $t->unit ?? ($kpiKeys[$t->kpi_key]['unit'] ?? '') }}</td>
                             <td>
                                 @if($t->direction === 'lower')
                                     <span class="inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">≤ Target (Lower)</span>

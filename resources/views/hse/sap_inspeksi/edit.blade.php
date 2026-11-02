@@ -28,7 +28,7 @@
     <form action="{{ route('hse.dashboard.sap.inspeksi.save_answers', $inspection->id) }}" method="POST" >
         @csrf
         @foreach($inspection->template->sections as $section)
-        <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div class="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div class="px-6 py-4 bg-slate-50 border-b border-slate-200">
                 <h2 class="text-base font-bold text-slate-900">{{ $section->title }}</h2>
                 @if($section->description)<p class="text-xs text-slate-500 mt-1">{{ $section->description }}</p>@endif

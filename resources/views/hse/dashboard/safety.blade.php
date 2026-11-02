@@ -14,15 +14,15 @@
         'export' => 'safety',
     ])
 
-    <div class="rounded-lg border border-[#E2E8F0] bg-white p-3 text-xs text-[#64748B]">
+    <div class="rounded-lg border border-[var(--border)] bg-white p-3 text-xs text-[var(--gray)]">
         Formula: LTIFR = LTI / exposure hours × {{ number_format($data['meta']['ltifr_multiplier'], 0, ',', '.') }} ·
         TRIR = recordable / exposure hours × {{ number_format($data['meta']['trir_multiplier'], 0, ',', '.') }} ·
-        Exposure hours periode ini: <strong class="text-[#0F172A]">{{ number_format($data['meta']['exposure_hours'], 0, ',', '.') }}</strong> jam.
+        Exposure hours periode ini: <strong class="text-[var(--primary-dark)]">{{ number_format($data['meta']['exposure_hours'], 0, ',', '.') }}</strong> jam.
         Nilai rate menjadi N/A bila exposure hours = 0.
     </div>
 
     <section>
-        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-[#64748B]">Safety KPIs</h2>
+        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--gray)]">Safety KPIs</h2>
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             @foreach($data['kpis'] as $kpi)
                 <x-hse.kpi-card :kpi="$kpi" />

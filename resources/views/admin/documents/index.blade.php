@@ -17,7 +17,7 @@
 </x-ui.page-header>
   <x-ui.panel :padded="false" class="max-w-full bg-white border rounded-lg overflow-x-auto">
     <x-ui.table :paginator="$docs" class="w-full text-sm min-w-[980px]">
-      <thead class="bg-[#1D1C1A] text-white">
+      <thead class="bg-[var(--primary-dark)] text-white">
         <tr>
           <th class="p-3 text-left">Template</th>
           <th class="p-3 text-left">Doc.No</th>
@@ -35,7 +35,7 @@
       </thead>
       <tbody>
       @forelse($docs as $d)
-        <tr class="border-b hover:bg-[#713F12]/5">
+        <tr class="border-b hover:bg-[var(--brown)]/5">
           {{-- Template --}}
           <td class="p-3">
             @php

@@ -6,7 +6,7 @@
     };
     $subItemClass = function (bool $isActive) {
         return $isActive
-            ? 'flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold bg-[#713F12] text-white transition'
+            ? 'flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold bg-[var(--brown)] text-white transition'
             : 'flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition';
     };
 
@@ -24,10 +24,10 @@
 <aside id="app-sidebar" aria-label="Navigasi utama" x-show="isDesktop || sidebarOpen" x-cloak
   :class="{ 'translate-x-0': sidebarOpen, 'ui-sidebar--collapsed': sidebarCollapsed && isDesktop }"
   :inert="!isDesktop && !sidebarOpen"
-  class="ui-sidebar fixed inset-y-0 left-0 z-50 w-64 -translate-x-full bg-white border-r border-[#D4D4D8] transition-transform duration-200 lg:static lg:translate-x-0 lg:w-auto lg:block overflow-y-auto">
+  class="ui-sidebar fixed inset-y-0 left-0 z-50 w-64 -translate-x-full bg-white border-r border-[var(--border)] transition-transform duration-200 lg:static lg:translate-x-0 lg:w-auto lg:block overflow-y-auto">
   <button type="button" class="ui-drawer-close ui-shell-toggle lg:hidden" @click="sidebarOpen=false; $nextTick(() => document.getElementById('navigation-toggle').focus())" aria-label="Tutup navigasi"><x-ui.icon name="x" /></button>
   <nav aria-label="Menu aplikasi">
-  <div class="ui-sidebar-brand flex items-center justify-center border-b border-[#D4D4D8] bg-white px-4 py-5">
+  <div class="ui-sidebar-brand flex items-center justify-center border-b border-[var(--border)] bg-white px-4 py-5">
     <a href="{{ route('dashboard') }}" class="flex items-center justify-center" aria-label="Mandala — Dashboard">
       <img
         src="{{ asset('assets/images/logomandala.png') }}"
@@ -64,7 +64,7 @@
     </div>
 
     {{-- 2. OPERASIONAL K3LH (DROPDOWN) --}}
-    <div x-data="{ openK3lh: {{ $isK3lhActive ? 'true' : 'false' }} }" class="rounded-xl border border-transparent transition">
+    <div x-data="{ openK3lh: {{ $isK3lhActive ? 'true' : 'false' }} }" class="rounded-lg border border-transparent transition">
       <button type="button" @click="if (sidebarCollapsed) { toggleSidebarCollapse(); openK3lh = true; } else { openK3lh = !openK3lh; }" title="Operasional K3LH" aria-label="Operasional K3LH" class="ui-nav-item w-full justify-between cursor-pointer font-semibold text-slate-800 hover:bg-slate-100" :class="{ 'bg-slate-50 border-slate-200': openK3lh }">
         <div class="flex items-center gap-3 min-w-0">
           <x-ui-icon name="shield"/>
@@ -133,7 +133,7 @@
     </div>
 
     @if($user?->canUseFeature('hse'))
-      <div class="ui-nav-section px-3 pt-2 text-xs font-medium text-[#52525B]">SHE Management</div>
+      <div class="ui-nav-section px-3 pt-2 text-xs font-medium text-[var(--gray)]">SHE Management</div>
       <x-ui.navigation-tree :items="\App\Support\SheNavigation::visible(\App\Support\SheNavigation::groups(), $user)" />
     @endif
 
@@ -143,7 +143,7 @@
     </div>
 
     {{-- 9. DOKUMEN & MASTER DATA (DROPDOWN) --}}
-    <div x-data="{ openMaster: {{ $isMasterActive ? 'true' : 'false' }} }" class="rounded-xl border border-transparent transition">
+    <div x-data="{ openMaster: {{ $isMasterActive ? 'true' : 'false' }} }" class="rounded-lg border border-transparent transition">
       <button type="button" @click="if (sidebarCollapsed) { toggleSidebarCollapse(); openMaster = true; } else { openMaster = !openMaster; }" title="Master Data & Forms" aria-label="Master Data & Forms" class="ui-nav-item w-full justify-between cursor-pointer font-semibold text-slate-800 hover:bg-slate-100" :class="{ 'bg-slate-50 border-slate-200': openMaster }">
         <div class="flex items-center gap-3 min-w-0">
           <x-ui-icon name="mandala"/>
@@ -207,7 +207,7 @@
 
     {{-- 10. ADMINISTRASI SISTEM --}}
     @if($user?->role === 'super_admin')
-    <div x-data="{ openAdmin: false }" class="rounded-xl border border-transparent transition">
+    <div x-data="{ openAdmin: false }" class="rounded-lg border border-transparent transition">
       <button type="button" @click="if (sidebarCollapsed) { toggleSidebarCollapse(); openAdmin = true; } else { openAdmin = !openAdmin; }" title="Administrasi" aria-label="Administrasi" class="ui-nav-item w-full justify-between cursor-pointer font-semibold text-slate-800 hover:bg-slate-100">
         <div class="flex items-center gap-3 min-w-0">
           <x-ui-icon name="lock"/>
