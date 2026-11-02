@@ -101,8 +101,8 @@
                             <td class="text-xs text-slate-600 max-w-xs truncate" title="{{ $r->treatment }}">{{ $r->treatment ?: '—' }}</td>
                             <td><x-hse.status :value="$r->status" /></td>
                             <td class="text-xs font-medium text-slate-800">{{ $r->owner?->name ?? '—' }}</td>
-                            <td>
-                                <div class="flex items-center gap-1">
+                            <td class="ui-action-cell">
+                                <x-ui.table-actions>
                                     @if($r->status !== 'Approved' && $r->status !== 'Archived')
                                         <form action="{{ route('hse.dashboard.risk.review', $r->id) }}" method="POST">
                                             @csrf
@@ -121,7 +121,7 @@
                                     @else
                                         <span class="text-[10px] text-slate-400">Archived</span>
                                     @endif
-                                </div>
+                                </x-ui.table-actions>
                             </td>
                         </tr>
                     @empty

@@ -163,11 +163,11 @@
                                 <td>{{ $doc->department?->name ?? '—' }}</td>
                                 <td class="font-bold text-slate-700">v{{ $doc->version }}</td>
                                 <td><x-hse.status :value="$doc->status" /></td>
-                                <td>
-                                    <div class="flex items-center gap-1.5">
+                                <td class="ui-action-cell">
+                                    <x-ui.table-actions>
                                         <x-ui.icon-button action="view" label="Detail & Riwayat" href="{{ route('hse.dashboard.documents.show', $doc->id) }}" />
                                         <x-ui.icon-button action="download" label="Unduh dokumen" href="{{ route('hse.dashboard.documents.download', $doc->id) }}" />
-                                    </div>
+                                    </x-ui.table-actions>
                                 </td>
                             </tr>
                         @empty

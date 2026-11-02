@@ -82,9 +82,9 @@
                             </td>
                             <td>{{ $row->submitter?->name ?? '—' }}</td>
                             <td>{{ $row->validator?->name ?? '—' }}</td>
-                            <td>
+                            <td class="ui-action-cell">
                                 @if($row->status === 'Submitted' && auth()->user()?->isAdmin())
-                                    <div class="flex items-center gap-1.5">
+                                    <x-ui.table-actions>
                                         <form action="{{ route('hse.dashboard.manhours.validate', $row->id) }}" method="POST">
                                             @csrf
                                             <input type="hidden" name="action" value="validate" />
@@ -95,7 +95,7 @@
                                             <input type="hidden" name="action" value="return" />
                                             <x-ui.icon-button action="deactivate" label="Return" type="submit" />
                                         </form>
-                                    </div>
+                                    </x-ui.table-actions>
                                 @else
                                     <span class="text-xs text-[var(--gray)]">Selesai</span>
                                 @endif

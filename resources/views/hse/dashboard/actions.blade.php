@@ -79,9 +79,11 @@
                             </td>
                             <td><x-hse.status :value="$row['verification']" /></td>
                             <td><x-hse.status :value="$row['status']" /></td>
-                            <td>
+                            <td class="ui-action-cell">
                                 <div x-data="{ open: false }">
-                                    <x-ui.icon-button action="edit" label="Update / Verifikasi" @click="open = true" type="button" />
+                                    <x-ui.table-actions>
+                                        <x-ui.icon-button action="edit" label="Update / Verifikasi" @click="open = true" type="button" />
+                                    </x-ui.table-actions>
 
                                     <div x-show="open" class="ui-modal-overlay" x-cloak>
                                         <div @click.away="open = false" class="ui-modal-panel ui-modal-panel--sm ui-modal-panel--padded">

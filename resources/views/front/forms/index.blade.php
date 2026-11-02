@@ -267,10 +267,9 @@
               </span>
             @endif
 
-            <x-ui.link variant="secondary" href="{{ $showUrl }}"
-               class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border dark:border-maroon-600 dark:text-maroon-300 dark:hover:bg-maroon-900/20">
-              LIHAT
-            </x-ui.link>
+            <x-ui.table-actions>
+              <x-ui.icon-button action="view" label="Buka formulir {{ $title }}" href="{{ $showUrl }}" />
+            </x-ui.table-actions>
           </div>
         </x-ui.panel>
       @endforeach

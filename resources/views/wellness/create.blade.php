@@ -36,7 +36,7 @@
         <!-- Section 1: Data Karyawan -->
         <section class="pwa-card">
           <div class="pwa-card__header">
-            <div class="pwa-card__number">01</div>
+            <div class="pwa-card__icon"><x-ui.lucide name="user-check" /></div>
             <div class="pwa-card__title">
               <h2>Data Karyawan</h2>
               <p>Identitas & lokasi penugasan kerja</p>
@@ -77,7 +77,7 @@
         <!-- Section 2: Kondisi Sebelum Shift -->
         <section class="pwa-card">
           <div class="pwa-card__header">
-            <div class="pwa-card__number">02</div>
+            <div class="pwa-card__icon"><x-ui.lucide name="heart" /></div>
             <div class="pwa-card__title">
               <h2>Kesiapan Sebelum Shift</h2>
               <p>Jawab sesuai kondisi nyata yang Anda rasakan</p>
