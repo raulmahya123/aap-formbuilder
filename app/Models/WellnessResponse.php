@@ -9,6 +9,8 @@ class WellnessResponse extends Model
     protected $fillable = [
         'name',
         'nik',
+        'nik_normalized',
+        'submission_date',
         'position',
         'site',
         'site_id',
