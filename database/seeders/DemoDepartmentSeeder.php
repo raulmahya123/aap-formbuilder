@@ -13,16 +13,16 @@ class DemoDepartmentSeeder extends Seeder
     {
         // ====== Definisi 10 departemen (slug, name, color) ======
         $departmentsData = [
-            ['slug' => 'operasional', 'name' => 'Operasional',           'color' => '#e61caf'],
-            ['slug' => 'hrga',        'name' => 'HRGA',                  'color' => '#bb9974'],
-            ['slug' => 'finance',     'name' => 'Finance',               'color' => '#34c759'],
-            ['slug' => 'it',          'name' => 'IT',                    'color' => '#0ea5e9'],
-            ['slug' => 'hse',         'name' => 'HSE',                   'color' => '#f59e0b'],
-            ['slug' => 'scm',         'name' => 'SCM/Procurement',       'color' => '#8b5cf6'],
-            ['slug' => 'engineering', 'name' => 'Engineering',           'color' => '#bb9974'],
-            ['slug' => 'marketing',   'name' => 'Marketing',             'color' => '#14b8a6'],
-            ['slug' => 'sales',       'name' => 'Sales',                 'color' => '#f97316'],
-            ['slug' => 'admin',       'name' => 'Admin',                 'color' => '#64748b'],
+            ['slug' => 'management',             'name' => 'Management',             'color' => '#0ea5e9'],
+            ['slug' => 'operation',              'name' => 'Operation',              'color' => '#e61caf'],
+            ['slug' => 'engineering',            'name' => 'Engineering',            'color' => '#bb9974'],
+            ['slug' => 'plant',                  'name' => 'Plant',                  'color' => '#f97316'],
+            ['slug' => 'budget-and-performance', 'name' => 'Budget and Performance', 'color' => '#14b8a6'],
+            ['slug' => 'asset-and-insurance',    'name' => 'Asset and Insurance',    'color' => '#64748b'],
+            ['slug' => 'she',                    'name' => 'SHE',                    'color' => '#f59e0b'],
+            ['slug' => 'hrga',                   'name' => 'HRGA',                   'color' => '#bb9974'],
+            ['slug' => 'scm',                    'name' => 'SCM',                    'color' => '#8b5cf6'],
+            ['slug' => 'finance',                'name' => 'Finance',                'color' => '#34c759'],
         ];
 
         $hasColor = Schema::hasColumn('departments', 'color');
@@ -65,21 +65,21 @@ class DemoDepartmentSeeder extends Seeder
             $super->departments()->syncWithoutDetaching($attach);
         }
 
-        // Andi: dept_admin di Operasional + IT, member di sisanya
+        // Andi: dept_admin di Operation + Management, member di sisanya
         $attachAndi = [
-            $id('operasional') => ['dept_role' => 'dept_admin'],
-            $id('it')          => ['dept_role' => 'dept_admin'],
+            $id('operation')  => ['dept_role' => 'dept_admin'],
+            $id('management') => ['dept_role' => 'dept_admin'],
         ];
         foreach ($departments as $dep) {
             $attachAndi[$dep->id] = $attachAndi[$dep->id] ?? ['dept_role' => 'member'];
         }
         $u1->departments()->syncWithoutDetaching($attachAndi);
 
-        // Sinta: member di Operasional, HRGA, HSE, Finance
+        // Sinta: member di Operation, HRGA, SHE, Finance
         $u2->departments()->syncWithoutDetaching(array_filter([
-            $id('operasional') => ['dept_role' => 'member'],
+            $id('operation')   => ['dept_role' => 'member'],
             $id('hrga')        => ['dept_role' => 'member'],
-            $id('hse')         => ['dept_role' => 'member'],
+            $id('she')         => ['dept_role' => 'member'],
             $id('finance')     => ['dept_role' => 'member'],
         ]));
 
@@ -89,8 +89,8 @@ class DemoDepartmentSeeder extends Seeder
             ['name' => 'Budi', 'password' => bcrypt('password'), 'role' => 'user']
         );
         $u3->departments()->syncWithoutDetaching([
-            $id('scm')        => ['dept_role' => 'dept_admin'],
-            $id('engineering')=> ['dept_role' => 'member'],
+            $id('scm')         => ['dept_role' => 'dept_admin'],
+            $id('engineering') => ['dept_role' => 'member'],
         ]);
 
         $u4 = User::firstOrCreate(
@@ -98,9 +98,9 @@ class DemoDepartmentSeeder extends Seeder
             ['name' => 'Rina', 'password' => bcrypt('password'), 'role' => 'user']
         );
         $u4->departments()->syncWithoutDetaching([
-            $id('marketing')  => ['dept_role' => 'dept_admin'],
-            $id('sales')      => ['dept_role' => 'member'],
-            $id('admin')      => ['dept_role' => 'member'],
+            $id('plant')                  => ['dept_role' => 'dept_admin'],
+            $id('budget-and-performance') => ['dept_role' => 'member'],
+            $id('asset-and-insurance')    => ['dept_role' => 'member'],
         ]);
     }
 }
