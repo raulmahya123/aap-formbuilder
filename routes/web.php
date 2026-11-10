@@ -320,6 +320,7 @@ Route::middleware('auth')->group(function () {
         });
 
         Route::middleware('can:is-admin')->group(function () {
+            Route::get('wellness/export', [AdminWellnessController::class, 'exportExcel'])->name('wellness.export');
             Route::get('wellness', [AdminWellnessController::class, 'index'])->name('wellness.index');
         });
 
