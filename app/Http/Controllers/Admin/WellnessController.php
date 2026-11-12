@@ -52,7 +52,7 @@ class WellnessController extends Controller
         $lastColumn = $this->excelColumn(count($columns));
 
         $sheet->mergeCells("A1:{$lastColumn}1");
-        $sheet->setCellValue('A1', 'Health Assessment Checklist');
+        $sheet->setCellValue('A1', 'AHEAD — Andalan Health Evaluation And Detection');
         $sheet->mergeCells("A2:{$lastColumn}2");
         $sheet->setCellValue('A2', 'Diekspor: '.now(config('app.timezone', 'Asia/Jakarta'))->format('d/m/Y H:i').' WIB · Mengikuti filter dan site yang diizinkan');
         $sheet->fromArray($columns, null, 'A4');

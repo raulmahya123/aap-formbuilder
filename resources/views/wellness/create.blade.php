@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" type="image/png" href="{{ asset('assets/images/andalanlogo-removebg-preview.png') }}">
-  <title>Health Assesment Checklist · {{ config('app.name', 'AAP Form Builder') }}</title>
+  <title>AHEAD — Andalan Health Evaluation And Detection · {{ config('app.name', 'AAP Form Builder') }}</title>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="health-check-page">
@@ -13,7 +13,7 @@
     <!-- Top Navigation App Bar -->
     <header class="pwa-topbar">
       <div class="pwa-topbar__inner">
-        <a href="{{ route('wellness.create') }}" aria-label="Health Assesment Checklist" class="pwa-brand">
+        <a href="{{ route('wellness.create') }}" aria-label="AHEAD — Andalan Health Evaluation And Detection" class="pwa-brand">
           <img src="{{ asset('assets/images/logomandala.png') }}" alt="Mandala Management System Andalan">
         </a>
         <div class="pwa-status-badge">
@@ -25,7 +25,8 @@
     <div class="pwa-container">
       <!-- Hero Banner -->
       <div class="pwa-hero">
-        <h1>Health Assesment Checklist</h1>
+        <h1>AHEAD</h1>
+        <p class="pwa-subtitle">Andalan Health Evaluation And Detection</p>
         <p>Awali shift dengan mengenali kondisi fisik & mental Anda hari ini. Isi sesuai keadaan yang sebenarnya.</p>
       </div>
 

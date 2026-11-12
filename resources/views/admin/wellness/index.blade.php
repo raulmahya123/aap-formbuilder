@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Health Assessment Checklist')
+@section('title', 'AHEAD — Andalan Health Evaluation And Detection')
 
 @section('content')
 <x-ui.page>
     <x-ui.page-header>
         <div class="ui-page-header__copy">
-            <x-ui.page-title>Health Assessment Checklist</x-ui.page-title>
-            <x-ui.page-description>Rekap pemeriksaan kesiapan kerja sebelum shift.</x-ui.page-description>
+            <x-ui.page-title>AHEAD</x-ui.page-title>
+            <x-ui.page-description>Andalan Health Evaluation And Detection · Rekap pemeriksaan kesiapan kerja sebelum shift.</x-ui.page-description>
         </div>
 
         <x-ui.page-actions>

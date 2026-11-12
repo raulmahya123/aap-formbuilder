@@ -92,7 +92,7 @@ class WellnessController extends Controller
             ]);
         }
 
-        return redirect()->route('wellness.create')->with('success', 'Terima kasih, Health Assesment Checklist Anda sudah tersimpan.');
+        return redirect()->route('wellness.create')->with('success', 'Terima kasih, data AHEAD Anda sudah tersimpan.');
     }
 
     private function normalizeNik(string $nik): string

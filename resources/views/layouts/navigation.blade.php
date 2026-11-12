@@ -90,7 +90,7 @@
 
         @if(Route::has('admin.wellness.index'))
         @if($user?->canUseFeatureRoute('admin.wellness.index'))
-          <a title="Health Assesment" href="{{ route('admin.wellness.index') }}" class="{{ $subItemClass(request()->routeIs('admin.wellness.*')) }}">Health Assesment</a>
+          <a title="AHEAD — Andalan Health Evaluation And Detection" href="{{ route('admin.wellness.index') }}" class="{{ $subItemClass(request()->routeIs('admin.wellness.*')) }}">AHEAD</a>
         @endif
         @endif
 
