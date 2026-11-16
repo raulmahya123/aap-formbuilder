@@ -29,7 +29,7 @@
                 <x-ui.table-search
                     name="q"
                     label="Karyawan"
-                    placeholder="Cari nama atau NIK..."
+                    placeholder="Cari nama karyawan..."
                     aria-label="Cari karyawan"
                 />
                 <x-ui.table-search
@@ -83,7 +83,6 @@
                     <td class="whitespace-nowrap">{{ $response->created_at->format('d M Y H:i') }}</td>
                     <td>
                         <div class="font-medium">{{ $response->name }}</div>
-                        <div class="text-xs text-zinc-600">NIK: {{ $response->nik ?: '—' }}</div>
                     </td>
                     <td>{{ $response->position ?: '—' }}</td>
                     <td>{{ $response->department ?: '—' }}</td>
@@ -120,7 +119,6 @@
                         <x-ui.detail-section title="Data karyawan">
                             @foreach([
                                 'Nama' => $response->name,
-                                'NIK' => $response->nik,
                                 'Jabatan' => $response->position,
                                 'Departemen' => $response->department,
                                 'Site' => $response->site,

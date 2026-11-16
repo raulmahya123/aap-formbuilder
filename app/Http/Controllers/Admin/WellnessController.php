@@ -40,10 +40,10 @@ class WellnessController extends Controller
         $responses = $this->filteredResponses($request)->latest()->get();
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Health Assessment');
+        $sheet->setTitle('AHEAD');
 
         $columns = [
-            'Waktu pengisian', 'Nama karyawan', 'NIK', 'Email', 'Jabatan', 'Departemen', 'Site', 'Shift',
+            'Waktu pengisian', 'Nama karyawan', 'Email', 'Jabatan', 'Departemen', 'Site', 'Shift',
             'Durasi tidur', 'Kualitas tidur', 'Alasan tidur buruk', 'Mengantuk berat / sulit fokus',
             'Keluhan kesehatan', 'Rincian keluhan / gejala', 'Obat berefek kantuk', 'Nama obat',
             'Kesiapan kerja', 'Mood (data lama)', 'Tingkat stres (data lama)', 'Tidur (jam, data lama)',
@@ -62,7 +62,6 @@ class WellnessController extends Controller
             $values = [
                 $response->created_at?->format('d/m/Y H:i') ?? '—',
                 $response->name,
-                $response->nik,
                 $response->email,
                 $response->position,
                 $response->department,
@@ -107,7 +106,7 @@ class WellnessController extends Controller
             $sheet->setAutoFilter("A4:{$lastColumn}{$lastRow}");
         }
 
-        $widths = [19, 24, 18, 30, 22, 22, 18, 12, 20, 16, 34, 28, 22, 38, 22, 32, 20, 18, 18, 20, 24, 36];
+        $widths = [19, 24, 30, 22, 22, 18, 12, 20, 16, 34, 28, 22, 38, 22, 32, 20, 18, 18, 20, 24, 36];
         foreach ($widths as $index => $width) {
             $sheet->getColumnDimension($this->excelColumn($index + 1))->setWidth($width);
         }
@@ -116,7 +115,7 @@ class WellnessController extends Controller
         (new Xlsx($spreadsheet))->save($temporaryFile);
         $spreadsheet->disconnectWorksheets();
 
-        return response()->download($temporaryFile, 'health-assessment-'.now()->format('Ymd-His').'.xlsx', [
+        return response()->download($temporaryFile, 'ahead-'.now()->format('Ymd-His').'.xlsx', [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ])->deleteFileAfterSend(true);
     }
@@ -133,8 +132,7 @@ class WellnessController extends Controller
 
         return WellnessResponse::query()
             ->when($request->filled('q'), fn ($query) => $query->where(fn ($employees) => $employees
-                ->where('name', 'like', '%'.$request->string('q').'%')
-                ->orWhere('nik', 'like', '%'.$request->string('q').'%')))
+                ->where('name', 'like', '%'.$request->string('q').'%')))
             ->when($siteId || is_array($allowed), fn ($query) => $query->whereIn('site', $labels ?: ['__none__']))
             ->when($request->filled('site'), fn ($query) => $query->where('site', 'like', '%'.(string) $request->string('site').'%'))
             ->when($request->filled('work_readiness'), fn ($query) => $query->where('work_readiness', (string) $request->string('work_readiness')));

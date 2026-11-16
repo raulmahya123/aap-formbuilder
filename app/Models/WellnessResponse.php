@@ -10,6 +10,7 @@ class WellnessResponse extends Model
         'name',
         'nik',
         'nik_normalized',
+        'employee_name_key',
         'submission_date',
         'position',
         'site',

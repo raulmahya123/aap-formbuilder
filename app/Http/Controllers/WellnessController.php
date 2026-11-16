@@ -24,7 +24,6 @@ class WellnessController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
-            'nik' => ['required', 'string', 'max:50'],
             'position' => ['required', 'string', 'max:120'],
             'department_id' => ['required', 'integer', 'exists:departments,id'],
             'site_id' => ['required', 'integer', 'exists:sites,id'],
@@ -50,18 +49,18 @@ class WellnessController extends Controller
             'heavy_drowsiness.required' => 'Pilih apakah Anda mengantuk berat atau sulit berkonsentrasi.',
         ]);
 
-        // A public link has no authenticated user identity. Use the required
-        // employee NIK and Jakarta calendar date as the submission key instead
-        // of the IP address (many employees may share one office IP).
-        $normalizedNik = $this->normalizeNik($validated['nik']);
+        // A public link has no authenticated user identity. Use the normalized
+        // employee name and Jakarta calendar date rather than IP, since many
+        // employees may share an office IP.
+        $employeeNameKey = hash('sha256', $this->normalizeEmployeeName($validated['name']));
         $submissionDate = now(config('app.timezone', 'Asia/Jakarta'))->toDateString();
 
         if (WellnessResponse::query()
-            ->where('nik_normalized', $normalizedNik)
+            ->where('employee_name_key', $employeeNameKey)
             ->where('submission_date', $submissionDate)
             ->exists()) {
             return back()->withInput()->withErrors([
-                'nik' => 'NIK ini sudah mengirim Health Assessment hari ini. Setiap karyawan hanya dapat mengirim satu kali per hari.',
+                'name' => 'Nama ini sudah mengirim AHEAD hari ini. Setiap nama karyawan hanya dapat mengirim satu kali per hari.',
             ]);
         }
 
@@ -70,7 +69,7 @@ class WellnessController extends Controller
         // Preserve the existing site-code representation for legacy reports and filters.
         $validated['department'] = $department->name;
         $validated['site'] = $site->code ?: $site->name;
-        $validated['nik_normalized'] = $normalizedNik;
+        $validated['employee_name_key'] = $employeeNameKey;
         $validated['submission_date'] = $submissionDate;
 
         try {
@@ -81,22 +80,23 @@ class WellnessController extends Controller
             $message = strtolower($exception->getMessage());
             $isDuplicateSubmission = in_array((string) $exception->getCode(), ['23000', '23505'], true)
                 && (str_contains($message, 'wellness_responses_nik_date_unique')
-                    || (str_contains($message, 'nik_normalized') && str_contains($message, 'submission_date')));
+                    || str_contains($message, 'wellness_responses_employee_name_date_unique')
+                    || (str_contains($message, 'employee_name_key') && str_contains($message, 'submission_date')));
 
             if (!$isDuplicateSubmission) {
                 throw $exception;
             }
 
             return back()->withInput()->withErrors([
-                'nik' => 'NIK ini sudah mengirim Health Assessment hari ini. Setiap karyawan hanya dapat mengirim satu kali per hari.',
+                'name' => 'Nama ini sudah mengirim AHEAD hari ini. Setiap nama karyawan hanya dapat mengirim satu kali per hari.',
             ]);
         }
 
         return redirect()->route('wellness.create')->with('success', 'Terima kasih, data AHEAD Anda sudah tersimpan.');
     }
 
-    private function normalizeNik(string $nik): string
+    private function normalizeEmployeeName(string $name): string
     {
-        return mb_strtolower((string) preg_replace('/\s+/u', '', trim($nik)));
+        return mb_strtolower((string) preg_replace('/\s+/u', ' ', trim($name)));
     }
 }

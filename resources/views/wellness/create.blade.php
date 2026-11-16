@@ -14,7 +14,7 @@
     <header class="pwa-topbar">
       <div class="pwa-topbar__inner">
         <a href="{{ route('wellness.create') }}" aria-label="AHEAD — Andalan Health Evaluation And Detection" class="pwa-brand">
-          <img src="{{ asset('assets/images/logomandala.png') }}" alt="Mandala Management System Andalan">
+          <img src="{{ asset('assets/images/ahead-logo.png') }}" alt="AHEAD — Andalan Health Evaluation And Detection">
         </a>
         <div class="pwa-status-badge">
           <span>Pre-Shift Assessment</span>
@@ -47,10 +47,6 @@
           <div class="pwa-fields">
             <x-ui.form-field name="name" label="Nama Lengkap" required>
               <x-ui.form-input id="name" name="name" :value="old('name')" required placeholder="Masukkan nama lengkap Anda" />
-            </x-ui.form-field>
-
-            <x-ui.form-field name="nik" label="NIK (Nomor Induk Karyawan)" required>
-              <x-ui.form-input id="nik" name="nik" :value="old('nik')" required placeholder="Contoh: 12345678" />
             </x-ui.form-field>
 
             <x-ui.form-field name="position" label="Jabatan" required>
